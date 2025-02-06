@@ -1,0 +1,1862 @@
+# Hijraah - Product Requirements Document (PRD)
+
+## 1. Product Overview
+
+### 1.1 Product Vision
+Hijraah aims to be the leading AI-powered immigration assistance platform, providing personalized guidance and support throughout the immigration journey while maintaining compliance with immigration regulations across multiple jurisdictions.
+
+### 1.2 Target Audience
+- Primary: Individuals seeking to immigrate for work, study, or family reasons
+- Secondary: Immigration consultants and agencies
+- Tertiary: Educational institutions and employers managing international recruitment
+
+### 1.3 Key Features
+1. AI-Powered Immigration Assistant
+2. Document Management System
+3. Progress Tracking Dashboard
+4. Eligibility Assessment Tool
+5. Immigration Timeline Generator
+6. Multi-language Support
+7. Resource Library
+8. Professional Network
+
+## 2. Detailed Requirements
+
+### 2.1 AI-Powered Immigration Assistant
+
+#### 2.1.1 Conversational Interface
+- Natural language processing for understanding user queries
+- Context-aware responses
+- Multi-turn conversation support
+- Real-time response generation
+- Support for multiple languages
+- Sentiment analysis for user satisfaction monitoring
+
+#### 2.1.2 Knowledge Base
+- Immigration laws and regulations
+- Visa requirements and procedures
+- Document checklists
+- Processing times
+- Fee structures
+- Country-specific requirements
+- Regular updates mechanism
+
+#### 2.1.3 Personalization
+- User profile-based recommendations
+- Historical conversation context
+- Custom immigration pathway suggestions
+- Adaptive learning from user interactions
+- Preference management
+- Progress-based guidance
+
+### 2.2 Document Management System
+
+#### 2.2.1 Document Upload and Storage
+- Secure file upload
+- Document categorization
+- Version control
+- OCR for text extraction
+- Automated document validation
+- Cloud storage integration
+- Encryption at rest and in transit
+
+#### 2.2.2 Document Organization
+- Folder structure
+- Tagging system
+- Search functionality
+- Filter options
+- Bulk operations
+- Sharing capabilities
+- Access control
+
+### 2.3 Progress Tracking Dashboard
+
+#### 2.3.1 Visual Progress Indicators
+- Timeline view
+- Milestone tracking
+- Status updates
+- Completion percentages
+- Priority indicators
+- Due date tracking
+- Notification system
+
+#### 2.3.2 Task Management
+- Task creation and assignment
+- Dependency mapping
+- Deadline management
+- Status updates
+- Priority settings
+- Reminder system
+- Integration with calendar
+
+### 2.4 Eligibility Assessment Tool
+
+#### 2.4.1 Assessment Questionnaire
+- Dynamic question flow
+- Point calculation
+- Real-time feedback
+- Multiple visa type support
+- Save and resume functionality
+- Results export
+- Recommendation engine
+
+#### 2.4.2 Results Analysis
+- Detailed breakdown
+- Alternative options
+- Improvement suggestions
+- Success probability
+- Comparative analysis
+- Historical tracking
+- PDF report generation
+
+## 3. Technical Requirements
+
+### 3.1 Platform Architecture
+
+#### 3.1.1 Frontend
+- Next.js framework
+- React components
+- Responsive design
+- Progressive Web App
+- Accessibility compliance
+- Performance optimization
+- Cross-browser compatibility
+
+#### 3.1.2 Backend
+- Node.js runtime
+- Express framework
+- RESTful API
+- WebSocket support
+- Microservices architecture
+- Caching system
+- Rate limiting
+
+#### 3.1.3 Database
+- PostgreSQL for structured data
+- Redis for caching
+- MongoDB for document storage
+- Data replication
+- Backup system
+- Data encryption
+- Performance optimization
+
+### 3.2 Integration Requirements
+
+#### 3.2.1 External Services
+- AI/ML services integration
+- Payment gateway
+- Email service
+- SMS service
+- Document verification services
+- Translation services
+- Analytics platforms
+
+#### 3.2.2 Authentication
+- OAuth 2.0 support
+- Multi-factor authentication
+- Role-based access control
+- Session management
+- Password policies
+- Account recovery
+- Social login options
+
+### 3.3 Security Requirements
+
+#### 3.3.1 Data Protection
+- End-to-end encryption
+- Data anonymization
+- Access logging
+- Audit trails
+- Compliance with GDPR/CCPA
+- Regular security audits
+- Penetration testing
+
+#### 3.3.2 Infrastructure Security
+- HTTPS enforcement
+- DDoS protection
+- WAF implementation
+- Network segmentation
+- Backup strategy
+- Disaster recovery
+- Monitoring system
+
+## 4. Task Breakdown
+
+### 4.1 Phase 1: Foundation (Weeks 1-4)
+
+#### Week 1: Project Setup
+- Initialize repository and project structure
+- Set up development environment
+- Configure CI/CD pipeline
+- Implement basic authentication
+- Create database schema
+- Set up monitoring tools
+
+#### Week 2: Core Features
+- Develop user management system
+- Implement document upload system
+- Create basic chat interface
+- Set up AI integration
+- Develop API endpoints
+- Implement caching system
+
+#### Week 3: Essential Features
+- Build eligibility assessment tool
+- Create progress tracking system
+- Implement document management
+- Develop notification system
+- Set up email service
+- Create admin dashboard
+
+#### Week 4: Integration
+- Integrate payment system
+- Set up analytics
+- Implement search functionality
+- Create backup system
+- Configure monitoring
+- Perform security audit
+
+### 4.2 Phase 2: Enhancement (Weeks 5-8)
+
+#### Week 5: AI Enhancement
+- Improve conversation flow
+- Enhance context awareness
+- Implement sentiment analysis
+- Add language support
+- Optimize response time
+- Develop feedback system
+
+#### Week 6: User Experience
+- Enhance UI/UX
+- Implement responsive design
+- Add accessibility features
+- Create help system
+- Develop onboarding flow
+- Implement preferences
+
+#### Week 7: Advanced Features
+- Add document verification
+- Implement timeline generator
+- Create resource library
+- Add professional network
+- Develop reporting system
+- Implement analytics dashboard
+
+#### Week 8: Optimization
+- Performance optimization
+- Security hardening
+- Documentation
+- User testing
+- Bug fixing
+- Final deployment
+
+## 5. Database Design
+
+### 5.1 Core Tables
+
+#### Users
+- id (UUID, PK)
+- email (VARCHAR)
+- password_hash (VARCHAR)
+- first_name (VARCHAR)
+- last_name (VARCHAR)
+- phone (VARCHAR)
+- country (VARCHAR)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+- last_login (TIMESTAMP)
+- status (ENUM)
+- preferences (JSONB)
+
+#### Immigration_Cases
+- id (UUID, PK)
+- user_id (UUID, FK)
+- case_type (VARCHAR)
+- destination_country (VARCHAR)
+- current_stage (VARCHAR)
+- status (ENUM)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+- target_date (DATE)
+- notes (TEXT)
+- requirements (JSONB)
+
+#### Documents
+- id (UUID, PK)
+- case_id (UUID, FK)
+- name (VARCHAR)
+- type (VARCHAR)
+- status (ENUM)
+- url (VARCHAR)
+- uploaded_at (TIMESTAMP)
+- expires_at (DATE)
+- metadata (JSONB)
+- version (INTEGER)
+
+#### Chat_Sessions
+- id (UUID, PK)
+- user_id (UUID, FK)
+- case_id (UUID, FK)
+- start_time (TIMESTAMP)
+- end_time (TIMESTAMP)
+- summary (TEXT)
+- context (JSONB)
+- feedback_score (INTEGER)
+
+### 5.2 Supporting Tables
+
+#### Tasks
+- id (UUID, PK)
+- case_id (UUID, FK)
+- title (VARCHAR)
+- description (TEXT)
+- due_date (DATE)
+- status (ENUM)
+- priority (INTEGER)
+- assigned_to (UUID, FK)
+- created_at (TIMESTAMP)
+- updated_at (TIMESTAMP)
+
+#### Assessments
+- id (UUID, PK)
+- user_id (UUID, FK)
+- type (VARCHAR)
+- score (INTEGER)
+- details (JSONB)
+- created_at (TIMESTAMP)
+- recommendations (TEXT)
+- validity_period (DATE)
+
+#### Notifications
+- id (UUID, PK)
+- user_id (UUID, FK)
+- type (VARCHAR)
+- message (TEXT)
+- created_at (TIMESTAMP)
+- read_at (TIMESTAMP)
+- action_url (VARCHAR)
+- priority (INTEGER)
+
+#### Payments
+- id (UUID, PK)
+- user_id (UUID, FK)
+- amount (DECIMAL)
+- currency (VARCHAR)
+- status (ENUM)
+- payment_method (VARCHAR)
+- created_at (TIMESTAMP)
+- transaction_id (VARCHAR)
+- metadata (JSONB)
+
+### 5.3 Relationship Tables
+
+#### User_Documents
+- user_id (UUID, FK)
+- document_id (UUID, FK)
+- permission_level (ENUM)
+- shared_at (TIMESTAMP)
+- expires_at (TIMESTAMP)
+
+#### Case_Contributors
+- case_id (UUID, FK)
+- user_id (UUID, FK)
+- role (ENUM)
+- added_at (TIMESTAMP)
+- status (ENUM)
+
+### 5.4 Audit Tables
+
+#### Activity_Logs
+- id (UUID, PK)
+- user_id (UUID, FK)
+- action (VARCHAR)
+- entity_type (VARCHAR)
+- entity_id (UUID)
+- timestamp (TIMESTAMP)
+- ip_address (VARCHAR)
+- user_agent (VARCHAR)
+- changes (JSONB)
+
+#### System_Logs
+- id (UUID, PK)
+- level (ENUM)
+- message (TEXT)
+- timestamp (TIMESTAMP)
+- service (VARCHAR)
+- trace_id (VARCHAR)
+- metadata (JSONB)
+
+## 6. Performance Requirements
+
+### 6.1 Response Times
+- Page load: < 2 seconds
+- API responses: < 200ms
+- Chat responses: < 1 second
+- File upload: < 5 seconds for 10MB
+- Search results: < 500ms
+
+### 6.2 Scalability
+- Support 100,000 concurrent users
+- Handle 1,000 requests per second
+- Store 10TB of documents
+- Process 1M messages per day
+- 99.9% uptime guarantee
+
+### 6.3 Browser Support
+- Chrome (last 2 versions)
+- Firefox (last 2 versions)
+- Safari (last 2 versions)
+- Edge (last 2 versions)
+- Mobile browsers
+
+## 7. Compliance Requirements
+
+### 7.1 Data Protection
+- GDPR compliance
+- CCPA compliance
+- Data encryption
+- Regular audits
+- Privacy policy
+- Terms of service
+- Cookie policy
+
+### 7.2 Accessibility
+- WCAG 2.1 Level AA
+- Screen reader support
+- Keyboard navigation
+- Color contrast
+- Alt text for images
+- Aria labels
+- Focus management
+
+## 8. Future Considerations
+
+### 8.1 Expansion Plans
+- Additional language support
+- Mobile applications
+- API marketplace
+- Partner integration
+- White-label solutions
+- Browser extensions
+- Desktop applications
+
+### 8.2 Feature Roadmap
+- Video consultations
+- Document translation
+- Blockchain verification
+- AR document scanning
+- Voice interface
+- Offline support
+- Advanced analytics
+
+### 8.3 Technical Debt
+- Code refactoring
+- Performance optimization
+- Security updates
+- Documentation updates
+- Test coverage
+- Accessibility improvements
+- Technical upgrades
+
+## 9. Success Metrics
+
+### 9.1 User Metrics
+- User acquisition rate
+- Retention rate
+- Conversion rate
+- User satisfaction score
+- Task completion rate
+- Response accuracy
+- Support ticket volume
+
+### 9.2 Technical Metrics
+- System uptime
+- Response times
+- Error rates
+- Resource utilization
+- Security incidents
+- Performance scores
+- Code quality metrics
+
+## 10. Risk Management
+
+### 10.1 Technical Risks
+- Data breaches
+- System outages
+- Integration failures
+- Performance issues
+- Scalability challenges
+- Security vulnerabilities
+- Technical debt
+
+### 10.2 Business Risks
+- Regulatory changes
+- Competition
+- Market changes
+- Resource constraints
+- Cost overruns
+- Timeline delays
+- User adoption
+
+### 10.3 Mitigation Strategies
+- Regular audits
+- Monitoring systems
+- Backup plans
+- Incident response
+- Change management
+- User feedback
+- Continuous improvement
+
+# Hijraah - Feature Prioritization and Database Design
+
+## 1. MoSCoW Feature Analysis
+
+### Must-haves (MVP Requirements)
+
+#### Core AI Chat System
+- Basic chat interface with AI assistant
+- Immigration process guidance
+- Document requirement information
+- Basic eligibility checking
+- Error handling and fallbacks
+- Chat history persistence
+
+#### User Management
+- User registration and authentication
+- Basic profile management
+- Session handling
+- Password reset functionality
+- Email verification
+
+#### Document Management
+- Secure document upload
+- Basic document categorization
+- Document storage
+- Basic search functionality
+- Document deletion
+
+#### Case Management
+- Basic case creation
+- Status tracking
+- Timeline view
+- Document checklist
+- Basic progress tracking
+
+#### Security Features
+- Data encryption
+- Secure authentication
+- Basic access control
+- Privacy compliance
+- Secure file storage
+
+### Should-haves (High Priority)
+
+#### Enhanced AI Features
+- Multi-turn conversation context
+- Personalized recommendations
+- Multiple language support
+- Response accuracy improvements
+- Integration with external immigration data
+
+#### Document Features
+- Document validation
+- Version control
+- Document sharing
+- Advanced search
+- Document expiry tracking
+
+#### Assessment Tools
+- Detailed eligibility calculator
+- Points calculator
+- Requirements checker
+- Cost calculator
+- Timeline estimator
+
+#### User Experience
+- Dashboard customization
+- Progress visualization
+- Notification system
+- Mobile responsiveness
+- Saved preferences
+
+### Could-haves (Desired)
+
+#### Advanced Features
+- Document translation
+- OCR functionality
+- Professional network
+- Resource library
+- Community forum
+
+#### Integration Features
+- Calendar integration
+- Payment processing
+- Email notifications
+- SMS alerts
+- Third-party API integrations
+
+#### Analytics
+- Usage tracking
+- Performance metrics
+- User feedback analysis
+- Success rate tracking
+- ROI calculator
+
+#### Administration
+- Admin dashboard
+- User management
+- Content management
+- Analytics dashboard
+- System monitoring
+
+### Won't-haves (Out of Scope)
+
+#### Features
+- Legal representation
+- Direct visa application submission
+- Immigration authority integration
+- Physical document storage
+- In-person consultations
+
+#### Services
+- Travel arrangements
+- Housing assistance
+- Job placement
+- Bank account setup
+- Insurance services
+
+## 2. Database Design
+
+### Core Tables
+
+#### users
+Purpose: Store user account information and profiles
+```sql
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    phone VARCHAR(50),
+    country_of_residence VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE,
+    status VARCHAR(20) DEFAULT 'active',
+    email_verified BOOLEAN DEFAULT false,
+    profile_data JSONB
+);
+```
+
+#### immigration_cases
+Purpose: Track individual immigration cases and their progress
+```sql
+CREATE TABLE immigration_cases (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    case_type VARCHAR(50) NOT NULL,
+    destination_country VARCHAR(100) NOT NULL,
+    current_stage VARCHAR(50) NOT NULL,
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    target_date DATE,
+    requirements JSONB,
+    notes TEXT,
+    CONSTRAINT fk_user 
+        FOREIGN KEY(user_id) 
+        REFERENCES users(id) 
+        ON DELETE CASCADE
+);
+```
+
+#### documents
+Purpose: Manage uploaded documents and their metadata
+```sql
+CREATE TABLE documents (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    case_id UUID REFERENCES immigration_cases(id),
+    user_id UUID REFERENCES users(id),
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    status VARCHAR(20) DEFAULT 'active',
+    storage_path VARCHAR(255) NOT NULL,
+    uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATE,
+    metadata JSONB,
+    version INTEGER DEFAULT 1,
+    CONSTRAINT fk_case 
+        FOREIGN KEY(case_id) 
+        REFERENCES immigration_cases(id) 
+        ON DELETE CASCADE
+);
+```
+
+#### chat_sessions
+Purpose: Store AI chat interactions and context
+```sql
+CREATE TABLE chat_sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    case_id UUID REFERENCES immigration_cases(id),
+    started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP WITH TIME ZONE,
+    context JSONB,
+    metadata JSONB,
+    CONSTRAINT fk_user 
+        FOREIGN KEY(user_id) 
+        REFERENCES users(id) 
+        ON DELETE CASCADE
+);
+```
+
+#### chat_messages
+Purpose: Store individual chat messages
+```sql
+CREATE TABLE chat_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID REFERENCES chat_sessions(id),
+    role VARCHAR(20) NOT NULL, -- 'user' or 'assistant'
+    content TEXT NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB,
+    CONSTRAINT fk_session 
+        FOREIGN KEY(session_id) 
+        REFERENCES chat_sessions(id) 
+        ON DELETE CASCADE
+);
+```
+
+### Supporting Tables
+
+#### eligibility_assessments
+Purpose: Store user eligibility assessments and results
+```sql
+CREATE TABLE eligibility_assessments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    case_id UUID REFERENCES immigration_cases(id),
+    assessment_type VARCHAR(50) NOT NULL,
+    score INTEGER,
+    results JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    valid_until DATE,
+    CONSTRAINT fk_user 
+        FOREIGN KEY(user_id) 
+        REFERENCES users(id) 
+        ON DELETE CASCADE
+);
+```
+
+#### tasks
+Purpose: Track immigration process tasks and deadlines
+```sql
+CREATE TABLE tasks (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    case_id UUID REFERENCES immigration_cases(id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    due_date DATE,
+    status VARCHAR(20) DEFAULT 'pending',
+    priority INTEGER DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT fk_case 
+        FOREIGN KEY(case_id) 
+        REFERENCES immigration_cases(id) 
+        ON DELETE CASCADE
+);
+```
+
+#### notifications
+Purpose: Manage system notifications and alerts
+```sql
+CREATE TABLE notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    type VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    read_at TIMESTAMP WITH TIME ZONE,
+    action_url VARCHAR(255),
+    priority INTEGER DEFAULT 1,
+    CONSTRAINT fk_user 
+        FOREIGN KEY(user_id) 
+        REFERENCES users(id) 
+        ON DELETE CASCADE
+);
+```
+
+### Audit Tables
+
+#### activity_logs
+Purpose: Track user activities and system events
+```sql
+CREATE TABLE activity_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES users(id),
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50),
+    entity_id UUID,
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    metadata JSONB
+);
+```
+
+### Relationships Overview
+
+1. One-to-Many Relationships:
+   - User → Immigration Cases
+   - User → Documents
+   - User → Chat Sessions
+   - Immigration Case → Documents
+   - Immigration Case → Tasks
+   - Chat Session → Chat Messages
+
+2. Many-to-One Relationships:
+   - Documents → Immigration Case
+   - Tasks → Immigration Case
+   - Chat Messages → Chat Session
+   - Notifications → User
+
+3. Optional Relationships:
+   - Documents can be associated with either a case or user directly
+   - Chat sessions can be associated with a specific case or be general inquiries
+
+### Indexes
+
+```sql
+-- Users
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_status ON users(status);
+
+-- Immigration Cases
+CREATE INDEX idx_cases_user ON immigration_cases(user_id);
+CREATE INDEX idx_cases_status ON immigration_cases(status);
+CREATE INDEX idx_cases_type ON immigration_cases(case_type);
+
+-- Documents
+CREATE INDEX idx_documents_case ON documents(case_id);
+CREATE INDEX idx_documents_user ON documents(user_id);
+CREATE INDEX idx_documents_type ON documents(type);
+
+-- Chat Sessions
+CREATE INDEX idx_chat_sessions_user ON chat_sessions(user_id);
+CREATE INDEX idx_chat_sessions_case ON chat_sessions(case_id);
+
+-- Chat Messages
+CREATE INDEX idx_chat_messages_session ON chat_messages(session_id);
+CREATE INDEX idx_chat_messages_timestamp ON chat_messages(timestamp);
+
+-- Tasks
+CREATE INDEX idx_tasks_case ON tasks(case_id);
+CREATE INDEX idx_tasks_status ON tasks(status);
+CREATE INDEX idx_tasks_due_date ON tasks(due_date);
+
+-- Notifications
+CREATE INDEX idx_notifications_user ON notifications(user_id);
+CREATE INDEX idx_notifications_read ON notifications(read_at);
+```
+
+
+# Rules for Next.js 14 Development
+
+## General Guidelines
+
+1. Use Next.js 14 with TypeScript and Tailwind CSS for optimal developer experience and type safety.
+2. Use `bun` for all package installations and management.
+3. Implement the App Router, which is the recommended routing system for Next.js 14.
+4. Utilize Server Components by default, using Client Components only when necessary for interactivity or client-side state.
+5. Leverage Server Actions for handling data mutations and form submissions.
+6. Implement proper caching strategies using Next.js built-in caching mechanisms.
+7. Ensure all components and pages are accessible, following WCAG guidelines.
+8. Use environment variables for configuration following Next.js conventions.
+9. Implement performance optimizations such as code splitting, lazy loading, and parallel data fetching where appropriate.
+10. Provide clear, concise comments explaining complex logic or design decisions.
+
+## Code Structure and Syntax
+
+1. Use the `app` directory for all components and pages.
+2. Implement the following file conventions in the `app` directory:
+    - `layout.tsx`: For shared UI across multiple pages
+    - `page.tsx`: For unique page content
+    - `loading.tsx`: For loading UI
+    - `error.tsx`: For error handling UI
+    - `not-found.tsx`: For 404 pages
+3. Use Server Components by default. Add the `'use client'` directive only when creating Client Components.
+4. Define components using arrow function syntax with TypeScript:
+    
+    ```tsx
+    import { FC } from 'react';
+    
+    interface ComponentProps {
+      // Props definition
+    }
+    
+    const Component: FC<ComponentProps> = ({ prop1, prop2 }) => {
+      // Component logic
+    };
+    
+    export default Component;
+    
+    ```
+    
+5. For page components, use default exports:
+    
+    ```tsx
+    export default function Page() {
+      // Page component logic
+    }
+    
+    ```
+    
+6. If explicit typing is needed, prefer `React.FC` or `React.ReactNode`:
+    
+    ```tsx
+    import React from 'react';
+    
+    const ComponentName: React.FC = () => {
+      // Component logic
+    };
+    
+    // OR
+    
+    const ComponentName = (): React.ReactNode => {
+      // Component logic
+    };
+    
+    ```
+    
+
+## Routing and Navigation
+
+1. Implement nested routing using folder structure in the `app` directory.
+2. Use the `<Link>` component from `next/link` for client-side navigation:
+    
+    ```tsx
+    import Link from 'next/link';
+    
+    <Link href="/about">About</Link>
+    
+    ```
+    
+3. Implement dynamic routes using folder names with square brackets (e.g., `[id]`).
+4. Use `generateStaticParams` for generating static paths in dynamic routes.
+
+## Data Fetching and API Routes
+
+1. Use Server Components and the `fetch` API for data fetching, leveraging Next.js automatic request deduplication:
+    
+    ```tsx
+    async function getData() {
+      const res = await fetch('<https://api.example.com/data>', { next: { revalidate: 3600 } });
+      if (!res.ok) throw new Error('Failed to fetch data');
+      return res.json();
+    }
+    
+    export default async function Page() {
+      const data = await getData();
+      // Render component using data
+    }
+    
+    ```
+    
+2. Implement Server Actions for data mutations:
+    
+    ```tsx
+    'use server';
+    
+    import { revalidatePath } from 'next/cache';
+    
+    export async function updateData(formData: FormData) {
+      // Update data in your database
+      revalidatePath('/data');
+    }
+    
+    ```
+    
+3. Use route handlers (route.ts) for API routes in the App Router.
+4. Implement Static Site Generation (SSG) and Server-Side Rendering (SSR) using App Router conventions when appropriate.
+
+## State Management and Interactivity
+
+1. Use Server Actions for form submissions and data mutations:
+    
+    ```tsx
+    import { updateData } from './actions';
+    
+    export default function Form() {
+      return (
+        <form action={updateData}>
+          <input type="text" name="data" />
+          <button type="submit">Update</button>
+        </form>
+      );
+    }
+    
+    ```
+    
+2. Implement React hooks for client-side state management when necessary.
+3. Use the `useState` and `useEffect` hooks in Client Components for local state and side effects.
+
+## Styling
+
+1. Use Tailwind CSS classes exclusively for styling. Avoid inline styles:
+    
+    ```tsx
+    <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+      {/* Component content */}
+    </div>
+    
+    ```
+    
+2. Create custom Tailwind classes in the `tailwind.config.js` file for reusable styles.
+3. Use CSS Modules for component-specific styles when needed.
+
+## Performance Optimization
+
+1. Implement automatic static optimization for eligible pages.
+2. Use dynamic imports for code splitting:
+    
+    ```tsx
+    import dynamic from 'next/dynamic';
+    
+    const DynamicComponent = dynamic(() => import('../components/DynamicComponent'));
+    
+    ```
+    
+3. Utilize the Image component from `next/image` for automatic image optimization:
+    
+    ```tsx
+    import Image from 'next/image';
+    
+    <Image src="/image.jpg" alt="Description" width={500} height={300} />
+    
+    ```
+    
+4. Implement proper caching strategies using the Data Cache and Full Route Cache.
+5. Use Next.js 14's built-in caching and revalidation features for optimal performance:
+    
+    ```tsx
+    import { unstable_cache } from 'next/cache';
+    
+    const getCachedUser = unstable_cache(
+      async (id: string) => getUser(id),
+      ['user-cache'],
+      { revalidate: 3600 } // Revalidate every hour
+    );
+    
+    ```
+    
+6. Use on-demand revalidation when appropriate:
+    
+    ```tsx
+    import { revalidatePath, revalidateTag } from 'next/cache';
+    
+    export async function updateData() {
+      // Update data in your database
+      revalidatePath('/data'); // Revalidate a specific path
+      revalidateTag('data-tag'); // Revalidate all entries with this tag
+    }
+    
+    ```
+    
+7. Implement parallel data fetching for improved performance:
+    
+    ```tsx
+    async function ParallelDataFetch() {
+      const dataPromise = fetch('<https://api.example.com/data>');
+      const userPromise = fetch('<https://api.example.com/user>');
+    
+      const [data, user] = await Promise.all([
+        dataPromise.then(res => res.json()),
+        userPromise.then(res => res.json())
+      ]);
+    
+      return { data, user };
+    }
+    
+    ```
+    
+
+## Error Handling and Loading States
+
+1. Create error.tsx files for error boundaries:
+    
+    ```tsx
+    'use client';
+    
+    export default function Error({
+      error,
+      reset,
+    }: {
+      error: Error & { digest?: string };
+      reset: () => void;
+    }) {
+      return (
+        <div>
+          <h2>Something went wrong!</h2>
+          <button onClick={() => reset()}>Try again</button>
+        </div>
+      );
+    }
+    
+    ```
+    
+2. Implement loading.tsx files for managing loading states.
+3. Use React Suspense for more granular loading states:
+    
+    ```tsx
+    import { Suspense } from 'react';
+    
+    export default function Page() {
+      return (
+        <Suspense fallback={<Loading />}>
+          <SomeComponent />
+        </Suspense>
+      );
+    }
+    
+    ```
+    
+
+## SEO and Metadata
+
+1. Use the Metadata API for SEO optimization:
+    
+    ```tsx
+    import type { Metadata } from 'next';
+    
+    export const metadata: Metadata = {
+      title: 'Page Title',
+      description: 'Page description',
+    };
+    
+    ```
+    
+2. Implement dynamic metadata using generateMetadata for pages with dynamic content.
+
+## Composer Mode-Specific Guidelines
+
+1. When using Composer mode, provide clear, natural language descriptions of desired changes or additions.
+2. For multi-file operations, specify the files involved and their relationships.
+3. When requesting code generation, provide context about the desired functionality and how it fits into the existing project structure.
+4. For refactoring tasks, describe the current code structure and the desired outcome.
+5. When addressing errors, provide details about the error message and the surrounding code context.
+
+Remember to adapt these rules based on specific project requirements and personal preferences. Always prioritize clean, efficient, and maintainable code that adheres to Next.js 14 best practices.
+
+# Hijraah Architecture Documentation
+
+## Authentication (Supabase)
+- Supabase Auth is used for authentication and user management
+- Authentication is configured in `lib/supabase/client.ts`
+- The middleware in `middleware.ts` handles protected routes and authentication checks
+- Supabase client is initialized in `lib/client.ts`
+- User sessions and authentication state are managed through Supabase hooks
+
+### Key Authentication Files
+- `middleware.ts`: Handles route protection and authentication middleware
+- `lib/supabase/client.ts`: Configures Supabase client with authentication
+- `components/Navigation.tsx`: Manages auth state in the UI
+- `lib/client.ts`: Sets up Supabase client initialization
+
+## Database (Supabase)
+- Supabase PostgreSQL database is used for data storage
+- Database schema and types are managed through Prisma
+- Database operations are handled through the Supabase client
+- Real-time subscriptions are available for live updates
+
+### Key Database Files
+- `prisma/schema.prisma`: Defines database schema
+- `lib/prisma.ts`: Configures Prisma client
+- `lib/supabase.ts`: Sets up Supabase database connection
+
+## AI Integration
+- Multiple AI providers are supported through a unified interface
+- AI agents are implemented in `lib/immigration-agents.ts`
+- Chat functionality is handled in `components/Chat.tsx`
+- Rate limiting is implemented in `lib/rate-limiter.ts`
+
+### Key AI Files
+- `lib/immigration-agents.ts`: Defines AI agent types and behaviors
+- `lib/chat-tools.ts`: Implements chat-related tools and utilities
+- `lib/agent-controller.ts`: Manages AI agent orchestration
+- `lib/rag.ts`: Implements retrieval-augmented generation
+
+## Application Structure
+- Next.js 14 app directory structure
+- Server and client components are clearly separated
+- TypeScript is used throughout the application
+- Error boundaries handle component-level errors
+
+### Important Files
+- `app/layout.tsx`: Root layout with providers and metadata
+- `app/page.tsx`: Main landing page
+- `components/Chat.tsx`: Main chat interface
+- `components/Navigation.tsx`: Site navigation
+- `lib/utils.ts`: Shared utility functions
+
+## Frontend Architecture
+- React with Next.js 14
+- Tailwind CSS for styling
+- shadcn/ui components
+- NextUI components
+- Responsive design implementation
+
+### UI Components
+- Reusable components in `components/ui/`
+- Layout components for page structure
+- Form components for user input
+- Chat interface components
+
+## Backend Architecture
+- Next.js API routes
+- Supabase Functions for serverless operations
+- Rate limiting implementation
+- Error handling middleware
+
+### API Structure
+- RESTful endpoints
+- WebSocket support for real-time features
+- Rate limiting on sensitive endpoints
+- Error handling and logging
+
+## Security Features
+- Authentication middleware
+- CORS configuration
+- Rate limiting
+- Security headers
+- Input validation
+
+### Security Implementation
+- Protected routes in middleware
+- Content Security Policy
+- XSS protection
+- CSRF protection
+- API rate limiting
+
+## Error Handling
+- Global error boundary
+- Structured error responses
+- Logging system
+- Toast notifications
+
+### Error Management Files
+- `components/ErrorBoundary.tsx`: Global error boundary
+- `lib/chat-error-handler.ts`: Chat-specific error handling
+- `lib/logger.ts`: Logging implementation
+
+## Performance Optimization
+- Image optimization
+- Code splitting
+- Dynamic imports
+- Caching strategies
+
+### Performance Features
+- Next.js image optimization
+- Dynamic component loading
+- Cache-Control headers
+- Service Worker implementation
+
+## Environment Configuration
+- Environment variables management
+- Development/production configurations
+- API keys and secrets handling
+
+### Configuration Files
+- `.env.example`: Example environment variables
+- `next.config.js`: Next.js configuration
+- `tailwind.config.ts`: Tailwind configuration
+- `tsconfig.json`: TypeScript configuration
+
+## Monitoring and Analytics
+- Vercel Analytics integration
+- Error tracking
+- Performance monitoring
+- User analytics
+
+### Analytics Implementation
+- Vercel Analytics setup
+- Custom event tracking
+- Performance metrics
+- Error reporting
+
+## Deployment
+- Vercel deployment configuration
+- Environment variable setup
+- Build optimization
+- CI/CD pipeline
+
+### Deployment Configuration
+- Production environment setup
+- Build process optimization
+- Deployment scripts
+- Monitoring setup
+
+## Key Patterns and Best Practices
+1. Server Components: Used for static and data-fetching components
+2. Client Components: Used for interactive features
+3. Type Safety: TypeScript throughout the application
+4. Error Boundaries: Graceful error handling
+5. Progressive Enhancement: Core functionality without JavaScript
+6. Responsive Design: Mobile-first approach
+7. Accessibility: WCAG compliance
+8. SEO: Meta tags and structured data
+
+## Testing Strategy
+- Unit testing setup
+- Integration testing
+- E2E testing configuration
+- Test utilities and helpers
+
+## Documentation
+- Code documentation
+- API documentation
+- Component documentation
+- Development guides
+
+# Hijraah API Specifications
+
+## API Overview
+
+Base URL: `https://api.hijraah.com/v1`
+
+### Authentication
+- Bearer token authentication
+- Tokens issued via OAuth 2.0
+- JWT format
+- 24-hour expiration
+- Refresh token support
+
+### Request Headers
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+Accept: application/json
+X-Request-ID: <unique-request-id>
+```
+
+### Response Format
+```json
+{
+  "status": "success|error",
+  "data": {}, // Response data
+  "error": {}, // Error details if status is error
+  "meta": {    // Pagination and other metadata
+    "page": 1,
+    "per_page": 20,
+    "total": 100
+  }
+}
+```
+
+## API Endpoints
+
+### Authentication
+
+#### POST /auth/register
+Create a new user account
+```json
+Request:
+{
+  "email": "string",
+  "password": "string",
+  "first_name": "string",
+  "last_name": "string",
+  "country": "string"
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "user_id": "uuid",
+    "email": "string",
+    "verification_sent": true
+  }
+}
+```
+
+#### POST /auth/login
+Authenticate user
+```json
+Request:
+{
+  "email": "string",
+  "password": "string"
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "access_token": "string",
+    "refresh_token": "string",
+    "expires_in": 86400
+  }
+}
+```
+
+#### POST /auth/refresh
+Refresh access token
+```json
+Request:
+{
+  "refresh_token": "string"
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "access_token": "string",
+    "expires_in": 86400
+  }
+}
+```
+
+### User Management
+
+#### GET /users/me
+Get current user profile
+```json
+Response:
+{
+  "status": "success",
+  "data": {
+    "id": "uuid",
+    "email": "string",
+    "first_name": "string",
+    "last_name": "string",
+    "country": "string",
+    "created_at": "timestamp",
+    "profile": {}
+  }
+}
+```
+
+#### PUT /users/me
+Update user profile
+```json
+Request:
+{
+  "first_name": "string",
+  "last_name": "string",
+  "country": "string",
+  "phone": "string",
+  "preferences": {}
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "id": "uuid",
+    "updated_at": "timestamp"
+  }
+}
+```
+
+### Immigration Cases
+
+#### POST /cases
+Create new immigration case
+```json
+Request:
+{
+  "case_type": "string",
+  "destination_country": "string",
+  "target_date": "date",
+  "notes": "string",
+  "requirements": {}
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "case_id": "uuid",
+    "created_at": "timestamp"
+  }
+}
+```
+
+#### GET /cases
+List user's immigration cases
+```json
+Query Parameters:
+- page (integer)
+- per_page (integer)
+- status (string)
+- type (string)
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "uuid",
+      "case_type": "string",
+      "destination_country": "string",
+      "current_stage": "string",
+      "status": "string",
+      "created_at": "timestamp",
+      "updated_at": "timestamp"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 100
+  }
+}
+```
+
+#### GET /cases/{case_id}
+Get case details
+```json
+Response:
+{
+  "status": "success",
+  "data": {
+    "id": "uuid",
+    "case_type": "string",
+    "destination_country": "string",
+    "current_stage": "string",
+    "status": "string",
+    "created_at": "timestamp",
+    "updated_at": "timestamp",
+    "target_date": "date",
+    "requirements": {},
+    "notes": "string",
+    "documents": [],
+    "tasks": []
+  }
+}
+```
+
+### Document Management
+
+#### POST /documents/upload
+Upload document
+```json
+Request:
+Content-Type: multipart/form-data
+{
+  "file": "binary",
+  "case_id": "uuid",
+  "type": "string",
+  "metadata": {}
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "document_id": "uuid",
+    "name": "string",
+    "type": "string",
+    "size": "integer",
+    "uploaded_at": "timestamp"
+  }
+}
+```
+
+#### GET /documents
+List documents
+```json
+Query Parameters:
+- case_id (uuid)
+- type (string)
+- page (integer)
+- per_page (integer)
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "uuid",
+      "name": "string",
+      "type": "string",
+      "status": "string",
+      "uploaded_at": "timestamp",
+      "expires_at": "date"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 100
+  }
+}
+```
+
+### Chat System
+
+#### POST /chat/sessions
+Create new chat session
+```json
+Request:
+{
+  "case_id": "uuid?",
+  "context": {}
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "session_id": "uuid",
+    "created_at": "timestamp"
+  }
+}
+```
+
+#### POST /chat/messages
+Send chat message
+```json
+Request:
+{
+  "session_id": "uuid",
+  "content": "string",
+  "metadata": {}
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "message_id": "uuid",
+    "content": "string",
+    "timestamp": "timestamp",
+    "role": "user|assistant"
+  }
+}
+```
+
+#### GET /chat/sessions/{session_id}/messages
+Get chat history
+```json
+Query Parameters:
+- before (timestamp)
+- limit (integer)
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "uuid",
+      "content": "string",
+      "role": "user|assistant",
+      "timestamp": "timestamp",
+      "metadata": {}
+    }
+  ]
+}
+```
+
+### Assessment Tools
+
+#### POST /assessments/eligibility
+Create eligibility assessment
+```json
+Request:
+{
+  "case_type": "string",
+  "destination_country": "string",
+  "criteria": {
+    "age": "integer",
+    "education": "string",
+    "work_experience": "integer",
+    "language_scores": {},
+    "other_factors": {}
+  }
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "assessment_id": "uuid",
+    "score": "integer",
+    "eligible": "boolean",
+    "breakdown": {},
+    "recommendations": []
+  }
+}
+```
+
+### Tasks
+
+#### POST /tasks
+Create task
+```json
+Request:
+{
+  "case_id": "uuid",
+  "title": "string",
+  "description": "string",
+  "due_date": "date",
+  "priority": "integer"
+}
+
+Response:
+{
+  "status": "success",
+  "data": {
+    "task_id": "uuid",
+    "created_at": "timestamp"
+  }
+}
+```
+
+#### GET /tasks
+List tasks
+```json
+Query Parameters:
+- case_id (uuid)
+- status (string)
+- page (integer)
+- per_page (integer)
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "uuid",
+      "title": "string",
+      "description": "string",
+      "due_date": "date",
+      "status": "string",
+      "priority": "integer"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 100
+  }
+}
+```
+
+### Notifications
+
+#### GET /notifications
+List notifications
+```json
+Query Parameters:
+- unread_only (boolean)
+- page (integer)
+- per_page (integer)
+
+Response:
+{
+  "status": "success",
+  "data": [
+    {
+      "id": "uuid",
+      "type": "string",
+      "message": "string",
+      "created_at": "timestamp",
+      "read_at": "timestamp?",
+      "action_url": "string?"
+    }
+  ],
+  "meta": {
+    "page": 1,
+    "per_page": 20,
+    "total": 100
+  }
+}
+```
+
+## Error Codes
+
+### HTTP Status Codes
+- 200: Success
+- 201: Created
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 422: Unprocessable Entity
+- 429: Too Many Requests
+- 500: Internal Server Error
+
+### Error Response Format
+```json
+{
+  "status": "error",
+  "error": {
+    "code": "string",
+    "message": "string",
+    "details": {}
+  }
+}
+```
+
+### Common Error Codes
+```
+AUTH_001: Invalid credentials
+AUTH_002: Token expired
+AUTH_003: Invalid token
+AUTH_004: Account locked
+
+VAL_001: Invalid input
+VAL_002: Missing required field
+VAL_003: Invalid format
+
+API_001: Rate limit exceeded
+API_002: Service unavailable
+API_003: Resource not found
+API_004: Permission denied
+```
+
+## Rate Limiting
+
+- Rate limit: 100 requests per minute per user
+- Rate limit headers included in response:
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+X-RateLimit-Reset: 1625097600
+```
+
+## Webhooks
+
+### Configuration
+Endpoint: POST /webhooks/configure
+```json
+Request:
+{
+  "url": "string",
+  "events": ["case.updated", "document.uploaded", "assessment.completed"],
+  "secret": "string"
+}
+```
+
+### Event Format
+```json
+{
+  "event_type": "string",
+  "timestamp": "timestamp",
+  "data": {},
+  "signature": "string"
+}
+```
+
+## API Versioning
+
+- Version included in URL path
+- Supported versions: v1
+- Deprecation notice via response header:
+```
+X-API-Deprecation: Version v1 will be deprecated on 2024-12-31
+```

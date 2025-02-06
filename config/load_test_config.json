@@ -1,0 +1,11 @@
+{
+  "config": {
+    "target": "http://api.example.com",
+    "phases": [
+      {
+        "duration": 60,
+        "arrivalRate": 20
+      }
+    ]
+  }
+} 

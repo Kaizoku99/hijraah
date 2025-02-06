@@ -1,0 +1,23 @@
+// Authentication Tests
+pm.test("Unauthenticated request should be rejected", function () {
+    if (!pm.request.headers.has('Authorization')) {
+        pm.response.to.have.status(401);
+    }
+});
+
+// Input Validation Tests
+pm.test("Message length validation", function () {
+    const responseData = pm.response.json();
+    if (pm.request.body && JSON.parse(pm.request.body.raw).message.length > 1000) {
+        pm.expect(responseData.status).to.eql('error');
+        pm.expect(responseData.message).to.include('Message too long');
+    }
+});
+
+// SQL Injection Prevention Test
+pm.test("SQL Injection prevention", function () {
+    if (pm.request.body && JSON.parse(pm.request.body.raw).message.includes("DROP TABLE")) {
+        pm.expect(responseData.status).to.eql('error');
+        pm.expect(responseData.message).to.include('Invalid input');
+    }
+}); 

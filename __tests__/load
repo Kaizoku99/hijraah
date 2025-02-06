@@ -1,0 +1,37 @@
+{
+  "config": {
+    "target": "http://localhost:3000",
+    "phases": [
+      {
+        "duration": 30,
+        "arrivalRate": 5,
+        "name": "Warm up"
+      },
+      {
+        "duration": 60,
+        "arrivalRate": 10,
+        "name": "Sustained load"
+      }
+    ],
+    "payload": {
+      "path": "test-messages.csv",
+      "fields": ["message"]
+    }
+  },
+  "scenarios": [
+    {
+      "name": "Send chat messages",
+      "flow": [
+        {
+          "post": {
+            "url": "/api/chat",
+            "json": {
+              "message": "{{ message }}",
+              "userId": "{{ userId }}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+} 

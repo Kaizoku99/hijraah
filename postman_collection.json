@@ -1,0 +1,10 @@
+{
+  "name": "API Test Collection",
+  "request": {
+    "method": "GET",
+    "url": "{{base_url}}/api/endpoint",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+} 

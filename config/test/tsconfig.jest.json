@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "module": "commonjs",
+    "target": "es2021",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "types": ["jest", "node", "@testing-library/jest-dom"],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "jest.setup.js"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+} 
