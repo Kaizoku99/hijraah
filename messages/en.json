@@ -1,0 +1,38 @@
+{
+  "common": {
+    "welcome": "Welcome to Hijraah",
+    "tagline": "Local Dreams, Global Horizons",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "dashboard": "Dashboard",
+    "chat": "Chat",
+    "tools": "Tools",
+    "profile": "Profile"
+  },
+  "home": {
+    "hero": {
+      "title": "Navigate Your Immigration Journey with AI Guidance",
+      "subtitle": "Get instant, personalized immigration assistance powered by AI. From eligibility assessment to document preparation, we're here to help 24/7.",
+      "cta": "Get Started",
+      "chat": "Start Chat"
+    },
+    "features": {
+      "title": "Why Choose Hijraah",
+      "items": {
+        "support": {
+          "title": "24/7 AI Support",
+          "description": "Get instant answers to your immigration questions anytime, anywhere."
+        },
+        "guidance": {
+          "title": "Expert Guidance",
+          "description": "Receive accurate, up-to-date immigration advice based on official guidelines."
+        },
+        "tools": {
+          "title": "Time-Saving Tools",
+          "description": "Streamline your application process with our document checklist and timeline planner."
+        }
+      }
+    }
+  }
+}

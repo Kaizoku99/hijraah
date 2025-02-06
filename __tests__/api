@@ -1,0 +1,39 @@
+// Pre-request Script (for authentication)
+if (!pm.environment.get('auth_token')) {
+    // Add your auth logic here if needed
+    pm.environment.set('auth_token', 'your-auth-token');
+}
+
+// Test Scripts
+// 1. Basic Chat Functionality Tests
+pm.test("Chat endpoint returns 200 OK", function () {
+    pm.response.to.have.status(200);
+});
+
+pm.test("Response has correct structure", function () {
+    const responseData = pm.response.json();
+    pm.expect(responseData).to.have.property('message');
+    pm.expect(responseData).to.have.property('timestamp');
+    pm.expect(responseData).to.have.property('status').to.eql('success');
+});
+
+// 2. Message Content Validation
+pm.test("Message content is valid", function () {
+    const responseData = pm.response.json();
+    pm.expect(responseData.message).to.be.a('string');
+    pm.expect(responseData.message.length).to.be.greaterThan(0);
+});
+
+// 3. Rate Limiting Tests
+pm.test("Rate limiting headers are present", function () {
+    pm.response.to.have.header('X-RateLimit-Limit');
+    pm.response.to.have.header('X-RateLimit-Remaining');
+});
+
+// 4. Error Handling Tests
+if (pm.response.code === 429) {
+    pm.test("Rate limit exceeded response is correct", function () {
+        const responseData = pm.response.json();
+        pm.expect(responseData.error).to.eql('Rate limit exceeded');
+    });
+} 

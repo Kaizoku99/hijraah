@@ -1,0 +1,13 @@
+test:
+  stage: test
+  script:
+    - newman run collection.json -e environment.json
+  artifacts:
+    reports:
+      junit: newman/report.xml 
+
+dependency_check:
+  script:
+    - npm audit
+    - npm outdated
+  allow_failure: true

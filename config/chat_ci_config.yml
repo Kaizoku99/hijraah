@@ -1,0 +1,12 @@
+api_tests:
+  stage: test
+  script:
+    - npm install -g newman artillery
+    - newman run chat_api_collection.json -e chat_environment.json
+    - artillery run chat_load_test.json
+  artifacts:
+    reports:
+      junit: newman/*.xml
+    paths:
+      - newman/*.html
+      - artillery-report.json 
