@@ -1,78 +1,51 @@
-"use client";
-
-import { useAuth } from '@/contexts/auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/_components/ui/card';
-import { DashboardLayout } from '@/app/_components/layouts/DashboardLayout';
+import { AppSidebar } from "@/components/app-sidebar"
 import {
-  Activity,
-  FileText,
-  MessageSquare,
-  Clock,
-} from 'lucide-react';
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
-export default function DashboardPage() {
-  const { user } = useAuth();
-
-  const stats = [
-    {
-      name: 'Active Cases',
-      value: '3',
-      icon: Activity,
-      description: 'Cases in progress',
-    },
-    {
-      name: 'Documents',
-      value: '12',
-      icon: FileText,
-      description: 'Uploaded documents',
-    },
-    {
-      name: 'Chat Sessions',
-      value: '24',
-      icon: MessageSquare,
-      description: 'AI conversations',
-    },
-    {
-      name: 'Hours Saved',
-      value: '48',
-      icon: Clock,
-      description: 'Time saved with AI',
-    },
-  ];
-
+export default function Page() {
   return (
-    <DashboardLayout>
-      <div className="flex flex-col gap-8">
-        <div>
-          <h1 className="text-3xl font-bold">
-            Welcome back, {user?.email?.split('@')[0]}
-          </h1>
-          <p className="text-muted-foreground">
-            Here&apos;s what&apos;s happening with your immigration journey
-          </p>
+    <>
+      <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+        <div className="flex items-center gap-2 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator
+            orientation="vertical"
+            className="mr-2 data-[orientation=vertical]:h-4"
+          />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="#">
+                  Building Your Application
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Data Fetching</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Card key={stat.name}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {stat.name}
-                </CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">
-                  {stat.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+      </header>
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+          <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="bg-muted/50 aspect-video rounded-xl" />
         </div>
-
-        {/* Add more dashboard content here */}
+        <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
       </div>
-    </DashboardLayout>
-  );
+    </>
+  )
 }

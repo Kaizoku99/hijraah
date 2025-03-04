@@ -4,6 +4,8 @@ import { type JSONValue } from 'ai';
 export type ChatRole = 'user' | 'assistant' | 'system';
 export type ChatSessionStatus = 'active' | 'archived' | 'deleted';
 export type MessageStatus = 'sending' | 'sent' | 'error';
+export type MessageSeverity = 'low' | 'medium' | 'high';
+export type ReactionType = '👍' | '❤️' | '😄' | '😮' | '😢' | '😡' | '🎉' | '🚀' | '👀' | '💯';
 
 export interface ChatMetadata {
   user_name?: string;
@@ -129,4 +131,99 @@ export interface ToolCallResult {
   status: 'running' | 'complete' | 'error';
   result?: unknown;
   error?: string;
-} 
+}
+
+export type MessageRole = 'user' | 'assistant' | 'system';
+
+export interface Message {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  role: MessageRole;
+  content: string;
+  status: MessageStatus;
+  severity?: MessageSeverity;
+  is_processed: boolean;
+  processed_at?: string;
+  error_message?: string;
+  context?: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Participant {
+  id: string;
+  conversation_id: string;
+  user_id: string;
+  role: 'owner' | 'member';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  created_by: string;
+  settings: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    language: string;
+    enableAttachments: boolean;
+    enableCodeHighlighting: boolean;
+    enableMarkdown: boolean;
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Analytics {
+  id: string;
+  conversation_id: string;
+  event_type: string;
+  event_data: Record<string, any>;
+  created_at: string;
+}
+
+export interface Reaction {
+  id: string;
+  message_id: string;
+  user_id: string;
+  type: ReactionType;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PresenceState {
+  user_id: string;
+  conversation_id: string;
+  is_typing: boolean;
+  last_seen: string;
+}
+
+// Type guards and transformers
+export function isAIMessage(message: any): message is Message {
+  return 'role' in message && 'content' in message && 'id' in message;
+}
+
+export function createEmptyMessage(): Message {
+  return {
+    id: '',
+    conversation_id: '',
+    user_id: '',
+    role: 'user',
+    content: '',
+    status: 'sending',
+    is_processed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+export function transformMessage(message: Message): Message {
+  return {
+    ...message,
+    created_at: message.created_at,
+    updated_at: message.updated_at
+  };
+}

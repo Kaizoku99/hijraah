@@ -7,11 +7,11 @@ import { getSupabaseClient } from '@/lib/supabase/client';
 import { ChatMessage } from '@/components/ui/chat/chat-message';
 import { ChatInput } from '@/components/ui/chat/chat-input';
 import { useToast } from '@/hooks/use-toast';
-import { TypingIndicator } from '@/components/ui/chat/TypingIndicator';
-import { MessageStatus } from '@/components/ui/chat/MessageStatus';
-import { SessionManager } from '@/components/ui/chat/SessionManager';
-import { DocumentContext } from '@/components/ui/chat/DocumentContext';
-import { ChatAnalytics } from '@/components/ui/chat/ChatAnalytics';
+import { TypingIndicator } from '@/components/ui/chat/typing-indicator';
+import { MessageStatus } from '@/components/ui/chat/message-status';
+import { SessionManager } from '@/components/ui/chat/session-manager';
+import { DocumentContext } from '@/components/ui/chat/document-context';
+import { ChatAnalytics } from '@/components/ui/chat/chat-analytics';
 import { nanoid } from 'nanoid';
 import { logger } from '@/lib/logger';
 import { ErrorBoundary } from '@/components/error-boundary';
@@ -27,7 +27,7 @@ interface Document {
 }
 
 export default function ChatPage() {
-  const { user, session, loading } = useAuth();
+  const { user, session, isLoading } = useAuth();
   const { toast } = useToast();
   const supabase = getSupabaseClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export default function ChatPage() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   const {
     messages,
@@ -61,7 +61,7 @@ export default function ChatPage() {
           title: 'Error',
           description: response.status === 401 ? 'Please sign in again' : 'Failed to send message',
         });
-        
+
         if (response.status === 401) {
           window.location.href = '/auth/login';
         }
@@ -77,7 +77,7 @@ export default function ChatPage() {
             content: message.content,
             created_at: new Date().toISOString(),
           })
-          .then(({ error }) => {
+          .then(({ error }: { error: any }) => {
             if (error) {
               logger.error('Failed to save message:', error);
             }
@@ -106,9 +106,9 @@ export default function ChatPage() {
         messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }
     };
-    
+
     scrollToBottom();
-    
+
     // Add a small delay to ensure content is rendered
     const timeoutId = setTimeout(scrollToBottom, 100);
     return () => clearTimeout(timeoutId);
@@ -129,7 +129,7 @@ export default function ChatPage() {
         if (error) throw error;
 
         if (data) {
-          const formattedMessages: Message[] = data.map(msg => ({
+          const formattedMessages: Message[] = data.map((msg: any) => ({
             id: msg.id,
             role: msg.role as 'user' | 'assistant',
             content: msg.content,
@@ -137,7 +137,7 @@ export default function ChatPage() {
           setMessages(formattedMessages);
         }
       } catch (error) {
-        logger.error('Failed to load messages:', error);
+        logger.error('Failed to load messages:', error instanceof Error ? error : new Error('Unknown error'));
         toast({
           variant: 'destructive',
           title: 'Error',
@@ -184,7 +184,7 @@ export default function ChatPage() {
   const handleSessionChange = async (sessionId: string) => {
     try {
       if (!supabase) return;
-      
+
       const { data: docs, error } = await supabase
         .from('documents')
         .select('*')
@@ -193,7 +193,7 @@ export default function ChatPage() {
       if (error) throw error;
 
       setCurrentSessionId(sessionId);
-      setDocuments((docs || []).map(doc => ({
+      setDocuments((docs || []).map((doc: any) => ({
         ...doc,
         type: doc.file_type,
         url: doc.file_path
@@ -245,7 +245,7 @@ export default function ChatPage() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -310,7 +310,6 @@ export default function ChatPage() {
                 <ChatMessage
                   key={message.id}
                   message={message}
-                  isLastMessage={i === messages.length - 1}
                 />
               ))}
               {chatLoading && <TypingIndicator />}

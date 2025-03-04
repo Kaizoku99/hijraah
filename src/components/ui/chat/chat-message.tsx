@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { BotIcon, UserIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-interface ChatMessageProps {
+export interface ChatMessageProps {
   message: Message & {
     timestamp?: Date;
   };

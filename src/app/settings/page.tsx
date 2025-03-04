@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { getSupabaseClient } from '@/lib/supabase/client';
-import { AvatarUpload } from '@/app/_components/ui/avatar-upload';
-import { Button } from '@/app/_components/ui/button';
-import { Switch } from '@/app/_components/ui/switch';
+import { AvatarUpload } from '@/components/ui/avatar-upload';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import {
   Card,
@@ -150,7 +150,7 @@ export default function SettingsPage() {
                       className="flex-1 rounded-md border px-3 py-2"
                       placeholder="Enter your full name"
                     />
-                    <Button 
+                    <Button
                       onClick={handleNameUpdate}
                       disabled={isLoading}
                     >

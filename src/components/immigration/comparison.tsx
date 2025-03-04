@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
 import { countryConfigs } from '@/lib/scrapers/config';
-import { OpenAI } from 'openai';
+import OpenAI from 'openai';
 
 interface ImmigrationComparisonProps {
   onCompare: (countries: string[], category: string) => Promise<void>;
@@ -24,12 +24,11 @@ const categories = [
 
 export function ImmigrationComparison({
   onCompare,
-  isLoading,
+  isLoading: isComparing,
   comparison,
 }: ImmigrationComparisonProps) {
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('visa');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   const availableCountries = Object.keys(countryConfigs);
@@ -48,37 +47,36 @@ export function ImmigrationComparison({
       return;
     }
     try {
-      setIsLoading(true);
       await onCompare(selectedCountries, selectedCategory);
     } catch (err) {
       setError(err as Error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  // Example of using OpenAI - commented out since it needs configuration
+  /* 
   const stream = async () => {
     if (selectedCountries.length < 2) {
       alert('Please select at least 2 countries to compare');
       return;
     }
     try {
-      setIsLoading(true);
+      const openai = new OpenAI();
       const prompt = `Compare immigration policies between ${selectedCountries.join(', ')}`;
-      const stream = await OpenAI.streamCompletion({
+      const stream = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
           { role: "system", content: "Compare immigration policies" },
           { role: "user", content: prompt }
-        ]
+        ],
+        stream: true
       });
       // Handle streaming response
     } catch (err) {
       setError(err as Error);
-    } finally {
-      setIsLoading(false);
     }
   };
+  */
 
   return (
     <div className="space-y-6">
@@ -116,10 +114,10 @@ export function ImmigrationComparison({
 
       <Button
         onClick={handleCompare}
-        disabled={selectedCountries.length < 2 || isLoading}
+        disabled={selectedCountries.length < 2 || isComparing}
         className="w-full"
       >
-        {isLoading ? 'Comparing...' : 'Compare Selected Countries'}
+        {isComparing ? 'Comparing...' : 'Compare Selected Countries'}
       </Button>
 
       {comparison && (

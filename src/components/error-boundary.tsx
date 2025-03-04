@@ -1,104 +1,66 @@
-import * as React from 'react';
-import * as Sentry from '@sentry/nextjs';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
+'use client';
 
-interface ErrorBoundaryState {
-  error: Error | null;
-  errorInfo: React.ErrorInfo | null;
+import { Component, type ReactNode } from 'react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { AlertCircle, RefreshCw } from 'lucide-react'
+
+interface Props {
+  children: ReactNode
+  fallback?: ReactNode
+  onError?: (error: Error) => void
 }
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-  onReset?: () => void;
+interface State {
+  hasError: boolean
+  error: Error | null
 }
 
-export class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { error: null, errorInfo: null };
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { hasError: false, error: null }
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { error, errorInfo: null };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error to Sentry
-    Sentry.captureException(error, {
-      extra: {
-        componentStack: errorInfo.componentStack,
-      },
-    });
-
-    this.setState({
-      error,
-      errorInfo,
-    });
-
-    // Call onError callback if provided
-    this.props.onError?.(error, errorInfo);
+  componentDidCatch(error: Error) {
+    console.error('Error caught by boundary:', error)
+    this.props.onError?.(error)
   }
-
-  handleReset = () => {
-    this.setState({ error: null, errorInfo: null });
-    this.props.onReset?.();
-  };
 
   render() {
-    if (this.state.error) {
-      // Render fallback UI if provided
+    if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
-      // Default error UI
       return (
-        <div className="flex min-h-screen items-center justify-center p-4">
-          <Card className="max-w-lg">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <CardTitle>Something went wrong</CardTitle>
-              </div>
-              <CardDescription>
-                An error occurred while rendering this component.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 rounded-md bg-muted p-4 font-mono text-sm">
-                <p className="font-medium text-destructive">
-                  {this.state.error.name}: {this.state.error.message}
-                </p>
-                {this.state.errorInfo && (
-                  <pre className="mt-2 max-h-96 overflow-auto whitespace-pre-wrap text-muted-foreground">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
-                )}
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button
-                onClick={this.handleReset}
-                variant="outline"
-                className="gap-2"
-              >
-                <RefreshCcw className="h-4 w-4" />
-                Try again
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      );
+        <Alert variant="destructive" className="my-8">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Something went wrong</AlertTitle>
+          <AlertDescription className="mt-2 flex flex-col gap-4">
+            <p>{this.state.error?.message || 'An unexpected error occurred'}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit gap-2"
+              onClick={() => {
+                this.setState({ hasError: false, error: null })
+                window.location.reload()
+              }}
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 

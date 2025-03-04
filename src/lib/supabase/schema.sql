@@ -122,4 +122,62 @@ $$ language 'plpgsql';
 CREATE TRIGGER update_chat_conversations_updated_at
   BEFORE UPDATE ON chat_conversations
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column(); 
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Add artifacts table if it doesn't exist
+CREATE TABLE IF NOT EXISTS artifacts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  content JSONB,
+  type TEXT NOT NULL, -- 'document', 'spreadsheet', 'code', etc.
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  chat_id UUID REFERENCES chats(id) ON DELETE CASCADE,
+  visibility TEXT DEFAULT 'private'
+);
+
+-- Add artifact_messages for messages related to artifacts
+CREATE TABLE IF NOT EXISTS artifact_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  artifact_id UUID REFERENCES artifacts(id) ON DELETE CASCADE,
+  message TEXT NOT NULL,
+  role TEXT NOT NULL, -- 'user', 'assistant', 'system'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Add RLS policies for artifacts
+ALTER TABLE artifacts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own artifacts"
+  ON artifacts
+  FOR SELECT
+  USING (user_id = auth.uid() OR visibility = 'public');
+
+CREATE POLICY "Users can insert their own artifacts"
+  ON artifacts
+  FOR INSERT
+  WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "Users can update their own artifacts"
+  ON artifacts
+  FOR UPDATE
+  USING (user_id = auth.uid());
+
+CREATE POLICY "Users can delete their own artifacts"
+  ON artifacts
+  FOR DELETE
+  USING (user_id = auth.uid());
+
+-- Add RLS policies for artifact messages
+ALTER TABLE artifact_messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view messages for their artifacts"
+  ON artifact_messages
+  FOR SELECT
+  USING (artifact_id IN (SELECT id FROM artifacts WHERE user_id = auth.uid() OR visibility = 'public'));
+
+CREATE POLICY "Users can insert messages for their artifacts"
+  ON artifact_messages
+  FOR INSERT
+  WITH CHECK (artifact_id IN (SELECT id FROM artifacts WHERE user_id = auth.uid())); 

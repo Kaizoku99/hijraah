@@ -1,19 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { createBrowserClient } from '@supabase/ssr';
 import { useAuth } from '@/contexts/auth';
-import { DashboardLayout } from '@/app/_components/layouts/DashboardLayout';
+import { MainLayout } from '@/components/layouts/main-layout';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/app/_components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/_components/ui/tabs';
-import { ScrollArea } from '@/app/_components/ui/scroll-area';
-import { formatDateTime } from '@/lib/utils/date';
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { format } from 'date-fns';
 
 interface HistoryItem {
   id: string;
@@ -23,12 +23,20 @@ interface HistoryItem {
   created_at: string;
 }
 
+// Helper function for date formatting
+const formatDateTime = (dateString: string): string => {
+  return format(new Date(dateString), 'PPp');
+};
+
 export default function HistoryPage() {
   const [chatHistory, setChatHistory] = useState<HistoryItem[]>([]);
   const [documentHistory, setDocumentHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const supabase = createClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
     if (!user?.id) return;
@@ -54,7 +62,7 @@ export default function HistoryPage() {
         if (docError) throw docError;
 
         setChatHistory(
-          chatData.map((chat) => ({
+          (chatData || []).map((chat: any) => ({
             id: chat.id,
             type: 'chat',
             title: 'Chat Session',
@@ -64,7 +72,7 @@ export default function HistoryPage() {
         );
 
         setDocumentHistory(
-          docs.map((doc) => ({
+          (docs || []).map((doc: any) => ({
             id: doc.id,
             type: 'document',
             title: doc.name,
@@ -87,7 +95,7 @@ export default function HistoryPage() {
   }, [user, supabase]);
 
   return (
-    <DashboardLayout>
+    <MainLayout>
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="text-3xl font-bold">History</h1>
@@ -159,6 +167,6 @@ export default function HistoryPage() {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </MainLayout>
   );
 } 
