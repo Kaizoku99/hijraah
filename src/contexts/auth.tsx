@@ -1,16 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import type { User, Session } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase, createClient } from '@/lib/supabase/client';
+import { withCircuitBreaker } from '@/lib/circuit-breaker';
 import { toast } from 'sonner';
-import type { Database } from '@/types/supabase';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -18,146 +17,98 @@ interface AuthContextType {
   updatePassword: (password: string) => Promise<void>;
 }
 
-const AuthContext = React.createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = React.useState<User | null>(null);
-  const [session, setSession] = React.useState<Session | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const router = useRouter();
-  const supabase = createClientComponentClient<Database>();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Initialize session
-  React.useEffect(() => {
-    const initSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-      } catch (error) {
-        console.error('Error initializing session:', error);
-        toast.error('Failed to initialize session');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  useEffect(() => {
+    const client = createClient();
 
-    initSession();
+    // Get initial session
+    client.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        router.refresh();
-      }
-    );
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+    });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, router]);
+  }, []);
 
-  const signIn = React.useCallback(async (email: string, password: string) => {
-    try {
+  const signIn = withCircuitBreaker(
+    'auth.signIn',
+    async (email: string, password: string) => {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-
       if (error) throw error;
-
-      router.push('/dashboard');
-      toast.success('Signed in successfully');
-    } catch (error) {
-      console.error('Error signing in:', error);
-      toast.error('Failed to sign in');
-      throw error;
     }
-  }, [supabase, router]);
+  );
 
-  const signUp = React.useCallback(async (email: string, password: string) => {
-    try {
+  const signUp = withCircuitBreaker(
+    'auth.signUp',
+    async (email: string, password: string) => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
       });
-
       if (error) throw error;
-
-      toast.success('Verification email sent');
-    } catch (error) {
-      console.error('Error signing up:', error);
-      toast.error('Failed to sign up');
-      throw error;
+      toast.success('Check your email for the confirmation link');
     }
-  }, [supabase]);
+  );
 
-  const signOut = React.useCallback(async () => {
-    try {
+  const signOut = withCircuitBreaker(
+    'auth.signOut',
+    async () => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-
-      router.push('/');
-      toast.success('Signed out successfully');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast.error('Failed to sign out');
-      throw error;
     }
-  }, [supabase, router]);
+  );
 
-  const resetPassword = React.useCallback(async (email: string) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      });
-
+  const resetPassword = withCircuitBreaker(
+    'auth.resetPassword',
+    async (email: string) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
-
-      toast.success('Password reset email sent');
-    } catch (error) {
-      console.error('Error resetting password:', error);
-      toast.error('Failed to send reset email');
-      throw error;
+      toast.success('Check your email for the password reset link');
     }
-  }, [supabase]);
+  );
 
-  const updatePassword = React.useCallback(async (password: string) => {
-    try {
+  const updatePassword = withCircuitBreaker(
+    'auth.updatePassword',
+    async (password: string) => {
       const { error } = await supabase.auth.updateUser({
         password,
       });
-
       if (error) throw error;
-
       toast.success('Password updated successfully');
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error updating password:', error);
-      toast.error('Failed to update password');
-      throw error;
     }
-  }, [supabase, router]);
-
-  const value = React.useMemo(
-    () => ({
-      user,
-      session,
-      isLoading,
-      signIn,
-      signUp,
-      signOut,
-      resetPassword,
-      updatePassword,
-    }),
-    [user, session, isLoading, signIn, signUp, signOut, resetPassword, updatePassword]
   );
+
+  const value = {
+    user,
+    session,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    updatePassword,
+  };
+
+  if (loading) {
+    return null; // or a loading spinner
+  }
 
   return (
     <AuthContext.Provider value={value}>
@@ -166,10 +117,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
-  const context = React.useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+};

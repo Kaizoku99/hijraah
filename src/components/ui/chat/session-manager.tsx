@@ -1,92 +1,122 @@
 'use client';
 
-import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { ChatService } from '@/lib/supabase/chat';
-import { Plus } from 'lucide-react';
-import { toast } from 'sonner';
-import type { ChatConversation } from '@/lib/supabase/chat';
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/contexts/auth'
+import {
+  type ChatSession,
+  type ChatMessage,
+  createChatSession,
+  getChatSessions,
+  getChatMessages,
+  sendChatMessage,
+  subscribeToChatMessages
+} from '@/lib/supabase/chat'
+import { Card } from '../card'
+import { Button } from '../button'
+import { Spinner } from '../spinner'
+import { toast } from 'sonner'
 
 interface SessionManagerProps {
-  currentSessionId?: string;
-  onSessionChange: (sessionId: string) => void;
-  className?: string;
+  onSessionSelect: (session: ChatSession) => void
+  onMessageReceived: (message: ChatMessage) => void
 }
 
-export function SessionManager({ 
-  currentSessionId, 
-  onSessionChange,
-  className 
-}: SessionManagerProps) {
-  const [sessions, setSessions] = React.useState<ChatConversation[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
+export function SessionManager({ onSessionSelect, onMessageReceived }: SessionManagerProps) {
+  const { user } = useAuth()
+  const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
 
-  const chatService = React.useMemo(() => new ChatService(), []);
+  useEffect(() => {
+    if (!user) return
 
-  const loadSessions = React.useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const data = await chatService.listConversations();
-      setSessions(data);
-    } catch (error) {
-      console.error('Error loading sessions:', error);
-      toast.error('Failed to load sessions');
-    } finally {
-      setIsLoading(false);
+    const loadSessions = async () => {
+      try {
+        const sessions = await getChatSessions(user.id)
+        setSessions(sessions)
+
+        // Select the first session if exists
+        if (sessions.length > 0) {
+          setSelectedSessionId(sessions[0].id)
+          onSessionSelect(sessions[0])
+        }
+      } catch (error) {
+        console.error('Error loading sessions:', error)
+        toast.error('Failed to load chat sessions')
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [chatService]);
 
-  React.useEffect(() => {
-    loadSessions();
-  }, [loadSessions]);
+    loadSessions()
+  }, [user, onSessionSelect])
 
-  const handleNewSession = async () => {
-    try {
-      const session = await chatService.createConversation();
-      onSessionChange(session.id);
-      await loadSessions();
-    } catch (error) {
-      console.error('Error creating session:', error);
-      toast.error('Failed to create new session');
+  useEffect(() => {
+    if (!selectedSessionId) return
+
+    const subscription = subscribeToChatMessages(selectedSessionId, (message) => {
+      onMessageReceived(message)
+    })
+
+    return () => {
+      subscription.unsubscribe()
     }
-  };
+  }, [selectedSessionId, onMessageReceived])
+
+  const handleCreateSession = async () => {
+    if (!user) return
+
+    try {
+      const session = await createChatSession(user.id)
+      setSessions((prev) => [session, ...prev])
+      setSelectedSessionId(session.id)
+      onSessionSelect(session)
+    } catch (error) {
+      console.error('Error creating session:', error)
+      toast.error('Failed to create new chat session')
+    }
+  }
+
+  const handleSelectSession = async (session: ChatSession) => {
+    setSelectedSessionId(session.id)
+    onSessionSelect(session)
+
+    try {
+      const messages = await getChatMessages(session.id)
+      // Handle messages if needed
+    } catch (error) {
+      console.error('Error loading messages:', error)
+      toast.error('Failed to load chat messages')
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Sessions</h2>
-        <Button onClick={handleNewSession} size="sm" className="gap-2">
-          <Plus className="h-4 w-4" />
-          New Session
-        </Button>
+    <Card className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Chat Sessions</h2>
+        <Button onClick={handleCreateSession}>New Chat</Button>
       </div>
-      <ScrollArea className="h-[300px]">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          </div>
-        ) : sessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <p className="text-sm text-muted-foreground">No active sessions</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {sessions.map((session) => (
-              <Button
-                key={session.id}
-                variant={currentSessionId === session.id ? 'secondary' : 'ghost'}
-                className="w-full justify-start"
-                onClick={() => onSessionChange(session.id)}
-              >
-                <span className="truncate">
-                  {session.title || `Session ${session.id.slice(0, 8)}`}
-                </span>
-              </Button>
-            ))}
-          </div>
-        )}
-      </ScrollArea>
-    </div>
-  );
+
+      <div className="space-y-2">
+        {sessions.map((session) => (
+          <Button
+            key={session.id}
+            variant={selectedSessionId === session.id ? 'default' : 'outline'}
+            className="w-full justify-start"
+            onClick={() => handleSelectSession(session)}
+          >
+            {session.title || `Chat ${new Date(session.created_at).toLocaleDateString()}`}
+          </Button>
+        ))}
+      </div>
+    </Card>
+  )
 } 

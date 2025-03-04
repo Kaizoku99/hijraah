@@ -1,0 +1,62 @@
+/* Sidebar Theme */
+.bg-sidebar {
+  @apply bg-background border-r;
+}
+
+.text-sidebar-foreground {
+  @apply text-foreground;
+}
+
+/* Sidebar Menu Item */
+[data-sidebar="menu-item"] {
+  @apply transition-colors hover:bg-accent hover:text-accent-foreground;
+}
+
+[data-sidebar="menu-item"][aria-current="page"] {
+  @apply bg-primary/10 text-primary;
+}
+
+/* Sidebar Group */
+[data-sidebar="group"] {
+  @apply space-y-1;
+}
+
+[data-sidebar="group-label"] {
+  @apply text-xs font-medium text-muted-foreground px-2 py-1.5;
+}
+
+/* Sidebar Header */
+[data-sidebar="header"] {
+  @apply border-b;
+}
+
+/* Sidebar Footer */
+[data-sidebar="footer"] {
+  @apply border-t mt-auto;
+}
+
+/* Sidebar Trigger */
+[data-sidebar="trigger"] {
+  @apply hover:bg-accent hover:text-accent-foreground;
+}
+
+/* Sidebar Animation */
+[data-state="expanded"] {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+[data-state="collapsed"] {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Dark Mode Adjustments */
+.dark [data-sidebar="menu-item"][aria-current="page"] {
+  @apply bg-primary/20;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  [data-sidebar="sidebar"] {
+    @apply fixed inset-y-0 left-0 z-50;
+  }
+}

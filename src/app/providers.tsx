@@ -1,24 +1,34 @@
 "use client";
 
-import { ThemeProvider } from 'next-themes';
-import { ApolloProvider } from './providers/ApolloProvider';
 import { AuthProvider } from '@/contexts/auth';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from 'sonner';
+import { SessionProvider } from '@/components/session-provider';
+import { DeepResearchProvider } from '@/lib/deep-research-context';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { toast } from 'sonner';
+import { ThemeProvider } from 'next-themes';
+import { SearchProvider } from '@/lib/contexts/search-context';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
+    <ErrorBoundary
+      onError={(error) => {
+        console.error('Application error:', error);
+        toast.error('An unexpected error occurred');
+      }}
     >
-      <AuthProvider>
-        <ApolloProvider>
-          {children}
-          <Toaster />
-        </ApolloProvider>
-      </AuthProvider>
-    </ThemeProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <AuthProvider>
+          <SessionProvider>
+            <SearchProvider>
+              <DeepResearchProvider>
+                {children}
+                <Toaster />
+              </DeepResearchProvider>
+            </SearchProvider>
+          </SessionProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

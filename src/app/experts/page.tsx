@@ -1,18 +1,18 @@
 "use client";
 
 import { useState } from 'react';
-import { Button } from '@/app/_components/ui/button';
-import { Card } from '@/app/_components/ui/card';
-import { Input } from '@/app/_components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/app/_components/ui/select';
-import { Calendar } from '@/app/_components/ui/calendar';
-import { Avatar } from '@/app/_components/ui/avatar';
+} from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Avatar } from '@/components/ui/avatar';
 import { Star, MapPin, Clock, Video } from 'lucide-react';
 import Image from 'next/image';
 

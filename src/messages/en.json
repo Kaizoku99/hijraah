@@ -1,0 +1,18 @@
+{
+    "Tools": {
+        "demo": {
+            "title": "Immigration Tools Demo",
+            "chatTab": "AI Assistant",
+            "aboutTab": "About Tools",
+            "chatTitle": "Immigration Assistant",
+            "chatDescription": "Ask questions about immigration programs, check your eligibility, or get guidance on your application.",
+            "aboutTitle": "About Our Tools",
+            "aboutDescription": "Learn about the immigration tools available through our AI assistant.",
+            "eligibilityTitle": "Eligibility Calculator",
+            "eligibilityDescription": "Our eligibility calculator evaluates your profile against immigration program requirements. It considers factors like age, education, work experience, language proficiency, and nationality to determine which programs you might qualify for.",
+            "searchTitle": "Information Search",
+            "searchDescription": "Our search tool provides access to up-to-date immigration information, including program details, requirements, application processes, and more.",
+            "tryItOut": "Try asking the assistant:"
+        }
+    }
+}

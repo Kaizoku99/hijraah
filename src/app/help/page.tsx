@@ -1,8 +1,8 @@
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/app/_components/ui/accordion';
-import { Button } from '@/app/_components/ui/button';
-import { Card } from '@/app/_components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
@@ -10,7 +10,7 @@ export default function HelpPage() {
   return (
     <div className="container max-w-4xl py-8">
       <h1 className="text-3xl font-bold mb-6">Help Center</h1>
-      
+
       <div className="grid gap-6">
         {/* Quick Support Card */}
         <Card className="p-6">

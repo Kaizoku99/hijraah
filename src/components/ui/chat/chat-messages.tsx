@@ -8,18 +8,18 @@ import { ScrollArea } from '../scroll-area';
 import { ChatMessage } from './chat-message';
 import { TypingIndicator } from './typing-indicator';
 
-interface ChatMessagesProps {
+export interface ChatMessagesProps {
   messages: Message[];
   streamData?: StreamData[];
   isLoading?: boolean;
   className?: string;
 }
 
-export function ChatMessages({ 
-  messages, 
-  streamData, 
+export function ChatMessages({
+  messages,
+  streamData,
   isLoading,
-  className 
+  className
 }: ChatMessagesProps) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
 

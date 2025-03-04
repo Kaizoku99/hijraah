@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
+// @ts-ignore: Allow synthetic default import
+import createIntlMiddleware from 'next-intl/middleware';
+import { locales, defaultLocale } from '../i18n';
 
 // Cache configuration
 const CACHE_REVALIDATE = 60; // 1 minute
@@ -33,27 +36,119 @@ const PUBLIC_ROUTES = [
   '/contact',
 ];
 
+const intlMiddleware = createIntlMiddleware({
+  // A list of all locales that are supported
+  locales,
+  // Used when no locale matches
+  defaultLocale,
+  // If this locale is matched, pathnames work without a prefix (e.g. `/about`)
+  localePrefix: 'always'
+});
+
 export const config = {
   matcher: [
-    '/api/:path*',
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public (public files)
+     * - api/public (public API routes)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|public|api/public).*)',
   ],
 };
 
+// Helper function to log and handle missing environment variables
+function validateEnvVariables() {
+  const missingVars = [];
+  
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    missingVars.push('NEXT_PUBLIC_SUPABASE_URL');
+  }
+  
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    missingVars.push('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  }
+  
+  return missingVars;
+}
+
 export async function middleware(request: NextRequest) {
   try {
-    // Create Supabase client
-    const response = NextResponse.next();
-    const supabase = createMiddlewareClient({ req: request, res: response });
+    // Check for missing environment variables
+    const missingVars = validateEnvVariables();
+    
+    if (missingVars.length > 0) {
+      console.error(`⚠️ Missing environment variables: ${missingVars.join(', ')}`);
+      console.error('Please check your .env.local file.');
+      
+      // Skip Supabase client creation for public routes to avoid errors
+      const requestPath = request.nextUrl.pathname;
+      if (PUBLIC_ROUTES.some(route => requestPath.startsWith(route))) {
+        return NextResponse.next();
+      }
+      
+      // For API routes or protected routes, return 500 error
+      if (requestPath.startsWith('/api/') || AUTH_REQUIRED_ROUTES.some(route => requestPath.startsWith(route))) {
+        return NextResponse.json(
+          { error: 'Server misconfiguration. Please check server logs.' },
+          { status: 500 }
+        );
+      }
+      
+      // For other routes, redirect to homepage
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    
+    let response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
+    
+    // Create a Supabase client configured to use cookies
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            });
+          },
+          remove(name: string, options: any) {
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            });
+          },
+        },
+      }
+    );
 
-    // Refresh session if needed
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+    const { data: { session }, error } = await supabase.auth.getSession();
 
-    if (sessionError) {
-      console.error('Session error:', sessionError);
+    // Handle session refresh
+    if (session?.expires_at && session.expires_at < Date.now() / 1000) {
+      const { data: { session: newSession }, error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        // Clear session if refresh fails
+        await supabase.auth.signOut();
+      }
+    }
+
+    // Add user session to request header for server components
+    if (session) {
+      response.headers.set('x-user-id', session.user.id);
+      response.headers.set('x-user-role', session.user.role || 'user');
     }
 
     const requestPath = request.nextUrl.pathname;
@@ -77,7 +172,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Redirect logged-in users away from auth pages
-    if (session && PUBLIC_ROUTES.some(route => requestPath.startsWith('/auth/'))) {
+    if (request.cookies.get('supabase-auth-token')) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
@@ -92,11 +187,6 @@ export async function middleware(request: NextRequest) {
 
     // Generate cache key
     const cacheKey = new URL(request.url);
-
-    // Add auth status to cache key if needed
-    if (session) {
-      cacheKey.searchParams.set('auth', 'true');
-    }
 
     // Get response
     const cacheResponse = await fetch(cacheKey.toString(), {
@@ -122,7 +212,22 @@ export async function middleware(request: NextRequest) {
     responseClone.headers.set('X-Cache-Status', 'MISS');
     responseClone.headers.set('X-Cache-Key', cacheKey.toString());
 
-    return responseClone;
+    // Step 1: Run the internationalization middleware
+    const intlResponse = intlMiddleware(request);
+
+    // Step 2: Add security headers
+    if (intlResponse) {
+      // Security headers
+      intlResponse.headers.set('X-Content-Type-Options', 'nosniff');
+      intlResponse.headers.set('X-Frame-Options', 'DENY');
+      intlResponse.headers.set('X-XSS-Protection', '1; mode=block');
+      intlResponse.headers.set(
+        'Content-Security-Policy',
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co;"
+      );
+    }
+
+    return intlResponse || responseClone;
   } catch (error) {
     console.error('Middleware error:', error);
 

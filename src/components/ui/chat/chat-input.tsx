@@ -7,7 +7,7 @@ import { Button } from '../button';
 import { Textarea } from '../textarea';
 import { Square, ArrowUp, RotateCw, Loader2 } from 'lucide-react';
 
-interface ChatInputProps {
+export interface ChatInputProps {
   input: string;
   isLoading: boolean;
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;

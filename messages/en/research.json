@@ -1,0 +1,60 @@
+{
+    "interface": {
+        "search": {
+            "placeholder": "Enter your research query...",
+            "button": "Search",
+            "searching": "Searching...",
+            "analyze": "Analyze Results",
+            "analyzing": "Analyzing..."
+        },
+        "tabs": {
+            "results": "Results",
+            "timeline": "Timeline",
+            "credibility": "Credibility",
+            "connections": "Connections"
+        },
+        "results": {
+            "empty": "No search results found",
+            "error": "Error loading search results",
+            "relevance": "{score}% Relevant",
+            "by": "By {author}",
+            "analyze": "Analyze"
+        },
+        "timeline": {
+            "empty": "No timeline data available",
+            "error": "Error loading timeline",
+            "source": "Source: {source}",
+            "confidence": "Confidence: {score}%"
+        },
+        "credibility": {
+            "empty": "No credibility data available",
+            "error": "Error loading credibility data",
+            "overall": "Overall Credibility:"
+        },
+        "crossReference": {
+            "empty": "No cross references available",
+            "error": "Error loading cross references",
+            "references": "References:",
+            "match": "{score}% Match",
+            "concepts": "Matching Concepts",
+            "context": "Context"
+        },
+        "aiModel": {
+            "select": "Select AI Model",
+            "models": {
+                "gpt4": {
+                    "name": "GPT-4",
+                    "description": "Most capable model, best for complex research tasks"
+                },
+                "gpt35": {
+                    "name": "GPT-3.5 Turbo",
+                    "description": "Fast and efficient for standard research tasks"
+                },
+                "claude3": {
+                    "name": "Claude 3",
+                    "description": "Specialized in academic research and analysis"
+                }
+            }
+        }
+    }
+}
