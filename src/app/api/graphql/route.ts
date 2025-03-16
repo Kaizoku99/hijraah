@@ -1,21 +1,21 @@
 import { createYoga, createSchema } from 'graphql-yoga';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { resolvers } from '@/graphql/resolvers';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { resolvers } from '../../../../graphql/resolvers';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@/types/database';
 import type { User } from '@supabase/supabase-js';
 
 type GraphQLContext = {
   user: User | null;
-  supabase?: ReturnType<typeof createRouteHandlerClient<Database>>;
+  supabase?: ReturnType<typeof createServerClient<Database>>;
   request: Request;
   params: Promise<{ [key: string]: string | string[] }>;
 };
 
 const typeDefs = readFileSync(
-  join(process.cwd(), 'graphql/schema.graphql'),
+  join(process.cwd(), 'graphql/schema/schema.graphql'),
   'utf-8'
 );
 
@@ -31,7 +31,23 @@ const { handleRequest } = createYoga<GraphQLContext>({
   context: async ({ request }) => {
     try {
       const cookieStore = cookies();
-      const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore });
+      const supabase = createServerClient<Database>(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet) {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                cookieStore.set(name, value, options);
+              });
+            }
+          }
+        }
+      );
+
       const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {

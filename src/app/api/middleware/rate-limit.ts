@@ -44,4 +44,7 @@ export async function rateLimitMiddleware(c: Context, next: Next) {
     }
     throw error
   }
-} 
+}
+
+// Export for backwards compatibility
+export const rateLimit = rateLimitMiddleware; 

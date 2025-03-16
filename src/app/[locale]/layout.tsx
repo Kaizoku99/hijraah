@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, AbstractIntlMessages } from 'next-intl';
-import { locales, localeConfigs } from '../../../i18n';
+import { locales, localeConfigs } from '@/i18n';
 import { Providers } from '../providers';
 import { RootErrorBoundary } from '@/components/root-error-boundary';
 import { Toaster } from 'sonner';

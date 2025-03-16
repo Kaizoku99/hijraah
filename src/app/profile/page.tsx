@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,8 @@ import { useAuth } from '@/contexts/auth'
 import { useToast } from '@/hooks/use-toast'
 import { createBrowserClient } from '@supabase/ssr'
 import Image from 'next/image'
+import { UserAvatar } from '@/components/ui/user-avatar'
+import { uploadAvatar, updateUserAvatar } from '@/lib/avatar-utils'
 
 export default function ProfilePage() {
   const { user } = useAuth()
@@ -21,6 +23,9 @@ export default function ProfilePage() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
   const [isLoading, setIsLoading] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
+    user?.user_metadata?.avatar_url
+  )
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.name || '',
     email: user?.email || '',
@@ -29,6 +34,40 @@ export default function ProfilePage() {
     newPassword: '',
     confirmPassword: '',
   })
+
+  // Fetch the user's avatar URL if not available in metadata
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!user || avatarUrl) return;
+
+      try {
+        // Check if user has a profile with avatar URL
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url')
+          .eq('id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
+
+        if (data?.avatar_url) {
+          setAvatarUrl(data.avatar_url);
+
+          // Also update user metadata for consistency
+          await supabase.auth.updateUser({
+            data: { avatar_url: data.avatar_url }
+          });
+        }
+      } catch (error) {
+        console.error('Error in avatar fetch:', error);
+      }
+    };
+
+    fetchAvatar();
+  }, [user, avatarUrl, supabase]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -112,46 +151,42 @@ export default function ProfilePage() {
 
   const handleAvatarUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !user) return
 
     try {
       setIsLoading(true)
-      const fileExt = file.name.split('.').pop()
-      const filePath = `avatars/${user?.id}.${fileExt}`
 
-      // Upload image
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true })
+      // Use our utility function to upload the avatar
+      const publicUrl = await uploadAvatar(file, user.id);
 
-      if (uploadError) throw uploadError
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath)
+      // Update the profile in the database
+      await updateUserAvatar(user.id, publicUrl);
 
       // Update user metadata
       const { error: updateError } = await supabase.auth.updateUser({
         data: { avatar_url: publicUrl }
-      })
+      });
 
-      if (updateError) throw updateError
+      if (updateError) throw updateError;
+
+      // Update local state
+      setAvatarUrl(publicUrl);
 
       toast({
         title: 'Success',
         description: 'Profile picture updated successfully',
-      })
+      });
     } catch (error) {
+      console.error('Avatar upload error:', error);
       toast({
         variant: 'destructive',
         title: 'Error',
         description: 'Failed to update profile picture',
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container max-w-4xl py-8">
@@ -169,18 +204,16 @@ export default function ProfilePage() {
               {/* Profile Picture */}
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center overflow-hidden relative">
-                    {user?.user_metadata?.avatar_url ? (
-                      <Image
-                        src={user.user_metadata.avatar_url}
-                        alt="Profile"
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <User className="w-10 h-10 text-muted-foreground" />
-                    )}
-                  </div>
+                  <UserAvatar
+                    user={{
+                      name: formData.name,
+                      email: formData.email,
+                      avatar: avatarUrl
+                    }}
+                    size="lg"
+                    shape="circle"
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                  />
                   <label htmlFor="avatar-upload">
                     <Button
                       className="absolute -bottom-2 -right-2 rounded-full cursor-pointer w-8 h-8 p-0"
@@ -196,6 +229,7 @@ export default function ProfilePage() {
                     accept="image/*"
                     className="hidden"
                     onChange={handleAvatarUpdate}
+                    disabled={isLoading}
                   />
                 </div>
                 <div>

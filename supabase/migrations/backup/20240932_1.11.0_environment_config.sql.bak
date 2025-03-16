@@ -1,0 +1,293 @@
+-- 20240932_1.11.0_environment_config.sql
+-- Migration file to add environment-specific configuration system
+
+-- Create environment configuration schema
+CREATE SCHEMA IF NOT EXISTS env_config;
+
+-- Create configuration table
+CREATE TABLE IF NOT EXISTS env_config.settings (
+    id SERIAL PRIMARY KEY,
+    setting_key TEXT NOT NULL,
+    setting_value JSONB NOT NULL,
+    description TEXT,
+    environment TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (setting_key, environment)
+);
+
+COMMENT ON TABLE env_config.settings IS 'Environment-specific configuration settings';
+COMMENT ON COLUMN env_config.settings.setting_key IS 'Unique identifier for this setting';
+COMMENT ON COLUMN env_config.settings.setting_value IS 'Value of the setting stored as JSONB for flexibility';
+COMMENT ON COLUMN env_config.settings.environment IS 'Environment this setting applies to (e.g., development, staging, production)';
+
+-- Create function to get current environment
+CREATE OR REPLACE FUNCTION env_config.get_environment() 
+RETURNS TEXT AS $$
+DECLARE
+    current_env TEXT;
+BEGIN
+    -- Try to get environment from app.environment setting
+    BEGIN
+        current_env := current_setting('app.environment', TRUE);
+    EXCEPTION WHEN OTHERS THEN
+        current_env := NULL;
+    END;
+    
+    -- Default to 'development' if not set
+    IF current_env IS NULL THEN
+        current_env := 'development';
+    END IF;
+    
+    RETURN current_env;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create function to get a configuration value
+CREATE OR REPLACE FUNCTION env_config.get_setting(
+    p_setting_key TEXT,
+    p_default_value JSONB DEFAULT NULL
+) 
+RETURNS JSONB AS $$
+DECLARE
+    v_setting_value JSONB;
+    v_environment TEXT;
+BEGIN
+    -- Get current environment
+    v_environment := env_config.get_environment();
+    
+    -- First try to get environment-specific setting
+    SELECT setting_value INTO v_setting_value
+    FROM env_config.settings
+    WHERE setting_key = p_setting_key 
+      AND environment = v_environment
+      AND is_active = TRUE;
+    
+    -- If not found, try to get default setting (common)
+    IF v_setting_value IS NULL THEN
+        SELECT setting_value INTO v_setting_value
+        FROM env_config.settings
+        WHERE setting_key = p_setting_key 
+          AND environment = 'common'
+          AND is_active = TRUE;
+    END IF;
+    
+    -- If still not found, return default value
+    IF v_setting_value IS NULL THEN
+        RETURN p_default_value;
+    END IF;
+    
+    RETURN v_setting_value;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create function to set a configuration value
+CREATE OR REPLACE FUNCTION env_config.set_setting(
+    p_setting_key TEXT,
+    p_setting_value JSONB,
+    p_description TEXT DEFAULT NULL,
+    p_environment TEXT DEFAULT NULL
+) 
+RETURNS BOOLEAN AS $$
+DECLARE
+    v_environment TEXT;
+BEGIN
+    -- If environment not specified, use current environment
+    IF p_environment IS NULL THEN
+        v_environment := env_config.get_environment();
+    ELSE
+        v_environment := p_environment;
+    END IF;
+    
+    -- Insert or update setting
+    INSERT INTO env_config.settings (
+        setting_key,
+        setting_value,
+        description,
+        environment,
+        updated_at
+    ) VALUES (
+        p_setting_key,
+        p_setting_value,
+        p_description,
+        v_environment,
+        now()
+    )
+    ON CONFLICT (setting_key, environment) 
+    DO UPDATE SET
+        setting_value = p_setting_value,
+        description = COALESCE(p_description, env_config.settings.description),
+        is_active = TRUE,
+        updated_at = now();
+    
+    RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create function to apply environment-specific initialization
+CREATE OR REPLACE FUNCTION env_config.apply_environment_config() 
+RETURNS VOID AS $$
+DECLARE
+    v_environment TEXT;
+BEGIN
+    -- Get current environment
+    v_environment := env_config.get_environment();
+    
+    -- Log the current environment
+    RAISE NOTICE 'Applying configuration for environment: %', v_environment;
+    
+    -- Apply environment-specific configuration
+    CASE v_environment
+        WHEN 'development' THEN
+            -- Development environment settings
+            PERFORM set_config('log_statement', 'all', FALSE);
+            PERFORM set_config('log_min_duration_statement', '0', FALSE);
+            PERFORM set_config('log_connections', 'on', FALSE);
+            
+        WHEN 'testing' THEN
+            -- Testing environment settings
+            PERFORM set_config('log_statement', 'mod', FALSE);
+            
+        WHEN 'staging' THEN
+            -- Staging environment settings
+            PERFORM set_config('log_min_duration_statement', '100', FALSE);
+            
+        WHEN 'production' THEN
+            -- Production environment settings
+            PERFORM set_config('log_min_duration_statement', '1000', FALSE);
+            
+        ELSE
+            RAISE NOTICE 'Unknown environment: %', v_environment;
+    END CASE;
+    
+    -- Apply common settings from the database
+    DECLARE
+        v_setting RECORD;
+    BEGIN
+        FOR v_setting IN 
+            SELECT setting_key, setting_value 
+            FROM env_config.settings 
+            WHERE environment = 'common'
+              AND is_active = TRUE
+        LOOP
+            -- Process common settings based on key
+            CASE v_setting.setting_key
+                WHEN 'worker_processes' THEN
+                    PERFORM set_config('max_worker_processes', v_setting.setting_value->>'value', FALSE);
+                    
+                WHEN 'statement_timeout' THEN
+                    PERFORM set_config('statement_timeout', v_setting.setting_value->>'value', FALSE);
+                    
+                WHEN 'session_timeout' THEN
+                    PERFORM set_config('idle_in_transaction_session_timeout', v_setting.setting_value->>'value', FALSE);
+                    
+                ELSE
+                    -- Skip unknown settings
+                    RAISE NOTICE 'Skipping unknown common setting: %', v_setting.setting_key;
+            END CASE;
+        END LOOP;
+    END;
+    
+    -- Apply environment-specific settings from the database
+    DECLARE
+        v_env_setting RECORD;
+    BEGIN
+        FOR v_env_setting IN 
+            SELECT setting_key, setting_value 
+            FROM env_config.settings 
+            WHERE environment = v_environment
+              AND is_active = TRUE
+        LOOP
+            -- Process environment-specific settings
+            CASE v_env_setting.setting_key
+                WHEN 'worker_processes' THEN
+                    PERFORM set_config('max_worker_processes', v_env_setting.setting_value->>'value', FALSE);
+                    
+                WHEN 'statement_timeout' THEN
+                    PERFORM set_config('statement_timeout', v_env_setting.setting_value->>'value', FALSE);
+                    
+                WHEN 'session_timeout' THEN
+                    PERFORM set_config('idle_in_transaction_session_timeout', v_env_setting.setting_value->>'value', FALSE);
+                    
+                WHEN 'feature_flags' THEN
+                    -- Feature flags can be processed here if needed
+                    RAISE NOTICE 'Applied feature flags for environment: %', v_environment;
+                    
+                ELSE
+                    -- Skip unknown settings
+                    RAISE NOTICE 'Skipping unknown environment setting: %', v_env_setting.setting_key;
+            END CASE;
+        END LOOP;
+    END;
+    
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Insert default settings
+INSERT INTO env_config.settings (setting_key, setting_value, description, environment)
+VALUES
+-- Common settings (applied to all environments)
+('worker_processes', '{"value": "4", "description": "Number of worker processes"}', 'Maximum worker processes', 'common'),
+('statement_timeout', '{"value": "30000", "description": "Statement timeout in milliseconds"}', 'SQL statement timeout', 'common'),
+('session_timeout', '{"value": "60000", "description": "Session timeout in milliseconds"}', 'Idle session timeout', 'common'),
+
+-- Development environment
+('feature_flags', '{"debug_mode": true, "beta_features": true, "extended_logging": true}', 'Feature flags for development', 'development'),
+('statement_timeout', '{"value": "60000", "description": "Extended timeout for development"}', 'Extended SQL timeout for development', 'development'),
+('log_level', '{"value": "debug", "description": "Verbose logging for development"}', 'Logging level for development', 'development'),
+
+-- Testing environment 
+('feature_flags', '{"debug_mode": true, "beta_features": true, "extended_logging": true}', 'Feature flags for testing', 'testing'),
+('test_data', '{"generate": true, "seed": 12345}', 'Test data generation settings', 'testing'),
+
+-- Staging environment
+('feature_flags', '{"debug_mode": false, "beta_features": true, "extended_logging": true}', 'Feature flags for staging', 'staging'),
+('performance_tuning', '{"max_connections": 100, "shared_buffers": "1GB"}', 'Performance settings for staging', 'staging'),
+
+-- Production environment
+('feature_flags', '{"debug_mode": false, "beta_features": false, "extended_logging": false}', 'Feature flags for production', 'production'),
+('performance_tuning', '{"max_connections": 200, "shared_buffers": "4GB"}', 'Performance settings for production', 'production'),
+('security_settings', '{"require_ssl": true, "password_strength": "high"}', 'Security settings for production', 'production')
+ON CONFLICT (setting_key, environment) DO NOTHING;
+
+-- Create a function to set the environment
+CREATE OR REPLACE FUNCTION env_config.set_environment(p_environment TEXT)
+RETURNS VOID AS $$
+BEGIN
+    -- Set the environment
+    PERFORM set_config('app.environment', p_environment, FALSE);
+    
+    -- Apply environment-specific configuration
+    PERFORM env_config.apply_environment_config();
+    
+    RAISE NOTICE 'Environment set to: %', p_environment;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Register this migration
+SELECT migration_meta.register_migration(
+    '1.11.0',
+    'environment_config',
+    'Add environment-specific configuration system'
+);
+
+-- Register a rollback for this migration
+SELECT migration_meta.register_rollback(
+    '1.11.0',
+    'environment_config',
+    $ROLLBACK$
+    -- Drop the environment configuration functions
+    DROP FUNCTION IF EXISTS env_config.set_environment;
+    DROP FUNCTION IF EXISTS env_config.apply_environment_config;
+    DROP FUNCTION IF EXISTS env_config.set_setting;
+    DROP FUNCTION IF EXISTS env_config.get_setting;
+    DROP FUNCTION IF EXISTS env_config.get_environment;
+    
+    -- Drop the configuration table
+    DROP TABLE IF EXISTS env_config.settings;
+    
+    -- Drop the schema
+    DROP SCHEMA IF EXISTS env_config;
+    $ROLLBACK$
+); 

@@ -1,0 +1,351 @@
+-- 20240935_1.14.0_fix_admin_column_references.sql
+-- Migration to fix issues with is_admin column references in policies
+
+-- Wrap in a transaction for atomic execution
+BEGIN;
+
+-- Track migration execution time
+DO $$
+DECLARE
+    migration_id INTEGER;
+    start_time TIMESTAMPTZ;
+    end_time TIMESTAMPTZ;
+    execution_time_ms INTEGER;
+BEGIN
+    -- Record start time
+    start_time := clock_timestamp();
+    
+    -- Register migration
+    SELECT migration_meta.register_migration(
+        '1.14.0',
+        'fix_admin_column_references',
+        'Fix is_admin column references in policies and create proper is_admin function'
+    ) INTO migration_id;
+    
+    -- Log the start of the process
+    PERFORM migration_meta.log_migration(
+        migration_id, 
+        'INFO', 
+        'Starting migration 1.14.0_fix_admin_column_references'
+    );
+
+    -- Check profiles table for is_admin column
+    DO $PROFILES$
+    BEGIN
+        -- Make sure profiles table exists
+        IF NOT EXISTS (
+            SELECT 1 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = 'profiles'
+        ) THEN
+            -- Create profiles table if it doesn't exist
+            CREATE TABLE public.profiles (
+                id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+                username TEXT UNIQUE,
+                full_name TEXT,
+                avatar_url TEXT,
+                website TEXT,
+                bio TEXT,
+                is_admin BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMPTZ DEFAULT now(),
+                updated_at TIMESTAMPTZ DEFAULT now()
+            );
+            
+            -- Enable RLS
+            ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+            
+            -- Drop existing policies if they exist
+            DROP POLICY IF EXISTS "Users can view all profiles" ON public.profiles;
+            DROP POLICY IF EXISTS "Users can update only their own profile" ON public.profiles;
+            DROP POLICY IF EXISTS "Users can insert only their own profile" ON public.profiles;
+            
+            -- Create policies
+            CREATE POLICY "Users can view all profiles" 
+            ON public.profiles FOR SELECT 
+            TO authenticated 
+            USING (true);
+            
+            CREATE POLICY "Users can update only their own profile" 
+            ON public.profiles FOR UPDATE 
+            TO authenticated 
+            USING (id = auth.uid());
+            
+            CREATE POLICY "Users can insert only their own profile" 
+            ON public.profiles FOR INSERT 
+            TO authenticated 
+            WITH CHECK (id = auth.uid());
+            
+            PERFORM migration_meta.log_migration(
+                migration_id, 
+                'INFO', 
+                'Created profiles table with is_admin column'
+            );
+        ELSE
+            -- Check if is_admin column exists
+            IF NOT EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_schema = 'public' AND table_name = 'profiles' AND column_name = 'is_admin'
+            ) THEN
+                -- Add is_admin column if it doesn't exist
+                ALTER TABLE public.profiles ADD COLUMN is_admin BOOLEAN DEFAULT FALSE;
+                
+                PERFORM migration_meta.log_migration(
+                    migration_id, 
+                    'INFO', 
+                    'Added is_admin column to existing profiles table'
+                );
+            ELSE
+                PERFORM migration_meta.log_migration(
+                    migration_id, 
+                    'INFO', 
+                    'is_admin column already exists in profiles table'
+                );
+            END IF;
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        PERFORM migration_meta.log_migration(
+            migration_id, 
+            'ERROR', 
+            'Error fixing profiles table: ' || SQLERRM
+        );
+        RAISE;
+    END $PROFILES$;
+
+    -- Create admin check function to use in policies
+    CREATE OR REPLACE FUNCTION public.is_admin()
+    RETURNS BOOLEAN AS $$
+    DECLARE
+        is_admin BOOLEAN;
+    BEGIN
+        -- Check if the current user has admin privileges
+        SELECT p.is_admin INTO is_admin
+        FROM public.profiles p
+        WHERE p.id = auth.uid();
+        
+        -- Return false if no profile found or not admin
+        RETURN COALESCE(is_admin, false);
+    END;
+    $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+    PERFORM migration_meta.log_migration(
+        migration_id, 
+        'INFO', 
+        'Created is_admin() helper function'
+    );
+
+    -- Fix policies in agents table
+    DO $AGENTS$
+    BEGIN
+        IF EXISTS (
+            SELECT 1 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = 'agents'
+        ) THEN
+            -- Drop existing policies for agents table
+            DROP POLICY IF EXISTS "Agents are viewable by authenticated users" ON public.agents;
+            
+            -- Create policy using is_admin() function
+            CREATE POLICY "Agents are viewable by authenticated users" 
+            ON public.agents FOR SELECT 
+            TO authenticated 
+            USING (true);
+            
+            PERFORM migration_meta.log_migration(
+                migration_id, 
+                'INFO', 
+                'Fixed policy for agents table'
+            );
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        PERFORM migration_meta.log_migration(
+            migration_id, 
+            'WARNING', 
+            'Error fixing agents table policy: ' || SQLERRM
+        );
+    END $AGENTS$;
+
+    -- Fix policies in agent_executions table
+    DO $EXECUTIONS$
+    BEGIN
+        IF EXISTS (
+            SELECT 1 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = 'agent_executions'
+        ) THEN
+            -- Drop existing policies
+            DROP POLICY IF EXISTS "Users can view their own agent executions" ON public.agent_executions;
+            
+            -- Create policy using is_admin() function instead of direct column reference
+            CREATE POLICY "Users can view their own agent executions" 
+            ON public.agent_executions FOR SELECT 
+            TO authenticated 
+            USING (user_id = auth.uid() OR public.is_admin());
+            
+            PERFORM migration_meta.log_migration(
+                migration_id, 
+                'INFO', 
+                'Fixed policy for agent_executions table'
+            );
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        PERFORM migration_meta.log_migration(
+            migration_id, 
+            'WARNING', 
+            'Error fixing agent_executions table policy: ' || SQLERRM
+        );
+    END $EXECUTIONS$;
+
+    -- Fix policies in agent_memory table
+    DO $MEMORY$
+    BEGIN
+        IF EXISTS (
+            SELECT 1 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = 'agent_memory'
+        ) THEN
+            -- Drop existing policies
+            DROP POLICY IF EXISTS "Users can access their own agent memory" ON public.agent_memory;
+            
+            -- Create policy using is_admin() function
+            CREATE POLICY "Users can access their own agent memory" 
+            ON public.agent_memory FOR SELECT 
+            TO authenticated 
+            USING (
+                EXISTS (
+                    SELECT 1 FROM public.agent_executions 
+                    WHERE agent_executions.id = agent_memory.execution_id 
+                    AND (agent_executions.user_id = auth.uid() OR public.is_admin())
+                )
+            );
+            
+            PERFORM migration_meta.log_migration(
+                migration_id, 
+                'INFO', 
+                'Fixed policy for agent_memory table'
+            );
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        PERFORM migration_meta.log_migration(
+            migration_id, 
+            'WARNING', 
+            'Error fixing agent_memory table policy: ' || SQLERRM
+        );
+    END $MEMORY$;
+
+    -- Fix policies in agent_feedback table
+    DO $FEEDBACK$
+    BEGIN
+        IF EXISTS (
+            SELECT 1 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' AND table_name = 'agent_feedback'
+        ) THEN
+            -- Drop existing policies
+            DROP POLICY IF EXISTS "Users can view their own feedback" ON public.agent_feedback;
+            
+            -- Create policy using is_admin() function
+            CREATE POLICY "Users can view their own feedback" 
+            ON public.agent_feedback FOR SELECT 
+            TO authenticated 
+            USING (user_id = auth.uid() OR public.is_admin());
+            
+            PERFORM migration_meta.log_migration(
+                migration_id, 
+                'INFO', 
+                'Fixed policy for agent_feedback table'
+            );
+        END IF;
+    EXCEPTION WHEN OTHERS THEN
+        PERFORM migration_meta.log_migration(
+            migration_id, 
+            'WARNING', 
+            'Error fixing agent_feedback table policy: ' || SQLERRM
+        );
+    END $FEEDBACK$;
+
+    -- Fix any other tables with policies that might reference is_admin
+    DO $OTHER$
+    DECLARE
+        table_record RECORD;
+    BEGIN
+        FOR table_record IN 
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name NOT IN ('profiles', 'agents', 'agent_executions', 'agent_memory', 'agent_feedback')
+            AND table_name NOT LIKE 'pg_%'
+        LOOP
+            -- Check if the table has any policies
+            IF EXISTS (
+                SELECT 1
+                FROM pg_policies
+                WHERE schemaname = 'public' AND tablename = table_record.table_name
+            ) THEN
+                PERFORM migration_meta.log_migration(
+                    migration_id,
+                    'INFO',
+                    'Checking policies for ' || table_record.table_name
+                );
+            END IF;
+        END LOOP;
+    EXCEPTION WHEN OTHERS THEN
+        PERFORM migration_meta.log_migration(
+            migration_id, 
+            'WARNING', 
+            'Error checking other tables: ' || SQLERRM
+        );
+    END $OTHER$;
+
+    -- Record execution time
+    end_time := clock_timestamp();
+    execution_time_ms := extract(epoch from (end_time - start_time)) * 1000;
+    
+    -- Update migration record with execution time
+    PERFORM migration_meta.register_migration(
+        '1.14.0',
+        'fix_admin_column_references',
+        'Fix is_admin column references in policies and create proper is_admin function',
+        TRUE,
+        execution_time_ms
+    );
+    
+    PERFORM migration_meta.log_migration(
+        migration_id, 
+        'INFO', 
+        'Completed migration 1.14.0_fix_admin_column_references in ' || execution_time_ms || 'ms'
+    );
+    
+EXCEPTION WHEN OTHERS THEN
+    -- Log error and mark migration as failed
+    PERFORM migration_meta.log_migration(
+        migration_id, 
+        'ERROR', 
+        'Migration failed: ' || SQLERRM
+    );
+    
+    PERFORM migration_meta.register_migration(
+        '1.14.0',
+        'fix_admin_column_references',
+        'Fix is_admin column references in policies and create proper is_admin function',
+        FALSE,
+        NULL
+    );
+    
+    RAISE;
+END $$;
+
+-- Register a rollback script
+SELECT migration_meta.register_rollback(
+    '1.14.0',
+    'fix_admin_column_references',
+    $ROLLBACK$
+    -- Drop the is_admin function if it was created
+    DROP FUNCTION IF EXISTS public.is_admin();
+    
+    -- Note: We don't drop the is_admin column since that could cause data loss
+    -- Instead, manual intervention would be needed to revert this change
+    $ROLLBACK$
+);
+
+COMMIT; 

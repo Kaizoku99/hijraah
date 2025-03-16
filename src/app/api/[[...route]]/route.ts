@@ -6,12 +6,24 @@ import { cors } from 'hono/cors';
 import { prettyJSON } from 'hono/pretty-json';
 import { timing } from 'hono/timing';
 import { cache } from 'hono/cache';
-import { supabase, getServiceClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
+import { rateLimit } from '@/lib/api/rate-limit';
+import type { Context } from 'hono';
+
+// Import route handlers
+// These will be created progressively as needed
+import { setupDocumentRoutes } from '@/lib/api/routes/documents';
+import { setupAuthRoutes } from '@/lib/api/routes/auth';
+import { setupProfileRoutes } from '@/lib/api/routes/profile';
+import { setupImmigrationRoutes } from '@/lib/api/routes/immigration';
+import { setupAdminRoutes } from '@/lib/api/routes/admin';
 
 // Create Hono app without basePath
 const app = new Hono();
 
+// -----------------------------
 // Middleware
+// -----------------------------
 app.use('*', logger());
 app.use('*', timing());
 app.use('*', prettyJSON());
@@ -27,6 +39,12 @@ app.use(
   }),
 );
 
+// Add rate limiting
+app.use('*', rateLimit({
+  max: 100,              // 100 requests
+  windowMs: 60 * 1000,   // per minute
+}));
+
 // Add caching for GET requests
 app.use(
   '*',
@@ -36,13 +54,16 @@ app.use(
   }),
 );
 
+// -----------------------------
 // Error handling middleware
+// -----------------------------
 app.onError((err, c) => {
   console.error(`[${c.req.method}] ${c.req.url}:`, err);
 
   if (err instanceof HTTPException) {
     return c.json(
       {
+        success: false,
         error: {
           message: err.message,
           status: err.status,
@@ -54,8 +75,11 @@ app.onError((err, c) => {
 
   return c.json(
     {
+      success: false,
       error: {
-        message: 'Internal Server Error',
+        message: process.env.NODE_ENV === 'development' 
+          ? err.message || 'Internal Server Error'
+          : 'Internal Server Error',
         status: 500,
       },
     },
@@ -63,16 +87,22 @@ app.onError((err, c) => {
   );
 });
 
-// Health check
+// -----------------------------
+// Health check & public routes
+// -----------------------------
 app.get('/', (c) => {
   return c.json({
+    success: true,
     status: 'ok',
     timestamp: new Date().toISOString(),
+    version: process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0',
   });
 });
 
-// Protected route middleware
-const auth = async (c: any, next: () => Promise<any>) => {
+// -----------------------------
+// Auth middleware
+// -----------------------------
+const auth = async (c: Context, next: () => Promise<any>) => {
   try {
     const authHeader = c.req.header('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
@@ -89,6 +119,7 @@ const auth = async (c: any, next: () => Promise<any>) => {
       throw new HTTPException(401, { message: 'Invalid token' });
     }
 
+    // Add user to context
     c.set('user', user);
     return next();
   } catch (error) {
@@ -96,29 +127,45 @@ const auth = async (c: any, next: () => Promise<any>) => {
   }
 };
 
-// API Routes
-const apiRoutes = app
-  .use('/protected/*', auth)
-  .get('/protected/user', async (c) => {
-    const user = c.get('user');
-    return c.json({ user });
-  })
-  .get('/protected/profile', async (c) => {
-    const user = c.get('user');
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+// Admin middleware - checks if user has admin role
+const adminOnly = async (c: Context, next: () => Promise<any>) => {
+  const user = c.get('user');
+  if (!user) {
+    throw new HTTPException(401, { message: 'Unauthorized' });
+  }
 
-    if (error) {
-      throw new HTTPException(500, { message: error.message });
-    }
+  // Get user roles from the database
+  // This will be implemented when user roles functionality is added
+  const isAdmin = true; // Placeholder - will be replaced with actual check
+  
+  if (!isAdmin) {
+    throw new HTTPException(403, { message: 'Forbidden: Admin access required' });
+  }
 
-    return c.json({ profile: data });
-  });
+  return next();
+};
 
+// -----------------------------
+// Configure routes
+// -----------------------------
+// Apply auth middleware to protected routes
+app.use('/protected/*', auth);
+app.use('/admin/*', auth, adminOnly);
+
+// Set up route groups
+setupAuthRoutes(app);
+setupDocumentRoutes(app);
+setupProfileRoutes(app);
+setupImmigrationRoutes(app);
+setupAdminRoutes(app);
+
+// -----------------------------
+// Export handlers
+// -----------------------------
 // Create handler for Next.js Edge API Routes
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 const handler = handle(app);
 
 // Export handlers for Next.js Edge API Routes

@@ -7,30 +7,30 @@ import {
   Info,
   X
 } from 'lucide-react';
-import * as React from "react"
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-// Toast types
-export type ToastVariant = 'default' | 'destructive' | 'success' | 'info';
+// Toast types for our custom implementation
+export type CustomToastVariant = 'default' | 'destructive' | 'success' | 'info';
 
-export interface ToastProps {
+export interface CustomToastProps {
   title: string;
   description?: string;
-  variant?: ToastVariant;
+  variant?: CustomToastVariant;
   duration?: number;
 }
 
 interface ToastContextValue {
-  toast: (props: ToastProps) => void;
-  toasts: (ToastProps & { id: string })[];
+  toast: (props: CustomToastProps) => void;
+  toasts: (CustomToastProps & { id: string })[];
   removeToast: (id: string) => void;
 }
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
+// Standard shadcn toast components
 const ToastProvider = ToastPrimitives.Provider
 
 const ToastViewport = React.forwardRef<
@@ -140,63 +140,10 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<(ToastProps & { id: string })[]>([]);
-
-  const toast = (props: ToastProps) => {
-    const id = Date.now().toString();
-    const newToast = { ...props, id };
-
-    setToasts((prevToasts) => [...prevToasts, newToast]);
-
-    // Auto-remove toast after duration
-    setTimeout(() => {
-      removeToast(id);
-    }, props.duration || 5000);
-  };
-
-  const removeToast = (id: string) => {
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
-  };
-
-  return (
-    <ToastContext.Provider value={{ toast, toasts, removeToast }}>
-      {children}
-      <ToastContainer />
-    </ToastContext.Provider>
-  );
-}
-
-export function useToast() {
-  const context = useContext(ToastContext);
-
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-
-  return context;
-}
-
-function ToastContainer() {
-  const { toasts, removeToast } = useToast();
-
-  return (
-    <div className="fixed bottom-0 right-0 p-4 space-y-2 z-50">
-      {toasts.map((toast) => (
-        <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
-      ))}
-    </div>
-  );
-}
-
-interface ToastComponentProps extends ToastProps {
-  onClose: () => void;
-  id: string;
-}
-
-function Toast({ title, description, variant = 'default', onClose }: ToastComponentProps) {
+// Rename our custom toast function to avoid conflicts
+function CustomToast({ title, description, variant = 'default', onClose }: CustomToastProps & { onClose: () => void }) {
   // Determine styles based on variant
-  const variantStyles = {
+  const variantStyles: Record<CustomToastVariant, string> = {
     default: 'bg-white border-gray-200',
     destructive: 'bg-red-50 border-red-200 text-red-700',
     success: 'bg-green-50 border-green-200 text-green-700',
@@ -230,6 +177,56 @@ function Toast({ title, description, variant = 'default', onClose }: ToastCompon
       >
         <X className="h-4 w-4" />
       </button>
+    </div>
+  );
+}
+
+// Rename our custom provider to avoid conflicts
+export function CustomToastProvider({ children }: { children: React.ReactNode }) {
+  const [toasts, setToasts] = useState<(CustomToastProps & { id: string })[]>([]);
+
+  const toast = (props: CustomToastProps) => {
+    const id = Date.now().toString();
+    const newToast = { ...props, id };
+
+    setToasts((prevToasts) => [...prevToasts, newToast]);
+
+    // Auto-remove toast after duration
+    setTimeout(() => {
+      removeToast(id);
+    }, props.duration || 5000);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
+  };
+
+  return (
+    <ToastContext.Provider value={{ toast, toasts, removeToast }}>
+      {children}
+      <CustomToastContainer />
+    </ToastContext.Provider>
+  );
+}
+
+export function useToast() {
+  const context = useContext(ToastContext);
+
+  if (!context) {
+    throw new Error('useToast must be used within a CustomToastProvider');
+  }
+
+  return context;
+}
+
+function CustomToastContainer() {
+  const { toasts, removeToast } = useToast();
+
+  return (
+    <div className="fixed bottom-0 right-0 p-4 space-y-2 z-50">
+      {toasts.map((toast) => (
+        <CustomToast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
+      ))}
     </div>
   );
 }

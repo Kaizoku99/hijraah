@@ -1,27 +1,45 @@
-import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
-export const env = createEnv({
-  server: {
-    OPENAI_API_KEY: z.string().min(1),
-    UPSTASH_REDIS_REST_URL: z.string().url(),
-    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
-    ANTHROPIC_API_KEY: z.string().optional(),
-    GOOGLE_AI_API_KEY: z.string().optional(),
-    DEEPSEEK_API_KEY: z.string().optional(),
-  },
-  client: {
-    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  },
-  runtimeEnv: {
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
-    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
-    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-    GOOGLE_AI_API_KEY: process.env.GOOGLE_AI_API_KEY,
-    DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  },
+/**
+ * Environment variable configuration and validation
+ */
+
+const envSchema = z.object({
+  // Supabase
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  
+  // App
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
+  
+  // Stripe
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  
+  // AI Services
+  OPENAI_API_KEY: z.string().optional(),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  GOOGLE_AI_API_KEY: z.string().optional(),
+  
+  // Analytics
+  NEXT_PUBLIC_ANALYTICS_ID: z.string().optional(),
 });
+
+/**
+ * Parse and validate environment variables
+ */
+const parseEnv = () => {
+  const parsed = envSchema.safeParse(process.env);
+  
+  if (!parsed.success) {
+    console.error(
+      "❌ Invalid environment variables:",
+      parsed.error.flatten().fieldErrors
+    );
+    throw new Error("Invalid environment variables");
+  }
+  
+  return parsed.data;
+};
+
+export const env = parseEnv();

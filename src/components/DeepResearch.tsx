@@ -1,179 +1,198 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useDeepResearch } from '@/lib/deep-research-context';
-import { Card } from '@/components/ui/card';
+import { useDeepResearch } from '@/hooks/useDeepResearch';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { X, ExternalLink, FileText } from 'lucide-react';
+import { X, ExternalLink, FileText, ChevronRight, Info, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger
+} from '@/components/ui/accordion';
 
 interface DeepResearchComponentProps {
     isFloating?: boolean;
-    onClose?: () => void;
 }
 
-export function DeepResearchComponent({
-    isFloating = true,
-    onClose
-}: DeepResearchComponentProps) {
-    const { state, setActive } = useDeepResearch();
+export function DeepResearchComponent({ isFloating = false }: DeepResearchComponentProps) {
+    const { state, isLoading } = useDeepResearch();
+    const [expanded, setExpanded] = useState(true);
 
-    if (!state.isActive || (state.activity.length === 0 && state.sources.length === 0)) {
-        return null;
+    const progress = state.totalExpectedSteps > 0
+        ? Math.floor((state.completedSteps / state.totalExpectedSteps) * 100)
+        : 0;
+
+    const sortedSources = [...state.sources].sort((a, b) =>
+        (b.relevance || 0) - (a.relevance || 0)
+    );
+
+    const latestActivity = state.activity[state.activity.length - 1];
+
+    // Auto-collapse floating panel when inactive
+    useEffect(() => {
+        if (isFloating && !state.activity.length && !state.sources.length) {
+            setExpanded(false);
+        }
+    }, [isFloating, state.activity.length, state.sources.length]);
+
+    if (!expanded && isFloating) {
+        return (
+            <Button
+                className="fixed bottom-20 right-4 z-50 shadow-lg"
+                onClick={() => setExpanded(true)}
+            >
+                Show Research
+            </Button>
+        );
     }
 
-    const progressPercentage = Math.round(
-        (state.completedSteps / state.totalExpectedSteps) * 100
-    );
-
-    const handleClose = () => {
-        if (onClose) {
-            onClose();
-        } else {
-            setActive(false);
-        }
-    };
-
-    const containerClassName = cn(
-        isFloating
-            ? "fixed right-4 top-20 z-50 w-80 bg-background border rounded-lg shadow-lg max-h-[80vh]"
-            : "w-full bg-background border rounded-lg",
-        "flex flex-col overflow-hidden"
-    );
-
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className={containerClassName}
-        >
-            <div className="flex items-center justify-between p-3 border-b">
-                <div className="flex items-center gap-2">
-                    <h3 className="font-medium">Deep Research</h3>
-                    {state.currentDepth > 0 && (
-                        <Badge variant="outline">
-                            Depth: {state.currentDepth}/{state.maxDepth}
-                        </Badge>
+        <Card className={isFloating
+            ? "fixed bottom-20 right-4 z-50 w-96 shadow-lg max-h-[70vh] flex flex-col"
+            : "w-full max-h-[600px] flex flex-col"
+        }>
+            <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg">Deep Research</CardTitle>
+                    {isFloating && (
+                        <Button variant="ghost" size="icon" onClick={() => setExpanded(false)}>
+                            <X className="h-4 w-4" />
+                        </Button>
                     )}
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleClose}
-                    className="h-8 w-8"
-                >
-                    <X className="h-4 w-4" />
-                </Button>
-            </div>
+                <CardDescription>
+                    {isLoading ? 'Researching...' : 'Web research results'}
+                </CardDescription>
 
-            {state.completedSteps > 0 && state.totalExpectedSteps > 0 && (
-                <div className="px-4 py-2">
-                    <div className="flex justify-between text-xs mb-1">
-                        <span>Research progress</span>
-                        <span>{progressPercentage}%</span>
+                {state.totalExpectedSteps > 0 && (
+                    <div className="mt-2">
+                        <div className="flex justify-between text-xs mb-1">
+                            <span>Progress</span>
+                            <span>{progress}%</span>
+                        </div>
+                        <Progress value={progress} />
                     </div>
-                    <Progress value={progressPercentage} className="h-2" />
-                </div>
-            )}
+                )}
+            </CardHeader>
 
-            <Tabs defaultValue="activity" className="flex-1">
-                <TabsList className="w-full rounded-none px-3 pt-2">
-                    <TabsTrigger value="activity" className="flex-1">
-                        Activity
-                    </TabsTrigger>
-                    <TabsTrigger value="sources" className="flex-1">
-                        Sources ({state.sources.length})
-                    </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="activity" className="mt-0 flex-1 p-0">
-                    <ScrollArea className="h-[50vh]">
-                        <div className="space-y-3 p-3">
-                            {[...state.activity].reverse().map((item, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex items-start gap-3"
-                                >
-                                    <div
-                                        className={cn(
-                                            'size-2 rounded-full shrink-0 mt-1.5',
-                                            item.status === 'pending' && 'bg-yellow-500',
-                                            item.status === 'complete' && 'bg-green-500',
-                                            item.status === 'error' && 'bg-red-500',
-                                        )}
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm break-words whitespace-pre-wrap">
-                                            {item.message}
-                                        </p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <p className="text-xs text-muted-foreground">
-                                                {new Date(item.timestamp).toLocaleTimeString()}
-                                            </p>
-                                            {item.depth && (
-                                                <Badge variant="outline" className="text-xs h-5">
-                                                    Depth {item.depth}
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+            <CardContent className="flex-1 overflow-hidden p-0">
+                <ScrollArea className="h-full px-4">
+                    {latestActivity && (
+                        <div className="mb-4 p-3 bg-muted rounded-md">
+                            <div className="flex items-center gap-2 mb-2">
+                                {latestActivity.status === 'complete' ? (
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                ) : latestActivity.status === 'error' ? (
+                                    <AlertCircle className="h-4 w-4 text-red-500" />
+                                ) : (
+                                    <Info className="h-4 w-4 text-blue-500" />
+                                )}
+                                <span className="font-medium text-sm">
+                                    {latestActivity.type === 'search' && 'Search'}
+                                    {latestActivity.type === 'extract' && 'Extract'}
+                                    {latestActivity.type === 'analyze' && 'Analysis'}
+                                    {(latestActivity.type === 'reasoning' ||
+                                        latestActivity.type === 'synthesis' ||
+                                        latestActivity.type === 'thought') && 'Analysis'}
+                                </span>
+                            </div>
+                            <p className="text-sm">{latestActivity.message}</p>
                         </div>
-                    </ScrollArea>
-                </TabsContent>
+                    )}
 
-                <TabsContent value="sources" className="mt-0 flex-1 p-0">
-                    <ScrollArea className="h-[50vh]">
-                        <div className="space-y-4 p-3">
-                            {state.sources.map((source, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex flex-col gap-1"
-                                >
-                                    <div className="flex items-start gap-2">
-                                        <FileText className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
-                                        <div className="flex-1 min-w-0">
-                                            <a
-                                                href={source.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-sm font-medium hover:underline break-words flex items-center gap-1"
-                                            >
-                                                {source.title}
-                                                <ExternalLink className="h-3 w-3 inline shrink-0" />
-                                            </a>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <div className="text-xs text-muted-foreground truncate">
-                                                    {new URL(source.url).hostname}
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    Relevance: {Math.round(source.relevance * 100)}%
-                                                </div>
+                    {sortedSources.length > 0 && (
+                        <>
+                            <h3 className="text-sm font-medium mb-2">Sources</h3>
+                            <Accordion type="multiple" className="w-full mb-4">
+                                {sortedSources.map((source, index) => (
+                                    <AccordionItem key={index} value={`source-${index}`}>
+                                        <AccordionTrigger className="py-2 text-sm">
+                                            <div className="flex items-center gap-2 text-left">
+                                                <span className="truncate">{source.title}</span>
+                                                {source.relevance !== undefined && (
+                                                    <Badge variant="secondary" className="ml-auto">
+                                                        {Math.round(source.relevance * 100)}%
+                                                    </Badge>
+                                                )}
                                             </div>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            {typeof source === 'object' &&
+                                                source !== null &&
+                                                'description' in source &&
+                                                typeof source.description === 'string' && (
+                                                    <p className="text-sm mb-2">{source.description}</p>
+                                                )}
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-xs text-muted-foreground truncate">
+                                                    {source.url}
+                                                </span>
+                                                <a
+                                                    href={source.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-1 text-xs text-primary"
+                                                >
+                                                    Visit <ExternalLink className="h-3 w-3" />
+                                                </a>
+                                            </div>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </>
+                    )}
 
-                            {state.sources.length === 0 && (
-                                <p className="text-sm text-muted-foreground text-center py-4">
-                                    No sources found yet...
-                                </p>
-                            )}
-                        </div>
-                    </ScrollArea>
-                </TabsContent>
-            </Tabs>
-        </motion.div>
+                    {state.activity.length > 1 && (
+                        <>
+                            <h3 className="text-sm font-medium mb-2">Activity Log</h3>
+                            <div className="space-y-2 mb-4">
+                                {state.activity.slice(0, -1).reverse().map((activity, index) => (
+                                    <div
+                                        key={index}
+                                        className="text-sm p-2 rounded border"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            {activity.status === 'complete' ? (
+                                                <CheckCircle className="h-3 w-3 text-green-500 shrink-0" />
+                                            ) : activity.status === 'error' ? (
+                                                <AlertCircle className="h-3 w-3 text-red-500 shrink-0" />
+                                            ) : (
+                                                <Info className="h-3 w-3 text-blue-500 shrink-0" />
+                                            )}
+                                            <span className="text-xs text-muted-foreground">
+                                                {new Date(activity.timestamp).toLocaleTimeString()}
+                                            </span>
+                                        </div>
+                                        <p className="mt-1 text-xs">{activity.message}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </ScrollArea>
+            </CardContent>
+
+            <CardFooter className="flex justify-end pt-2 pb-3">
+                <Button
+                    variant="secondary"
+                    size="sm"
+                    className="text-xs"
+                    onClick={() => {
+                        // Convert research to document
+                    }}
+                >
+                    Save as Document <ChevronRight className="ml-1 h-3 w-3" />
+                </Button>
+            </CardFooter>
+        </Card>
     );
 } 

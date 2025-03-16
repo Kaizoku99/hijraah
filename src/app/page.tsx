@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MessageSquare, Shield, Clock, CheckCircle, Globe, Compass, Search, User } from 'lucide-react';
+import { ArrowRight, MessageSquare, Shield, Clock, CheckCircle, Globe, Compass, Search, User, LineChart } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -40,6 +40,15 @@ export default function Home() {
                 <Button asChild size="lg" variant="outline" className="text-lg font-medium border-white text-white hover:bg-white/10 dark:border-blue-300 dark:text-blue-300 dark:hover:bg-blue-900/50 transition-all duration-200">
                   <Link href="/assessment" className="flex items-center">
                     Check Eligibility <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Added Dashboard link for existing users */}
+              <div className="mt-6 flex justify-start">
+                <Button asChild variant="link" className="text-blue-200 hover:text-white">
+                  <Link href="/dashboard" className="flex items-center">
+                    <LineChart className="mr-2 h-4 w-4" /> Existing users? Go to Dashboard
                   </Link>
                 </Button>
               </div>
@@ -227,6 +236,15 @@ export default function Home() {
             <Button asChild size="lg" variant="outline" className="text-lg font-medium border-2 border-white text-white bg-white/10 hover:bg-white/30 transition-all duration-200 shadow-md ring-1 ring-white/20">
               <Link href="/about" className="flex items-center">
                 Learn More
+              </Link>
+            </Button>
+          </div>
+
+          {/* Added Dashboard link for existing users */}
+          <div className="mt-6">
+            <Button asChild variant="link" className="text-blue-200 hover:text-white">
+              <Link href="/dashboard" className="flex items-center justify-center">
+                <LineChart className="mr-2 h-4 w-4" /> Already have an account? Go to Dashboard
               </Link>
             </Button>
           </div>

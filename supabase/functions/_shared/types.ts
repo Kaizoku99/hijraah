@@ -43,4 +43,20 @@ export interface ImmigrationRules {
 export interface ApiError {
   message: string;
   status?: number;
+}
+
+export interface RateLimitResult {
+  allowed: boolean;
+  limit: string;
+  current: number;
+  maximum: number;
+  resetAfter: number;
+}
+
+// Cache options interface
+export interface CacheOptions {
+  ttl?: number;           // Time to live in seconds
+  useMemory?: boolean;    // Whether to use memory cache
+  useDb?: boolean;        // Whether to use database cache
+  useKv?: boolean;        // Whether to use KV store cache
 } 

@@ -9,7 +9,7 @@ import {
 } from 'react'
 
 interface Activity {
-    type: 'search' | 'extract' | 'analyze' | 'error'
+    type: 'search' | 'extract' | 'analyze' | 'error' | 'synthesis' | 'reasoning' | 'thought'
     status: 'pending' | 'complete' | 'error'
     message: string
     timestamp: string
@@ -37,6 +37,7 @@ type DeepResearchAction =
     | { type: 'ADD_SOURCE'; payload: Source }
     | { type: 'INIT_PROGRESS'; payload: { maxDepth: number; totalSteps: number } }
     | { type: 'UPDATE_PROGRESS'; payload: { current: number; total: number } }
+    | { type: 'SET_DEPTH'; payload: { current: number; max: number } }
     | { type: 'CLEAR_STATE' }
 
 const initialState: DeepResearchState = {
@@ -75,6 +76,12 @@ function reducer(state: DeepResearchState, action: DeepResearchAction): DeepRese
                 completedSteps: action.payload.current,
                 totalExpectedSteps: action.payload.total,
             }
+        case 'SET_DEPTH':
+            return {
+                ...state,
+                currentDepth: action.payload.current,
+                maxDepth: action.payload.max,
+            }
         case 'CLEAR_STATE':
             return initialState
         default:
@@ -88,6 +95,7 @@ interface DeepResearchContextValue {
     addSource: (source: Source) => void
     initProgress: (maxDepth: number, totalSteps: number) => void
     updateProgress: (current: number, total: number) => void
+    setDepth: (current: number, max: number) => void
     clearState: () => void
 }
 
@@ -118,6 +126,13 @@ export function DeepResearchProvider({ children }: { children: ReactNode }) {
         })
     }, [])
 
+    const setDepth = useCallback((current: number, max: number) => {
+        dispatch({
+            type: 'SET_DEPTH',
+            payload: { current, max },
+        })
+    }, [])
+
     const clearState = useCallback(() => {
         dispatch({ type: 'CLEAR_STATE' })
     }, [])
@@ -130,6 +145,7 @@ export function DeepResearchProvider({ children }: { children: ReactNode }) {
                 addSource,
                 initProgress,
                 updateProgress,
+                setDepth,
                 clearState,
             }}
         >

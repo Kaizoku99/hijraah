@@ -17,15 +17,22 @@ import { Spinner } from '../spinner'
 import { toast } from 'sonner'
 
 interface SessionManagerProps {
-  onSessionSelect: (session: ChatSession) => void
-  onMessageReceived: (message: ChatMessage) => void
+  currentSessionId?: string | null;
+  onSessionChange?: (sessionId: string) => void;
+  onNewSession?: () => void;
+  onMessageReceived?: (message: ChatMessage) => void;
 }
 
-export function SessionManager({ onSessionSelect, onMessageReceived }: SessionManagerProps) {
+export function SessionManager({
+  currentSessionId,
+  onSessionChange,
+  onNewSession,
+  onMessageReceived
+}: SessionManagerProps) {
   const { user } = useAuth()
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null)
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(currentSessionId || null)
 
   useEffect(() => {
     if (!user) return
@@ -35,10 +42,10 @@ export function SessionManager({ onSessionSelect, onMessageReceived }: SessionMa
         const sessions = await getChatSessions(user.id)
         setSessions(sessions)
 
-        // Select the first session if exists
-        if (sessions.length > 0) {
+        // Select the first session if exists and no current session is selected
+        if (sessions.length > 0 && !selectedSessionId) {
           setSelectedSessionId(sessions[0].id)
-          onSessionSelect(sessions[0])
+          onSessionChange?.(sessions[0].id)
         }
       } catch (error) {
         console.error('Error loading sessions:', error)
@@ -49,10 +56,17 @@ export function SessionManager({ onSessionSelect, onMessageReceived }: SessionMa
     }
 
     loadSessions()
-  }, [user, onSessionSelect])
+  }, [user, onSessionChange, selectedSessionId])
+
+  // Update selected session when currentSessionId changes
+  useEffect(() => {
+    if (currentSessionId && currentSessionId !== selectedSessionId) {
+      setSelectedSessionId(currentSessionId)
+    }
+  }, [currentSessionId])
 
   useEffect(() => {
-    if (!selectedSessionId) return
+    if (!selectedSessionId || !onMessageReceived) return
 
     const subscription = subscribeToChatMessages(selectedSessionId, (message) => {
       onMessageReceived(message)
@@ -67,10 +81,14 @@ export function SessionManager({ onSessionSelect, onMessageReceived }: SessionMa
     if (!user) return
 
     try {
-      const session = await createChatSession(user.id)
-      setSessions((prev) => [session, ...prev])
-      setSelectedSessionId(session.id)
-      onSessionSelect(session)
+      if (onNewSession) {
+        onNewSession()
+      } else {
+        const session = await createChatSession(user.id)
+        setSessions((prev) => [session, ...prev])
+        setSelectedSessionId(session.id)
+        onSessionChange?.(session.id)
+      }
     } catch (error) {
       console.error('Error creating session:', error)
       toast.error('Failed to create new chat session')
@@ -79,7 +97,7 @@ export function SessionManager({ onSessionSelect, onMessageReceived }: SessionMa
 
   const handleSelectSession = async (session: ChatSession) => {
     setSelectedSessionId(session.id)
-    onSessionSelect(session)
+    onSessionChange?.(session.id)
 
     try {
       const messages = await getChatMessages(session.id)

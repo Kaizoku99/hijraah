@@ -24,10 +24,12 @@ import {
   Calendar
 } from "lucide-react"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 import { NavUser } from "@/components/nav-user"
 import { useAuth } from "@/contexts/auth"
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { getUserAvatar } from '@/lib/avatar-utils'
 
 import {
   Sidebar,
@@ -190,6 +192,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open } = useSidebar();
   const { user } = useAuth();
   const { isAdmin } = useIsAdmin();
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
+    user?.user_metadata?.avatar_url
+  );
+
+  // Fetch user avatar if not present in metadata
+  useEffect(() => {
+    const fetchAvatar = async () => {
+      if (!user || avatarUrl) return;
+
+      try {
+        // Get avatar from profile or generate a default one
+        const url = await getUserAvatar(user.id);
+        setAvatarUrl(url);
+      } catch (error) {
+        console.error('Error fetching user avatar:', error);
+        // If error, use a default avatar
+        setAvatarUrl('/avatars/default-1.png');
+      }
+    };
+
+    fetchAvatar();
+  }, [user, avatarUrl]);
 
   // If sidebar is closed, return null to hide it completely
   if (!open) {
@@ -205,7 +229,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const userData = user ? {
     name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
     email: user.email || '',
-    avatar: user.user_metadata?.avatar_url || '/avatars/01.png'
+    avatar: avatarUrl || '/avatars/default-1.png'
   } : undefined;
 
   return (
@@ -237,7 +261,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {filteredNavMain.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
-                  <Link href={item.url} className="font-medium">
+                  <Link
+                    href={item.url}
+                    className="font-medium"
+                    {...(item.title === "Support" ? { "data-tour": "help" } : {})}
+                  >
                     {item.title}
                   </Link>
                 </SidebarMenuButton>
