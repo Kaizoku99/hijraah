@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Database } from '@/types/supabase'
+import type { Database } from '@/types/database'
 
 export type Document = Database['public']['Tables']['documents']['Row']
 export type DocumentInsert = Database['public']['Tables']['documents']['Insert']
@@ -102,3 +102,7 @@ export const documentsService = {
     if (error) throw error
   }
 } 
+
+// Export aliases for backward compatibility
+export const documentService = documentsService;
+export const DocumentService = documentsService; 

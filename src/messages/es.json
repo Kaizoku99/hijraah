@@ -1,0 +1,124 @@
+{
+    "common": {
+        "welcome": "Bienvenido a Hijraah",
+        "tagline": "Sueños locales, horizontes globales",
+        "login": "Iniciar sesión",
+        "signup": "Registrarse",
+        "logout": "Cerrar sesión",
+        "dashboard": "Panel de control",
+        "chat": "Chat",
+        "tools": "Herramientas",
+        "profile": "Perfil",
+        "settings": "Configuración",
+        "search": "Buscar",
+        "notifications": "Notificaciones",
+        "loading": "Cargando...",
+        "error": "Error",
+        "success": "Éxito",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "edit": "Editar",
+        "back": "Atrás",
+        "next": "Siguiente"
+    },
+    "home": {
+        "hero": {
+            "title": "Navega tu viaje de inmigración con guía de IA",
+            "subtitle": "Obtén asistencia de inmigración personalizada e instantánea impulsada por IA. Desde la evaluación de elegibilidad hasta la preparación de documentos, estamos aquí para ayudarte 24/7.",
+            "cta": "Comenzar",
+            "chat": "Iniciar chat"
+        },
+        "features": {
+            "title": "Por qué elegir Hijraah",
+            "items": {
+                "support": {
+                    "title": "Soporte IA 24/7",
+                    "description": "Obtén respuestas instantáneas a tus preguntas de inmigración en cualquier momento y lugar."
+                },
+                "guidance": {
+                    "title": "Guía experta",
+                    "description": "Recibe consejos precisos y actualizados sobre inmigración basados en pautas oficiales."
+                },
+                "tools": {
+                    "title": "Herramientas que ahorran tiempo",
+                    "description": "Simplifica tu proceso de solicitud con nuestra lista de verificación de documentos y planificador."
+                }
+            }
+        }
+    },
+    "auth": {
+        "login": {
+            "title": "Bienvenido de nuevo",
+            "subtitle": "Inicia sesión en tu cuenta",
+            "email": "Correo electrónico",
+            "password": "Contraseña",
+            "forgotPassword": "¿Olvidaste tu contraseña?",
+            "rememberMe": "Recordarme",
+            "submit": "Iniciar sesión",
+            "noAccount": "¿No tienes una cuenta?",
+            "signUp": "Registrarse"
+        },
+        "register": {
+            "title": "Crear cuenta",
+            "subtitle": "Únete a Hijraah hoy",
+            "name": "Nombre completo",
+            "email": "Correo electrónico",
+            "password": "Contraseña",
+            "confirmPassword": "Confirmar contraseña",
+            "terms": "Acepto los términos y condiciones",
+            "submit": "Crear cuenta",
+            "haveAccount": "¿Ya tienes una cuenta?",
+            "signIn": "Iniciar sesión"
+        }
+    },
+    "dashboard": {
+        "welcome": "Bienvenido, {{name}}",
+        "summary": {
+            "title": "Resumen",
+            "applications": "Solicitudes",
+            "documents": "Documentos",
+            "messages": "Mensajes"
+        },
+        "recentActivity": {
+            "title": "Actividad reciente",
+            "noActivity": "Sin actividad reciente"
+        }
+    },
+    "documents": {
+        "title": "Documentos",
+        "upload": {
+            "title": "Subir documento",
+            "dropzone": "Arrastra y suelta archivos aquí o haz clic para explorar",
+            "maxSize": "Tamaño máximo de archivo: {{size}}MB",
+            "allowedTypes": "Tipos de archivo permitidos: {{types}}"
+        },
+        "list": {
+            "empty": "No se encontraron documentos",
+            "search": "Buscar documentos",
+            "filter": "Filtrar por tipo"
+        },
+        "status": {
+            "pending": "Pendiente",
+            "approved": "Aprobado",
+            "rejected": "Rechazado"
+        }
+    },
+    "errors": {
+        "general": "Algo salió mal. Por favor, inténtalo de nuevo.",
+        "network": "Error de red. Por favor, verifica tu conexión.",
+        "notFound": "Página no encontrada",
+        "unauthorized": "Por favor, inicia sesión para continuar",
+        "forbidden": "No tienes permiso para acceder a este recurso"
+    },
+    "dates": {
+        "today": "Hoy",
+        "yesterday": "Ayer",
+        "tomorrow": "Mañana",
+        "format": {
+            "short": "DD/MM/YYYY",
+            "long": "D 'de' MMMM 'de' YYYY",
+            "time": "H:mm"
+        }
+    }
+}

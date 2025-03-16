@@ -9,7 +9,6 @@ import { Providers } from './providers'
 import { RootErrorBoundary } from '@/components/root-error-boundary'
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import { Toaster } from 'sonner'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 import { Search, Bell } from 'lucide-react'
@@ -28,31 +27,46 @@ import {
 import { useSearchContext } from '@/lib/contexts/search-context'
 import { SearchBar } from '@/components/ui/search-bar'
 import { NotificationButton } from '@/components/ui/notification-button'
+import Image from 'next/image'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Hijraah - Immigration Comparison',
+    default: 'Hijraah - Navigate Your Immigration Journey',
     template: '%s | Hijraah'
   },
-  description: 'Compare immigration policies across countries with AI-powered insights',
-  keywords: ['immigration', 'visa', 'comparison', 'countries', 'policies'],
+  metadataBase: new URL('https://hijraah.vercel.app'),
+  description: 'Navigate your immigration journey with AI guidance - Compare immigration policies across countries with intelligent insights',
+  keywords: ['immigration', 'visa', 'comparison', 'countries', 'policies', 'AI guidance', 'immigration journey'],
   authors: [{ name: 'Hijraah Team' }],
   creator: 'Hijraah',
+  icons: {
+    icon: '/Hijraah_logo.png',
+    apple: '/Hijraah_logo.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: 'https://hijraah.vercel.app',
     title: 'Hijraah - Immigration Comparison',
     description: 'Compare immigration policies across countries with AI-powered insights',
-    siteName: 'Hijraah'
+    siteName: 'Hijraah',
+    images: [
+      {
+        url: '/Hijraah_logo.png',
+        width: 800,
+        height: 800,
+        alt: 'Hijraah Logo'
+      }
+    ]
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Hijraah - Immigration Comparison',
     description: 'Compare immigration policies across countries with AI-powered insights',
-    creator: '@hijraah'
+    creator: '@hijraah',
+    images: ['/Hijraah_logo.png']
   },
   robots: {
     index: true,
@@ -89,12 +103,21 @@ export default function RootLayout({
             <SidebarProvider defaultOpen={true}>
               <AppSidebar />
               <SidebarInset className="flex flex-col min-h-screen w-full">
-                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-border bg-background/95 backdrop-blur-sm">
+                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-blue-800/20 bg-gradient-to-r from-blue-950/95 to-indigo-950/95 dark:from-blue-950/95 dark:to-indigo-950/95 backdrop-blur-sm">
                   <div className="flex items-center gap-2 px-4">
-                    <SidebarTrigger className="-ml-1">
+                    <SidebarTrigger className="-ml-1 text-blue-100">
                       <span className="sr-only">Toggle Sidebar</span>
                     </SidebarTrigger>
-                    <Separator orientation="vertical" className="shrink-0 bg-border w-[1px] mr-2 h-4" />
+                    <Separator orientation="vertical" className="shrink-0 bg-blue-700/30 w-[1px] mr-2 h-4" />
+                    <Image
+                      src="/Hijraah_logo.png"
+                      alt="Hijraah"
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 mr-2"
+                      priority
+                    />
+                    <span className="font-semibold text-lg hidden md:inline-block text-blue-100">Hijraah</span>
                   </div>
 
                   <div className="ml-auto flex items-center gap-4 px-4">
@@ -110,7 +133,6 @@ export default function RootLayout({
                 </main>
               </SidebarInset>
             </SidebarProvider>
-            <Toaster />
           </Providers>
         </RootErrorBoundary>
       </body>

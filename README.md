@@ -1,6 +1,65 @@
 # Hijraah Immigration Platform
 
-A comprehensive platform for immigration research and information processing with advanced features for performance, scalability, and usage management.
+Modern immigration processing and management platform built with Next.js, Supabase, and Shadcn UI.
+
+## Key Features
+
+- **User Authentication**: Secure login/registration using Supabase Auth
+- **Profile Management**: Complete user profile management for immigration applications
+- **Document Management**: Secure document upload, storage, and verification
+- **Case Tracking**: Real-time tracking of immigration applications and statuses
+- **AI Assistance**: AI-powered guidance and support throughout the immigration process
+- **Onboarding Experience**: Guided user onboarding with customized steps
+
+## Onboarding System
+
+The platform includes a comprehensive onboarding system designed to guide new users through the following steps:
+
+1. **Welcome**: Introduction to the platform
+2. **Profile Setup**: Collecting essential user information and immigration preferences
+3. **Feature Tour**: Showcasing key platform features
+4. **First Task**: Guiding users to create their first immigration case or upload documents
+5. **Resources**: Providing access to helpful immigration resources and guides
+
+### Onboarding Architecture
+
+- **Database Trigger**: Automatically creates onboarding records for new users upon signup
+- **API Endpoints**: Manages onboarding state and user progress
+- **React Components**: Renders appropriate onboarding UI based on user state
+- **Authentication Integration**: Initializes onboarding when users sign in
+
+## Technical Architecture
+
+- **Frontend**: Next.js 15 with TypeScript, React Server Components
+- **UI**: Shadcn UI components with Tailwind CSS
+- **Backend**: Supabase with PostgreSQL
+- **Authentication**: Supabase Auth
+- **API**: Next.js API routes with Supabase client
+- **Storage**: Supabase Storage for documents and files
+- **AI**: Integration with OpenAI and custom models
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables (see `.env.example`)
+4. Run database migrations: `npx supabase migration up`
+5. Start the development server: `npm run dev`
+
+## Database Setup
+
+The platform requires the following tables:
+
+- `auth.users`: Provided by Supabase Auth
+- `user_profiles`: User profile information
+- `user_onboarding`: Tracks onboarding progress
+- `cases`: Immigration cases
+- `documents`: User documents
+- `admin_users`: Administrative user access
+
+## Contributing
+
+Contributions are welcome! Please read the contribution guidelines before submitting pull requests.
 
 ## Advanced Platform Features
 

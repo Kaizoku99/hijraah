@@ -1,0 +1,340 @@
+-- Migration: 20240933_1.12.0_storage_policies_fix.sql
+-- Description: Fix storage policies and ensure proper bucket setup
+-- Author: System
+
+-- Begin transaction for atomicity
+BEGIN;
+
+-- Register migration in migration_meta if schema exists
+DO $$
+DECLARE
+    migration_id UUID;
+    start_time TIMESTAMPTZ;
+    end_time TIMESTAMPTZ;
+    execution_time_ms INT;
+BEGIN
+    -- Record start time
+    start_time := clock_timestamp();
+    
+    -- Check if migration_meta schema exists
+    IF EXISTS (
+        SELECT 1 
+        FROM pg_namespace 
+        WHERE nspname = 'migration_meta'
+    ) THEN
+        -- Register migration
+        SELECT migration_meta.register_migration(
+            '1.12.0',
+            'storage_policies_fix',
+            'Fix storage policies and bucket setup for avatars and other content'
+        ) INTO migration_id;
+        
+        -- Log migration start
+        PERFORM migration_meta.log_migration_event(
+            migration_id, 
+            'INFO', 
+            'Starting storage policies fix migration'
+        );
+    ELSE
+        RAISE NOTICE 'migration_meta schema not found, skipping registration';
+    END IF;
+END $$;
+
+-- Check if storage schema exists
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_namespace 
+        WHERE nspname = 'storage'
+    ) THEN
+        RAISE NOTICE 'Storage schema does not exist. Creating storage schema.';
+        CREATE SCHEMA IF NOT EXISTS storage;
+    END IF;
+END $$;
+
+-- Create storage.buckets table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_tables 
+        WHERE schemaname = 'storage' AND tablename = 'buckets'
+    ) THEN
+        RAISE NOTICE 'storage.buckets table does not exist. Creating table.';
+        
+        CREATE TABLE IF NOT EXISTS storage.buckets (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            owner UUID DEFAULT auth.uid(),
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            public BOOLEAN DEFAULT FALSE
+        );
+        
+        -- Add RLS
+        ALTER TABLE storage.buckets ENABLE ROW LEVEL SECURITY;
+    ELSE
+        RAISE NOTICE 'storage.buckets table already exists, skipping creation.';
+    END IF;
+END $$;
+
+-- Create storage.objects table if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_tables 
+        WHERE schemaname = 'storage' AND tablename = 'objects'
+    ) THEN
+        RAISE NOTICE 'storage.objects table does not exist. Creating table.';
+        
+        CREATE TABLE IF NOT EXISTS storage.objects (
+            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            bucket_id TEXT NOT NULL REFERENCES storage.buckets(id),
+            name TEXT NOT NULL,
+            owner UUID DEFAULT auth.uid(),
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW(),
+            last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+            metadata JSONB DEFAULT '{}'::JSONB,
+            path_tokens TEXT[] GENERATED ALWAYS AS (string_to_array(name, '/')) STORED
+        );
+        
+        -- Add RLS
+        ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+        
+        -- Add unique constraint
+        CREATE UNIQUE INDEX IF NOT EXISTS objects_bucket_id_name_unique_idx ON storage.objects (bucket_id, name);
+    ELSE
+        RAISE NOTICE 'storage.objects table already exists, skipping creation.';
+    END IF;
+END $$;
+
+-- Create avatars bucket if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM storage.buckets 
+        WHERE id = 'avatars'
+    ) THEN
+        INSERT INTO storage.buckets (id, name, public)
+        VALUES ('avatars', 'avatars', TRUE);
+        
+        RAISE NOTICE 'Created avatars bucket';
+    ELSE
+        RAISE NOTICE 'Avatars bucket already exists, skipping creation';
+    END IF;
+END $$;
+
+-- Fix storage policies - for buckets first
+DO $$
+BEGIN
+    -- Check and drop existing policies to ensure clean state
+    DROP POLICY IF EXISTS "Allow public read access" ON storage.buckets;
+    DROP POLICY IF EXISTS "Allow authenticated users to create buckets" ON storage.buckets;
+    DROP POLICY IF EXISTS "Allow authenticated users to update own buckets" ON storage.buckets;
+
+    -- Create policies for buckets with proper syntax
+    CREATE POLICY "Allow public read access" 
+    ON storage.buckets 
+    FOR SELECT 
+    USING (public = TRUE);
+    
+    CREATE POLICY "Allow authenticated users to create buckets" 
+    ON storage.buckets 
+    FOR INSERT 
+    TO authenticated 
+    WITH CHECK (TRUE);
+    
+    CREATE POLICY "Allow authenticated users to update own buckets" 
+    ON storage.buckets 
+    FOR UPDATE 
+    TO authenticated 
+    USING (owner = auth.uid());
+
+    RAISE NOTICE 'Storage bucket policies fixed';
+END $$;
+
+-- Fix storage policies - for objects next
+DO $$
+BEGIN
+    -- Check and drop existing policies to ensure clean state
+    DROP POLICY IF EXISTS "Allow public read access for avatar objects" ON storage.objects;
+    DROP POLICY IF EXISTS "Allow authenticated users to upload their own avatars" ON storage.objects;
+    DROP POLICY IF EXISTS "Allow authenticated users to update their own avatar objects" ON storage.objects;
+    DROP POLICY IF EXISTS "Allow owners to delete their own avatar objects" ON storage.objects;
+
+    -- Create policies for objects with proper syntax
+    CREATE POLICY "Allow public read access for avatar objects" 
+    ON storage.objects 
+    FOR SELECT 
+    USING (bucket_id = 'avatars');
+    
+    CREATE POLICY "Allow authenticated users to upload their own avatars" 
+    ON storage.objects 
+    FOR INSERT 
+    TO authenticated 
+    WITH CHECK (
+        bucket_id = 'avatars' AND 
+        (owner = auth.uid() OR owner IS NULL)
+    );
+    
+    CREATE POLICY "Allow authenticated users to update their own avatar objects" 
+    ON storage.objects 
+    FOR UPDATE 
+    TO authenticated 
+    USING (
+        bucket_id = 'avatars' AND 
+        owner = auth.uid()
+    );
+    
+    CREATE POLICY "Allow owners to delete their own avatar objects" 
+    ON storage.objects 
+    FOR DELETE 
+    TO authenticated 
+    USING (
+        bucket_id = 'avatars' AND 
+        owner = auth.uid()
+    );
+
+    RAISE NOTICE 'Storage object policies fixed';
+END $$;
+
+-- Create the create_storage_policy helper function if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_proc 
+        WHERE proname = 'create_storage_policy' AND pronamespace::regnamespace::text = 'public'
+    ) THEN
+        CREATE OR REPLACE FUNCTION public.create_storage_policy(
+            policy_name TEXT,
+            table_name TEXT,
+            schema_name TEXT DEFAULT 'storage',
+            operation TEXT DEFAULT 'ALL',
+            role_name TEXT DEFAULT 'authenticated',
+            using_expression TEXT DEFAULT 'TRUE',
+            check_expression TEXT DEFAULT NULL
+        ) RETURNS VOID AS $$
+        DECLARE
+            full_table_name TEXT;
+            policy_exists BOOLEAN;
+            sql_statement TEXT;
+        BEGIN
+            full_table_name := schema_name || '.' || table_name;
+            
+            -- Check if policy exists
+            SELECT EXISTS (
+                SELECT 1 
+                FROM pg_policies 
+                WHERE schemaname = schema_name 
+                AND tablename = table_name 
+                AND policyname = policy_name
+            ) INTO policy_exists;
+            
+            -- Drop policy if it exists
+            IF policy_exists THEN
+                EXECUTE 'DROP POLICY IF EXISTS "' || policy_name || '" ON ' || full_table_name;
+            END IF;
+            
+            -- Create new policy
+            sql_statement := 'CREATE POLICY "' || policy_name || '" ON ' || full_table_name || ' FOR ' || operation;
+            
+            -- Add role if specified
+            IF role_name != 'public' THEN
+                sql_statement := sql_statement || ' TO ' || role_name;
+            END IF;
+            
+            -- Add USING clause if applicable
+            IF using_expression IS NOT NULL AND operation != 'INSERT' THEN
+                sql_statement := sql_statement || ' USING (' || using_expression || ')';
+            END IF;
+            
+            -- Add WITH CHECK clause if applicable
+            IF check_expression IS NOT NULL AND (operation = 'INSERT' OR operation = 'UPDATE' OR operation = 'ALL') THEN
+                sql_statement := sql_statement || ' WITH CHECK (' || check_expression || ')';
+            END IF;
+            
+            -- Execute the SQL statement
+            EXECUTE sql_statement;
+        END;
+        $$ LANGUAGE plpgsql;
+        
+        COMMENT ON FUNCTION public.create_storage_policy IS 'Helper function for creating storage policies';
+        
+        RAISE NOTICE 'Created storage policy helper function';
+    END IF;
+END $$;
+
+-- Register the completion of the migration if migration_meta exists
+DO $$
+DECLARE
+    migration_id UUID;
+    start_time TIMESTAMPTZ;
+    end_time TIMESTAMPTZ;
+    execution_time_ms INT;
+BEGIN
+    -- Record end time
+    end_time := clock_timestamp();
+    
+    IF EXISTS (
+        SELECT 1 
+        FROM pg_namespace 
+        WHERE nspname = 'migration_meta'
+    ) THEN
+        -- Get the migration ID
+        SELECT id INTO migration_id
+        FROM migration_meta.migrations
+        WHERE version = '1.12.0' AND name = 'storage_policies_fix';
+        
+        IF migration_id IS NOT NULL THEN
+            -- Calculate execution time
+            execution_time_ms := EXTRACT(EPOCH FROM (end_time - start_time)) * 1000;
+            
+            -- Log completion
+            PERFORM migration_meta.log_migration_event(
+                migration_id, 
+                'INFO', 
+                'Completed storage policies fix in ' || execution_time_ms || 'ms'
+            );
+            
+            -- Mark migration as successful
+            UPDATE migration_meta.migrations
+            SET 
+                completed_at = end_time,
+                success = TRUE,
+                execution_time_ms = execution_time_ms
+            WHERE id = migration_id;
+        END IF;
+    END IF;
+END $$;
+
+-- Register rollback
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 
+        FROM pg_proc 
+        WHERE proname = 'register_rollback' AND pronamespace::regnamespace::text = 'migration_meta'
+    ) THEN
+        PERFORM migration_meta.register_rollback(
+            '1.12.0',
+            'storage_policies_fix',
+            $$
+            -- Drop policies (but not the tables/buckets themselves)
+            DROP POLICY IF EXISTS "Allow public read access" ON storage.buckets;
+            DROP POLICY IF EXISTS "Allow authenticated users to create buckets" ON storage.buckets;
+            DROP POLICY IF EXISTS "Allow authenticated users to update own buckets" ON storage.buckets;
+            DROP POLICY IF EXISTS "Allow public read access for avatar objects" ON storage.objects;
+            DROP POLICY IF EXISTS "Allow authenticated users to upload their own avatars" ON storage.objects;
+            DROP POLICY IF EXISTS "Allow authenticated users to update their own avatar objects" ON storage.objects;
+            DROP POLICY IF EXISTS "Allow owners to delete their own avatar objects" ON storage.objects;
+            $$
+        );
+    END IF;
+END $$;
+
+COMMIT; 

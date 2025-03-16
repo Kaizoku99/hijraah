@@ -13,6 +13,7 @@ import {
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from 'ai';
+import { listFineTunedModels } from './fine-tuning/fine-tuning-service';
 
 // Import fireworks SDK conditionally to avoid requiring it when not in use
 let fireworks: any;
@@ -24,7 +25,7 @@ try {
 }
 
 // Original types preserved for backward compatibility
-export type AIModel = 'gpt-4' | 'gemini-pro' | 'claude-3' | 'deepseek-chat';
+export type AIModel = 'gpt-4' | 'gemini-pro' | 'claude-3' | 'deepseek-chat' | 'immigration-fine-tuned';
 
 interface AIModelConfig {
   openaiKey?: string;
@@ -47,6 +48,8 @@ export interface Model {
   apiIdentifier: string;
   description: string;
   provider?: string;
+  category?: string;  // New field for fine-tuned model category
+  isFineTuned?: boolean; // Flag to identify fine-tuned models
 }
 
 // Chat models available for conversation
@@ -127,6 +130,58 @@ export const reasoningModels: Array<Model> = [
   }
 ];
 
+// New category for immigration-specific fine-tuned models
+export const fineTunedModels: Array<Model> = [];
+
+// Function to load fine-tuned models from the database
+export async function loadFineTunedModels() {
+  try {
+    const dbModels = await listFineTunedModels();
+    
+    // Reset the array
+    fineTunedModels.length = 0;
+    
+    // Add all fine-tuned models to the array
+    dbModels.forEach(model => {
+      if (model.fine_tuned_model) {
+        fineTunedModels.push({
+          id: model.fine_tuned_model,
+          name: `Immigration (${model.category || 'General'})`,
+          apiIdentifier: model.fine_tuned_model,
+          description: `Fine-tuned model for ${model.category || 'general'} immigration assistance`,
+          provider: 'openai',
+          category: model.category || 'general',
+          isFineTuned: true
+        });
+      }
+    });
+    
+    // Also update the custom provider
+    updateCustomProviderWithFineTunedModels();
+    
+    return fineTunedModels;
+  } catch (error) {
+    console.error('Error loading fine-tuned models:', error);
+    return [];
+  }
+}
+
+// Function to update the custom provider with fine-tuned models
+function updateCustomProviderWithFineTunedModels() {
+  // Create a new provider with updated models
+  // This approach avoids direct modification of the provider properties
+  fineTunedModels.forEach(model => {
+    // Add the model using the correct API
+    // @ts-ignore - We need to dynamically register models
+    customAIProvider.languageModel(model.id, openai(model.apiIdentifier));
+  });
+}
+
+// Get all available models including fine-tuned ones
+export function getAllAvailableModels(): Model[] {
+  return [...models, ...fineTunedModels];
+}
+
 // Default models to use if none specified
 export const DEFAULT_MODEL_NAME = 'gpt-4o-mini';
 export const DEFAULT_REASONING_MODEL_NAME = 'gpt-4-turbo';
@@ -145,6 +200,7 @@ export const customAIProvider = customProvider({
     'claude-3-sonnet': anthropic('claude-3-sonnet'),
     'gemini-pro': google('gemini-pro'),
     'deepseek-coder': fireworks ? fireworks('accounts/fireworks/models/deepseek-coder') : null,
+    // Fine-tuned models will be added dynamically
   },
   imageModels: {
     'dall-e-3': openai.image('dall-e-3'),
@@ -197,9 +253,21 @@ export async function saveReasoningModelIdInCookie(model: string) {
   }
 }
 
-// Get the appropriate model object based on ID
+// Updated getModelById to include fine-tuned models
 export function getModelById(modelId: string): Model | undefined {
-  return [...models, ...reasoningModels].find(model => model.id === modelId);
+  // Check standard models
+  const standardModel = models.find((m) => m.id === modelId);
+  if (standardModel) return standardModel;
+  
+  // Check reasoning models
+  const reasoningModel = reasoningModels.find((m) => m.id === modelId);
+  if (reasoningModel) return reasoningModel;
+  
+  // Check fine-tuned models
+  const fineTunedModel = fineTunedModels.find((m) => m.id === modelId);
+  if (fineTunedModel) return fineTunedModel;
+  
+  return undefined;
 }
 
 // For backward compatibility with older api

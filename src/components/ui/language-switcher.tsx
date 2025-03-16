@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { locales, localeConfigs } from '../../../i18n';
+import { locales, localeConfigs } from '@/i18n';
 
 const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },

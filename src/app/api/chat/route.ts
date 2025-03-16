@@ -7,6 +7,12 @@ import type { ChatMessage, StreamData, ToolCallResult } from '@/types/chat';
 import { customModel } from '@/lib/ai/models';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { tools as aiTools } from '@/lib/ai/tools';
+import { 
+  generatePersonalizationContext, 
+  addRecentQuery, 
+  updateUserInterests 
+} from '@/lib/ai/personalization/user-history';
+import { AIChatService } from '@/lib/ai/chat-service';
 
 // Runtime configuration for edge deployment
 export const runtime = 'edge';
@@ -204,9 +210,12 @@ export async function POST(req: Request) {
         const { 
           messages, 
           sessionId, 
+          userId,
           modelId = 'gpt-4o-mini',
           reasoningModelId = 'gpt-4-turbo',
-          experimental_deepResearch = false 
+          experimental_deepResearch = false,
+          category = '',
+          personalizedResponse = true
         } = await req.json();
         
         // Write status update to data stream
@@ -223,62 +232,212 @@ export async function POST(req: Request) {
           ? [...activeTools]  // Create a new array to avoid readonly issues
           : activeTools.filter(t => t !== 'deepResearch');
         
-        // Create streaming response using Vercel AI SDK
-        const result = await streamText({
-          model: openai(model),
-          messages,
-          maxTokens: 8000,
-          temperature: 0.7,
-          experimental_activeTools: enabledTools,
-          tools,
-        });
-
-        // Merge the streaming result into the data stream
-        result.mergeIntoDataStream(dataStream);
+        // Apply personalization if enabled and userId is provided
+        let personalizedMessages = [...messages];
         
-        // Try to save chat session
-        try {
-          const supabase = getSupabaseClient();
-          
-          // Check if chat exists
-          const { data: existingChat } = await supabase
-            .from('chats')
-            .select('id')
-            .eq('id', sessionId)
-            .single();
-            
-          if (!existingChat) {
-            // Generate title from first user message
-            const userMessage = messages.find((m: any) => m.role === 'user');
-            let title = 'New Chat';
-            
-            if (userMessage) {
-              // Generate a title based on the first user message (simplified)
-              const titleContent = userMessage.content.substring(0, 50);
-              title = titleContent + (titleContent.length >= 50 ? '...' : '');
+        if (personalizedResponse && userId) {
+          try {
+            // Extract the latest user query for tracking interests
+            const lastUserMessage = messages.findLast((m: ChatMessage) => m.role === 'user');
+            if (lastUserMessage) {
+              // Add the query to recent queries
+              await addRecentQuery(userId, lastUserMessage.content);
+              
+              // Update user interests if a category is provided
+              if (category) {
+                await updateUserInterests(userId, category);
+              }
             }
             
-            // Save the chat session - we'll let Supabase RLS handle permissions
-            await supabase.from('chats').insert({
-              id: sessionId,
-              title,
-              created_at: new Date().toISOString(),
-              model: modelId,
-            });
+            // Add the AI-generated context of all data sources if needed
+            try {
+              if (personalizedResponse && userId) {
+                const personalizationContext = await generatePersonalizationContext(userId);
+                if (personalizationContext) {
+                  personalizedMessages = [
+                    { 
+                      role: 'system', 
+                      content: personalizationContext,
+                    },
+                    ...personalizedMessages,
+                  ];
+                }
+              }
+            } catch (error) {
+              console.error('Error generating personalization context:', error);
+              // Continue without personalization
+            }
+
+            // Create model instance for reasoning if needed
+            const reasoningModel = customModel(reasoningModelId, true);
+            
+            // Log the conversation
+            try {
+              const chatId = sessionId || nanoid();
+              const supabase = getSupabaseClient();
+              await supabase.from('conversations').upsert({
+                id: chatId,
+                messages: personalizedMessages.map(m => ({
+                  role: m.role,
+                  content: m.content.substring(0, 1000), // Limit content length for storage
+                })),
+                user_id: userId || null,
+                updated_at: new Date().toISOString(),
+              }, { onConflict: 'id' });
+              
+              dataStream.writeData({
+                type: 'meta',
+                value: { chatId, timestamp: Date.now() }
+              });
+            } catch (error) {
+              console.error('Error logging conversation:', error);
+              // Continue without logging
+            }
+            
+            // Choose the appropriate AI service based on request parameters
+            let response: Response;
+
+            // Check if this is a query that should use scraped data
+            const lastUserQuery = personalizedMessages.findLast((m: ChatMessage) => m.role === 'user')?.content || '';
+            const shouldUseScrapedData = isQuestionRequiringFactualData(lastUserQuery);
+            
+            if (shouldUseScrapedData) {
+              // Use new method with scraped data sources
+              const chatService = new AIChatService(process.env.OPENAI_API_KEY!);
+              response = await chatService.streamChatWithScrapedData({
+                messages: personalizedMessages,
+                useSearch: true,
+                useScrape: true,
+                useExtract: true,
+                useDeepResearch: experimental_deepResearch,
+                maxRelevantDocs: 5,
+                relevanceThreshold: 0.7
+              });
+            } else {
+              // Default to streaming chat with AI-SDK
+              const result = await streamText({
+                model: openai(modelId),
+                messages: personalizedMessages.map(m => ({
+                  role: m.role as any,
+                  content: m.content,
+                })),
+                temperature: 0.7,
+                maxTokens: 1000,
+                tools: enabledTools.map(t => tools[t]),
+              });
+              
+              // Create a readable stream from the result
+              const encoder = new TextEncoder();
+              const stream = new ReadableStream({
+                async start(controller) {
+                  for await (const chunk of result.textStream) {
+                    controller.enqueue(encoder.encode(chunk));
+                  }
+                  controller.close();
+                },
+              });
+              
+              response = new Response(stream);
+            }
+  
+            // Get the response body
+            if (response.body) {
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder();
+              
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                dataStream.appendText(chunk);
+              }
+            }
+            
+            // Try to save chat session
+            try {
+              const supabase = getSupabaseClient();
+              
+              // Check if chat exists
+              const { data: existingChat } = await supabase
+                .from('chats')
+                .select('id')
+                .eq('id', sessionId)
+                .single();
+                
+              if (!existingChat) {
+                // Generate title from first user message
+                const userMessage = messages.find((m: any) => m.role === 'user');
+                let title = 'New Chat';
+                
+                if (userMessage) {
+                  // Generate a title based on the first user message (simplified)
+                  const titleContent = userMessage.content.substring(0, 50);
+                  title = titleContent + (titleContent.length >= 50 ? '...' : '');
+                }
+                
+                // Save the chat session - we'll let Supabase RLS handle permissions
+                await supabase.from('chats').insert({
+                  id: sessionId,
+                  title,
+                  created_at: new Date().toISOString(),
+                  model: modelId,
+                });
+              }
+            } catch (error) {
+              console.error('Failed to save chat session:', error);
+              // Non-fatal error, continue execution
+            }
+          } catch (error) {
+            console.error('Personalization error:', error);
+            // Continue without personalization if it fails
           }
-        } catch (error) {
-          console.error('Failed to save chat session:', error);
-          // Non-fatal error, continue execution
         }
       } catch (error) {
-        // Handle errors in the data stream
+        console.error('Chat API error:', error);
         dataStream.writeData({
           type: 'error',
-          value: { 
-            error: error instanceof Error ? error.message : 'Unknown error'
-          }
+          value: { message: 'Failed to process chat request' },
         });
       }
-    }
+    },
   });
+}
+
+/**
+ * Determines if a user message is likely asking a question that requires factual data
+ * rather than just conversational chat
+ */
+function isQuestionRequiringFactualData(message: string): boolean {
+  // Simple heuristic approach - could be replaced with a more sophisticated classifier
+  const message_lower = message.toLowerCase();
+  
+  // Check if it contains question-related keywords
+  const hasQuestionMarkers = message.includes('?') || 
+    message_lower.includes('how') ||
+    message_lower.includes('what') ||
+    message_lower.includes('when') ||
+    message_lower.includes('where') ||
+    message_lower.includes('which') ||
+    message_lower.includes('who') ||
+    message_lower.includes('why') ||
+    message_lower.includes('can you tell me') ||
+    message_lower.includes('explain') ||
+    message_lower.includes('describe');
+    
+  // Check if it contains immigration-related terms
+  const hasImmigrationTerms = message_lower.includes('visa') ||
+    message_lower.includes('immigration') ||
+    message_lower.includes('country') ||
+    message_lower.includes('passport') ||
+    message_lower.includes('requirements') ||
+    message_lower.includes('process') ||
+    message_lower.includes('application') ||
+    message_lower.includes('permit') ||
+    message_lower.includes('residence') ||
+    message_lower.includes('citizen') ||
+    message_lower.includes('eligibility') ||
+    message_lower.includes('status');
+    
+  // Return true if it appears to be a question about immigration
+  return hasQuestionMarkers && hasImmigrationTerms;
 }

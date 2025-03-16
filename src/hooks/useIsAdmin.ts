@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { checkUserIsAdmin } from '@/lib/actions/admin';
 
 export function useIsAdmin() {
   const { user } = useAuth();
@@ -16,19 +16,9 @@ export function useIsAdmin() {
       }
 
       try {
-        const supabase = getSupabaseClient();
-        const { data, error } = await supabase
-          .from('auth.users')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (error) {
-          console.error('Error checking admin status:', error);
-          setIsAdmin(false);
-        } else {
-          setIsAdmin(data.role === 'admin');
-        }
+        // Use the server action to check admin status
+        const { isAdmin: adminStatus } = await checkUserIsAdmin(user.id);
+        setIsAdmin(adminStatus);
       } catch (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);

@@ -1,103 +1,428 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.1'
-import { ValidationResult, QueryAnalysis, ImmigrationUpdate, UserProfile } from './types.ts'
+import { createClient } from '@supabase/supabase-js'
+import { ValidationResult, QueryAnalysis, ImmigrationUpdate, UserProfile, RateLimitResult, CacheOptions } from './types'
+import { randomBytes } from 'node:crypto'
 
 // Initialize Supabase client
 export const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+  process.env.SUPABASE_URL ?? '',
+  process.env.SUPABASE_ANON_KEY ?? ''
 )
 
-// Rate limiting utilities with sliding window
-export const getRateLimit = async (userId: string): Promise<{ allowed: boolean }> => {
-  const kv = await Deno.openKv()
-  const now = Date.now()
-  const windowSize = 60000 // 1 minute window
-  const maxRequests = 100 // 100 requests per minute
-  
-  // Use a sliding window for more accurate rate limiting
-  const key = ['rate_limit', userId]
-  const result = await kv.get(key)
-  const requests = (result.value as { timestamp: number; count: number }[]) || []
-  
-  // Remove expired requests
-  const validRequests = requests.filter(r => now - r.timestamp < windowSize)
-  
-  // Count total requests in the current window
-  const totalRequests = validRequests.reduce((sum, r) => sum + r.count, 0)
-  
-  if (totalRequests >= maxRequests) {
-    return { allowed: false }
-  }
-  
-  // Add new request
-  validRequests.push({ timestamp: now, count: 1 })
-  await kv.set(key, validRequests, { expireIn: windowSize })
-  
-  return { allowed: true }
+// In-memory KV store for functions that don't have access to Deno.openKv
+const kvStore = new Map<string, any>()
+const memoryCache = new Map<string, { value: any, expiresAt?: number }>()
+
+// Define types for queue management
+interface QueueEntry {
+  userId: string;
+  priority: number;
+  timestamp: number;
 }
 
-// Queue management with priority and timeout
-export const addToQueue = async (userId: string): Promise<number> => {
-  const kv = await Deno.openKv()
-  const queueKey = ['chat_queue']
-  const userStateKey = ['user_state', userId]
+interface UserState {
+  lastAccess: number;
+  totalRequests: number;
+}
+
+// Cache utilities
+export const cacheKey = (namespace: string, key: string): string => {
+  return `${namespace}:${key}`
+}
+
+export const getFromCache = async <T>(
+  namespace: string,
+  key: string,
+  options: CacheOptions = {}
+): Promise<T | null> => {
+  const fullKey = cacheKey(namespace, key)
   const now = Date.now()
   
-  // Get current queue and user state
-  const [queueResult, userStateResult] = await Promise.all([
-    kv.get(queueKey),
-    kv.get(userStateKey)
-  ])
+  // Check in-memory cache first (fastest)
+  if (options.useMemory !== false) {
+    const cachedItem = memoryCache.get(fullKey)
+    if (cachedItem && (!cachedItem.expiresAt || cachedItem.expiresAt > now)) {
+      return cachedItem.value as T
+    } else if (cachedItem && cachedItem.expiresAt && cachedItem.expiresAt <= now) {
+      // Clean up expired item
+      memoryCache.delete(fullKey)
+    }
+  }
   
-  const queue = (queueResult.value as Array<{
-    userId: string;
-    priority: number;
-    timestamp: number;
-  }>) || []
+  // Then check database cache if enabled
+  if (options.useDb !== false) {
+    try {
+      const { data } = await supabase.rpc('cache.get', {
+        p_cache_key: namespace,
+        p_data_key: key
+      })
+      
+      if (data) {
+        // Update memory cache if enabled
+        if (options.useMemory !== false) {
+          const ttl = options.ttl || 60 // Default 60 seconds for memory cache
+          memoryCache.set(fullKey, {
+            value: data,
+            expiresAt: ttl ? now + (ttl * 1000) : undefined
+          })
+        }
+        
+        return data as T
+      }
+    } catch (error) {
+      console.error('Database cache error:', error)
+    }
+  }
   
-  const userState = userStateResult.value as {
-    lastAccess: number;
-    totalRequests: number;
-  } | null
+  // Check KV store
+  if (options.useKv !== false) {
+    const kvItem = kvStore.get(fullKey)
+    if (kvItem && (!kvItem.expiresAt || kvItem.expiresAt > now)) {
+      return kvItem.value as T
+    } else if (kvItem && kvItem.expiresAt && kvItem.expiresAt <= now) {
+      // Clean up expired item
+      kvStore.delete(fullKey)
+    }
+  }
   
-  // Calculate user priority based on usage patterns
-  const priority = userState ? 
-    Math.floor(userState.totalRequests / 100) : 0
+  return null
+}
+
+export const setInCache = async <T>(
+  namespace: string,
+  key: string,
+  value: T,
+  options: CacheOptions = {}
+): Promise<void> => {
+  const fullKey = cacheKey(namespace, key)
+  const now = Date.now()
+  const ttl = options.ttl
   
-  // Remove expired entries (older than 5 minutes)
-  const activeQueue = queue.filter(entry => now - entry.timestamp < 300000)
+  // Set in memory cache
+  if (options.useMemory !== false) {
+    memoryCache.set(fullKey, {
+      value,
+      expiresAt: ttl ? now + (ttl * 1000) : undefined
+    })
+  }
+  
+  // Set in database cache
+  if (options.useDb !== false) {
+    try {
+      await supabase.rpc('cache.set', {
+        p_cache_key: namespace,
+        p_data_key: key,
+        p_data_value: value,
+        p_ttl_seconds: ttl
+      })
+    } catch (error) {
+      console.error('Database cache error:', error)
+    }
+  }
+  
+  // Set in KV store
+  if (options.useKv !== false) {
+    kvStore.set(fullKey, {
+      value,
+      expiresAt: ttl ? now + (ttl * 1000) : undefined
+    })
+  }
+}
+
+export const invalidateCache = async (
+  namespace: string,
+  key?: string,
+  options: CacheOptions = {}
+): Promise<void> => {
+  // If key is provided, delete specific item
+  if (key) {
+    const fullKey = cacheKey(namespace, key)
+    
+    // Delete from memory cache
+    if (options.useMemory !== false) {
+      memoryCache.delete(fullKey)
+    }
+    
+    // Delete from database cache
+    if (options.useDb !== false) {
+      try {
+        await supabase.rpc('cache.delete', {
+          p_cache_key: namespace,
+          p_data_key: key
+        })
+      } catch (error) {
+        console.error('Database cache error:', error)
+      }
+    }
+    
+    // Delete from KV store
+    if (options.useKv !== false) {
+      kvStore.delete(fullKey)
+    }
+  } else {
+    // Delete all items in namespace
+    
+    // Delete from memory cache
+    if (options.useMemory !== false) {
+      const keysToDelete = []
+      for (const cachedKey of memoryCache.keys()) {
+        if (cachedKey.startsWith(`${namespace}:`)) {
+          keysToDelete.push(cachedKey)
+        }
+      }
+      for (const keyToDelete of keysToDelete) {
+        memoryCache.delete(keyToDelete)
+      }
+    }
+    
+    // Delete from database cache
+    if (options.useDb !== false) {
+      try {
+        await supabase.rpc('cache.delete', {
+          p_cache_key: namespace,
+          p_data_key: null
+        })
+      } catch (error) {
+        console.error('Database cache error:', error)
+      }
+    }
+    
+    // Delete from KV store
+    if (options.useKv !== false) {
+      const keysToDelete = []
+      for (const cachedKey of kvStore.keys()) {
+        if (cachedKey.startsWith(`${namespace}:`)) {
+          keysToDelete.push(cachedKey)
+        }
+      }
+      for (const keyToDelete of keysToDelete) {
+        kvStore.delete(keyToDelete)
+      }
+    }
+  }
+}
+
+// Cache wrapper function for functions with expensive operations
+export const cachedFunction = async <T, A extends any[]>(
+  namespace: string,
+  key: string,
+  fn: (...args: A) => Promise<T>,
+  args: A,
+  options: CacheOptions = {}
+): Promise<T> => {
+  // Try to get from cache first
+  const cachedResult = await getFromCache<T>(namespace, key, options)
+  if (cachedResult !== null) {
+    return cachedResult
+  }
+  
+  // Execute the function if not in cache
+  const result = await fn(...args)
+  
+  // Store the result in cache
+  await setInCache(namespace, key, result, options)
+  
+  return result
+}
+
+// Observability utilities
+export const logEvent = async (
+  level: 'debug' | 'info' | 'warn' | 'error',
+  message: string,
+  component?: string,
+  context?: Record<string, any>,
+  traceId?: string,
+  userId?: string,
+  sessionId?: string,
+  requestId?: string
+): Promise<void> => {
+  try {
+    await supabase.rpc('observability.log', {
+      p_level: level,
+      p_message: message,
+      p_component: component,
+      p_context: context ? JSON.stringify(context) : null,
+      p_trace_id: traceId,
+      p_user_id: userId,
+      p_session_id: sessionId,
+      p_request_id: requestId
+    })
+  } catch (error) {
+    console.error('Failed to log event:', error)
+  }
+}
+
+export const recordMetric = async (
+  name: string,
+  value: number,
+  labels?: Record<string, any>
+): Promise<void> => {
+  try {
+    await supabase.rpc('observability.record_metric', {
+      p_name: name,
+      p_value: value,
+      p_labels: labels ? JSON.stringify(labels) : null
+    })
+  } catch (error) {
+    console.error('Failed to record metric:', error)
+  }
+}
+
+export const recordPerformance = async (
+  operation: string,
+  durationMs: number,
+  resourceType: string,
+  resourceId?: string,
+  userId?: string,
+  sessionId?: string,
+  requestId?: string,
+  metadata?: Record<string, any>
+): Promise<void> => {
+  try {
+    await supabase.rpc('observability.record_performance', {
+      p_operation: operation,
+      p_duration_ms: durationMs,
+      p_resource_type: resourceType,
+      p_resource_id: resourceId,
+      p_user_id: userId,
+      p_session_id: sessionId,
+      p_request_id: requestId,
+      p_metadata: metadata ? JSON.stringify(metadata) : null
+    })
+  } catch (error) {
+    console.error('Failed to record performance:', error)
+  }
+}
+
+// Performance tracking helper for timing function execution
+export const measurePerformance = async <T>(
+  operation: string,
+  resourceType: string,
+  fn: () => Promise<T>,
+  metadata?: Record<string, any>,
+  userId?: string
+): Promise<T> => {
+  const startTime = performance.now()
+  try {
+    const result = await fn()
+    const endTime = performance.now()
+    const duration = Math.round(endTime - startTime)
+    
+    // Record performance asynchronously
+    recordPerformance(
+      operation,
+      duration,
+      resourceType,
+      undefined,
+      userId,
+      undefined,
+      undefined,
+      metadata
+    ).catch(console.error)
+    
+    return result
+  } catch (error) {
+    const endTime = performance.now()
+    const duration = Math.round(endTime - startTime)
+    
+    // Record performance for failed operations too
+    recordPerformance(
+      `${operation}_error`,
+      duration,
+      resourceType,
+      undefined,
+      userId,
+      undefined,
+      undefined,
+      { ...metadata, error: error instanceof Error ? error.message : 'Unknown error' }
+    ).catch(console.error)
+    
+    throw error
+  }
+}
+
+// Enhanced Rate limiting utilities using database-backed rate limiting
+export const getRateLimit = async (userId: string, resourceType: string): Promise<RateLimitResult> => {
+  try {
+    // Check rate limits in the database
+    const { data, error } = await supabase.rpc('rate_limiting.check_rate_limit', {
+      p_user_id: userId,
+      p_resource_type: resourceType
+    })
+
+    if (error) {
+      console.error('Error checking rate limit:', error)
+      // Allow the request if there's an error checking rate limits
+      return { 
+        allowed: true,
+        limit: 'unknown',
+        current: 0,
+        maximum: 0,
+        resetAfter: 0
+      }
+    }
+
+    // Record this request if allowed
+    if (data[0].allowed) {
+      await supabase.rpc('rate_limiting.record_request', {
+        p_user_id: userId,
+        p_resource_type: resourceType
+      })
+    }
+
+    return {
+      allowed: data[0].allowed,
+      limit: data[0].limit_name,
+      current: data[0].current_usage,
+      maximum: data[0].max_requests,
+      resetAfter: data[0].reset_after_seconds
+    }
+  } catch (error) {
+    console.error('Unexpected error in rate limiting:', error)
+    // Allow the request if there's an unexpected error
+    return { 
+      allowed: true,
+      limit: 'error',
+      current: 0,
+      maximum: 0,
+      resetAfter: 0
+    }
+  }
+}
+
+// Queue management utilities
+export const addToQueue = async (userId: string, priority: number = 1): Promise<number> => {
+  const key = 'request_queue'
+  const queue = (kvStore.get(key) || []) as QueueEntry[]
   
   // Check if user is already in queue
-  const existingPosition = activeQueue.findIndex(entry => entry.userId === userId)
-  if (existingPosition >= 0) {
-    return existingPosition
+  const userIndex = queue.findIndex((entry: QueueEntry) => entry.userId === userId)
+  
+  if (userIndex >= 0) {
+    // User already in queue, return position
+    return userIndex + 1
   }
   
-  // Add user to queue with priority
-  const newEntry = {
+  // Add user to queue
+  queue.push({
     userId,
     priority,
-    timestamp: now
-  }
+    timestamp: Date.now()
+  })
   
-  // Insert maintaining priority order
-  const insertIndex = activeQueue.findIndex(entry => entry.priority < priority)
-  if (insertIndex >= 0) {
-    activeQueue.splice(insertIndex, 0, newEntry)
-  } else {
-    activeQueue.push(newEntry)
-  }
+  // Sort queue by priority (higher first) then by timestamp (older first)
+  queue.sort((a: QueueEntry, b: QueueEntry) => {
+    if (a.priority !== b.priority) {
+      return b.priority - a.priority // Higher priority first
+    }
+    return a.timestamp - b.timestamp // Older requests first
+  })
   
-  // Update queue and user state
-  await Promise.all([
-    kv.set(queueKey, activeQueue),
-    kv.set(userStateKey, {
-      lastAccess: now,
-      totalRequests: (userState?.totalRequests || 0) + 1
-    })
-  ])
+  // Store updated queue
+  kvStore.set(key, queue)
   
-  return activeQueue.findIndex(entry => entry.userId === userId)
+  // Return position in queue (0 means user is at the front of the queue)
+  const newPosition = queue.findIndex((entry: QueueEntry) => entry.userId === userId)
+  return newPosition
 }
 
 // Enhanced document validation with metadata extraction
@@ -220,10 +545,10 @@ export const analyzeQuery = (query: string): QueryAnalysis => {
   }
 }
 
-// Enhanced webhook signature validation with timing-safe comparison
+// For webhook signature validation
 export const validateWebhookSignature = async (req: Request): Promise<boolean> => {
   const signature = req.headers.get('x-webhook-signature')
-  const secret = Deno.env.get('WEBHOOK_SECRET')
+  const secret = process.env.WEBHOOK_SECRET
   const timestamp = req.headers.get('x-webhook-timestamp')
   
   if (!signature || !secret || !timestamp) {
@@ -380,4 +705,14 @@ export const notifyUsers = async (users: UserProfile[], update: ImmigrationUpdat
     console.error('Failed to send notifications:', error)
     return false
   }
+}
+
+// Secure random token generation
+export const generateToken = (length: number = 32): string => {
+  return randomBytes(length).toString('hex')
+}
+
+// For functions that relied on Deno.env.get
+export const getEnvVariable = (key: string): string => {
+  return process.env[key] || ''
 } 

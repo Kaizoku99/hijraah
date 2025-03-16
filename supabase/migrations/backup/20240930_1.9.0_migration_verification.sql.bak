@@ -1,0 +1,185 @@
+-- 20240930_1.9.0_migration_verification.sql
+-- Migration file to add a formal verification system for tracking migrations
+
+-- Create migration_meta schema if it doesn't exist
+DO $$
+BEGIN
+    -- Create schema if not exists
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.schemata 
+        WHERE schema_name = 'migration_meta'
+    ) THEN
+        CREATE SCHEMA migration_meta;
+    END IF;
+
+    -- Create migrations table if not exists
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.tables 
+        WHERE table_schema = 'migration_meta' 
+        AND table_name = 'migrations'
+    ) THEN
+        CREATE TABLE migration_meta.migrations (
+            id SERIAL PRIMARY KEY,
+            version TEXT NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            applied_at TIMESTAMPTZ DEFAULT NOW(),
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            UNIQUE(version, name)
+        );
+
+        CREATE INDEX idx_migrations_version ON migration_meta.migrations(version);
+        CREATE INDEX idx_migrations_name ON migration_meta.migrations(name);
+        CREATE INDEX idx_migrations_applied_at ON migration_meta.migrations(applied_at);
+    END IF;
+
+    -- Create migration logs table if not exists
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM information_schema.tables 
+        WHERE table_schema = 'migration_meta' 
+        AND table_name = 'migration_logs'
+    ) THEN
+        CREATE TABLE migration_meta.migration_logs (
+            id SERIAL PRIMARY KEY,
+            migration_id INTEGER REFERENCES migration_meta.migrations(id),
+            log_level TEXT NOT NULL,
+            message TEXT NOT NULL,
+            logged_at TIMESTAMPTZ DEFAULT NOW()
+        );
+
+        CREATE INDEX idx_migration_logs_migration_id ON migration_meta.migration_logs(migration_id);
+        CREATE INDEX idx_migration_logs_log_level ON migration_meta.migration_logs(log_level);
+        CREATE INDEX idx_migration_logs_logged_at ON migration_meta.migration_logs(logged_at);
+    END IF;
+
+    -- Create register_migration function if not exists
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+        WHERE n.nspname = 'migration_meta'
+        AND p.proname = 'register_migration'
+    ) THEN
+        -- Create the register_migration function
+        CREATE OR REPLACE FUNCTION migration_meta.register_migration(
+            p_version TEXT,
+            p_name TEXT,
+            p_description TEXT DEFAULT NULL
+        ) RETURNS INTEGER
+        AS $$
+        DECLARE
+            v_migration_id INTEGER;
+        BEGIN
+            INSERT INTO migration_meta.migrations(version, name, description)
+            VALUES (p_version, p_name, p_description)
+            ON CONFLICT (version, name) DO UPDATE
+            SET description = COALESCE(p_description, migrations.description)
+            RETURNING id INTO v_migration_id;
+            
+            RETURN v_migration_id;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        COMMENT ON FUNCTION migration_meta.register_migration IS 'Registers a migration as applied to the database';
+    END IF;
+
+    -- Create log_migration function if not exists
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_proc p
+        JOIN pg_namespace n ON p.pronamespace = n.oid
+        WHERE n.nspname = 'migration_meta'
+        AND p.proname = 'log_migration'
+    ) THEN
+        -- Create the log_migration function
+        CREATE OR REPLACE FUNCTION migration_meta.log_migration(
+            p_migration_id INTEGER,
+            p_log_level TEXT,
+            p_message TEXT
+        ) RETURNS VOID
+        AS $$
+        BEGIN
+            INSERT INTO migration_meta.migration_logs(migration_id, log_level, message)
+            VALUES (p_migration_id, p_log_level, p_message);
+        END;
+        $$ LANGUAGE plpgsql;
+
+        COMMENT ON FUNCTION migration_meta.log_migration IS 'Logs a message for a migration';
+    END IF;
+END $$;
+
+-- Create verification view for quickly checking migration status
+CREATE OR REPLACE VIEW migration_meta.migration_status AS
+SELECT 
+    version,
+    migration_name,
+    description,
+    applied_at,
+    applied_by,
+    success,
+    execution_time_ms,
+    environment
+FROM 
+    migration_meta.migrations
+ORDER BY 
+    applied_at DESC;
+
+-- Function to verify if all expected migrations are applied
+CREATE OR REPLACE FUNCTION migration_meta.verify_migrations(
+    p_expected_versions TEXT[] DEFAULT NULL
+) RETURNS TABLE (
+    version TEXT,
+    migration_name TEXT,
+    applied BOOLEAN,
+    success BOOLEAN
+) AS $$
+BEGIN
+    IF p_expected_versions IS NULL THEN
+        RETURN QUERY
+        SELECT 
+            m.version,
+            m.name AS migration_name,
+            TRUE AS applied,
+            m.success
+        FROM 
+            migration_meta.migrations m
+        ORDER BY 
+            m.version;
+    ELSE
+        RETURN QUERY
+        WITH expected AS (
+            SELECT unnest(p_expected_versions) AS version
+        )
+        SELECT 
+            e.version,
+            COALESCE(m.name, 'Not Applied') AS migration_name,
+            m.version IS NOT NULL AS applied,
+            COALESCE(m.success, FALSE) AS success
+        FROM 
+            expected e
+        LEFT JOIN 
+            migration_meta.migrations m ON split_part(m.version, '.', 1) || '.' || 
+                                         split_part(m.version, '.', 2) || '.' || 
+                                         split_part(m.version, '.', 3) = e.version
+        ORDER BY 
+            e.version;
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Register this migration
+SELECT migration_meta.register_migration(
+    '1.9.0',
+    'migration_verification',
+    'Add formal migration verification system'
+);
+
+COMMENT ON SCHEMA migration_meta IS 'Schema for tracking and verifying database migrations';
+COMMENT ON TABLE migration_meta.migrations IS 'Records all migrations applied to the database';
+COMMENT ON TABLE migration_meta.migration_logs IS 'Detailed logs for migration execution';
+COMMENT ON FUNCTION migration_meta.register_migration IS 'Registers a migration as applied to the database';
+COMMENT ON FUNCTION migration_meta.log_migration IS 'Logs a message for a migration';
+COMMENT ON FUNCTION migration_meta.verify_migrations IS 'Verifies if expected migrations are applied successfully'; 

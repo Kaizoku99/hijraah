@@ -88,6 +88,13 @@ export async function getUserSession(c: Context) {
     throw new Error('Supabase client not found in context');
   }
   
+  // First verify the user exists using getUser (more secure)
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    return null;
+  }
+  
   // Get session from supabase
   const { data: { session }, error } = await supabase.auth.getSession();
   

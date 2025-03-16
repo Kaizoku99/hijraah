@@ -56,7 +56,14 @@ export function Navbar({ session }: { session: Session | null }) {
         <div className="container flex h-14 items-center">
           <div className="mr-4 flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <div className="h-8 w-8" /> {/* Placeholder for logo */}
+              <Image
+                src="/Hijraah_logo.png"
+                alt="Hijraah"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+                priority
+              />
               <span className="font-bold text-xl">Hijraah</span>
             </Link>
           </div>
@@ -71,7 +78,7 @@ export function Navbar({ session }: { session: Session | null }) {
         <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image
-              src={theme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'}
+              src="/Hijraah_logo.png"
               alt="Hijraah"
               width={32}
               height={32}

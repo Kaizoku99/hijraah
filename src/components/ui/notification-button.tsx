@@ -9,16 +9,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { createClient } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/auth';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
-
-// Initialize Supabase client
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from '@/lib/supabase/client';
 
 interface Notification {
     id: string;
@@ -40,20 +34,24 @@ export function NotificationButton() {
 
         // Fetch initial notifications
         const fetchNotifications = async () => {
-            const { data, error } = await supabase
-                .from('notifications')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(10);
+            try {
+                const { data, error } = await supabase
+                    .from('notifications')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .order('created_at', { ascending: false })
+                    .limit(10);
 
-            if (error) {
-                console.error('Error fetching notifications:', error);
-                return;
+                if (error) {
+                    console.error('Error fetching notifications:', error);
+                    return;
+                }
+
+                setNotifications(data || []);
+                setUnreadCount(data?.filter(n => !n.read).length || 0);
+            } catch (err) {
+                console.error('Error fetching notifications:', err);
             }
-
-            setNotifications(data || []);
-            setUnreadCount(data?.filter(n => !n.read).length || 0);
         };
 
         fetchNotifications();
@@ -88,36 +86,46 @@ export function NotificationButton() {
     }, [user]);
 
     const markAsRead = async (notificationId: string) => {
-        const { error } = await supabase
-            .from('notifications')
-            .update({ read: true })
-            .eq('id', notificationId);
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true })
+                .eq('id', notificationId);
 
-        if (error) {
-            console.error('Error marking notification as read:', error);
-            return;
+            if (error) {
+                console.error('Error marking notification as read:', error);
+                return;
+            }
+
+            setNotifications(prev =>
+                prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+            );
+            setUnreadCount(prev => Math.max(0, prev - 1));
+        } catch (err) {
+            console.error('Error marking notification as read:', err);
         }
-
-        setNotifications(prev =>
-            prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
     };
 
     const markAllAsRead = async () => {
-        const { error } = await supabase
-            .from('notifications')
-            .update({ read: true })
-            .eq('user_id', user?.id)
-            .eq('read', false);
+        if (!user?.id) return;
 
-        if (error) {
-            console.error('Error marking all notifications as read:', error);
-            return;
+        try {
+            const { error } = await supabase
+                .from('notifications')
+                .update({ read: true })
+                .eq('user_id', user.id)
+                .eq('read', false);
+
+            if (error) {
+                console.error('Error marking all notifications as read:', error);
+                return;
+            }
+
+            setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            setUnreadCount(0);
+        } catch (err) {
+            console.error('Error marking all notifications as read:', err);
         }
-
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-        setUnreadCount(0);
     };
 
     return (

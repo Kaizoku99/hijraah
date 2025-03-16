@@ -1,6 +1,7 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { UserProfile, EligibilityResult, ImmigrationRules, ApiError } from '../_shared/types.ts'
-import { supabase } from '../_shared/utils.ts'
+import express from 'express'
+import { Request, Response } from 'express'
+import { UserProfile, EligibilityResult, ImmigrationRules, ApiError } from '../_shared/types'
+import { supabase } from '../_shared/utils'
 
 async function getImmigrationRules(programType: string): Promise<ImmigrationRules> {
   const { data, error } = await supabase
@@ -51,22 +52,19 @@ function checkBasicEligibility(params: {
   }
 }
 
-serve(async (req) => {
-  try {
-    if (req.method !== 'POST') {
-      return new Response(
-        JSON.stringify({ error: 'Method not allowed' }),
-        { status: 405, headers: { 'Content-Type': 'application/json' } }
-      )
-    }
+// Initialize Express app
+const app = express()
+app.use(express.json())
 
-    const { userProfile, programType } = await req.json()
+// Define routes
+app.post('/eligibility-checker', async (req: Request, res: Response) => {
+  try {
+    const { userProfile, programType } = req.body
 
     if (!userProfile || !programType) {
-      return new Response(
-        JSON.stringify({ error: 'User profile and program type are required' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      )
+      return res.status(400).json({ 
+        error: 'User profile and program type are required' 
+      })
     }
 
     // Get immigration rules for the program
@@ -79,17 +77,22 @@ serve(async (req) => {
       rules
     })
 
-    return new Response(
-      JSON.stringify(result),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    )
+    return res.status(200).json(result)
   } catch (error: unknown) {
     const apiError: ApiError = {
       message: error instanceof Error ? error.message : 'An unknown error occurred'
     }
-    return new Response(
-      JSON.stringify({ error: apiError.message }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    )
+    return res.status(500).json({ error: apiError.message })
   }
-}) 
+})
+
+// Handle all other routes
+app.all('*', (req: Request, res: Response) => {
+  res.status(405).json({ error: 'Method not allowed' })
+})
+
+// Start server
+app.listen(8000)
+
+// For Supabase Edge Functions to recognize the handler
+export default app 

@@ -39,6 +39,7 @@ import { authRoutes } from './routes/auth';
 import { scrapingRoutes } from './routes/scraping';
 import { vectorSearchRoutes } from './routes/vector-search';
 import { subscriptionRoutes } from './routes/subscription';
+import ocrRoutes from './routes/ocr';
 
 // Initialize external services
 initSentry();
@@ -333,6 +334,9 @@ vectorSearchApp.use('*', vectorSearchLimiter);
 vectorSearchApp.use('*', redisCacheMiddleware({ ttl: 120 })); // 2 minute cache for vector search
 vectorSearchApp.route('/', vectorSearchRoutes);
 app.route('/api/vector-search', vectorSearchApp);
+
+// OCR routes
+app.route('/ocr', ocrRoutes);
 
 // Error handling
 app.onError((err, c) => {

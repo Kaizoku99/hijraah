@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
-import type { Database } from '@/types/supabase'
+import type { Database } from '@/types/database'
 
 export type Case = Database['public']['Tables']['cases']['Row']
 export type CaseInsert = Database['public']['Tables']['cases']['Insert']
@@ -87,3 +87,7 @@ export const casesService = {
     return analytics
   }
 } 
+
+// Export aliases for backward compatibility
+export const caseService = casesService;
+export const CaseService = casesService; 

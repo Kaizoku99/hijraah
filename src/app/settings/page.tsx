@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { getSupabaseClient } from '@/lib/supabase/client';
 import { AvatarUpload } from '@/components/ui/avatar-upload';
@@ -20,6 +20,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
+import { useSearchParams } from 'next/navigation';
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +28,8 @@ export default function SettingsPage() {
   const { toast } = useToast();
   const supabase = getSupabaseClient();
   const [name, setName] = useState(user?.user_metadata?.full_name || '');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
 
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -120,7 +123,7 @@ export default function SettingsPage() {
 
   return (
     <div className="container max-w-4xl py-8">
-      <Tabs defaultValue="general" className="space-y-4">
+      <Tabs defaultValue={tabParam || "general"} className="space-y-4">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>

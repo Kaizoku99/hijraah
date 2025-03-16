@@ -34,15 +34,34 @@ export function UserProfile() {
     const [userName, setUserName] = useState<string | null>(null);
 
     useEffect(() => {
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            setSession(session);
+        const getAuthenticatedUser = async () => {
+            // First verify the user securely
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+            if (userError || !user) {
+                setSession(null);
+                return;
+            }
+
+            // Then get the session
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (!sessionError && session) {
+                setSession(session);
+            }
         };
 
-        getSession();
+        getAuthenticatedUser();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+            // Verify the user on auth state change too
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+            if (!userError && user && session) {
+                setSession(session);
+            } else {
+                setSession(null);
+            }
         });
 
         return () => subscription.unsubscribe();

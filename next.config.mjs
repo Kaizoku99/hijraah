@@ -2,11 +2,18 @@ import { dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 import createNextIntlPlugin from 'next-intl/plugin';
+import withBundleAnalyzer from '@next/bundle-analyzer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const require = createRequire(import.meta.url);
 
+// Initialize bundle analyzer
+const withBundleAnalyzerConfig = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+// Initialize next-intl
 const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
@@ -14,13 +21,17 @@ const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ['pdf-parse'],
   experimental: {
-    optimizeCss: false,
+    optimizeCss: true, // Enable CSS optimization for production
     serverActions: {
       bodySizeLimit: '2mb',
       allowedOrigins: ['localhost:3000'],
     },
-    optimizePackageImports: ['lucide-react'],
-    instrumentationHook: true,
+    optimizePackageImports: [
+      'lucide-react',
+      '@radix-ui/react-icons',
+      'date-fns',
+      'lodash',
+    ],
   },
   typescript: {
     ignoreBuildErrors: process.env.CI !== 'true',
@@ -85,6 +96,49 @@ const nextConfig = {
       { message: /DEP0040/ },
     ];
 
+    // Add optimization for production
+    if (!dev && !isServer) {
+      // Enable tree shaking 
+      config.optimization.usedExports = true;
+      
+      // Split chunks for better caching
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        maxInitialRequests: 25,
+        minSize: 20000,
+        cacheGroups: {
+          default: false,
+          defaultVendors: false,
+          framework: {
+            name: 'framework',
+            test: /[\\/]node_modules[\\/](react|react-dom|next|@next)[\\/]/,
+            priority: 40,
+            chunks: 'all',
+            enforce: true,
+          },
+          commons: {
+            name: 'commons',
+            chunks: 'all',
+            minChunks: 2,
+            priority: 20,
+          },
+          lib: {
+            test: /[\\/]node_modules[\\/]/,
+            name(module) {
+              const packageName = module.context.match(
+                /[\\/]node_modules[\\/](.*?)([\\/]|$)/
+              )[1];
+              
+              return `npm.${packageName.replace('@', '')}`;
+            },
+            priority: 10,
+            minChunks: 1,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+    }
+
     return config;
   },
   logging: {
@@ -93,7 +147,9 @@ const nextConfig = {
     },
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
   assetPrefix: '',
   distDir: '.next',
@@ -111,5 +167,12 @@ const nextConfig = {
       },
     ];
   },
+  // Optimize output for production
+  output: 'standalone',
+  poweredByHeader: false,
+  compress: true,
 };
+
+// Apply plugins
+export default withBundleAnalyzerConfig(withNextIntl(nextConfig));
 

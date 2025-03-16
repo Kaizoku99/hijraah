@@ -6,11 +6,20 @@ import GoogleProvider from "next-auth/providers/google";
 import { createClient } from "./supabase/server";
 
 /**
- * Get the current user's session on the server
+ * Get the current authenticated user on the server
  * @returns The current user's session or null if not authenticated
  */
 export async function auth(): Promise<Session | null> {
   const supabase = await getSupabaseServerClient();
+  
+  // Use getUser which is more secure than getSession
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (error || !user) {
+    return null;
+  }
+  
+  // Get the session only after verifying the user
   const { data: { session } } = await supabase.auth.getSession();
   return session;
 }
@@ -20,8 +29,12 @@ export async function auth(): Promise<Session | null> {
  * @returns The current user or null if not authenticated
  */
 export async function getUser(): Promise<User | null> {
-  const session = await auth();
-  return session?.user || null;
+  const supabase = await getSupabaseServerClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
+    return null;
+  }
+  return data.user;
 }
 
 /**
@@ -31,6 +44,31 @@ export async function getUser(): Promise<User | null> {
 export async function isAuthenticated(): Promise<boolean> {
   const session = await auth();
   return !!session;
+}
+
+/**
+ * Securely get the authenticated session by first verifying the user
+ * This is the recommended approach to avoid security issues with direct session access
+ * @returns The authenticated session or null if not authenticated
+ */
+export async function getAuthenticatedSession(): Promise<Session | null> {
+  const supabase = await getSupabaseServerClient();
+  
+  // First verify user exists using getUser
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    return null;
+  }
+  
+  // Only then get the session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session) {
+    return null;
+  }
+  
+  return session;
 }
 
 export const authOptions: NextAuthOptions = {

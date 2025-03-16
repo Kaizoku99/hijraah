@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 // @ts-ignore: Allow synthetic default import
 import createIntlMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from '../i18n';
+import { locales, defaultLocale } from '@/i18n';
 
 // Cache configuration
 const CACHE_REVALIDATE = 60; // 1 minute
@@ -42,21 +42,11 @@ const intlMiddleware = createIntlMiddleware({
   // Used when no locale matches
   defaultLocale,
   // If this locale is matched, pathnames work without a prefix (e.g. `/about`)
-  localePrefix: 'always'
+  localePrefix: 'as-needed'
 });
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public (public files)
-     * - api/public (public API routes)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public|api/public).*)',
-  ],
+  matcher: ['/((?!api|_next|.*\\..*).*)']
 };
 
 // Helper function to log and handle missing environment variables
@@ -134,6 +124,15 @@ export async function middleware(request: NextRequest) {
       }
     );
 
+    // First verify the user with getUser which is more secure
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      // No authenticated user
+      return response;
+    }
+    
+    // Get session only after verifying the user
     const { data: { session }, error } = await supabase.auth.getSession();
 
     // Handle session refresh
@@ -172,7 +171,11 @@ export async function middleware(request: NextRequest) {
     }
 
     // Redirect logged-in users away from auth pages
-    if (request.cookies.get('supabase-auth-token')) {
+    if (session && (
+      requestPath.startsWith('/auth/login') || 
+      requestPath.startsWith('/auth/register')
+    )) {
+      // Redirect to dashboard
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
