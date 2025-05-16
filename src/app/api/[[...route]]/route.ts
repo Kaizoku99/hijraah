@@ -51,8 +51,15 @@ app.use(
   cache({
     cacheName: 'api-cache',
     cacheControl: 'max-age=300, stale-while-revalidate=60',
+    wait: true, // Ensure cache is set before responding
   }),
 );
+
+// Console logging for cache status
+app.use('*', async (c, next) => {
+  console.log('Cache Middleware is enabled with cacheName: api-cache');
+  await next();
+});
 
 // -----------------------------
 // Error handling middleware

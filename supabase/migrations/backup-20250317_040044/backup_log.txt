@@ -1,0 +1,30 @@
+Backup started at 03/17/2025 04:00:44
+Found 27 migration files to back up
+Backed up: 0_schema.sql
+Backed up: 0000_keen_devos.sql
+Backed up: 0001_sparkling_blue_marvel.sql
+Backed up: 0002_wandering_riptide.sql
+Backed up: 0003_cloudy_glorian.sql
+Backed up: 0004_odd_slayback.sql
+Backed up: 20240901_1.0.0_core_system_setup.sql
+Backed up: 20240902_1.1.0_primary_schema.sql
+Backed up: 20240903_1.2.0_extensions_and_features.sql
+Backed up: 20240910_add_profiles_and_avatar.sql
+Backed up: 20240920_1.3.0_core_content_tables.sql
+Backed up: 20240921_1.4.0_research_system.sql
+Backed up: 20240922_1.5.0_user_experience.sql
+Backed up: 20240923_1.6.0_performance_infrastructure.sql
+Backed up: 20240923_onboarding_triggers.sql
+Backed up: 20240924_1.6.1_user_profiles.sql
+Backed up: 20240924_1.7.0_operational_features.sql
+Backed up: 20240924_missing_tables.sql
+Backed up: 20240925_1.8.0_additional_features.sql
+Backed up: 20240940_1.20.0_migration_fixes.sql
+Backed up: 20240941_1.21.0_fix_startup_issues.sql
+Backed up: 20240950_1.22.0_consolidated_fixes.sql
+Backed up: 20240960_1.23.0_fix_policy_references.sql
+Backed up: 20240970_1.24.0_create_admin_users_table.sql
+Backed up: 20240975_1.25.0_chat_ai_system.sql
+Backed up: fix-policy-issues.sql
+Backed up: fix-simple.sql
+Backup completed at 03/17/2025 04:00:44

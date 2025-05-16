@@ -1,4 +1,4 @@
-import { type Message } from 'ai';
+import { type Message as AIMessage } from 'ai';
 import { type JSONValue } from 'ai';
 
 export type ChatRole = 'user' | 'assistant' | 'system';
@@ -23,7 +23,7 @@ export interface BaseChatMessage {
   metadata?: Record<string, any>;
 }
 
-export interface ChatMessage extends Omit<Message, 'id' | 'createdAt'>, BaseChatMessage {
+export interface ChatMessage extends Omit<AIMessage, 'id' | 'createdAt'>, BaseChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
 }
@@ -114,7 +114,7 @@ export interface ChatAnalytics {
   errorRate: number;
 }
 
-export interface StreamData implements JSONValue {
+export interface StreamData {
   type: 'status' | 'error' | 'progress' | 'tool';
   value: {
     name?: string;
@@ -206,24 +206,24 @@ export function isAIMessage(message: any): message is Message {
   return 'role' in message && 'content' in message && 'id' in message;
 }
 
-export function createEmptyMessage(): Message {
+export function createEmptyMessage(): ChatMessage {
   return {
     id: '',
-    conversation_id: '',
-    user_id: '',
+    conversationId: '',
+    userId: '',
     role: 'user',
     content: '',
     status: 'sending',
-    is_processed: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    isProcessed: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 }
 
-export function transformMessage(message: Message): Message {
+export function transformMessage(message: ChatMessage): ChatMessage {
   return {
     ...message,
-    created_at: message.created_at,
-    updated_at: message.updated_at
+    createdAt: message.createdAt,
+    updatedAt: message.updatedAt
   };
 }

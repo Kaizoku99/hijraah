@@ -383,3 +383,159 @@ A `templates` directory is provided with starter templates for different migrati
 - `idempotent_migration_template.sql` - Base template with idempotent patterns
 - `rollback_template.sql` - Template with explicit rollback support
 - `environment_config_template.sql` - Template for environment-specific code
+
+# Supabase Migration Fix Scripts
+
+This directory contains scripts to fix migration issues with Supabase projects. These scripts help identify and fix common migration problems like syntax errors, unbalanced blocks, and duplicate migrations.
+
+## Prerequisites
+
+- PowerShell 7+ (Windows PowerShell or PowerShell Core)
+- Supabase CLI (installed via npm)
+- Node.js and npm
+
+## Usage
+
+### Using the Master Script
+
+The simplest way to run the entire fix process is to use the master script:
+
+```powershell
+# Run with standard "supabase" command (requires global Supabase CLI installation)
+.\fix-migrations.ps1
+
+# Run with "npx supabase" command (works without global installation)
+.\fix-migrations.ps1 -UseNpx
+
+# Run in simulation mode (no actual changes made)
+.\fix-migrations.ps1 -WhatIf
+
+# Run in simulation mode with npx
+.\fix-migrations.ps1 -WhatIf -UseNpx
+```
+
+The master script will:
+
+1. Create a backup of all migration files
+2. Verify the Supabase environment
+3. Fix syntax errors in migration files
+4. Consolidate duplicate migrations
+5. Standardize migration file naming
+6. Repair migration history in the database (optional)
+7. Verify migrations
+8. Perform a final test (optional)
+9. Deploy fixed migrations to the remote project (optional)
+
+### Running Individual Scripts
+
+You can also run individual scripts for specific tasks:
+
+```powershell
+# Create a backup of all migration files
+.\backup-migrations.ps1
+
+# Verify Supabase CLI installation and environment
+.\verify-environment.ps1
+
+# Fix syntax errors in migration files
+.\fix-syntax-errors.ps1
+
+# Consolidate duplicate migrations
+.\consolidate-migrations.ps1
+
+# Standardize migration file naming
+.\standardize-naming.ps1
+
+# Repair migration history in the database
+.\repair-migration-history.ps1
+
+# Verify migrations
+.\verify-migrations.ps1
+
+# Perform a final test with database reset
+.\final-test.ps1
+
+# Deploy fixed migrations to the remote project
+.\deploy-migrations.ps1
+```
+
+## Using npx with Supabase CLI
+
+If you don't have the Supabase CLI installed globally, you can use `npx supabase` instead. Several scripts have been updated to support this approach:
+
+1. Add the `-UseNpx` flag when running the master script:
+
+   ```powershell
+   .\fix-migrations.ps1 -UseNpx
+   ```
+
+2. For individual scripts that interact with the Supabase CLI, commands will use `npx supabase` instead of just `supabase`.
+
+## Common Migration Issues Fixed
+
+### Syntax Errors
+
+- Unbalanced BEGIN/END blocks
+- Unbalanced DO $$ blocks
+- Missing semicolons after CREATE statements
+- Missing transaction blocks
+
+### Migration Conflicts
+
+- Duplicate migration versions
+- Migration ordering issues
+- Missing migration registration
+
+### Policy References
+
+- Incorrect references in RLS policies (e.g., user_id = auth.uid() vs id = auth.uid())
+
+## Log Files
+
+Each script generates detailed logs that are saved in the migrations directory:
+
+- `master_fix.log` - Log file for the master script
+- `environment_check.log` - Log file for environment verification
+- `syntax_fix.log` - Log file for syntax fixes
+- `consolidation.log` - Log file for migration consolidation
+- `naming_standardization.log` - Log file for naming standardization
+- `migration_verification.log` - Log file for migration verification
+- `migration_test_log_*.log` - Log files for migration tests
+- `deployment.log` - Log file for deployment
+
+## Backup
+
+Before making any changes, all migration files are backed up to a directory named `backup-{timestamp}` in the migrations directory. You can restore these files if needed.
+
+## Additional Information
+
+- The scripts check for Supabase CLI installation and project linking before making any changes.
+- The scripts use PowerShell's error handling to ensure that errors are properly caught and reported.
+- The scripts provide detailed logs of all actions taken, making it easier to troubleshoot issues.
+
+## Troubleshooting
+
+### Supabase CLI Not Found
+
+If you see an error message that the Supabase CLI is not found, you have two options:
+
+1. Install the Supabase CLI globally: `npm install -g supabase`
+2. Use the `-UseNpx` flag to run with npx: `.\fix-migrations.ps1 -UseNpx`
+
+### Database Connection Issues
+
+If you encounter database connection issues:
+
+1. Make sure your Supabase instance is running (`npx supabase start`)
+2. Check if your project is linked (`npx supabase status`)
+3. Check your database credentials and connection string
+
+### Script Execution Policy
+
+If you encounter issues with script execution policy, run PowerShell as administrator and use:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+```
+
+Then run the scripts again.

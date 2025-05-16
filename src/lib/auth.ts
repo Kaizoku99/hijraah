@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          const supabase = createClient();
+          const supabase = await createClient();
           
           // Authenticate user with Supabase
           const { data, error } = await supabase.auth.signInWithPassword({
@@ -155,5 +155,30 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
     };
+  }
+}
+
+export async function getServerUser() {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    return { user, error };
+  } catch (error) {
+    console.error('Error getting server user:', error);
+    return { user: null, error };
+  }
+}
+
+export async function getServerSession() {
+  try {
+    const supabase = await getSupabaseServerClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (user) {
+      return { session: { user }, error: null };
+    }
+    return { session: null, error };
+  } catch (error) {
+    console.error('Error getting server session:', error);
+    return { session: null, error };
   }
 } 
