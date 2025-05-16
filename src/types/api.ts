@@ -1,182 +1,43 @@
-/**
- * API Response Types for Hijraah API
- * These types represent the response structures returned by the API
- */
+// This will be the single source of truth for API response structures, pagination, etc.
 
-// Base API Response
-export interface ApiResponse {
-  success: boolean;
-  error?: string;
-}
+// Unified API types
 
-// General Types
-export interface User {
-  id: string;
-  email: string;
-  user_metadata: {
-    first_name: string;
-    last_name: string;
+// Common response structure, similar to src/app/api/types.ts
+export interface ApiResponse<T = unknown> {
+  success: boolean; // Standardized to 'success' boolean
+  data?: T;
+  error?: {
+    message: string;
+    status: number;
+    code?: string; // Added optional error code
   };
 }
 
-export interface UserProfile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  avatar_url?: string;
-  created_at: string;
-  updated_at?: string;
-}
-
-// Authentication API Types
-export interface SignInResponse extends ApiResponse {
-  user: User;
-  session: {
-    access_token: string;
-    expires_at: number;
+// Pagination types from src/app/api/types.ts
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    hasMore: boolean;
   };
 }
 
-export interface SignUpResponse extends ApiResponse {
+// Generic API Error type from src/app/api/types.ts
+export interface ApiError {
   message: string;
-  user: User;
+  status: number;
+  code?: string;
 }
 
-export interface ProfileResponse extends ApiResponse {
-  user: User;
-  profile: UserProfile;
-}
+// It seems the old src/types/api.ts had more specific response types
+// (e.g., SignInResponse, ResearchSessionResponse).
+// If that content can be recovered, those should be merged here.
+// For now, this file contains the essentials from src/app/api/types.ts
 
-// Research API Types
-export interface ResearchSession {
-  id: string;
-  user_id: string;
-  query: string;
-  status: 'active' | 'processing' | 'completed' | 'error' | 'cancelled';
-  metadata: {
-    source: string;
-    depth: number;
-    startTime?: string;
-    completedAt?: string;
-    error?: string;
-    errorTime?: string;
-    cancelled_at?: string;
-    cancelled_by?: string;
-  };
-  created_at: string;
-  updated_at?: string;
-}
+// Placeholder for User type if it becomes API specific,
+// otherwise it should come from @/types/auth
+// export type ApiUser = { id: string, name: string, ... };
 
-export interface ResearchSource {
-  id: string;
-  report_id: string;
-  url: string;
-  title: string;
-  content: string;
-  metadata: any;
-  created_at: string;
-}
-
-export interface ResearchFinding {
-  id: string;
-  report_id: string;
-  content: string;
-  category: string;
-  metadata: any;
-  created_at: string;
-}
-
-export interface ResearchSessionResponse extends ApiResponse {
-  session: ResearchSession;
-  sources: ResearchSource[];
-  findings: ResearchFinding[];
-}
-
-export interface ResearchStartResponse extends ApiResponse {
-  message: string;
-  sessionId: string;
-}
-
-export interface UserSessionsResponse extends ApiResponse {
-  sessions: ResearchSession[];
-}
-
-// Vector Search API Types
-export interface EmbeddingResult {
-  id: string;
-  content: string;
-  collection_id: string;
-  user_id: string;
-  metadata: any;
-  similarity: number;
-}
-
-export interface EmbeddingResponse extends ApiResponse {
-  embeddingId: string;
-  message: string;
-}
-
-export interface VectorSearchResponse extends ApiResponse {
-  query: string;
-  results: EmbeddingResult[];
-}
-
-export interface BulkEmbeddingResult {
-  success: boolean;
-  text: string;
-  embeddingId?: string;
-  error?: string;
-}
-
-export interface BulkEmbeddingResponse extends ApiResponse {
-  processedCount: number;
-  failedCount: number;
-  results: BulkEmbeddingResult[];
-}
-
-// Scraping API Types
-export interface ScrapeMetadata {
-  title: string;
-  description: string;
-  ogTitle: string;
-  ogDescription: string;
-  ogImage: string;
-  url: string;
-  scrapedAt: string;
-}
-
-export interface ScrapeResponse extends ApiResponse {
-  url: string;
-  content: string;
-  metadata: ScrapeMetadata;
-  storageUrl?: string;
-}
-
-export interface BulkScrapeResult {
-  success: boolean;
-  url: string;
-  content?: string;
-  metadata?: ScrapeMetadata;
-  storageUrl?: string;
-  error?: string;
-}
-
-export interface BulkScrapeResponse extends ApiResponse {
-  results: BulkScrapeResult[];
-}
-
-export interface ScrapeHistoryEntry {
-  id: string;
-  user_id: string;
-  url: string;
-  title: string;
-  storage_path?: string;
-  public_url?: string;
-  metadata: any;
-  created_at: string;
-}
-
-export interface ScrapeHistoryResponse extends ApiResponse {
-  history: ScrapeHistoryEntry[];
-} 
+export {}; // Ensures this is treated as a module if no other exports are present initially

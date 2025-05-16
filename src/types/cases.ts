@@ -1,9 +1,22 @@
-import { Database, Json } from './database';
+import { Database, Json } from "./supabase";
 
-type CaseRow = Database['public']['Tables']['cases']['Row'];
-type TimelineRow = Database['public']['Tables']['case_timeline']['Row'];
+type CaseRow = Database["public"]["Tables"]["cases"]["Row"];
+
+/**
+ * Custom type for case timeline entries since there's no corresponding database table
+ */
+interface TimelineRow {
+  id: string;
+  case_id: string;
+  event_type: string;
+  event_date: string;
+  description: string;
+  metadata?: Json;
+  created_at: string;
+}
 
 export interface Case extends CaseRow {
+  case_number?: string | null;
   case_type: CaseType;
   destination_country: string;
   target_date?: string;
@@ -14,15 +27,15 @@ export interface Case extends CaseRow {
 }
 
 export type CaseEventType =
-  | 'created'
-  | 'status_change'
-  | 'stage_change'
-  | 'document_added'
-  | 'document_removed'
-  | 'document_updated'
-  | 'note_added'
-  | 'requirement_updated'
-  | 'deadline_updated';
+  | "created"
+  | "status_change"
+  | "stage_change"
+  | "document_added"
+  | "document_removed"
+  | "document_updated"
+  | "note_added"
+  | "requirement_updated"
+  | "deadline_updated";
 
 export interface CaseTimeline {
   id: string;
@@ -40,7 +53,7 @@ export interface CaseDocument {
   document_id: string;
   name: string;
   category: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   metadata?: {
     expiry_date?: string;
     rejection_reason?: string;
@@ -57,7 +70,7 @@ export interface CaseRequirement {
   case_id: string;
   name: string;
   description?: string;
-  status: 'pending' | 'completed' | 'waived';
+  status: "pending" | "completed" | "waived";
   due_date?: string;
   metadata?: Record<string, any>;
   created_at: string;
@@ -74,33 +87,23 @@ export interface CaseNote {
   updated_at: string;
 }
 
-export type CaseStatus = 
-  | 'active'
-  | 'pending'
-  | 'in_progress'
-  | 'pending_review'
-  | 'completed'
-  | 'approved'
-  | 'rejected'
-  | 'archived';
-
 export type CaseStage =
-  | 'document_collection'
-  | 'review'
-  | 'submission'
-  | 'processing'
-  | 'decision'
-  | 'completed';
+  | "document_collection"
+  | "review"
+  | "submission"
+  | "processing"
+  | "decision"
+  | "completed";
 
 export type CaseType =
-  | 'student_visa'
-  | 'work_visa'
-  | 'family_visa'
-  | 'permanent_residence'
-  | 'citizenship'
-  | 'business_visa'
-  | 'tourist_visa'
-  | 'other';
+  | "student_visa"
+  | "work_visa"
+  | "family_visa"
+  | "permanent_residence"
+  | "citizenship"
+  | "business_visa"
+  | "tourist_visa"
+  | "other";
 
 export interface CaseStats {
   total: number;
@@ -136,9 +139,9 @@ export interface CaseAssignment {
   id: string;
   case_id: string;
   user_id: string;
-  role: 'owner' | 'member' | 'viewer';
-  status: 'active' | 'inactive';
+  role: "owner" | "member" | "viewer";
+  status: "active" | "inactive";
   metadata: Json;
   created_at: string;
   updated_at: string;
-} 
+}
