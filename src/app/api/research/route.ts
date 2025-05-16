@@ -1,193 +1,250 @@
 import { Hono } from 'hono'
 import { handle } from 'hono/vercel'
-import { zValidator } from '@hono/zod-validator'
-import { z } from 'zod'
+import { cors } from 'hono/cors'
+import { OpenAI } from 'openai'
+import { Anthropic } from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
-import { SearchEngine } from '@/lib/scrapers/search'
-import { TimelineAnalyzer } from '@/lib/analysis/timeline'
-import { CredibilityScorer } from '@/lib/analysis/credibility'
-import { CrossReferenceAnalyzer } from '@/lib/analysis/cross-reference'
-import { AIModelManager } from '@/lib/ai/models'
+import { Firecrawl } from '@firecrawl/node'
+import { z } from 'zod'
 
-// Create a new Hono app
+// Initialize clients
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+})
+
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY
+})
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
+
+const firecrawl = new Firecrawl({
+  apiKey: process.env.FIRECRAWL_API_KEY
+})
+
+// Create a Hono app
 const app = new Hono()
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Add CORS middleware
+app.use('*', cors())
 
-// Define request validation schemas
-const searchSchema = z.object({
-  query: z.string().min(1).max(500),
-  model: z.string().default('gpt-4'),
-  options: z.object({
-    searchMode: z.enum(['vector', 'firecrawl', 'hybrid']).default('hybrid'),
-    rerank: z.boolean().default(true),
-    filters: z.record(z.string()).optional()
-  }).optional()
+// Define schema for the request body
+const researchRequestSchema = z.object({
+  query: z.string().min(1),
+  userId: z.string().optional(),
+  sessionId: z.string(),
+  model: z.enum(['gpt-4o', 'claude-3-opus', 'claude-3-sonnet', 'gemini-pro']).default('gpt-4o'),
+  maxSources: z.number().min(1).max(10).default(5),
+  maxDepth: z.number().min(1).max(3).default(2)
 })
 
-const analysisSchema = z.object({
-  sources: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    url: z.string().url(),
-    snippet: z.string(),
-    content: z.string().optional(),
-    relevanceScore: z.number(),
-    categories: z.array(z.string()),
-    metadata: z.record(z.any()).optional()
-  })),
-  model: z.string().default('gpt-4'),
-  options: z.object({
-    timeline: z.object({
-      granularity: z.enum(['day', 'week', 'month', 'year']).default('month'),
-      includeTrends: z.boolean().default(true)
-    }).optional(),
-    credibility: z.object({
-      minConfidence: z.number().min(0).max(1).default(0.5)
-    }).optional(),
-    crossReference: z.object({
-      minSimilarity: z.number().min(0).max(1).default(0.3),
-      maxConnections: z.number().int().positive().default(5)
-    }).optional()
-  }).optional()
+// Define schema for source data
+const sourceSchema = z.object({
+  url: z.string().url(),
+  title: z.string(),
+  description: z.string(),
+  type: z.enum(['web', 'pdf', 'document', 'database']),
+  relevance: z.number().min(0).max(1)
 })
 
-// Search endpoint
-app.post('/search', zValidator('json', searchSchema), async (c) => {
+// Define schema for activity data
+const activitySchema = z.object({
+  type: z.enum(['search', 'extract', 'analyze', 'reasoning', 'synthesis', 'thought']),
+  message: z.string(),
+  status: z.enum(['pending', 'complete', 'error']),
+  depth: z.number().min(0),
+  timestamp: z.number()
+})
+
+// Define schema for finding data
+const findingSchema = z.object({
+  content: z.string(),
+  confidence: z.number().min(0).max(1),
+  sources: z.array(z.string()),
+  timestamp: z.number()
+})
+
+// Define schema for research response
+const researchResponseSchema = z.object({
+  sources: z.array(sourceSchema),
+  activities: z.array(activitySchema),
+  findings: z.array(findingSchema),
+  depth: z.object({
+    current: z.number(),
+    max: z.number()
+  }),
+  progress: z.object({
+    completedSteps: z.number(),
+    totalSteps: z.number()
+  })
+})
+
+// Handle research request
+app.post('/research', async (c) => {
   try {
-    const { query, model, options } = c.req.valid('json')
+    // Parse and validate request body
+    const body = await c.req.json()
+    const validatedData = researchRequestSchema.parse(body)
     
-    // Store search query in Supabase for analytics
+    // Start a research session in Supabase
+    const { data: session, error: sessionError } = await supabase
+      .from('research_sessions')
+      .upsert({
+        id: validatedData.sessionId,
+        user_id: validatedData.userId,
+        query: validatedData.query,
+        model: validatedData.model,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        status: 'in_progress'
+      })
+      .select()
+      .single()
+    
+    if (sessionError) {
+      console.error('Error creating research session:', sessionError)
+      return c.json({ error: 'Failed to create research session' }, 500)
+    }
+    
+    // Initialize research data
+    const researchData = {
+      sources: [],
+      activities: [
+        {
+          type: 'search',
+          message: `Starting research on: ${validatedData.query}`,
+          status: 'pending',
+          depth: 1,
+          timestamp: Date.now()
+        }
+      ],
+      findings: [],
+      depth: { current: 1, max: validatedData.maxDepth },
+      progress: { completedSteps: 0, totalSteps: 5 * validatedData.maxDepth }
+    }
+    
+    // Store initial research data
     await supabase
-      .from('search_queries')
-      .insert({
-        query,
-        model,
-        options,
-        user_id: c.req.header('x-user-id'),
-        timestamp: new Date().toISOString()
+      .from('research_data')
+      .upsert({
+        session_id: validatedData.sessionId,
+        data: researchData,
+        updated_at: new Date().toISOString()
       })
     
-    // Perform search
-    const searchEngine = new SearchEngine({
-      modelManager: {
-        model,
-        temperature: 0.3,
-        maxTokens: 1000
-      }
-    })
-    
-    const results = await searchEngine.search(query, options)
-    
-    // Return search results
-    return c.json({
-      success: true,
-      results
-    })
+    // Return the initial research data
+    return c.json(researchData)
   } catch (error) {
-    console.error('Search error:', error)
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500)
+    console.error('Research API error:', error)
+    return c.json({ error: 'Internal server error' }, 500)
   }
 })
 
-// Analysis endpoint
-app.post('/analyze', zValidator('json', analysisSchema), async (c) => {
+// Handle research update
+app.post('/research/:sessionId/update', async (c) => {
   try {
-    const { sources, model, options } = c.req.valid('json')
+    const sessionId = c.req.param('sessionId')
+    const body = await c.req.json()
     
-    // Initialize AI model manager
-    const modelManager = new AIModelManager({
-      model,
-      temperature: 0.3,
-      maxTokens: 1000
-    })
-    
-    // Run analyses in parallel
-    const [timeline, credibility, crossReferences] = await Promise.all([
-      // Timeline analysis
-      new TimelineAnalyzer(modelManager).createTimeline(
-        sources.map(s => ({
-          date: new Date(s.metadata?.date || Date.now()),
-          title: s.title,
-          description: s.snippet,
-          sources: [s.url],
-          importance: s.relevanceScore,
-          relatedEvents: [],
-          confidence: 0.8
-        })),
-        {
-          granularity: options?.timeline?.granularity || 'month',
-          includeTrends: options?.timeline?.includeTrends
-        }
-      ),
-      
-      // Credibility analysis
-      Promise.all(
-        sources.map(s =>
-          new CredibilityScorer(modelManager).scoreSource(
-            s.content || s.snippet,
-            {
-              domain: new URL(s.url).hostname,
-              publishDate: s.metadata?.date ? new Date(s.metadata.date) : undefined,
-              citations: s.metadata?.citations,
-              backlinks: s.metadata?.backlinks
-            }
-          )
-        )
-      ),
-      
-      // Cross-reference analysis
-      new CrossReferenceAnalyzer(modelManager).analyzeSources(
-        sources.map(s => ({
-          id: s.url,
-          content: s.content || s.snippet
-        })),
-        {
-          minSimilarity: options?.crossReference?.minSimilarity,
-          maxConnections: options?.crossReference?.maxConnections
-        }
-      )
-    ])
-    
-    // Store analysis results in Supabase
-    await supabase
-      .from('analysis_results')
-      .insert({
-        sources: sources.map(s => s.id),
-        model,
-        options,
-        results: {
-          timeline,
-          credibility,
-          crossReferences
-        },
-        user_id: c.req.header('x-user-id'),
-        timestamp: new Date().toISOString()
+    // Update research data in Supabase
+    const { error } = await supabase
+      .from('research_data')
+      .upsert({
+        session_id: sessionId,
+        data: body,
+        updated_at: new Date().toISOString()
       })
     
-    // Return analysis results
-    return c.json({
-      success: true,
-      results: {
-        timeline,
-        credibility,
-        crossReferences
-      }
-    })
+    if (error) {
+      console.error('Error updating research data:', error)
+      return c.json({ error: 'Failed to update research data' }, 500)
+    }
+    
+    return c.json({ success: true })
   } catch (error) {
-    console.error('Analysis error:', error)
-    return c.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, 500)
+    console.error('Research update API error:', error)
+    return c.json({ error: 'Internal server error' }, 500)
   }
 })
 
-// Export Next.js route handler
-export const POST = handle(app) 
+// Handle research sources fetch (Firecrawl integration)
+app.post('/research/:sessionId/sources', async (c) => {
+  try {
+    const sessionId = c.req.param('sessionId')
+    const body = await c.req.json()
+    const { query } = body
+    
+    // Get research results using Firecrawl
+    const searchResults = await firecrawl.search(query, {
+      limit: 5,
+      extractContent: true
+    })
+    
+    // Format the search results
+    const sources = searchResults.map(result => ({
+      url: result.url,
+      title: result.title || 'Unknown Title',
+      description: result.description || 'No description available',
+      type: 'web',
+      relevance: result.score || 0.5
+    }))
+    
+    // Update the research data with the new sources
+    const { data: researchData, error: fetchError } = await supabase
+      .from('research_data')
+      .select('data')
+      .eq('session_id', sessionId)
+      .single()
+    
+    if (fetchError) {
+      console.error('Error fetching research data:', fetchError)
+      return c.json({ error: 'Failed to fetch research data' }, 500)
+    }
+    
+    const updatedData = {
+      ...researchData.data,
+      sources: [...researchData.data.sources, ...sources],
+      activities: [
+        ...researchData.data.activities,
+        {
+          type: 'search',
+          message: `Found ${sources.length} sources for: ${query}`,
+          status: 'complete',
+          depth: 1,
+          timestamp: Date.now()
+        }
+      ],
+      progress: {
+        ...researchData.data.progress,
+        completedSteps: researchData.data.progress.completedSteps + 1
+      }
+    }
+    
+    // Save the updated data
+    const { error: updateError } = await supabase
+      .from('research_data')
+      .upsert({
+        session_id: sessionId,
+        data: updatedData,
+        updated_at: new Date().toISOString()
+      })
+    
+    if (updateError) {
+      console.error('Error updating research data with sources:', updateError)
+      return c.json({ error: 'Failed to update research data with sources' }, 500)
+    }
+    
+    return c.json(sources)
+  } catch (error) {
+    console.error('Research sources API error:', error)
+    return c.json({ error: 'Internal server error' }, 500)
+  }
+})
+
+// Export Hono app using Vercel adapter
+export const GET = handle(app)
+export const POST = handle(app)
+export const PUT = handle(app) 

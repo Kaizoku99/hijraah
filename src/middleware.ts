@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 // @ts-ignore: Allow synthetic default import
 import createIntlMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale } from '@/i18n';
+import { locales, defaultLocale, Locale, localeConfigs } from '@/i18n';
+import { detectLocaleFromHeader } from './lib/i18n/helpers';
 
 // Cache configuration
 const CACHE_REVALIDATE = 60; // 1 minute
@@ -36,6 +37,39 @@ const PUBLIC_ROUTES = [
   '/contact',
 ];
 
+// Types of sources for language detection
+type DetectionSource = 'path' | 'cookie' | 'header' | 'searchParams' | 'default';
+
+// Configuration for language detection
+const DETECTION_CONFIG = {
+  // Order of detection sources
+  order: ['path', 'cookie', 'searchParams', 'header'] as DetectionSource[],
+  // Cookie name for language preference
+  cookieName: 'NEXT_LOCALE',
+  // Query parameter name for language
+  searchParamName: 'locale',
+  // Cache detected language in cookie
+  cacheInCookie: true,
+  // Cookie options for caching
+  cookieOptions: {
+    path: '/',
+    maxAge: 365 * 24 * 60 * 60, // 1 year
+    sameSite: 'lax' as const,
+    secure: process.env.NODE_ENV === 'production',
+  },
+  // Routes that should be excluded from locale prefix
+  unprefixedRoutes: [
+    '/api',
+    '/_next',
+    '/public',
+    '/favicon.ico',
+    '/robots.txt',
+    '/sitemap.xml',
+  ],
+  // Debug mode
+  debug: process.env.NODE_ENV === 'development',
+};
+
 const intlMiddleware = createIntlMiddleware({
   // A list of all locales that are supported
   locales,
@@ -46,7 +80,7 @@ const intlMiddleware = createIntlMiddleware({
 });
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)']
 };
 
 // Helper function to log and handle missing environment variables
@@ -62,6 +96,92 @@ function validateEnvVariables() {
   }
   
   return missingVars;
+}
+
+// Create the internationalization middleware
+const i18nMiddleware = createIntlMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'as-needed',
+});
+
+/**
+ * Detect locale from various sources in the specified order
+ */
+function detectLocale(req: NextRequest): Locale {
+  let detectedLocale: Locale | null = null;
+  let detectedSource: DetectionSource | null = null;
+
+  // Check each source in order
+  for (const source of DETECTION_CONFIG.order) {
+    switch (source) {
+      case 'path': {
+        // Check URL path for locale
+        const pathname = req.nextUrl.pathname;
+        const pathnameSegments = pathname.split('/').filter(Boolean);
+        const firstSegment = pathnameSegments[0];
+        
+        if (firstSegment && locales.includes(firstSegment as Locale)) {
+          detectedLocale = firstSegment as Locale;
+          detectedSource = 'path';
+        }
+        break;
+      }
+      
+      case 'cookie': {
+        // Check cookie for locale
+        const cookieLocale = req.cookies.get(DETECTION_CONFIG.cookieName)?.value;
+        if (cookieLocale && locales.includes(cookieLocale as Locale)) {
+          detectedLocale = cookieLocale as Locale;
+          detectedSource = 'cookie';
+        }
+        break;
+      }
+      
+      case 'searchParams': {
+        // Check search params for locale
+        const paramLocale = req.nextUrl.searchParams.get(DETECTION_CONFIG.searchParamName);
+        if (paramLocale && locales.includes(paramLocale as Locale)) {
+          detectedLocale = paramLocale as Locale;
+          detectedSource = 'searchParams';
+        }
+        break;
+      }
+      
+      case 'header': {
+        // Check Accept-Language header
+        const acceptLanguage = req.headers.get('Accept-Language');
+        const headerLocale = detectLocaleFromHeader(acceptLanguage);
+        if (headerLocale) {
+          detectedLocale = headerLocale;
+          detectedSource = 'header';
+        }
+        break;
+      }
+    }
+    
+    // Stop checking if we found a locale
+    if (detectedLocale) break;
+  }
+  
+  // Use fallback if no locale detected
+  if (!detectedLocale) {
+    detectedLocale = defaultLocale;
+    detectedSource = 'default';
+  }
+  
+  if (DETECTION_CONFIG.debug) {
+    console.log(`[middleware] Detected locale: ${detectedLocale} from ${detectedSource}`);
+  }
+  
+  return detectedLocale;
+}
+
+/**
+ * Check if a path should be excluded from locale prefix
+ */
+function shouldExcludePath(pathname: string): boolean {
+  return DETECTION_CONFIG.unprefixedRoutes.some(route => pathname.startsWith(route));
 }
 
 export async function middleware(request: NextRequest) {
@@ -215,8 +335,42 @@ export async function middleware(request: NextRequest) {
     responseClone.headers.set('X-Cache-Status', 'MISS');
     responseClone.headers.set('X-Cache-Key', cacheKey.toString());
 
+    // Skip language detection for excluded paths
+    if (shouldExcludePath(requestPath)) {
+      return responseClone;
+    }
+
+    // Detect the locale from various sources
+    const detectedLocale = detectLocale(request);
+    
+    // Check if the URL already has a locale prefix
+    const hasLocalePrefix = locales.some(locale => 
+      requestPath === `/${locale}` || requestPath.startsWith(`/${locale}/`)
+    );
+    
+    // If URL doesn't have locale prefix and detected locale is not default,
+    // redirect to add locale prefix
+    if (!hasLocalePrefix && detectedLocale !== defaultLocale) {
+      const url = new URL(request.url);
+      url.pathname = `/${detectedLocale}${requestPath}`;
+      
+      // Create response with redirect
+      const redirectResponse = NextResponse.redirect(url);
+      
+      // Cache the detected locale in cookie if enabled
+      if (DETECTION_CONFIG.cacheInCookie) {
+        redirectResponse.cookies.set(
+          DETECTION_CONFIG.cookieName, 
+          detectedLocale,
+          DETECTION_CONFIG.cookieOptions
+        );
+      }
+      
+      return redirectResponse;
+    }
+
     // Step 1: Run the internationalization middleware
-    const intlResponse = intlMiddleware(request);
+    const intlResponse = i18nMiddleware(request);
 
     // Step 2: Add security headers
     if (intlResponse) {
@@ -228,6 +382,15 @@ export async function middleware(request: NextRequest) {
         'Content-Security-Policy',
         "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co;"
       );
+    }
+
+    // Set HTML direction based on locale
+    if (intlResponse && 'headers' in intlResponse) {
+      const direction = localeConfigs[detectedLocale]?.direction || 'ltr';
+      intlResponse.headers.set('Content-Language', detectedLocale);
+      
+      // Add custom header to tell client-side code about the language direction
+      intlResponse.headers.set('X-Language-Direction', direction);
     }
 
     return intlResponse || responseClone;

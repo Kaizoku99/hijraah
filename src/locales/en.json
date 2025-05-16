@@ -1,0 +1,101 @@
+{
+  "common": {
+    "appName": "Hijraah",
+    "tagline": "Immigration made simple",
+    "loading": "Loading...",
+    "menu": "Menu",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submit": "Submit",
+    "edit": "Edit",
+    "delete": "Delete",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "continue": "Continue",
+    "languageName": "English"
+  },
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "blog": "Blog",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "account": "Account",
+    "logout": "Logout"
+  },
+  "api": {
+    "hello": {
+      "success": "Hello! You're using {{language}} language."
+    },
+    "users": {
+      "retrieved": "Successfully retrieved user with ID {{id}}",
+      "created": "User created successfully",
+      "updated": "User updated successfully",
+      "deleted": "User deleted successfully"
+    }
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "resetPassword": "Reset Password",
+    "emailAddress": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fullName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "rememberMe": "Remember Me",
+    "orContinueWith": "Or continue with",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "forms": {
+    "required": "This field is required",
+    "invalidEmail": "Invalid email address",
+    "passwordsMustMatch": "Passwords must match",
+    "passwordTooShort": "Password must be at least {{length}} characters",
+    "invalidPhone": "Invalid phone number"
+  },
+  "errors": {
+    "generic": "An error occurred",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access denied",
+    "invalidRequest": "Invalid request",
+    "serverError": "Server error",
+    "server": "Something went wrong on our end",
+    "offline": "You are offline",
+    "timeoutError": "Request timed out",
+    "users": {
+      "notFound": "User with ID {{id}} not found"
+    }
+  },
+  "success": {
+    "generic": "Success",
+    "saved": "Successfully saved",
+    "updated": "Successfully updated",
+    "deleted": "Successfully deleted"
+  },
+  "dates": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "daysAgo": "{{days}} days ago",
+    "inDays": "in {{days}} days",
+    "monthsAgo": "{{months}} months ago",
+    "inMonths": "in {{months}} months",
+    "yearsAgo": "{{years}} years ago",
+    "inYears": "in {{years}} years",
+    "format": {
+      "short": "MM/DD/YYYY",
+      "medium": "MMM D, YYYY",
+      "long": "MMMM D, YYYY",
+      "full": "dddd, MMMM D, YYYY"
+    }
+  }
+} 

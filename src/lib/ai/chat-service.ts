@@ -482,9 +482,9 @@ export class AIChatService {
       }
 
       // Create system message with the combined context
-      const contextMessage = contextData.length > 0
-        ? `I'll help answer your question using the following information:\n\n${contextData.join('\n\n')}`
-        : 'I'll help answer your question based on my general knowledge about immigration.';
+      const contextMessage = contextData.length > 0 
+        ? `I'll help answer your question using the following information: \n\n${contextData.join('\n\n')}`
+        : "I'll help answer your question based on my general knowledge about immigration.";
 
       // Use circuit breaker pattern for OpenAI calls
       const response = await withCircuitBreaker(

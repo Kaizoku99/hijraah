@@ -1,0 +1,12 @@
+{
+    "version": "1",
+    "entries": [
+        {
+            "idx": 0,
+            "version": "0",
+            "when": 1714932000000,
+            "tag": "0000_initial_consolidated_schema",
+            "breakpoints": true
+        }
+    ]
+}

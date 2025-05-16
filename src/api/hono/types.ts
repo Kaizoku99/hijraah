@@ -1,5 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { User, Session } from '@supabase/supabase-js';
+import { Locale } from '@/i18n';
+import { TranslateService } from '@/lib/i18n/translate-service';
 
 /**
  * Declaration merging for Hono's Context
@@ -22,6 +24,15 @@ declare module 'hono' {
     // Request metadata
     clientIp: string;
     userAgent: string;
+    
+    /** The detected language for the current request */
+    language: Locale;
+    
+    /** Cached translations for the detected language */
+    translations: Record<string, any>;
+    
+    /** Translation service instance */
+    translator: TranslateService;
   }
 }
 

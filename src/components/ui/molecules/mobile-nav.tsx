@@ -32,6 +32,14 @@ const routes = [
     href: '/chat',
     label: 'Chat',
   },
+  {
+    href: '/ai-chat',
+    label: 'AI Chat',
+  },
+  {
+    href: '/ai-chat/history',
+    label: 'Chat History',
+  },
 ]
 
 export function MobileNav({ session }: { session: Session | null }) {
