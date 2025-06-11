@@ -67,16 +67,16 @@ graph TD
 > • Trigger.dev job: `src/lib/triggers/rag-pipeline.ts` (_ragPipelineTask_) + legacy `src/jobs/process-document.ts` (**to merge**)  
 > • Upload flow: UI components `UnifiedDocumentProcessor.tsx`, `BatchProcessor.tsx` already call `/api/documents/ocr` but **not yet the new pipeline**.
 
-| ID    | Item                                                                                                                       | Owner    | Status  | Notes                                                                              |
-| ----- | -------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------- |
-| DP-1  | Migrate OCR logic to shared **DocumentProcessor.extractText** so both uploads & scraped docs share the same flow           | Backend  | ✅ Done | implemented in `src/lib/rag/ingestion/document-processor.ts` + `src/lib/ai/ocr.ts` |
-| DP-1a | Ensure `/api/documents/ocr` simply proxies to the new utility (maintain external contract)                                 | Backend  | ✅ Done | refactored route in `src/app/api/documents/ocr/route.ts`                           |
-| DP-2  | Add `classifyText()` to `DocumentProcessor` that calls internal `/api/documents/classify` (or inline SDK call)             | Backend  | ✅ Done | inline generateObject classification implemented in processor                      |
-| DP-3  | Deprecate `/api/documents/classify` & `/api/embeddings` once processor integration is complete; respond `410 Gone`         | Backend  | ✅ Done | LEGACY_DOC_APIS gate added to both routes                                          |
-| DP-4  | Update `document.uploaded` Trigger.dev event to invoke **ragPipelineTask** only and remove `process-document.ts` job       | Workflow | ✅ Done | process route now emits event `rag-pipeline-orchestrator`, legacy job removed      |
-| DP-5  | Review & adjust RLS for buckets: `documents`, `chat-attachments` to ensure Processor service role access                   | DBA      | 🔜      | deliberate on `storage_admin` role                                                 |
-| DP-6  | Migrate front-end upload components to call `/api/documents/process` (or new GraphQL mutation) instead of manual OCR steps | Frontend | 🔜      | affects `UnifiedDocumentProcessor.tsx`, `BatchProcessor.tsx`                       |
-| DP-7  | End-to-end tests (Playwright) covering upload → OCR → KG insertion                                                         | QA       | 📝      | create under `tests/e2e/doc_upload.spec.ts`                                        |
+| ID    | Item                                                                                                                       | Owner    | Status  | Notes                                                                               |
+| ----- | -------------------------------------------------------------------------------------------------------------------------- | -------- | ------- | ----------------------------------------------------------------------------------- |
+| DP-1  | Migrate OCR logic to shared **DocumentProcessor.extractText** so both uploads & scraped docs share the same flow           | Backend  | ✅ Done | implemented in `src/lib/rag/ingestion/document-processor.ts` + `src/lib/ai/ocr.ts`  |
+| DP-1a | Ensure `/api/documents/ocr` simply proxies to the new utility (maintain external contract)                                 | Backend  | ✅ Done | refactored route in `src/app/api/documents/ocr/route.ts`                            |
+| DP-2  | Add `classifyText()` to `DocumentProcessor` that calls internal `/api/documents/classify` (or inline SDK call)             | Backend  | ✅ Done | inline generateObject classification implemented in processor                       |
+| DP-3  | Deprecate `/api/documents/classify` & `/api/embeddings` once processor integration is complete; respond `410 Gone`         | Backend  | ✅ Done | LEGACY_DOC_APIS gate added to both routes                                           |
+| DP-4  | Update `document.uploaded` Trigger.dev event to invoke **ragPipelineTask** only and remove `process-document.ts` job       | Workflow | ✅ Done | process route now emits event `rag-pipeline-orchestrator`, legacy job removed       |
+| DP-5  | Review & adjust RLS for buckets: `documents`, `chat-attachments` to ensure Processor service role access                   | DBA      | ✅ Done | migration `20240723000000_rag_storage_policies.sql` adds storage_admin and policies |
+| DP-6  | Migrate front-end upload components to call `/api/documents/process` (or new GraphQL mutation) instead of manual OCR steps | Frontend | 🔜      | affects `UnifiedDocumentProcessor.tsx`, `BatchProcessor.tsx`                        |
+| DP-7  | End-to-end tests (Playwright) covering upload → OCR → KG insertion                                                         | QA       | 📝      | create under `tests/e2e/doc_upload.spec.ts`                                         |
 
 ### 3.3 Knowledge Graph & Retrieval (🚧 Ongoing)
 
