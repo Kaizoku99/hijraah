@@ -1,133 +1,147 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { generateEmbedding, getTextForEmbedding } from '@/lib/openai';
+import { mistral } from "@ai-sdk/mistral";
+import { zValidator } from "@hono/zod-validator";
+import { embed, embedMany } from "ai";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { handle } from "hono/vercel";
+import { z } from "zod";
 
-// Initialize Supabase client with admin privileges for direct database access
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { recursiveCharacterTextSplitter } from "@/lib/ai/chunking"; // Ensure this utility exists and is compatible
 
-/**
- * Process documents that need embeddings
- */
-export async function POST(request: Request) {
-  try {
-    // Verify API key for security (if this is an internal API)
-    const { key } = await request.json();
-    if (key !== process.env.EMBEDDING_API_KEY) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+// Ensure these environment variables are set
+const internalApiKey = process.env.API_SECRET_KEY;
+const mistralApiKey = process.env.MISTRAL_API_KEY;
 
-    // Get documents that need embeddings
-    const { data: artifacts, error } = await supabaseAdmin
-      .from('artifacts')
-      .select('*')
-      .eq('needs_embedding', true)
-      .limit(10); // Process in batches
-
-    if (error) {
-      console.error('Error fetching artifacts:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    if (!artifacts || artifacts.length === 0) {
-      return NextResponse.json({ message: 'No artifacts need embedding' });
-    }
-
-    // Process each artifact
-    const results = await Promise.all(
-      artifacts.map(async (artifact) => {
-        try {
-          // Generate text for embedding
-          const text = getTextForEmbedding(artifact);
-          
-          // Generate embedding
-          const embedding = await generateEmbedding(text);
-          
-          // Update the artifact with the new embedding
-          const { error: updateError } = await supabaseAdmin
-            .from('artifacts')
-            .update({ 
-              embedding,
-              needs_embedding: false 
-            })
-            .eq('id', artifact.id);
-
-          if (updateError) {
-            throw updateError;
-          }
-          
-          return { id: artifact.id, status: 'success' };
-        } catch (err: any) {
-          console.error(`Error processing artifact ${artifact.id}:`, err);
-          return { id: artifact.id, status: 'error', message: err.message };
-        }
-      })
-    );
-
-    return NextResponse.json({ 
-      processed: results.length,
-      results 
-    });
-  } catch (error: any) {
-    console.error('Error in embedding API:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+if (!internalApiKey || !mistralApiKey) {
+  console.error("Missing required environment variables for Embedding API");
+  // Potentially throw an error or prevent startup in a real application
 }
 
-/**
- * Endpoint to manually request embedding for a specific document
- */
-export async function GET(request: Request) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    if (!id) {
-      return NextResponse.json({ error: 'Document ID is required' }, { status: 400 });
-    }
-    
-    // Get the specific artifact
-    const { data: artifact, error } = await supabaseAdmin
-      .from('artifacts')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    
-    if (!artifact) {
-      return NextResponse.json({ error: 'Document not found' }, { status: 404 });
-    }
-    
-    // Generate text for embedding
-    const text = getTextForEmbedding(artifact);
-    
-    // Generate embedding
-    const embedding = await generateEmbedding(text);
-    
-    // Update the artifact with the new embedding
-    const { error: updateError } = await supabaseAdmin
-      .from('artifacts')
-      .update({ 
-        embedding,
-        needs_embedding: false 
-      })
-      .eq('id', artifact.id);
-    
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
-    }
-    
-    return NextResponse.json({ 
-      id: artifact.id,
-      status: 'success' 
-    });
-  } catch (error: any) {
-    console.error('Error in embedding API:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+// --- Hono App Setup --- //
+const app = new Hono().basePath("/api/embeddings");
+
+// --- Middleware --- //
+app.use("*", cors());
+
+// Authentication Middleware
+app.use("*", async (c, next) => {
+  const authHeader = c.req.header("Authorization");
+  if (authHeader !== `Bearer ${internalApiKey}` || !internalApiKey) {
+    console.warn("Unauthorized attempt to access internal Embedding API");
+    return c.json({ error: "Unauthorized" }, 401);
   }
-} 
+  await next();
+});
+
+// ---------------- Deprecation Gate (DP-3) ----------------
+const legacyApisEnabled =
+  process.env.LEGACY_DOC_APIS === undefined ||
+  process.env.LEGACY_DOC_APIS.toLowerCase() === "true";
+
+app.use("*", async (c, next) => {
+  if (!legacyApisEnabled) {
+    c.header("X-Deprecation", "This endpoint is deprecated and disabled");
+    c.header("Access-Control-Expose-Headers", "X-Deprecation");
+    return c.json({ error: "Endpoint deprecated" }, 410 as any);
+  }
+  c.header(
+    "X-Deprecation",
+    "This endpoint is deprecated; migrate to DocumentProcessor inline embedding generation"
+  );
+  c.header("Access-Control-Expose-Headers", "X-Deprecation");
+  await next();
+});
+
+// --- Schemas --- //
+const EmbeddingRequestSchema = z.object({
+  text: z.string().min(1, "Text cannot be empty"),
+  documentId: z.string().uuid().optional(), // Optional, for logging/context
+  isQuery: z.boolean().optional().default(false), // Differentiate query vs document
+});
+
+// --- Embedding Model --- //
+// Check for API key presence during model initialization might be redundant
+// if the SDK handles it, but kept for clarity.
+const embeddingModel = mistralApiKey
+  ? mistral.embedding("mistral-embed")
+  : null;
+
+// --- Route --- //
+app.post("/", zValidator("json", EmbeddingRequestSchema), async (c) => {
+  if (!embeddingModel) {
+    console.error("Embedding model not initialized due to missing API key.");
+    return c.json({ error: "Embedding service not configured" }, 503);
+  }
+
+  const { documentId, text, isQuery } = c.req.valid("json");
+
+  try {
+    if (isQuery) {
+      // --- Handle Single Query Embedding ---
+      console.log(`[Embed API] Generating embedding for query`);
+      const { embedding, usage } = await embed({
+        model: embeddingModel,
+        value: text,
+      });
+      console.log(`[Embed API] Query embedding generated. Usage:`, usage);
+      return c.json({ embedding });
+    } else {
+      // --- Handle Document Chunk Embedding ---
+      console.log(
+        `[Embed API] Generating embeddings for documentId: ${documentId ?? "N/A"}`
+      );
+
+      // Chunk the text
+      const textChunks = recursiveCharacterTextSplitter(text, {
+        // Adjust chunkSize/chunkOverlap if needed
+        // chunkSize: 1000,
+        // chunkOverlap: 100,
+      });
+      console.log(`[Embed API] Text chunked into ${textChunks.length} pieces.`);
+
+      if (textChunks.length === 0) {
+        console.warn(
+          `[Embed API] No text chunks generated for documentId: ${documentId ?? "N/A"}.`
+        );
+        return c.json({ chunks: [] }); // Return empty if no chunks
+      }
+
+      // Generate embeddings for all chunks
+      const { embeddings, usage } = await embedMany({
+        model: embeddingModel,
+        values: textChunks,
+      });
+      console.log(
+        `[Embed API] Batch embedding generated ${embeddings.length} vectors. Usage:`,
+        usage
+      );
+
+      // Combine chunks with their embeddings
+      const chunksWithEmbeddings = textChunks.map(
+        (chunkText: string, index: number) => ({
+          index: index,
+          text: chunkText,
+          embedding: embeddings[index], // Assumes order matches
+        })
+      );
+
+      return c.json({ chunks: chunksWithEmbeddings });
+    }
+  } catch (error) {
+    console.error("[Embed API] Error:", error);
+    let errorMessage = "Internal server error processing embedding request";
+    let statusCode = 500;
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      // Potentially check for specific AI SDK or API errors for better status codes
+    }
+    return c.json({ error: errorMessage }, statusCode as any);
+  }
+});
+
+// --- Export Hono App --- //
+export const POST = handle(app);
+// Removed GET handler logic (moved responsibility elsewhere)
+
+// Optional: Specify runtime (Node.js likely needed for chunking library)
+export const runtime = "nodejs";
