@@ -77,6 +77,7 @@ graph TD
 | DP-5  | Review & adjust RLS for buckets: `documents`, `chat-attachments` to ensure Processor service role access                   | DBA      | ✅ Done | migration `20240723000000_rag_storage_policies.sql` adds storage_admin and policies |
 | DP-6  | Migrate front-end upload components to call `/api/documents/process` (or new GraphQL mutation) instead of manual OCR steps | Frontend | 🔜      | affects `UnifiedDocumentProcessor.tsx`, `BatchProcessor.tsx`                        |
 | DP-7  | End-to-end tests (Playwright) covering upload → OCR → KG insertion                                                         | QA       | 📝      | create under `tests/e2e/doc_upload.spec.ts`                                         |
+| MU-1  | Ensure consolidated + incremental Supabase migrations compile & run without conflicts                                      | DBA      | ✅ Done | baseline header fixed & kg schema search_path set                                   |
 
 ### 3.3 Knowledge Graph & Retrieval (🚧 Ongoing)
 
