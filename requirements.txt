@@ -1,0 +1,23 @@
+# Core dependencies for Hijraah Multi-Agent System
+asyncio>=3.4.3
+dataclasses>=0.6
+typing-extensions>=4.0.0
+
+# Optional: For production deployment
+# fastapi>=0.68.0
+# uvicorn>=0.15.0
+# redis>=4.0.0
+# celery>=5.2.0
+# psycopg2-binary>=2.9.0
+
+# Optional: For advanced AI features
+# langchain>=0.0.200
+# openai>=0.27.0
+# transformers>=4.20.0
+# torch>=1.12.0
+
+# Optional: For data analysis
+# pandas>=1.4.0
+# numpy>=1.21.0
+# matplotlib>=3.5.0
+# seaborn>=0.11.0
