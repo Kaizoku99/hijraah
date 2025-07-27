@@ -7,10 +7,10 @@
  * for the Shadcn UI components used in the project.
  */
 
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,7 +69,7 @@ if (!fs.existsSync(tailwindConfigPath)) {
 export default {
   darkMode: 'class',
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./apps/web/src/**/*.{js,jsx,ts,tsx}",
     "./app/**/*.{js,jsx,ts,tsx}",
     "./components/**/*.{js,jsx,ts,tsx}",
   ],
@@ -135,7 +135,7 @@ export default {
 export default {
   darkMode: 'class',
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
+    "./apps/web/src/**/*.{js,jsx,ts,tsx}",
     "./app/**/*.{js,jsx,ts,tsx}",
     "./components/**/*.{js,jsx,ts,tsx}",
   ],
@@ -204,7 +204,7 @@ if (fs.existsSync(packageJsonPath)) {
   if (!packageJson.scripts['build:css']) {
     console.log(`${colors.yellow}⚠️ Adding build:css script to package.json...${colors.reset}`);
     
-    packageJson.scripts['build:css'] = 'tailwindcss -i ./src/app/globals.css -o ./public/styles.css';
+    packageJson.scripts['build:css'] = 'tailwindcss -i ./apps/web/src/app/globals.css -o ./public/styles.css';
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2), 'utf8');
     
     console.log(`${colors.green}✅ Added build:css script to package.json.${colors.reset}`);

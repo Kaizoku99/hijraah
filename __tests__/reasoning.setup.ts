@@ -1,5 +1,7 @@
 import path from 'path';
+
 import { expect, test as setup } from '@playwright/test';
+
 import { ChatPage } from './pages/chat';
 
 const reasoningFile = path.join(

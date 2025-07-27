@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  # Shared packages following Turborepo best practices
+  - "packages/hijraah-*"
+
+  # Temporary directories for legacy integration (will be removed in Phase 4)
+  - "ai-chatbot" # Legacy AI chatbot to be migrated
+  - "firestarter" # Legacy Firestarter to be migrated
+  - "browser-r2-worker" # Legacy worker to be migrated

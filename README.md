@@ -295,3 +295,34 @@ export default function DashboardPage() {
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Project Architecture
+
+This project is being migrated to a Domain-Driven Design (DDD) architecture for better maintainability and scalability. See [ARCHITECTURE.md](src/ARCHITECTURE.md) for details on the new structure.
+
+### Migration Status
+
+We are currently in the process of migrating components and features to the new architecture. See [MIGRATION-STRATEGY.md](src/MIGRATION-STRATEGY.md) for the approach we're taking.
+
+### Component Migration
+
+Components are being organized following the Atomic Design methodology:
+
+- **Atoms**: Basic UI elements (Button, Input, etc.)
+- **Molecules**: Combinations of atoms (Form fields, etc.)
+- **Organisms**: Complex UI sections (Navigation bars, etc.)
+- **Templates**: Page layouts and structures
+
+To help with component migration, use the provided script:
+
+```bash
+node scripts/migrate-component.js --component=ComponentName --type=atom
+```
+
+### New Development
+
+For new development:
+
+1. Place components in the appropriate atomic design category
+2. Follow the domain boundaries defined in the architecture
+3. Implement proper testing and documentation

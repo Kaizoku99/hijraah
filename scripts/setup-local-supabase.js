@@ -262,7 +262,7 @@ ON CONFLICT DO NOTHING;
   // Step 6: Generate TypeScript types
   print('Generating TypeScript types...', colors.blue);
   runCommand(
-    'npx supabase gen types typescript --local > src/types/supabase-gen.ts',
+              'npx supabase gen types typescript --local > apps/web/src/types/supabase-gen.ts',
     'Failed to generate TypeScript types'
   );
   

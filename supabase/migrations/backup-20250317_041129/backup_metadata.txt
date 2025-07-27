@@ -1,7 +1,0 @@
-Supabase Migrations Backup
-Created: 03/17/2025 04:11:29
-Number of files: 28
-Backup directory: E:\downloads\Hijraah\supabase\migrations\backup-20250317_041129
-
-Files:
-20240901_1.0.0_core_system_setup.sql 20240902_1.1.0_primary_schema.sql 20240903_1.2.0_extensions_and_features.sql 20240920_1.3.0_core_content_tables.sql 20240921_1.4.0_research_system.sql 20240922_1.5.0_user_experience.sql 20240923_1.6.0_performance_infrastructure.sql 20240924_1.6.1_user_profiles.sql 20240924_1.7.0_operational_features.sql 20240925_1.8.0_additional_features.sql 20240940_1.20.0_migration_fixes.consolidated.sql 20240941_1.21.0_fix_startup_issues.consolidated.sql 20240950_1.22.0_consolidated_fixes.consolidated.sql 20240960_1.23.0_fix_policy_references.consolidated.sql 20240970_1.24.0_create_admin_users_table.sql 20240975_1.25.0_chat_ai_system.sql 20250309_1.0.0_add_profiles_and_avatar.sql 20250315_1.0.0_missing_tables.sql 20250315_1.0.0_onboarding_triggers.sql 20250316_1.0.0_keen_devos.sql 20250316_1.0.0_schema.sql 20250316_1.0.1_sparkling_blue_marvel.sql 20250316_1.0.2_wandering_riptide.sql 20250316_1.0.3_cloudy_glorian.sql 20250316_1.0.4_odd_slayback.sql 20250317_1.26.0_consolidated_fixes.sql fix-policy-issues.consolidated.sql fix-simple.consolidated.sql 

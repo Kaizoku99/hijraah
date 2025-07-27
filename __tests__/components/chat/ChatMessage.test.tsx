@@ -1,113 +1,88 @@
-import { render, screen } from '@testing-library/react';
-import { ChatMessage } from '@/components/chat/ChatMessage';
-import { ChatMessage as ChatMessageType } from '@/types/chat';
+import { render, screen } from "@testing-library/react";
 
-describe('ChatMessage', () => {
+import { ChatMessage } from "@/components/chat/ChatMessage";
+import { ChatMessage as ChatMessageType } from "@/types/chat";
+
+describe("ChatMessage", () => {
   const mockMessage: ChatMessageType = {
-    id: '1',
-    session_id: 'session-1',
-    user_id: 'user-1',
-    role: 'user',
-    content: 'Hello, world!',
+    id: "1",
+    session_id: "session-1",
+    user_id: "user-1",
+    role: "user",
+    content: "Hello, world!",
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     metadata: {
-      user_name: 'John Doe',
-      status: 'sent',
+      user_name: "John Doe",
+      status: "sent",
     },
   };
 
-  it('renders user message correctly', () => {
-    render(
-      <ChatMessage
-        message={mockMessage}
-        userAvatar="/avatar.png"
-      />
-    );
+  it("renders user message correctly", () => {
+    render(<ChatMessage message={mockMessage} userAvatar="/avatar.png" />);
 
-    expect(screen.getByText('John Doe')).toBeInTheDocument();
-    expect(screen.getByText('Hello, world!')).toBeInTheDocument();
+    expect(screen.getByText("John Doe")).toBeInTheDocument();
+    expect(screen.getByText("Hello, world!")).toBeInTheDocument();
   });
 
-  it('renders AI message correctly', () => {
+  it("renders AI message correctly", () => {
     const aiMessage = {
       ...mockMessage,
-      role: 'assistant' as const,
-      user_id: 'ai',
+      role: "assistant" as const,
+      user_id: "ai",
     };
 
-    render(
-      <ChatMessage
-        message={aiMessage}
-      />
-    );
+    render(<ChatMessage message={aiMessage} />);
 
-    expect(screen.getByText('AI Assistant')).toBeInTheDocument();
-    expect(screen.getByText('Hello, world!')).toBeInTheDocument();
+    expect(screen.getByText("AI Assistant")).toBeInTheDocument();
+    expect(screen.getByText("Hello, world!")).toBeInTheDocument();
   });
 
-  it('shows loading state', () => {
-    render(
-      <ChatMessage
-        message={mockMessage}
-        isLoading
-      />
-    );
+  it("shows loading state", () => {
+    render(<ChatMessage message={mockMessage} isLoading />);
 
-    expect(screen.getByTestId('message-skeleton')).toBeInTheDocument();
+    expect(screen.getByTestId("message-skeleton")).toBeInTheDocument();
   });
 
-  it('shows error state with retry button', () => {
+  it("shows error state with retry button", () => {
     const onRetry = jest.fn();
-    const error = new Error('Failed to send message');
+    const error = new Error("Failed to send message");
 
     render(
-      <ChatMessage
-        message={mockMessage}
-        error={error}
-        onRetry={onRetry}
-      />
+      <ChatMessage message={mockMessage} error={error} onRetry={onRetry} />
     );
 
-    expect(screen.getByText('Failed to send message')).toBeInTheDocument();
-    expect(screen.getByText('Retry')).toBeInTheDocument();
+    expect(screen.getByText("Failed to send message")).toBeInTheDocument();
+    expect(screen.getByText("Retry")).toBeInTheDocument();
 
-    screen.getByText('Retry').click();
+    screen.getByText("Retry").click();
     expect(onRetry).toHaveBeenCalled();
   });
 
-  it('renders attachments when present', () => {
+  it("renders attachments when present", () => {
     const messageWithAttachments = {
       ...mockMessage,
       metadata: {
         ...mockMessage.metadata,
         attachments: [
-          { id: '1', name: 'document.pdf', type: 'pdf', url: '/doc.pdf' },
+          { id: "1", name: "document.pdf", type: "pdf", url: "/doc.pdf" },
         ],
       },
     };
 
-    render(
-      <ChatMessage
-        message={messageWithAttachments}
-      />
-    );
+    render(<ChatMessage message={messageWithAttachments} />);
 
-    expect(screen.getByText('document.pdf')).toBeInTheDocument();
+    expect(screen.getByText("document.pdf")).toBeInTheDocument();
   });
 
-  it('handles missing metadata gracefully', () => {
+  it("handles missing metadata gracefully", () => {
     const messageWithoutMetadata = {
       ...mockMessage,
       metadata: undefined,
     };
 
-    render(
-      <ChatMessage
-        message={messageWithoutMetadata}
-      />
-    );
+    render(<ChatMessage message={messageWithoutMetadata} />);
 
-    expect(screen.getByText('You')).toBeInTheDocument();
+    expect(screen.getByText("You")).toBeInTheDocument();
   });
-}); 
+});

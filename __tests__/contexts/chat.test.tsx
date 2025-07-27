@@ -1,7 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
+
+import { useAuth } from '@/contexts/auth';
 import { ChatProvider, useChat } from '@/contexts/chat';
 import { createClient } from '@/lib/supabase/client';
-import { useAuth } from '@/contexts/auth';
 
 // Mock dependencies
 jest.mock('@/lib/supabase/client');

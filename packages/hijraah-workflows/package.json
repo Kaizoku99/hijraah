@@ -1,0 +1,42 @@
+{
+    "name": "@hijraah/workflows",
+    "version": "0.1.0",
+    "description": "Background job processing and workflow orchestration for Hijraah using Trigger.dev v3",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "lint": "eslint src --ext .ts,.tsx",
+        "type-check": "tsc --noEmit",
+        "trigger:dev": "npx trigger.dev@latest dev"
+    },
+    "dependencies": {
+        "@trigger.dev/sdk": "^3.2.0",
+        "@hijraah/ai": "workspace:*",
+        "@hijraah/documents": "workspace:*",
+        "@hijraah/types": "workspace:*",
+        "zod": "^3.23.8",
+        "openai": "^4.67.1",
+        "@mendable/firecrawl-js": "^1.29.1",
+        "@supabase/supabase-js": "^2.46.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.7.4",
+        "typescript": "^5.6.2",
+        "eslint": "^8.57.0",
+        "@hijraah/eslint-config": "workspace:*",
+        "@hijraah/typescript-config": "workspace:*"
+    },
+    "files": [
+        "dist"
+    ],
+    "publishConfig": {
+        "access": "restricted"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/yourusername/hijraah.git",
+        "directory": "packages/hijraah-workflows"
+    }
+}

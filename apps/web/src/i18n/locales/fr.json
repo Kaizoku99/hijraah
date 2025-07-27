@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Hijraah",
+    "tagline": "L'immigration simplifiée",
+    "loading": "Chargement...",
+    "menu": "Menu",
+    "close": "Fermer",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "submit": "Soumettre",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "continue": "Continuer",
+    "languageName": "Français"
+  },
+  "Home": {
+    "title": "Bienvenue sur Hijraah",
+    "description": "Comparez les politiques d'immigration entre les pays avec des informations basées sur l'IA"
+  },
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "services": "Services",
+    "contact": "Contact",
+    "blog": "Blog",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "dashboard": "Tableau de bord",
+    "account": "Compte",
+    "logout": "Déconnexion"
+  },
+  "api": {
+    "hello": {
+      "success": "Bonjour! Vous utilisez la langue {{language}}."
+    },
+    "users": {
+      "retrieved": "L'utilisateur avec l'ID {{id}} a été récupéré avec succès",
+      "created": "Utilisateur créé avec succès",
+      "updated": "Utilisateur mis à jour avec succès",
+      "deleted": "Utilisateur supprimé avec succès"
+    }
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "forgotPassword": "Mot de passe oublié?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "emailAddress": "Adresse e-mail",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "fullName": "Nom complet",
+    "phoneNumber": "Numéro de téléphone",
+    "rememberMe": "Se souvenir de moi",
+    "orContinueWith": "Ou continuer avec",
+    "dontHaveAccount": "Vous n'avez pas de compte?",
+    "alreadyHaveAccount": "Vous avez déjà un compte?"
+  },
+  "forms": {
+    "required": "Ce champ est obligatoire",
+    "invalidEmail": "Adresse e-mail invalide",
+    "passwordsMustMatch": "Les mots de passe doivent correspondre",
+    "passwordTooShort": "Le mot de passe doit comporter au moins {{length}} caractères",
+    "invalidPhone": "Numéro de téléphone invalide"
+  },
+  "errors": {
+    "generic": "Une erreur s'est produite",
+    "notFound": "Page Non Trouvée",
+    "pageNotFound": "La page que vous recherchez n'existe pas.",
+    "backHome": "Retour à l'Accueil",
+    "unauthorized": "Non autorisé",
+    "forbidden": "Accès refusé",
+    "invalidRequest": "Requête invalide",
+    "serverError": "Erreur du serveur",
+    "server": "Une erreur s'est produite de notre côté",
+    "offline": "Vous êtes hors ligne",
+    "timeoutError": "La requête a expiré",
+    "users": {
+      "notFound": "Utilisateur avec l'ID {{id}} non trouvé"
+    }
+  },
+  "success": {
+    "generic": "Succès",
+    "saved": "Enregistré avec succès",
+    "updated": "Mis à jour avec succès",
+    "deleted": "Supprimé avec succès"
+  },
+  "dates": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "tomorrow": "Demain",
+    "daysAgo": "Il y a {{days}} jours",
+    "inDays": "Dans {{days}} jours",
+    "monthsAgo": "Il y a {{months}} mois",
+    "inMonths": "Dans {{months}} mois",
+    "yearsAgo": "Il y a {{years}} ans",
+    "inYears": "Dans {{years}} ans",
+    "format": {
+      "short": "DD/MM/YYYY",
+      "medium": "D MMM, YYYY",
+      "long": "D MMMM, YYYY",
+      "full": "dddd D MMMM, YYYY"
+    }
+  }
+} 

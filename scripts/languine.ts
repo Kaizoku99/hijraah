@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-import { LanguineService } from '../src/lib/i18n/languine-service';
-import { Command } from 'commander';
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 import { fileURLToPath } from 'url';
+
+import { Command } from 'commander';
+
+import { LanguineService } from '../src/lib/i18n/languine-service';
 
 // Get the directory name
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

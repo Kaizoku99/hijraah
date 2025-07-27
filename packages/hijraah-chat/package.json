@@ -1,0 +1,46 @@
+{
+    "name": "@hijraah/chat",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+        },
+        "./service": {
+            "types": "./dist/service.d.ts",
+            "default": "./dist/service.js"
+        },
+        "./handlers": {
+            "types": "./dist/handlers.d.ts",
+            "default": "./dist/handlers.js"
+        },
+        "./middleware": {
+            "types": "./dist/middleware.d.ts",
+            "default": "./dist/middleware.js"
+        }
+    },
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "clean": "rm -rf dist"
+    },
+    "dependencies": {
+        "@hijraah/ai": "workspace:*",
+        "@hijraah/documents": "workspace:*",
+        "@hijraah/database": "workspace:*",
+        "@hijraah/types": "workspace:*",
+        "@hijraah/utils": "workspace:*",
+        "@upstash/redis": "^1.34.0",
+        "hono": "^4.6.3",
+        "ai": "^4.0.20",
+        "zod": "^3.22.4",
+        "uuid": "^10.0.0"
+    },
+    "devDependencies": {
+        "@hijraah/typescript-config": "workspace:*",
+        "@types/uuid": "^10.0.0",
+        "typescript": "^5.0.0"
+    }
+}

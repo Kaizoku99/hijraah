@@ -1,0 +1,144 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "ui": "tui",
+    "tasks": {
+        "build": {
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                ".env*",
+                "next.config.*",
+                "tailwind.config.*",
+                "postcss.config.*",
+                "tsconfig*.json"
+            ],
+            "outputs": [
+                ".next/**",
+                "!.next/cache/**",
+                "dist/**",
+                "build/**",
+                "*.tsbuildinfo"
+            ]
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true,
+            "dependsOn": [
+                "//#dev:setup"
+            ]
+        },
+        "//#dev:setup": {
+            "outputs": [
+                ".codegen/**"
+            ]
+        },
+        "lint": {
+            "dependsOn": [
+                "^lint"
+            ],
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                ".eslintrc*",
+                "eslint.config.*",
+                "biome.json*"
+            ],
+            "outputs": []
+        },
+        "type-check": {
+            "dependsOn": [
+                "^type-check"
+            ],
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                "tsconfig*.json"
+            ],
+            "outputs": [
+                "*.tsbuildinfo"
+            ]
+        },
+        "test": {
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                "jest.config.*",
+                "vitest.config.*",
+                "__tests__/**",
+                "**/*.test.*",
+                "**/*.spec.*"
+            ],
+            "outputs": [
+                "coverage/**"
+            ]
+        },
+        "clean": {
+            "cache": false
+        },
+        "db:push": {
+            "cache": false
+        },
+        "db:studio": {
+            "cache": false,
+            "persistent": true
+        },
+        "db:migrate": {
+            "cache": false,
+            "dependsOn": [
+                "^build"
+            ]
+        },
+        "supabase:start": {
+            "cache": false,
+            "persistent": true
+        },
+        "supabase:stop": {
+            "cache": false
+        },
+        "supabase:types": {
+            "cache": false,
+            "outputs": [
+                "src/types/supabase.ts",
+                "apps/web/src/types/supabase.ts"
+            ]
+        },
+        "codegen": {
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "graphql/**/*.graphql",
+                "codegen.ts",
+                "codegen.yml"
+            ],
+            "outputs": [
+                "graphql/generated/**"
+            ]
+        }
+    },
+    "globalDependencies": [
+        "**/.env.*local",
+        ".env",
+        "turbo.json",
+        "pnpm-workspace.yaml",
+        "package.json"
+    ],
+    "globalEnv": [
+        "NODE_ENV",
+        "CI",
+        "VERCEL",
+        "NEXT_PUBLIC_*",
+        "DATABASE_URL",
+        "SUPABASE_*",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "MISTRAL_API_KEY",
+        "DEEPSEEK_API_KEY",
+        "GOOGLE_API_KEY",
+        "FIREWORKS_API_KEY",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
+    ]
+}

@@ -1,9 +1,10 @@
 // Find duplicate files and code in the project
 // Usage: node scripts/find-duplicates.js
 
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+
 const glob = require('glob');
 
 // Configuration

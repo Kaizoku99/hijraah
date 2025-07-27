@@ -7,9 +7,9 @@
  * to the new unified auth helper implementation.
  */
 
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 // Configuration
 const rootDir = path.resolve(__dirname, '..');

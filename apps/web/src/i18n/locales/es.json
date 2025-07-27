@@ -1,0 +1,107 @@
+{
+  "common": {
+    "appName": "Hijraah",
+    "tagline": "Inmigración simplificada",
+    "loading": "Cargando...",
+    "menu": "Menú",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "submit": "Enviar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "continue": "Continuar",
+    "languageName": "Español"
+  },
+  "Home": {
+    "title": "Bienvenido a Hijraah",
+    "description": "Compara políticas de inmigración entre países con información impulsada por IA"
+  },
+  "nav": {
+    "home": "Inicio",
+    "about": "Acerca de",
+    "services": "Servicios",
+    "contact": "Contacto",
+    "blog": "Blog",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "dashboard": "Panel",
+    "account": "Cuenta",
+    "logout": "Cerrar sesión"
+  },
+  "api": {
+    "hello": {
+      "success": "¡Hola! Estás usando el idioma {{language}}."
+    },
+    "users": {
+      "retrieved": "Usuario con ID {{id}} recuperado con éxito",
+      "created": "Usuario creado con éxito",
+      "updated": "Usuario actualizado con éxito",
+      "deleted": "Usuario eliminado con éxito"
+    }
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPassword": "Restablecer contraseña",
+    "emailAddress": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "fullName": "Nombre completo",
+    "phoneNumber": "Número de teléfono",
+    "rememberMe": "Recordarme",
+    "orContinueWith": "O continuar con",
+    "dontHaveAccount": "¿No tienes una cuenta?",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?"
+  },
+  "forms": {
+    "required": "Este campo es obligatorio",
+    "invalidEmail": "Dirección de correo electrónico inválida",
+    "passwordsMustMatch": "Las contraseñas deben coincidir",
+    "passwordTooShort": "La contraseña debe tener al menos {{length}} caracteres",
+    "invalidPhone": "Número de teléfono inválido"
+  },
+  "errors": {
+    "generic": "Ha ocurrido un error",
+    "notFound": "Página No Encontrada",
+    "pageNotFound": "La página que estás buscando no existe.",
+    "backHome": "Volver al Inicio",
+    "unauthorized": "No autorizado",
+    "forbidden": "Acceso denegado",
+    "invalidRequest": "Solicitud inválida",
+    "serverError": "Error del servidor",
+    "server": "Algo salió mal en nuestro sistema",
+    "offline": "Estás desconectado",
+    "timeoutError": "La solicitud ha caducado",
+    "users": {
+      "notFound": "Usuario con ID {{id}} no encontrado"
+    }
+  },
+  "success": {
+    "generic": "Éxito",
+    "saved": "Guardado con éxito",
+    "updated": "Actualizado con éxito",
+    "deleted": "Eliminado con éxito"
+  },
+  "dates": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "tomorrow": "Mañana",
+    "daysAgo": "hace {{days}} días",
+    "inDays": "en {{days}} días",
+    "monthsAgo": "hace {{months}} meses",
+    "inMonths": "en {{months}} meses",
+    "yearsAgo": "hace {{years}} años",
+    "inYears": "en {{years}} años",
+    "format": {
+      "short": "DD/MM/YYYY",
+      "medium": "D MMM, YYYY",
+      "long": "D de MMMM, YYYY",
+      "full": "dddd, D de MMMM, YYYY"
+    }
+  }
+} 

@@ -1,0 +1,403 @@
+/* Import Tailwind CSS with V4 syntax */
+@import "tailwindcss";
+
+/* Define dark mode variant */
+@custom-variant dark (&:is(.dark *));
+
+/* Theme configuration with OKLCH color format for better consistency */
+@theme {
+  --radius: 0.5rem;
+
+  /* Base colors - using OKLCH for better color perception */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.87 0 0);
+
+  /* Chart colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Enhanced sidebar colors matching brand colors from screenshot */
+  --sidebar-width: 280px;
+  --sidebar-background: oklch(0.13 0.02 240); /* Dark navy background to match the screenshot */
+  --sidebar-foreground: oklch(0.95 0.02 240);
+  --sidebar-muted: oklch(0.5 0.02 240);
+  --sidebar-muted-foreground: oklch(0.7 0.02 240);
+  --sidebar-primary: oklch(0.6 0.18 230); /* Blueish primary color */
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent: oklch(0.18 0.02 240);
+  --sidebar-accent-foreground: oklch(0.95 0.02 240);
+  --sidebar-border: oklch(0.2 0.02 240);
+  --sidebar-ring: oklch(0.6 0.18 230);
+
+  /* Fluid spacing configuration */
+  --spacing-1: clamp(0.25rem, 0.5vw, 0.5rem);
+  --spacing-2: clamp(0.5rem, 1vw, 0.75rem);
+  --spacing-3: clamp(0.75rem, 1.5vw, 1rem);
+  --spacing-4: clamp(1rem, 2vw, 1.5rem);
+  --spacing-5: clamp(1.5rem, 3vw, 2rem);
+
+  /* Transition speeds */
+  --transition-fast: 150ms;
+  --transition-medium: 250ms;
+  --transition-slow: 350ms;
+}
+
+/* Separate dark theme using custom variant with enhanced colors */
+@dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+
+  /* Enhanced chart colors for dark mode */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Enhanced sidebar colors for dark mode */
+  --sidebar-background: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme {
+  /* Font family configuration with fallbacks */
+  --font-sans: "geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "geist-mono", ui-monospace, monospace;
+
+  /* Color configuration based on tailwind.config.ts */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar configuration */
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Base layer styles */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Fluid typography using Tailwind v4 syntax */
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.1;
+    font-weight: 700;
+    color: oklch(var(--foreground));
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    line-height: 1.2;
+    font-weight: 600;
+    color: oklch(var(--foreground));
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 3vw, 2rem);
+    line-height: 1.3;
+    font-weight: 600;
+    color: oklch(var(--foreground));
+  }
+
+  h4, h5, h6 {
+    color: oklch(var(--foreground));
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  button, input, select, textarea {
+    font-family: inherit;
+  }
+
+  /* Better focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid oklch(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Improved scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: oklch(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: oklch(var(--muted-foreground) / 0.5);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--muted-foreground) / 0.8);
+  }
+}
+
+/* Utilities layer for additional CSS classes */
+@layer utilities {
+  /* Modern glassmorphism effect */
+  .glass {
+    background: oklch(var(--background) / 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid oklch(var(--border) / 0.2);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Inline theme configuration */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* Enhanced hover trigger styles */
+.hover-trigger {
+  position: relative;
+}
+
+.hover-trigger::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 100%;
+  opacity: 0;
+  transition: opacity var(--transition-medium) ease;
+  border-radius: var(--radius-sm);
+  background: oklch(var(--primary) / 0.8);
+}
+
+.hover-trigger:hover::before {
+  opacity: 1;
+}
+
+/* Animation classes using Tailwind v4's @keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-fade-in {
+  animation: fadeIn var(--transition-medium) ease forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn var(--transition-medium) ease forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  --sidebar-width: 280px;
+  /* Sidebar HSL colors that match the OKLCH values above */
+  --sidebar-background: hsl(240 20% 13%); /* Dark navy background */
+  --sidebar-foreground: hsl(240 10% 95%);
+  --sidebar-muted: hsl(240 10% 50%);
+  --sidebar-muted-foreground: hsl(240 10% 70%);
+  --sidebar-primary: hsl(230 60% 60%); /* Blueish primary color */
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 20% 18%);
+  --sidebar-accent-foreground: hsl(240 10% 95%);
+  --sidebar-border: hsl(240 20% 20%);
+  --sidebar-ring: hsl(230 60% 60%);
+  --sidebar: hsl(0 0% 98%);
+}
+
+.dark {
+  /* Dark mode sidebar colors - slightly adjusted for better visibility */
+  --sidebar-width: 280px;
+  --sidebar-background: hsl(240 20% 10%); /* Darker navy background */
+  --sidebar-foreground: hsl(240 10% 95%);
+  --sidebar-muted: hsl(240 10% 50%);
+  --sidebar-muted-foreground: hsl(240 10% 70%);
+  --sidebar-primary: hsl(230 70% 55%); /* Brighter blue in dark mode */
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 20% 16%);
+  --sidebar-accent-foreground: hsl(240 10% 95%);
+  --sidebar-border: hsl(240 20% 15%);
+  --sidebar-ring: hsl(230 70% 55%);
+  --sidebar: hsl(240 5.9% 10%);
+}
+
+/* Added RTL support utilities */
+[dir="rtl"] .rtl\:mr-0 {
+  margin-right: 0 !important;
+}
+
+[dir="rtl"] .rtl\:ml-0 {
+  margin-left: 0 !important;
+}
+
+[dir="rtl"] .rtl\:ml-2 {
+  margin-left: 0.5rem !important;
+}
+
+[dir="rtl"] .rtl\:mr-2 {
+  margin-right: 0.5rem !important;
+}
+
+[dir="rtl"] .rtl {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+[dir="rtl"] .rtl\:flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+
+/* Fix hover triggers for RTL */
+[dir="rtl"] .hover-trigger::before {
+  left: auto;
+  right: 0;
+}
+
+/* Use logical properties in RTL mode */
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Force RTL padding on responsive layouts */
+@media (min-width: 768px) {
+  [dir="rtl"] .md\:rtl\:pl-0 {
+    padding-left: 0 !important;
+  }
+  
+  [dir="rtl"] .md\:rtl\:pr-4 {
+    padding-right: 1rem !important;
+  }
+}

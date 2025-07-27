@@ -1,5 +1,5 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { PostgrestError } from '@supabase/postgrest-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 export interface ShardConnection {
   shardKey: string

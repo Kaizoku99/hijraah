@@ -12,6 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Added to support diffing for type location checks
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -21,6 +23,70 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Check Type Definition Locations
+        if: github.event_name == 'pull_request' # Only run on PRs
+        run: |
+          # Get the base of the PR
+          BASE_REF="master" # Using master as the base branch based on workflow config
+          echo "Base ref for PR: $BASE_REF"
+
+          # Get list of new or modified .ts/.tsx files in this PR
+          git fetch origin $BASE_REF
+          MERGE_BASE=$(git merge-base HEAD "origin/$BASE_REF")
+
+          # Files added (A) or modified (M)
+          CHANGED_FILES=$(git diff --name-status --diff-filter=AM $MERGE_BASE HEAD -- 'src/**/*.ts' 'src/**/*.tsx' | awk '{print $2}')
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No .ts or .tsx files were added or modified."
+            exit 0
+          fi
+
+          echo "Checking files for global type definitions outside src/types/:"
+          echo "$CHANGED_FILES"
+
+          VIOLATIONS=""
+
+          for FILE_PATH in $CHANGED_FILES; do
+            echo "Checking: $FILE_PATH"
+
+            # Rule 1: Allow files in src/types/
+            if [[ "$FILE_PATH" == src/types/* ]]; then
+              echo "  SKIPPED: File is in src/types/"
+              continue
+            fi
+
+            # Rule 2: Allow component-local type files (common patterns)
+            if [[ "$FILE_PATH" == src/components/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/app/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/features/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/_core/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/_shared/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/pages/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/lib/**/types.ts ]] || \
+               [[ "$FILE_PATH" == src/hooks/**/types.ts ]] || \
+               [[ "$FILE_PATH" == supabase/functions/_shared/types.ts ]]; then
+              echo "  SKIPPED: File matches allowed pattern for local types."
+              continue
+            fi
+            
+            # Rule 3: Check for global type definitions
+            if grep -q -E -H -n --color=never '^(export|declare)\s+(type|interface|enum)\s+' "$FILE_PATH"; then
+              echo "  VIOLATION: Global type found in $FILE_PATH"
+              VIOLATIONS="${VIOLATIONS}\n  - ${FILE_PATH} contains global type definitions and is outside 'src/types/' or allowed component paths."
+            else
+              echo "  OK: No global types found (or file is allowed)."
+            fi
+          done
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo -e "::error::Found type definition violations:${VIOLATIONS}"
+            echo -e "Please move global type definitions to src/types/ or appropriate domain subdirectory."
+            exit 1
+          else
+            echo "All checked files adhere to type location guidelines."
+          fi
 
       - name: Type check
         run: npm run type-check || npm run tsc

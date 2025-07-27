@@ -1,2 +1,0 @@
--- This file represents the existing remote migration
--- It is intentionally left empty as the remote migration has already been applied 

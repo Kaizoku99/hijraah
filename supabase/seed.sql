@@ -2,7 +2,7 @@
 
 -- Seed file with necessary initial data
 -- Reset any existing data in critical tables (optional, uncomment if needed)
--- TRUNCATE public.profiles, public.document_categories CASCADE;
+-- TRUNCATE public.profiles CASCADE;
 
 -- Document categories for immigration system
 INSERT INTO public.document_categories (name, description)

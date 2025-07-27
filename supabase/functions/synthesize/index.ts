@@ -1,9 +1,10 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { OpenAI } from 'https://esm.sh/openai@4.20.1';
+/// <reference lib="deno.ns" />
+
+import { OpenAI } from "npm:openai@4.20.1";
 
 // Initialize OpenAI client with env variable
 const openai = new OpenAI({
-  apiKey: Deno.env.get('OPENAI_API_KEY'),
+  apiKey: Deno.env.get("OPENAI_API_KEY"),
 });
 
 // Type definitions
@@ -27,58 +28,62 @@ interface SynthesizeResponse {
   error?: string;
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   try {
     // Handle CORS preflight request
-    if (req.method === 'OPTIONS') {
+    if (req.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
         },
       });
     }
 
     // Only allow POST requests
-    if (req.method !== 'POST') {
-      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
       });
     }
 
     // Get the request body
-    const requestBody = await req.json() as SynthesizeRequest;
+    const requestBody = (await req.json()) as SynthesizeRequest;
     const { query, findings, sources } = requestBody;
 
     // Validate required fields
     if (!query || !findings) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Missing required fields: query, findings' 
+        JSON.stringify({
+          success: false,
+          error: "Missing required fields: query, findings",
         }),
         {
           status: 400,
           headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
           },
         }
       );
     }
 
     // Format sources for the prompt
-    const sourcesText = sources && sources.length > 0
-      ? sources.map((source, index) => 
-          `${index + 1}. "${source.title}" - ${source.url} (Relevance: ${source.relevance}/1.0)`
-        ).join('\n')
-      : 'No sources provided';
+    const sourcesText =
+      sources && sources.length > 0
+        ? sources
+            .map(
+              (source, index) =>
+                `${index + 1}. "${source.title}" - ${source.url} (Relevance: ${source.relevance}/1.0)`
+            )
+            .join("\n")
+        : "No sources provided";
 
     // Generate synthesis prompt
     const prompt = `
@@ -114,53 +119,54 @@ FORMAT YOUR RESPONSE IN JSON:
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: 'gpt-4-turbo',
+      model: "gpt-4-turbo",
       messages: [
         {
-          role: 'system',
-          content: 'You are a research synthesis expert that combines findings from multiple sources into a comprehensive report.',
+          role: "system",
+          content:
+            "You are a research synthesis expert that combines findings from multiple sources into a comprehensive report.",
         },
         {
-          role: 'user',
+          role: "user",
           content: prompt,
         },
       ],
       temperature: 0.3,
       max_tokens: 2500,
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
     });
 
     // Parse the response
-    const synthesisText = response.choices[0]?.message?.content || '{}';
+    const synthesisText = response.choices[0]?.message?.content || "{}";
     let synthesis;
-    
+
     try {
       synthesis = JSON.parse(synthesisText);
     } catch (error) {
-      console.error('Failed to parse OpenAI response:', error);
-      
+      console.error("Failed to parse OpenAI response:", error);
+
       // Attempt to extract JSON from the response if it's not properly formatted
       const jsonMatch = synthesisText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         try {
           synthesis = JSON.parse(jsonMatch[0]);
         } catch (e) {
-          console.error('Failed to extract JSON from response:', e);
-          synthesis = { 
+          console.error("Failed to extract JSON from response:", e);
+          synthesis = {
             title: `Research on ${query}`,
-            summary: 'Failed to generate synthesis',
-            keyFindings: ['Error processing findings'],
-            gaps: ['Unknown due to processing error'],
-            nextSteps: ['Retry synthesis process']
+            summary: "Failed to generate synthesis",
+            keyFindings: ["Error processing findings"],
+            gaps: ["Unknown due to processing error"],
+            nextSteps: ["Retry synthesis process"],
           };
         }
       } else {
-        synthesis = { 
+        synthesis = {
           title: `Research on ${query}`,
-          summary: 'Failed to generate synthesis',
-          keyFindings: ['Error processing findings'],
-          gaps: ['Unknown due to processing error'],
-          nextSteps: ['Retry synthesis process']
+          summary: "Failed to generate synthesis",
+          keyFindings: ["Error processing findings"],
+          gaps: ["Unknown due to processing error"],
+          nextSteps: ["Retry synthesis process"],
         };
       }
     }
@@ -170,7 +176,7 @@ FORMAT YOUR RESPONSE IN JSON:
       JSON.stringify({
         success: true,
         title: synthesis.title || `Research on ${query}`,
-        summary: synthesis.summary || 'No summary available',
+        summary: synthesis.summary || "No summary available",
         keyFindings: synthesis.keyFindings || [],
         gaps: synthesis.gaps || [],
         nextSteps: synthesis.nextSteps || [],
@@ -178,26 +184,26 @@ FORMAT YOUR RESPONSE IN JSON:
       {
         status: 200,
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
       }
     );
   } catch (error: any) {
-    console.error('Error in synthesize function:', error);
-    
+    console.error("Error in synthesize function:", error);
+
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'An unknown error occurred',
+        error: error.message || "An unknown error occurred",
       }),
       {
         status: 500,
         headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         },
       }
     );
   }
-}); 
+});

@@ -1,0 +1,32 @@
+{
+    "name": "@hijraah/types",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./auth": {
+            "types": "./src/auth.ts",
+            "default": "./src/auth.ts"
+        },
+        "./chat": {
+            "types": "./src/chat.ts",
+            "default": "./src/chat.ts"
+        },
+        "./database": {
+            "types": "./src/database.ts",
+            "default": "./src/database.ts"
+        },
+        "./immigration": {
+            "types": "./src/immigration.ts",
+            "default": "./src/immigration.ts"
+        }
+    },
+    "scripts": {
+        "type-check": "tsc --noEmit",
+        "build": "tsc"
+    },
+    "devDependencies": {
+        "@hijraah/typescript-config": "workspace:*",
+        "typescript": "latest"
+    }
+}

@@ -1,8 +1,9 @@
+/// <reference lib="deno.ns" />
+
 // Follow this approach to create a Supabase Edge Function
 // You'll need to deploy this to your Supabase project
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import React from 'https://esm.sh/react';
-import { renderToStaticMarkup } from 'https://esm.sh/react-dom/server';
+import React from "npm:react@18.3.1";
+import { renderToStaticMarkup } from "npm:react-dom@18.3.1/server";
 
 // Email templates would need to be reimplemented in Deno
 // This is a simplified example of how you could handle password reset emails
@@ -18,89 +19,98 @@ interface EmailTemplateProps {
 // or find a way to bundle them for use with Deno
 
 function PasswordResetEmail({ actionUrl, email, name }: EmailTemplateProps) {
-  const greeting = name ? `Hello, ${name}` : 'Hello';
-  
-  return React.createElement('div', null, [
-    React.createElement('h2', { key: 'h2' }, 'Reset Your Password'),
-    React.createElement('p', { key: 'p1' }, greeting),
-    React.createElement('p', { key: 'p2' }, 
+  const greeting = name ? `Hello, ${name}` : "Hello";
+
+  return React.createElement("div", null, [
+    React.createElement("h2", { key: "h2" }, "Reset Your Password"),
+    React.createElement("p", { key: "p1" }, greeting),
+    React.createElement(
+      "p",
+      { key: "p2" },
       `We received a request to reset the password for your Hijraah account (${email}).`
     ),
-    React.createElement('div', { key: 'div', style: { textAlign: 'center', margin: '20px 0' } },
-      React.createElement('a', { 
-        href: actionUrl,
-        style: {
-          backgroundColor: '#134e4a',
-          color: 'white',
-          padding: '10px 20px',
-          borderRadius: '5px',
-          textDecoration: 'none',
-          fontWeight: 'bold'
-        }
-      }, 'Reset Password')
+    React.createElement(
+      "div",
+      { key: "div", style: { textAlign: "center", margin: "20px 0" } },
+      React.createElement(
+        "a",
+        {
+          href: actionUrl,
+          style: {
+            backgroundColor: "#134e4a",
+            color: "white",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            textDecoration: "none",
+            fontWeight: "bold",
+          },
+        },
+        "Reset Password"
+      )
     ),
-    React.createElement('p', { key: 'p3' }, 
-      'If you did not request a password reset, please ignore this email.'
+    React.createElement(
+      "p",
+      { key: "p3" },
+      "If you did not request a password reset, please ignore this email."
     ),
-    React.createElement('p', { key: 'p4' }, 
-      'Best regards,\nThe Hijraah Team'
-    )
+    React.createElement("p", { key: "p4" }, "Best regards,\nThe Hijraah Team"),
   ]);
 }
 
 // Add more email templates as needed following the same pattern
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   try {
     const { type, metadata } = await req.json();
-    
+
     if (!type || !metadata) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: "Missing required parameters" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    
-    const actionUrl = metadata?.action_link || '';
-    const email = metadata?.email || '';
-    
+
+    const actionUrl = metadata?.action_link || "";
+    const email = metadata?.email || "";
+
     // Extract user information if available
-    let name = '';
+    let name = "";
     try {
       if (metadata.user) {
         const user = JSON.parse(metadata.user);
-        name = user?.user_metadata?.full_name || 
-               user?.user_metadata?.name || 
-               user?.user_metadata?.preferred_username || 
-               '';
+        name =
+          user?.user_metadata?.full_name ||
+          user?.user_metadata?.name ||
+          user?.user_metadata?.preferred_username ||
+          "";
       }
     } catch (error) {
-      console.error('Error parsing user data', error);
+      console.error("Error parsing user data", error);
     }
-    
-    let html = '';
-    
+
+    let html = "";
+
     // Generate HTML for the appropriate email type
     switch (type) {
-      case 'recovery':
-        const emailElement = React.createElement(PasswordResetEmail, { 
-          actionUrl, 
-          email, 
-          name 
+      case "recovery":
+        const emailElement = React.createElement(PasswordResetEmail, {
+          actionUrl,
+          email,
+          name,
         });
         html = renderToStaticMarkup(emailElement);
         break;
-        
+
       // Implement other email types as needed
-      
+
       default:
         // Return an error for unsupported email types
         return new Response(
           JSON.stringify({ error: `Unsupported email type: ${type}` }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { "Content-Type": "application/json" } }
         );
     }
-    
+
     // Include a complete HTML document wrapper
     html = `
       <!DOCTYPE html>
@@ -158,18 +168,17 @@ serve(async (req) => {
         </body>
       </html>
     `;
-    
-    return new Response(
-      JSON.stringify({ html }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-    
+
+    return new Response(JSON.stringify({ html }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
-    console.error('Error generating email:', error);
-    
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    console.error("Error generating email:", error);
+
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-}); 
+});

@@ -1,0 +1,50 @@
+{
+    "name": "@hijraah/ui",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./button": {
+            "types": "./src/button.tsx",
+            "default": "./src/button.tsx"
+        },
+        "./card": {
+            "types": "./src/card.tsx",
+            "default": "./src/card.tsx"
+        },
+        "./dialog": {
+            "types": "./src/dialog.tsx",
+            "default": "./src/dialog.tsx"
+        },
+        "./input": {
+            "types": "./src/input.tsx",
+            "default": "./src/input.tsx"
+        },
+        "./toast": {
+            "types": "./src/toast.tsx",
+            "default": "./src/toast.tsx"
+        },
+        "./styles": {
+            "types": "./src/styles.ts",
+            "default": "./src/styles.ts"
+        }
+    },
+    "scripts": {
+        "dev": "tsc --watch",
+        "build": "tsc",
+        "lint": "eslint .",
+        "type-check": "tsc --noEmit"
+    },
+    "devDependencies": {
+        "@hijraah/typescript-config": "workspace:*",
+        "@hijraah/eslint-config": "workspace:*",
+        "typescript": "latest",
+        "eslint": "^8",
+        "@types/react": "^18",
+        "@types/react-dom": "^18"
+    },
+    "peerDependencies": {
+        "react": "^18",
+        "react-dom": "^18"
+    }
+}

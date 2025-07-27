@@ -1,6 +1,8 @@
-import { ScraperService } from '../src/lib/scrapers/service';
-import dotenv from 'dotenv';
 import path from 'path';
+
+import dotenv from 'dotenv';
+
+import { ScraperService } from '../src/lib/scrapers/service';
 
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
