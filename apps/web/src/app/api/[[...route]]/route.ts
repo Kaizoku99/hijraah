@@ -24,9 +24,9 @@ import { setupSubscriptionRoutes } from "@/app/api/routes/subscription";
 import { setupUserRoutes } from "@/app/api/routes/users";
 
 // Import application services (placeholder paths - adjust if needed)
-import { ChatService as DomainChatService } from "@/core/chat/services/chat-service";
+// import { ChatService as DomainChatService } from "@/_core/chat/services/chat-service";
 import type { Locale } from "@/i18n";
-import { repositoryFactory } from "@/infrastructure/repositories";
+// import { repositoryFactory } from "@/_infrastructure/repositories";
 
 // Import language middleware
 
@@ -37,7 +37,7 @@ import {
   TypedSSRSupabaseClient,
   createSupabaseServiceClient,
 } from "@/lib/supabase/client";
-import { ChatApplicationService } from "@/services/chat-service";
+// import { ChatApplicationService } from "@/services/chat-service-consolidated";
 
 // New import for the active Sentry middleware
 import { sentryErrorLoggerMiddleware } from "../hono/middleware/sentry-error-logger";
@@ -53,7 +53,7 @@ export type AppEnv = {
   };
   Variables: {
     user: User | null;
-    chatService: ChatApplicationService;
+    // chatService: ChatApplicationService;
     locale: Locale;
     translations: Record<string, any>;
     db: TypedSSRSupabaseClient;
@@ -90,17 +90,17 @@ app.get("/ping", (c) => {
 // Instantiate Services
 // -----------------------------
 // const repositoryFactory = new RepositoryFactory(supabase); // Example if needed
-const domainChatService = new DomainChatService();
+// const domainChatService = new DomainChatService();
 const openaiApiKey = process.env.OPENAI_API_KEY || "";
 if (!openaiApiKey) {
   console.warn("OPENAI_API_KEY is not set!");
   // Potentially throw error or handle gracefully
 }
-const chatServiceInstance = new ChatApplicationService(
-  repositoryFactory,
-  domainChatService,
-  openaiApiKey
-);
+// const chatServiceInstance = new ChatApplicationService(
+//   repositoryFactory,
+//   domainChatService,
+//   openaiApiKey
+// );
 
 // -----------------------------
 // Middleware
@@ -121,7 +121,7 @@ app.use(
     exposeHeaders: ["Content-Length", "X-Request-Id"],
     maxAge: 600,
     credentials: true,
-  })
+  }),
 );
 
 // Apply Language Detection early in the pipeline
@@ -129,14 +129,14 @@ app.use(
   "*",
   languageDetectionMiddleware({
     // Add options if needed, e.g., cookieName: 'MY_APP_LOCALE'
-  })
+  }),
 );
 
 // Add middleware to set services in context
-app.use("*", async (c, next) => {
-  c.set("chatService", chatServiceInstance); // Set the instantiated service
-  await next();
-});
+// app.use("*", async (c, next) => {
+//   c.set("chatService", chatServiceInstance); // Set the instantiated service
+//   await next();
+// });
 
 // Add middleware to set Supabase client in context
 app.use("*", async (c, next) => {
@@ -162,7 +162,7 @@ app.use(
   redisApiCacheMiddleware({
     ttl: 300, // 5 minutes cache time
     varyByAuth: true, // Create different cache entries based on user
-  })
+  }),
 );
 
 // Fallback to standard caching for better performance
@@ -192,7 +192,7 @@ app.onError((err, c) => {
           status: err.status,
         },
       },
-      err.status
+      err.status,
     );
   }
 
@@ -207,7 +207,7 @@ app.onError((err, c) => {
         status: 500,
       },
     },
-    500
+    500,
   );
 });
 
@@ -230,13 +230,13 @@ const auth = async (c: Context<AppEnv>, next: () => Promise<any>) => {
   try {
     const authHeader = c.req.header("Authorization");
     console.log(
-      `[HONO AUTH] Processing auth for: ${c.req.url}, Auth header present: ${!!authHeader}`
+      `[HONO AUTH] Processing auth for: ${c.req.url}, Auth header present: ${!!authHeader}`,
     );
 
     if (!authHeader?.startsWith("Bearer ")) {
       c.set("user", null); // Ensure user is null if auth fails early
       console.log(
-        `[HONO AUTH] Missing or invalid Bearer token format: ${authHeader?.substring(0, 15) || "undefined"}`
+        `[HONO AUTH] Missing or invalid Bearer token format: ${authHeader?.substring(0, 15) || "undefined"}`,
       );
       throw new HTTPException(401, {
         message: "Unauthorized: Missing Bearer token",
@@ -245,7 +245,7 @@ const auth = async (c: Context<AppEnv>, next: () => Promise<any>) => {
 
     const token = authHeader.split(" ")[1];
     console.log(
-      `[HONO AUTH] Attempting to validate token with Service Client: ${token.substring(0, 10)}...`
+      `[HONO AUTH] Attempting to validate token with Service Client: ${token.substring(0, 10)}...`,
     );
 
     // Use the Service Role Client for validating the Bearer token
@@ -263,7 +263,7 @@ const auth = async (c: Context<AppEnv>, next: () => Promise<any>) => {
 
     // Add user to context
     console.log(
-      `[HONO AUTH] Authentication successful for user: ${user.id.substring(0, 8)}...`
+      `[HONO AUTH] Authentication successful for user: ${user.id.substring(0, 8)}...`,
     );
     c.set("user", user);
     await next(); // Call next *after* setting user
@@ -321,7 +321,7 @@ app.use(
   subscriptionRateLimit({
     resourceType: ResourceType.API,
     errorMessage: "You have exceeded your documents API request limit.",
-  })
+  }),
 );
 
 // Apply special rate limits to scraping features
@@ -330,7 +330,7 @@ app.use(
   subscriptionRateLimit({
     resourceType: ResourceType.SCRAPING,
     errorMessage: "You have exceeded your web scraping request limit.",
-  })
+  }),
 );
 
 // Apply special rate limits to vector operations (embeddings, etc.)
@@ -339,7 +339,7 @@ app.use(
   subscriptionRateLimit({
     resourceType: ResourceType.VECTOR,
     errorMessage: "You have exceeded your vector operations request limit.",
-  })
+  }),
 );
 
 // Apply special rate limits to research and AI features
@@ -348,7 +348,7 @@ app.use(
   subscriptionRateLimit({
     resourceType: ResourceType.RESEARCH,
     errorMessage: "You have exceeded your research and AI request limit.",
-  })
+  }),
 );
 
 // Chat API also consumes research tokens
@@ -357,7 +357,7 @@ app.use(
   subscriptionRateLimit({
     resourceType: ResourceType.RESEARCH,
     errorMessage: "You have exceeded your chat API request limit.",
-  })
+  }),
 );
 
 // -----------------------------

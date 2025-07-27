@@ -1,12 +1,12 @@
 {
-    "status": {
-        "draft": "Draft",
-        "submitted": "Submitted",
-        "inReview": "In Review",
-        "additionalInfoRequired": "Additional Info Required",
-        "approved": "Approved",
-        "rejected": "Rejected",
-        "completed": "Completed",
-        "cancelled": "Cancelled"
-    }
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "inReview": "In Review",
+    "additionalInfoRequired": "Additional Info Required",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  }
 }

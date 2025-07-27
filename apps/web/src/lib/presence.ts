@@ -4,7 +4,7 @@ import { Database } from "@/types/database.types";
 
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 interface PresenceState {
@@ -38,7 +38,7 @@ export class PresenceManager {
           Object.entries(state).map(([key, value]) => [
             key,
             (value as any[])[0] as PresenceState,
-          ])
+          ]),
         );
       })
       .on("presence", { event: "join" }, ({ key, newPresences }) => {
@@ -87,7 +87,7 @@ export class PresenceManager {
 
   getOnlineUsers(): string[] {
     return Array.from(this.presenceStates.values()).map(
-      (state) => state.user_id
+      (state) => state.user_id,
     );
   }
 

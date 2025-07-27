@@ -10,7 +10,7 @@ import { openai } from "@/lib/openai"; // Assuming this uses the official openai
 // Initialize Supabase client
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // --- Templates --- //
@@ -35,7 +35,7 @@ type DocumentTemplate = keyof typeof documentTemplates;
 const GenerateRequestSchema = z.object({
   prompt: z.string().min(1, "Prompt is required"),
   template: z.enum(
-    Object.keys(documentTemplates) as [DocumentTemplate, ...DocumentTemplate[]]
+    Object.keys(documentTemplates) as [DocumentTemplate, ...DocumentTemplate[]],
   ),
   additionalContext: z.string().optional(),
   userId: z.string().uuid().optional(), // Optional: client might handle auth separately
@@ -69,7 +69,7 @@ app.post("/", zValidator("json", GenerateRequestSchema), async (c) => {
 
   try {
     console.log(
-      `[Generate Doc API] Request for template: ${template}, User: ${effectiveUserId}`
+      `[Generate Doc API] Request for template: ${template}, User: ${effectiveUserId}`,
     );
     // Call OpenAI
     const completion = await openai.chat.completions.create({
@@ -112,7 +112,7 @@ app.post("/", zValidator("json", GenerateRequestSchema), async (c) => {
         if (insertError) throw insertError;
         saved = true;
         console.log(
-          `[Generate Doc API] Saved artifact for user ${effectiveUserId}`
+          `[Generate Doc API] Saved artifact for user ${effectiveUserId}`,
         );
       } catch (dbError) {
         console.error("[Generate Doc API] Error saving artifact:", dbError);

@@ -1,32 +1,32 @@
 "use client";
 
-import { Star, MapPin, Clock, Video } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+import { Star, MapPin, Clock, Video } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
-import { Avatar } from '@/ui/avatar';
-import { Button } from '@/ui/button';
-import { Calendar } from '@/ui/calendar';
-import { Card } from '@/ui/card';
-import { Input } from '@/ui/input';
+import { Avatar } from "@/ui/avatar";
+import { Button } from "@/ui/button";
+import { Calendar } from "@/ui/calendar";
+import { Card } from "@/ui/card";
+import { Input } from "@/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/ui/select';
+} from "@/ui/select";
 
 const experts = [
   {
     id: 1,
-    name: 'Dr. Sarah Johnson',
-    specialization: 'Immigration Law',
+    name: "Dr. Sarah Johnson",
+    specialization: "Immigration Law",
     rating: 4.9,
     reviews: 128,
-    location: 'New York, USA',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
-    availability: ['Monday', 'Wednesday', 'Friday'],
+    location: "New York, USA",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+    availability: ["Monday", "Wednesday", "Friday"],
     hourlyRate: 150,
   },
   // Add more experts
@@ -56,10 +56,7 @@ export default function ExpertsPage() {
               <SelectItem value="business">Business Immigration</SelectItem>
             </SelectContent>
           </Select>
-          <Input
-            placeholder="Search experts..."
-            className="w-[200px]"
-          />
+          <Input placeholder="Search experts..." className="w-[200px]" />
         </div>
       </div>
 
@@ -99,7 +96,7 @@ export default function ExpertsPage() {
                   <div className="flex items-center">
                     <Clock className="w-4 h-4 mr-1" />
                     <span className="text-sm">
-                      Available {expert.availability.join(', ')}
+                      Available {expert.availability.join(", ")}
                     </span>
                   </div>
                   <span className="text-sm font-medium">

@@ -44,7 +44,7 @@ const templateCache = new Map<string, DocumentTemplate>();
  */
 export async function getDocumentTemplate(
   documentType: DocumentType,
-  targetCountry?: string
+  targetCountry?: string,
 ): Promise<DocumentTemplate> {
   // Generate cache key
   const cacheKey = `${documentType}:${targetCountry || "global"}`;
@@ -107,7 +107,7 @@ export async function getDocumentTemplate(
  */
 function getDefaultTemplate(
   documentType: DocumentType,
-  targetCountry?: string
+  targetCountry?: string,
 ): DocumentTemplate {
   // Generic template structure
   const genericTemplate: DocumentTemplate = {

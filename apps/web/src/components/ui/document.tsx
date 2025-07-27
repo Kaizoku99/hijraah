@@ -13,7 +13,7 @@ import type { ArtifactKind } from "./artifact";
 
 const getActionText = (
   type: "create" | "update" | "request-suggestions",
-  tense: "present" | "past"
+  tense: "present" | "past",
 ) => {
   switch (type) {
     case "create":
@@ -49,7 +49,7 @@ function PureDocumentToolResult({
       onClick={(event) => {
         if (isReadonly) {
           toast.error(
-            "Viewing files in shared chats is currently not supported."
+            "Viewing files in shared chats is currently not supported.",
           );
           return;
         }
@@ -112,7 +112,7 @@ function PureDocumentToolCall({
       onClick={(event) => {
         if (isReadonly) {
           toast.error(
-            "Viewing files in shared chats is currently not supported."
+            "Viewing files in shared chats is currently not supported.",
           );
           return;
         }

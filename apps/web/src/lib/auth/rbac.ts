@@ -125,7 +125,7 @@ export class RBACManager {
    */
   private getRolePermissions(
     roleName: string,
-    visited: Set<string> = new Set()
+    visited: Set<string> = new Set(),
   ): Set<Permission> {
     // Avoid circular dependencies
     if (visited.has(roleName)) {
@@ -239,10 +239,10 @@ export class RBACManager {
    */
   hasAnyPermission(
     user: ExtendedUser | null,
-    permissions: Permission[]
+    permissions: Permission[],
   ): boolean {
     return permissions.some((permission) =>
-      this.hasPermission(user, permission)
+      this.hasPermission(user, permission),
     );
   }
 
@@ -251,10 +251,10 @@ export class RBACManager {
    */
   hasAllPermissions(
     user: ExtendedUser | null,
-    permissions: Permission[]
+    permissions: Permission[],
   ): boolean {
     return permissions.every((permission) =>
-      this.hasPermission(user, permission)
+      this.hasPermission(user, permission),
     );
   }
 
@@ -272,11 +272,11 @@ export class RBACManager {
    */
   enforceAnyPermission(
     user: ExtendedUser | null,
-    permissions: Permission[]
+    permissions: Permission[],
   ): void {
     if (!this.hasAnyPermission(user, permissions)) {
       throw new ForbiddenError(
-        `Missing at least one of the required permissions: ${permissions.join(", ")}`
+        `Missing at least one of the required permissions: ${permissions.join(", ")}`,
       );
     }
   }
@@ -286,11 +286,11 @@ export class RBACManager {
    */
   enforceAllPermissions(
     user: ExtendedUser | null,
-    permissions: Permission[]
+    permissions: Permission[],
   ): void {
     if (!this.hasAllPermissions(user, permissions)) {
       throw new ForbiddenError(
-        `Missing some of the required permissions: ${permissions.join(", ")}`
+        `Missing some of the required permissions: ${permissions.join(", ")}`,
       );
     }
   }
@@ -328,7 +328,7 @@ export function createPermission(resource: string, action: string): Permission {
  */
 export function hasPermission(
   user: ExtendedUser | null,
-  permission: Permission
+  permission: Permission,
 ): boolean {
   return getRBACManager().hasPermission(user, permission);
 }
@@ -338,7 +338,7 @@ export function hasPermission(
  */
 export function enforcePermission(
   user: ExtendedUser | null,
-  permission: Permission
+  permission: Permission,
 ): void {
   return getRBACManager().enforcePermission(user, permission);
 }

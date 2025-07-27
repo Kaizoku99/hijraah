@@ -192,7 +192,7 @@ async function createCheckout(supabaseClient: any, user: any, planId: string) {
       }),
       {
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   } else {
     // Create new subscription
@@ -219,7 +219,7 @@ async function createCheckout(supabaseClient: any, user: any, planId: string) {
       }),
       {
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }
@@ -243,7 +243,7 @@ async function cancelSubscription(supabaseClient: any, userId: string) {
     }),
     {
       headers: { "Content-Type": "application/json" },
-    }
+    },
   );
 }
 

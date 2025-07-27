@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef, RefObject } from "react";
 
 /**
  * Hook to detect clicks outside of a specified element
@@ -8,7 +8,7 @@ import { useEffect, useRef, RefObject } from 'react';
  * @returns Ref to attach to the element
  */
 export function useClickOutside<T extends HTMLElement = HTMLElement>(
-  handler: (event: MouseEvent | TouchEvent) => void
+  handler: (event: MouseEvent | TouchEvent) => void,
 ): RefObject<T> {
   const ref = useRef<T>(null);
 
@@ -23,13 +23,13 @@ export function useClickOutside<T extends HTMLElement = HTMLElement>(
     };
 
     // Add event listeners for both mouse and touch events
-    document.addEventListener('mousedown', listener);
-    document.addEventListener('touchstart', listener);
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
 
     // Clean up
     return () => {
-      document.removeEventListener('mousedown', listener);
-      document.removeEventListener('touchstart', listener);
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
     };
   }, [ref, handler]);
 

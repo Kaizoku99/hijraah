@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "files": [
+    "../../../../webpack-runtime.js",
+    "../../../../webpack-runtime.js.map",
+    "../../../../chunks/827.js",
+    "../../../../chunks/827.js.map",
+    "../../../../chunks/5400.js",
+    "../../../../chunks/5400.js.map",
+    "route.js.map",
+    "route_client-reference-manifest.js",
+    "../../../../../../package.json",
+    "../../../../../../../../package.json"
+  ]
+}

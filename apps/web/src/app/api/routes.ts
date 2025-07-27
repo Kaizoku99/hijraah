@@ -1,9 +1,9 @@
-import { zValidator } from '@hono/zod-validator';
-import { Hono } from 'hono';
-import { HTTPException } from 'hono/http-exception';
-import { z } from 'zod';
+import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
+import { z } from "zod";
 
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from "@/lib/supabase/client";
 
 // Types
 export type ApiHono = Hono;
@@ -20,55 +20,55 @@ const profileSchema = z.object({
 // Protected route middleware
 export const auth = async (c: any, next: () => Promise<any>) => {
   try {
-    const authHeader = c.req.header('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw new HTTPException(401, { message: 'Unauthorized' });
+    const authHeader = c.req.header("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new HTTPException(401, { message: "Unauthorized" });
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser(token);
 
     if (error || !user) {
-      throw new HTTPException(401, { message: 'Invalid token' });
+      throw new HTTPException(401, { message: "Invalid token" });
     }
 
-    c.set('user', user);
+    c.set("user", user);
     return next();
   } catch (error) {
-    throw new HTTPException(401, { message: 'Authentication failed' });
+    throw new HTTPException(401, { message: "Authentication failed" });
   }
 };
 
 // API Routes
 export const createApiRoutes = (app: ApiHono) => {
   // Public routes
-  app.get('/', (c) => {
+  app.get("/", (c) => {
     return c.json({
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
     });
   });
 
   // Protected routes
-  app.use('/protected/*', auth);
+  app.use("/protected/*", auth);
 
   // User routes
-  app.get('/protected/user', async (c) => {
-    const user = c.get('user');
+  app.get("/protected/user", async (c) => {
+    const user = c.get("user");
     return c.json({ user });
   });
 
   // Profile routes
   app
-    .get('/protected/profile', async (c) => {
-      const user = c.get('user');
+    .get("/protected/profile", async (c) => {
+      const user = c.get("user");
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
         .single();
 
       if (error) {
@@ -77,14 +77,14 @@ export const createApiRoutes = (app: ApiHono) => {
 
       return c.json({ profile: data });
     })
-    .put('/protected/profile', zValidator('json', profileSchema), async (c) => {
-      const user = c.get('user');
-      const profile = c.req.valid('json');
+    .put("/protected/profile", zValidator("json", profileSchema), async (c) => {
+      const user = c.get("user");
+      const profile = c.req.valid("json");
 
       const { data, error } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update(profile)
-        .eq('id', user.id)
+        .eq("id", user.id)
         .select()
         .single();
 

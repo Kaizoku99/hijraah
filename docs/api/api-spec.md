@@ -5,6 +5,7 @@
 Base URL: `https://api.hijraah.com/v1`
 
 ### Authentication
+
 - Bearer token authentication
 - Tokens issued via OAuth 2.0
 - JWT format
@@ -12,6 +13,7 @@ Base URL: `https://api.hijraah.com/v1`
 - Refresh token support
 
 ### Request Headers
+
 ```
 Authorization: Bearer <token>
 Content-Type: application/json
@@ -20,12 +22,14 @@ X-Request-ID: <unique-request-id>
 ```
 
 ### Response Format
+
 ```json
 {
   "status": "success|error",
   "data": {}, // Response data
   "error": {}, // Error details if status is error
-  "meta": {    // Pagination and other metadata
+  "meta": {
+    // Pagination and other metadata
     "page": 1,
     "per_page": 20,
     "total": 100
@@ -38,7 +42,9 @@ X-Request-ID: <unique-request-id>
 ### Authentication
 
 #### POST /auth/register
+
 Create a new user account
+
 ```json
 Request:
 {
@@ -61,7 +67,9 @@ Response:
 ```
 
 #### POST /auth/login
+
 Authenticate user
+
 ```json
 Request:
 {
@@ -81,7 +89,9 @@ Response:
 ```
 
 #### POST /auth/refresh
+
 Refresh access token
+
 ```json
 Request:
 {
@@ -101,7 +111,9 @@ Response:
 ### User Management
 
 #### GET /users/me
+
 Get current user profile
+
 ```json
 Response:
 {
@@ -119,7 +131,9 @@ Response:
 ```
 
 #### PUT /users/me
+
 Update user profile
+
 ```json
 Request:
 {
@@ -143,7 +157,9 @@ Response:
 ### Immigration Cases
 
 #### POST /cases
+
 Create new immigration case
+
 ```json
 Request:
 {
@@ -165,7 +181,9 @@ Response:
 ```
 
 #### GET /cases
+
 List user's immigration cases
+
 ```json
 Query Parameters:
 - page (integer)
@@ -196,7 +214,9 @@ Response:
 ```
 
 #### GET /cases/{case_id}
+
 Get case details
+
 ```json
 Response:
 {
@@ -221,7 +241,9 @@ Response:
 ### Document Management
 
 #### POST /documents/upload
+
 Upload document
+
 ```json
 Request:
 Content-Type: multipart/form-data
@@ -246,7 +268,9 @@ Response:
 ```
 
 #### GET /documents
+
 List documents
+
 ```json
 Query Parameters:
 - case_id (uuid)
@@ -278,7 +302,9 @@ Response:
 ### Chat System
 
 #### POST /chat/sessions
+
 Create new chat session
+
 ```json
 Request:
 {
@@ -297,7 +323,9 @@ Response:
 ```
 
 #### POST /chat/messages
+
 Send chat message
+
 ```json
 Request:
 {
@@ -319,7 +347,9 @@ Response:
 ```
 
 #### GET /chat/sessions/{session_id}/messages
+
 Get chat history
+
 ```json
 Query Parameters:
 - before (timestamp)
@@ -343,7 +373,9 @@ Response:
 ### Assessment Tools
 
 #### POST /assessments/eligibility
+
 Create eligibility assessment
+
 ```json
 Request:
 {
@@ -374,7 +406,9 @@ Response:
 ### Tasks
 
 #### POST /tasks
+
 Create task
+
 ```json
 Request:
 {
@@ -396,7 +430,9 @@ Response:
 ```
 
 #### GET /tasks
+
 List tasks
+
 ```json
 Query Parameters:
 - case_id (uuid)
@@ -428,7 +464,9 @@ Response:
 ### Notifications
 
 #### GET /notifications
+
 List notifications
+
 ```json
 Query Parameters:
 - unread_only (boolean)
@@ -459,6 +497,7 @@ Response:
 ## Error Codes
 
 ### HTTP Status Codes
+
 - 200: Success
 - 201: Created
 - 400: Bad Request
@@ -470,6 +509,7 @@ Response:
 - 500: Internal Server Error
 
 ### Error Response Format
+
 ```json
 {
   "status": "error",
@@ -482,6 +522,7 @@ Response:
 ```
 
 ### Common Error Codes
+
 ```
 AUTH_001: Invalid credentials
 AUTH_002: Token expired
@@ -502,6 +543,7 @@ API_004: Permission denied
 
 - Rate limit: 100 requests per minute per user
 - Rate limit headers included in response:
+
 ```
 X-RateLimit-Limit: 100
 X-RateLimit-Remaining: 99
@@ -511,7 +553,9 @@ X-RateLimit-Reset: 1625097600
 ## Webhooks
 
 ### Configuration
+
 Endpoint: POST /webhooks/configure
+
 ```json
 Request:
 {
@@ -522,6 +566,7 @@ Request:
 ```
 
 ### Event Format
+
 ```json
 {
   "event_type": "string",
@@ -536,6 +581,7 @@ Request:
 - Version included in URL path
 - Supported versions: v1
 - Deprecation notice via response header:
+
 ```
 X-API-Deprecation: Version v1 will be deprecated on 2024-12-31
 ```

@@ -66,7 +66,7 @@ export class EligibilityCheckerAgent extends Agent {
       let personalizationContext = "";
       if (this.userId) {
         personalizationContext = await generatePersonalizationContext(
-          this.userId
+          this.userId,
         );
       }
 
@@ -258,7 +258,7 @@ ${JSON.stringify(this.metadata.userProfile, null, 2)}`;
 
     // Extract country of origin
     const originMatch = message.match(
-      /(\b[Ii]\s*am\s*from|\b[Mm]y\s*country\s*is)\s*([A-Za-z\s]+)/
+      /(\b[Ii]\s*am\s*from|\b[Mm]y\s*country\s*is)\s*([A-Za-z\s]+)/,
     );
     if (originMatch && originMatch[2]) {
       this.metadata.userProfile.countryOfOrigin = originMatch[2].trim();
@@ -266,7 +266,7 @@ ${JSON.stringify(this.metadata.userProfile, null, 2)}`;
 
     // Extract education level
     const educationMatch = message.match(
-      /(\beducation|\bdegree|\bqualification).*?([A-Za-z\s']+)/i
+      /(\beducation|\bdegree|\bqualification).*?([A-Za-z\s']+)/i,
     );
     if (educationMatch && educationMatch[2]) {
       this.metadata.userProfile.educationLevel = educationMatch[2].trim();
@@ -274,7 +274,7 @@ ${JSON.stringify(this.metadata.userProfile, null, 2)}`;
 
     // Extract work experience
     const experienceMatch = message.match(
-      /(\bexperience|\bworked).*?(\d+)\s*(years|year)/i
+      /(\bexperience|\bworked).*?(\d+)\s*(years|year)/i,
     );
     if (experienceMatch && experienceMatch[2]) {
       this.metadata.userProfile.workExperience = parseInt(experienceMatch[2]);
@@ -492,7 +492,7 @@ ${JSON.stringify(this.metadata.userProfile, null, 2)}`;
    * Extract program and criteria mentions from assistant messages
    */
   private async extractProgramAndCriteriaMentions(
-    content: string
+    content: string,
   ): Promise<void> {
     // Pattern to detect program mentions
     const programPattern = /\[PROGRAM:(.*?)\]/gi;

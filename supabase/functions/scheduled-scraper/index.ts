@@ -39,7 +39,7 @@ const scraperService = new ScraperService(
   r2AccountId,
   r2AccessKeyId,
   r2SecretAccessKey,
-  r2BucketName
+  r2BucketName,
 );
 
 Deno.serve(async (req) => {
@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
-      }
+      },
     );
   } catch (error) {
     console.error("Error during scheduled scraper run:", error);

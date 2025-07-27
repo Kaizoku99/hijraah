@@ -1,7 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-import { notFound } from 'next/navigation';
+import { createClient } from "@supabase/supabase-js";
+import { notFound } from "next/navigation";
 
-import { auth } from '@/lib/auth';
+import { auth } from "@/lib/auth";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -31,23 +31,23 @@ export interface Artifact {
  */
 export async function getArtifact(id: string): Promise<Artifact> {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     throw notFound();
   }
-  
+
   const { data, error } = await supabase
-    .from('artifacts')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', session.user.id)
+    .from("artifacts")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", session.user.id)
     .single();
-  
+
   if (error || !data) {
-    console.error('Error fetching artifact:', error);
+    console.error("Error fetching artifact:", error);
     throw notFound();
   }
-  
+
   return {
     id: data.id,
     name: data.name,
@@ -67,23 +67,23 @@ export async function getArtifact(id: string): Promise<Artifact> {
  */
 export async function getUserArtifacts(): Promise<Artifact[]> {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
     return [];
   }
-  
+
   const { data, error } = await supabase
-    .from('artifacts')
-    .select('*')
-    .eq('user_id', session.user.id)
-    .order('created_at', { ascending: false });
-  
+    .from("artifacts")
+    .select("*")
+    .eq("user_id", session.user.id)
+    .order("created_at", { ascending: false });
+
   if (error) {
-    console.error('Error fetching artifacts:', error);
+    console.error("Error fetching artifacts:", error);
     return [];
   }
-  
-  return data.map(item => ({
+
+  return data.map((item) => ({
     id: item.id,
     name: item.name,
     description: item.description,
@@ -100,15 +100,17 @@ export async function getUserArtifacts(): Promise<Artifact[]> {
 /**
  * Create a new artifact
  */
-export async function createArtifact(artifact: Omit<Artifact, 'id' | 'createdAt' | 'updatedAt'>): Promise<Artifact> {
+export async function createArtifact(
+  artifact: Omit<Artifact, "id" | "createdAt" | "updatedAt">,
+): Promise<Artifact> {
   const session = await auth();
-  
+
   if (!session?.user?.id) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
-  
+
   const { data, error } = await supabase
-    .from('artifacts')
+    .from("artifacts")
     .insert({
       name: artifact.name,
       description: artifact.description,
@@ -120,12 +122,12 @@ export async function createArtifact(artifact: Omit<Artifact, 'id' | 'createdAt'
     })
     .select()
     .single();
-  
+
   if (error) {
-    console.error('Error creating artifact:', error);
+    console.error("Error creating artifact:", error);
     throw new Error(`Failed to create artifact: ${error.message}`);
   }
-  
+
   return {
     id: data.id,
     name: data.name,
@@ -138,4 +140,4 @@ export async function createArtifact(artifact: Omit<Artifact, 'id' | 'createdAt'
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
-} 
+}

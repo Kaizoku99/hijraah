@@ -21,7 +21,7 @@ export interface ProviderConfig {
 
 // Unified provider registry following Context7 patterns
 export function createHijraahProviderRegistry(
-  config: Record<string, ProviderConfig>
+  config: Record<string, ProviderConfig>,
 ) {
   const languageModels: Record<string, any> = {};
   const imageModels: Record<string, any> = {};
@@ -250,7 +250,7 @@ export function getOptimalModel(requirements: {
 
 // Provider health check utility
 export async function checkProviderHealth(
-  provider: any
+  provider: any,
 ): Promise<Record<string, boolean>> {
   const healthStatus: Record<string, boolean> = {};
 

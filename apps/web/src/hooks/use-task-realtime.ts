@@ -26,7 +26,7 @@ interface TaskRealtimeState {
 // Context7 Pattern: Composable hook with state management
 export function useTaskRealtime(
   tasks: Task[] = [],
-  options: UseTaskRealtimeOptions = {}
+  options: UseTaskRealtimeOptions = {},
 ) {
   const { toast } = useToast();
   const {
@@ -164,7 +164,7 @@ export function useTaskRealtime(
         });
       }
     },
-    [tasks, toast, notifyOnComplete, notifyOnError]
+    [tasks, toast, notifyOnComplete, notifyOnError],
   );
 
   // Context7 Pattern: Connection state management
@@ -186,13 +186,13 @@ export function useTaskRealtime(
       // Subscribe to all task events
       unsubscribeRef.current = streamServiceRef.current.subscribe(
         "*",
-        handleTaskEvent
+        handleTaskEvent,
       );
 
       // Listen to connection state changes
       streamServiceRef.current.on(
         "connectionState",
-        handleConnectionStateChange
+        handleConnectionStateChange,
       );
       streamServiceRef.current.on("maxReconnectAttemptsReached", () => {
         setState((prev) => ({
@@ -229,7 +229,7 @@ export function useTaskRealtime(
     if (streamServiceRef.current) {
       streamServiceRef.current.off(
         "connectionState",
-        handleConnectionStateChange
+        handleConnectionStateChange,
       );
       streamServiceRef.current.disconnect();
     }
@@ -293,7 +293,7 @@ export function useTaskRealtime(
         ? Date.now() -
           (streamServiceRef.current?.getBufferedEvents()[0]
             ? new Date(
-                streamServiceRef.current.getBufferedEvents()[0].timestamp
+                streamServiceRef.current.getBufferedEvents()[0].timestamp,
               ).getTime()
             : Date.now())
         : 0,
@@ -304,7 +304,7 @@ export function useTaskRealtime(
 // Context7 Pattern: Specialized hook for single task monitoring
 export function useTaskRealtimeForTask(
   taskId: string,
-  options: UseTaskRealtimeOptions = {}
+  options: UseTaskRealtimeOptions = {},
 ) {
   const streamServiceRef = useRef<TaskStreamService | null>(null);
   const [taskEvents, setTaskEvents] = useState<TaskStreamEvent[]>([]);

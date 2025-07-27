@@ -62,7 +62,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
           },
-        }
+        },
       );
     }
 
@@ -157,7 +157,7 @@ FORMAT YOUR RESPONSE IN JSON:
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-      }
+      },
     );
   } catch (error: any) {
     console.error("Error in generate-queries function:", error);
@@ -173,7 +173,7 @@ FORMAT YOUR RESPONSE IN JSON:
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-      }
+      },
     );
   }
 });

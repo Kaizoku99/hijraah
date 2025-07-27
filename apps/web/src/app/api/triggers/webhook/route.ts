@@ -17,28 +17,28 @@ export async function POST(request: NextRequest) {
       case "hello-world":
         handle = await tasks.trigger<typeof helloWorldTask>(
           "hello-world",
-          taskPayload
+          taskPayload,
         );
         break;
 
       case "immigration-document-analysis":
         handle = await tasks.trigger<typeof immigrationDocumentAnalysisTask>(
           "immigration-document-analysis",
-          taskPayload
+          taskPayload,
         );
         break;
 
       case "batch-document-processing":
         handle = await tasks.trigger<typeof batchDocumentProcessingTask>(
           "batch-document-processing",
-          taskPayload
+          taskPayload,
         );
         break;
 
       default:
         return NextResponse.json(
           { error: `Unknown task type: ${taskType}` },
-          { status: 400 }
+          { status: 400 },
         );
     }
 
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         error: "Failed to trigger task",
         details: error instanceof Error ? error.message : String(error),
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

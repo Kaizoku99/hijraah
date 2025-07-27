@@ -48,7 +48,7 @@ export class ImmigrationAdvisorAgent extends Agent {
       let personalizationContext = "";
       if (this.userId) {
         personalizationContext = await generatePersonalizationContext(
-          this.userId
+          this.userId,
         );
       }
 
@@ -69,7 +69,7 @@ export class ImmigrationAdvisorAgent extends Agent {
           role: "assistant",
           content: `I'm connecting you with our ${delegationResult.agentType.replace(
             "_",
-            " "
+            " ",
           )} specialist who can better help with this specific question.`,
           sessionId: this.id,
           createdAt: new Date().toISOString(),
@@ -306,7 +306,7 @@ Recent user activities:
 ${data
   .map(
     (interaction: any) =>
-      `- ${interaction.interaction_type} (${interaction.category || "general"})`
+      `- ${interaction.interaction_type} (${interaction.category || "general"})`,
   )
   .join("\n")}
         `;

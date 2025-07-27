@@ -31,7 +31,7 @@ type UploadStatus =
 interface ProcessStatus {
   status: UploadStatus;
   message: string;
-    error?: string;
+  error?: string;
 }
 
 // Define the specific Insert type for documents for clarity
@@ -41,21 +41,21 @@ export function MistralOcrUploader() {
   const supabase = useSupabaseBrowser();
   const { toast } = useToast();
 
-    const [file, setFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [uploadStatus, setUploadStatus] = useState<ProcessStatus>({
     status: "idle",
     message: "",
   });
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
       setUploadStatus({ status: "idle", message: "" });
-        }
-    };
+    }
+  };
 
-    const processFileUpload = async () => {
-        if (!file) return;
+  const processFileUpload = async () => {
+    if (!file) return;
 
     setUploadStatus({ status: "getting_user", message: "Starting upload..." });
 
@@ -97,7 +97,7 @@ export function MistralOcrUploader() {
       if (insertError || !docRecord?.id) {
         console.error("DB Insert Error Details:", insertError);
         throw new Error(
-          insertError?.message || "Failed to create document record."
+          insertError?.message || "Failed to create document record.",
         );
       }
       documentId = docRecord.id; // Store the ID
@@ -115,7 +115,7 @@ export function MistralOcrUploader() {
       if (uploadError) {
         // Attempt to clean up the DB record if upload fails
         console.warn(
-          `Upload failed for doc ${documentId}, attempting DB cleanup.`
+          `Upload failed for doc ${documentId}, attempting DB cleanup.`,
         );
         await supabase.from("documents").delete().eq("id", documentId);
         documentId = null; // Clear ID after delete attempt
@@ -136,13 +136,13 @@ export function MistralOcrUploader() {
         // DB record exists, but upload succeeded. Status is inconsistent.
         console.error(
           `Failed to update doc ${documentId} status after successful upload:`,
-          updateError
+          updateError,
         );
         // Don't necessarily delete the record here, maybe just report error
         // Consider a background job for reconciliation or manual check
         throw new Error(
           updateError.message ||
-            "Failed to update document record after upload."
+            "Failed to update document record after upload.",
         );
       }
       setUploadStatus({
@@ -153,22 +153,22 @@ export function MistralOcrUploader() {
       // 5. Call Triggering Endpoint
       const response = await fetch("/api/documents/process", {
         method: "POST",
-                headers: {
+        headers: {
           "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+        },
+        body: JSON.stringify({
           documentId, // Pass the confirmed document ID
           filePath: storagePath,
           fileType: file.type, // Keep original file type for the trigger payload
-                }),
-            });
+        }),
+      });
 
       const processResult = await response.json();
 
       if (!response.ok || !processResult.success) {
         console.error(
           `Failed to trigger processing via API for doc ${documentId}:`,
-          processResult.error
+          processResult.error,
         );
         // Update status to 'processing_failed' in DB
         await supabase
@@ -180,7 +180,7 @@ export function MistralOcrUploader() {
           })
           .eq("id", documentId);
         throw new Error(
-          processResult.error || "Failed to trigger document processing."
+          processResult.error || "Failed to trigger document processing.",
         );
       }
 
@@ -194,7 +194,7 @@ export function MistralOcrUploader() {
         description: "Document processing has started.",
       });
       // setFile(null); // Optionally clear file input
-        } catch (error) {
+    } catch (error) {
       console.error("Error during document upload process:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -212,7 +212,7 @@ export function MistralOcrUploader() {
       // Optional: Attempt cleanup if a DB record was created but process failed later
       // Be cautious with cleanup logic, might depend on where the error occurred
       // if (documentId) { ... maybe update status to 'upload_failed' ... }
-        } finally {
+    } finally {
       // No finally needed, status state handles loading indication
     }
   };
@@ -225,31 +225,31 @@ export function MistralOcrUploader() {
     "triggering",
   ].includes(uploadStatus.status);
 
-    return (
+  return (
     <Card className="w-full max-w-lg mx-auto">
-            <CardHeader>
+      <CardHeader>
         <CardTitle>Upload Document for Processing</CardTitle>
-                <CardDescription>
+        <CardDescription>
           Select a document (PDF, PNG, JPG, TIFF) to upload and start the
           processing pipeline.
-                </CardDescription>
-            </CardHeader>
+        </CardDescription>
+      </CardHeader>
       <CardContent className="space-y-6">
-                        <div className="grid w-full gap-2">
+        <div className="grid w-full gap-2">
           <Label htmlFor="file">Select Document</Label>
-                            <Input
-                                id="file"
-                                type="file"
-                                accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif"
-                                onChange={handleFileChange}
+          <Input
+            id="file"
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif"
+            onChange={handleFileChange}
             disabled={isLoading}
-                            />
-                            {file && (
-                                <p className="text-sm text-muted-foreground">
-                                    Selected: {file.name} ({Math.round(file.size / 1024)} KB)
-                                </p>
-                            )}
-                        </div>
+          />
+          {file && (
+            <p className="text-sm text-muted-foreground">
+              Selected: {file.name} ({Math.round(file.size / 1024)} KB)
+            </p>
+          )}
+        </div>
 
         {(uploadStatus.status !== "idle" || uploadStatus.message) && (
           <div className="mt-4 p-3 rounded-md bg-muted/50 border">
@@ -267,35 +267,35 @@ export function MistralOcrUploader() {
               <p className="text-xs text-red-700 mt-1">
                 Error details: {uploadStatus.error}
               </p>
-                        )}
-                    </div>
-                )}
-            </CardContent>
-            <CardFooter className="flex justify-between">
+            )}
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-between">
         <Button
           variant="outline"
           onClick={() => {
-                    setFile(null);
+            setFile(null);
             setUploadStatus({ status: "idle", message: "" });
           }}
           disabled={isLoading}
         >
-                    Clear
-                </Button>
+          Clear
+        </Button>
         <Button onClick={processFileUpload} disabled={isLoading || !file}>
           {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               {uploadStatus.message || "Processing..."}
-                        </>
-                    ) : (
-                        <>
+            </>
+          ) : (
+            <>
               <Upload className="mr-2 h-4 w-4" />
               Upload and Process
-                        </>
-                    )}
-                </Button>
-            </CardFooter>
-        </Card>
-    );
-} 
+            </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}

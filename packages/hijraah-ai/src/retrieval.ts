@@ -52,7 +52,7 @@ export class HybridRetriever {
       supabaseUrl: string;
       supabaseKey: string;
       namespace?: string;
-    }
+    },
   ) {
     this.vectorIndex = new Index({
       url: config.upstashUrl,
@@ -88,12 +88,12 @@ export class HybridRetriever {
       // Fusion and ranking following Context7 DBSF/RRF patterns
       const fusedResults = this.fuseResults(
         [vectorResults, fulltextResults, kgResults],
-        validatedQuery.fusionAlgorithm
+        validatedQuery.fusionAlgorithm,
       );
 
       // Apply threshold filtering
       const filteredResults = fusedResults.filter(
-        (result) => result.score >= validatedQuery.threshold
+        (result) => result.score >= validatedQuery.threshold,
       );
 
       // Limit results
@@ -107,7 +107,7 @@ export class HybridRetriever {
     } catch (error) {
       console.error("Hybrid retrieval error:", error);
       throw new Error(
-        `Retrieval failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Retrieval failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -186,7 +186,7 @@ export class HybridRetriever {
           search_query: query.text,
           limit_count: query.limit * 2,
           filters: query.filters || {},
-        }
+        },
       );
 
       if (error) {
@@ -213,7 +213,7 @@ export class HybridRetriever {
    * Finds connected entities and their relationships
    */
   private async knowledgeGraphSearch(
-    query: HybridQuery
+    query: HybridQuery,
   ): Promise<RetrievalResult[]> {
     try {
       const { data, error } = await this.supabase.rpc(
@@ -223,7 +223,7 @@ export class HybridRetriever {
           max_depth: 2,
           limit_count: query.limit,
           filters: query.filters || {},
-        }
+        },
       );
 
       if (error) {
@@ -255,7 +255,7 @@ export class HybridRetriever {
    */
   private fuseResults(
     resultSets: RetrievalResult[][],
-    algorithm: "RRF" | "DBSF"
+    algorithm: "RRF" | "DBSF",
   ): RetrievalResult[] {
     if (algorithm === "DBSF") {
       return this.distributionBasedScoreFusion(resultSets);
@@ -269,7 +269,7 @@ export class HybridRetriever {
    * More stable across different scoring systems
    */
   private reciprocalRankFusion(
-    resultSets: RetrievalResult[][]
+    resultSets: RetrievalResult[][],
   ): RetrievalResult[] {
     const k = 60; // RRF parameter
     const scoreMap = new Map<
@@ -302,7 +302,7 @@ export class HybridRetriever {
    * More sensitive to score variations
    */
   private distributionBasedScoreFusion(
-    resultSets: RetrievalResult[][]
+    resultSets: RetrievalResult[][],
   ): RetrievalResult[] {
     const scoreMap = new Map<
       string,
@@ -330,7 +330,7 @@ export class HybridRetriever {
           const setMean = this.calculateMean(resultSets[i].map((r) => r.score));
           const setStd = this.calculateStd(
             resultSets[i].map((r) => r.score),
-            setMean
+            setMean,
           );
           return setStd > 0 ? (score - setMean) / setStd : 0;
         });
@@ -340,7 +340,7 @@ export class HybridRetriever {
           normalizedScores.length;
 
         return { ...result, score: fusedScore };
-      }
+      },
     );
 
     return fusedResults.sort((a, b) => b.score - a.score);

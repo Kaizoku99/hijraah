@@ -46,7 +46,7 @@ app.use("*", async (c, next) => {
   }
   c.header(
     "X-Deprecation",
-    "This endpoint is deprecated; migrate to DocumentProcessor inline embedding generation"
+    "This endpoint is deprecated; migrate to DocumentProcessor inline embedding generation",
   );
   c.header("Access-Control-Expose-Headers", "X-Deprecation");
   await next();
@@ -88,7 +88,7 @@ app.post("/", zValidator("json", EmbeddingRequestSchema), async (c) => {
     } else {
       // --- Handle Document Chunk Embedding ---
       console.log(
-        `[Embed API] Generating embeddings for documentId: ${documentId ?? "N/A"}`
+        `[Embed API] Generating embeddings for documentId: ${documentId ?? "N/A"}`,
       );
 
       // Chunk the text
@@ -101,7 +101,7 @@ app.post("/", zValidator("json", EmbeddingRequestSchema), async (c) => {
 
       if (textChunks.length === 0) {
         console.warn(
-          `[Embed API] No text chunks generated for documentId: ${documentId ?? "N/A"}.`
+          `[Embed API] No text chunks generated for documentId: ${documentId ?? "N/A"}.`,
         );
         return c.json({ chunks: [] }); // Return empty if no chunks
       }
@@ -113,7 +113,7 @@ app.post("/", zValidator("json", EmbeddingRequestSchema), async (c) => {
       });
       console.log(
         `[Embed API] Batch embedding generated ${embeddings.length} vectors. Usage:`,
-        usage
+        usage,
       );
 
       // Combine chunks with their embeddings
@@ -122,7 +122,7 @@ app.post("/", zValidator("json", EmbeddingRequestSchema), async (c) => {
           index: index,
           text: chunkText,
           embedding: embeddings[index], // Assumes order matches
-        })
+        }),
       );
 
       return c.json({ chunks: chunksWithEmbeddings });

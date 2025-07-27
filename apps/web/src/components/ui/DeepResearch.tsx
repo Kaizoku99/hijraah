@@ -59,7 +59,7 @@ export function DeepResearchDisplay({
       : 0;
 
   const sortedSourcesPanel = [...state.sources].sort(
-    (a, b) => (b.relevance || 0) - (a.relevance || 0)
+    (a, b) => (b.relevance || 0) - (a.relevance || 0),
   );
 
   const latestActivityPanel = state.activity[state.activity.length - 1];
@@ -246,7 +246,7 @@ export function DeepResearchDisplay({
             className="text-xs"
             onClick={() => {
               toast.info(
-                "Save as Document functionality is not yet implemented."
+                "Save as Document functionality is not yet implemented.",
               );
             }}
           >
@@ -448,13 +448,13 @@ export function DeepResearchDisplay({
               <CardContent>
                 <ScrollArea className="h-[300px] pr-4">
                   {state.activity.filter(
-                    (a) => a.type === "synthesis" && a.status === "complete"
+                    (a) => a.type === "synthesis" && a.status === "complete",
                   ).length > 0 ? (
                     <div className="space-y-4">
                       {state.activity
                         .filter(
                           (a) =>
-                            a.type === "synthesis" && a.status === "complete"
+                            a.type === "synthesis" && a.status === "complete",
                         )
                         .map((activity, index) => (
                           <div key={index} className="text-sm">

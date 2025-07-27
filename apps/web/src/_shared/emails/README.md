@@ -44,7 +44,7 @@ const html = renderToStaticMarkup(
     actionUrl="https://example.com/reset-password?token=xyz"
     email="user@example.com"
     name="John Doe"
-  />
+  />,
 );
 
 // Now you can use the HTML in your email sending service

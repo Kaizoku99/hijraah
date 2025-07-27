@@ -143,7 +143,7 @@ function detectLocale(req: NextRequest): Locale {
       case "cookie": {
         // Check cookie for locale
         const cookieLocale = req.cookies.get(
-          DETECTION_CONFIG.cookieName
+          DETECTION_CONFIG.cookieName,
         )?.value;
         if (cookieLocale && locales.includes(cookieLocale as Locale)) {
           detectedLocale = cookieLocale as Locale;
@@ -155,7 +155,7 @@ function detectLocale(req: NextRequest): Locale {
       case "searchParams": {
         // Check search params for locale
         const paramLocale = req.nextUrl.searchParams.get(
-          DETECTION_CONFIG.searchParamName
+          DETECTION_CONFIG.searchParamName,
         );
         if (paramLocale && locales.includes(paramLocale as Locale)) {
           detectedLocale = paramLocale as Locale;
@@ -188,7 +188,7 @@ function detectLocale(req: NextRequest): Locale {
 
   if (DETECTION_CONFIG.debug) {
     console.log(
-      `[middleware] Detected locale: ${detectedLocale} from ${detectedSource}`
+      `[middleware] Detected locale: ${detectedLocale} from ${detectedSource}`,
     );
   }
 
@@ -200,7 +200,7 @@ function detectLocale(req: NextRequest): Locale {
  */
 function shouldExcludePath(pathname: string): boolean {
   return DETECTION_CONFIG.unprefixedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 }
 
@@ -211,7 +211,7 @@ export async function middleware(request: NextRequest) {
 
     if (missingVars.length > 0) {
       console.error(
-        `⚠️ Missing environment variables: ${missingVars.join(", ")}`
+        `⚠️ Missing environment variables: ${missingVars.join(", ")}`,
       );
       console.error("Please check your .env.local file.");
 
@@ -228,7 +228,7 @@ export async function middleware(request: NextRequest) {
       ) {
         return NextResponse.json(
           { error: "Server misconfiguration. Please check server logs." },
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -266,7 +266,7 @@ export async function middleware(request: NextRequest) {
             });
           },
         },
-      }
+      },
     );
 
     // Get user session
@@ -318,7 +318,7 @@ export async function middleware(request: NextRequest) {
 
     // Check if route should be cached
     const shouldCache = CACHEABLE_ROUTES.some((route) =>
-      requestPath.startsWith(route)
+      requestPath.startsWith(route),
     );
 
     if (!shouldCache) {
@@ -339,13 +339,13 @@ export async function middleware(request: NextRequest) {
     // Add cache control headers
     responseClone.headers.set(
       "Cache-Control",
-      `s-maxage=${CACHE_REVALIDATE}, stale-while-revalidate=${CACHE_STALE}`
+      `s-maxage=${CACHE_REVALIDATE}, stale-while-revalidate=${CACHE_STALE}`,
     );
 
     // Add Vercel edge caching headers
     responseClone.headers.set(
       "Vercel-CDN-Cache-Control",
-      `s-maxage=${CACHE_REVALIDATE}, stale-while-revalidate=${CACHE_STALE}`
+      `s-maxage=${CACHE_REVALIDATE}, stale-while-revalidate=${CACHE_STALE}`,
     );
 
     // Add debug headers
@@ -363,7 +363,7 @@ export async function middleware(request: NextRequest) {
     // Check if the URL already has a locale prefix
     const hasLocalePrefix = locales.some(
       (locale) =>
-        requestPath === `/${locale}` || requestPath.startsWith(`/${locale}/`)
+        requestPath === `/${locale}` || requestPath.startsWith(`/${locale}/`),
     );
 
     // If URL doesn't have locale prefix and detected locale is not default,
@@ -380,7 +380,7 @@ export async function middleware(request: NextRequest) {
         redirectResponse.cookies.set(
           DETECTION_CONFIG.cookieName,
           detectedLocale,
-          DETECTION_CONFIG.cookieOptions
+          DETECTION_CONFIG.cookieOptions,
         );
       }
 
@@ -398,7 +398,7 @@ export async function middleware(request: NextRequest) {
       intlResponse.headers.set("X-XSS-Protection", "1; mode=block");
       intlResponse.headers.set(
         "Content-Security-Policy",
-        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co;"
+        "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co;",
       );
     }
 
@@ -418,7 +418,7 @@ export async function middleware(request: NextRequest) {
     // Return error response
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

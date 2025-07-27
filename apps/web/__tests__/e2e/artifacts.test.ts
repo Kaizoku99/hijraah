@@ -90,7 +90,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
 
     try {
       await chatPage.sendUserMessage(
-        "Create a code snippet for a NextJS middleware function with authentication"
+        "Create a code snippet for a NextJS middleware function with authentication",
       );
       await artifactPage.isGenerationComplete();
 
@@ -134,7 +134,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
     try {
       // Context7 - Data-as-Code: Initial artifact creation
       await chatPage.sendUserMessage(
-        "Create a comprehensive checklist for immigration document preparation"
+        "Create a comprehensive checklist for immigration document preparation",
       );
       await artifactPage.isGenerationComplete();
 
@@ -150,7 +150,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
 
       // Context7 - Resumability: Follow-up interaction
       await chatPage.sendUserMessage(
-        "Can you add estimated timeframes for each step?"
+        "Can you add estimated timeframes for each step?",
       );
       await artifactPage.isGenerationComplete();
 
@@ -185,7 +185,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
     try {
       // Context7 - Data-as-Code: Request code artifact
       await chatPage.sendUserMessage(
-        "Write a TypeScript function to calculate immigration points based on age, education, and language scores"
+        "Write a TypeScript function to calculate immigration points based on age, education, and language scores",
       );
       await artifactPage.isGenerationComplete();
 
@@ -235,7 +235,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
     try {
       // Context7 - Data-as-Code: Create initial artifact version
       await chatPage.sendUserMessage(
-        "Create a template email for visa application follow-up"
+        "Create a template email for visa application follow-up",
       );
       await artifactPage.isGenerationComplete();
 
@@ -247,7 +247,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
 
       // Context7 - Resumability: Request modification
       await chatPage.sendUserMessage(
-        "Make the email more formal and add legal disclaimer"
+        "Make the email more formal and add legal disclaimer",
       );
       await artifactPage.isGenerationComplete();
 
@@ -296,7 +296,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
 
       // Context7 - Data-as-Code: Test artifact creation as guest
       await chatPage.sendUserMessage(
-        "Help me understand the basic requirements for Canadian permanent residence"
+        "Help me understand the basic requirements for Canadian permanent residence",
       );
       await artifactPage.isGenerationComplete();
 
@@ -336,7 +336,7 @@ test.describe("Hijraah Artifacts E2E Tests (Context7 Compliant)", () => {
 
       // Context7 - Observability: Monitor artifact creation time
       await chatPage.sendUserMessage(
-        "Generate a detailed immigration timeline with multiple phases"
+        "Generate a detailed immigration timeline with multiple phases",
       );
 
       const generationStartTime = Date.now();

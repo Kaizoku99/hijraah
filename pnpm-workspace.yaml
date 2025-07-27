@@ -4,7 +4,5 @@ packages:
   # Shared packages following Turborepo best practices
   - "packages/hijraah-*"
 
-  # Temporary directories for legacy integration (will be removed in Phase 4)
-  - "ai-chatbot" # Legacy AI chatbot to be migrated
-  - "firestarter" # Legacy Firestarter to be migrated
+  # Keep only browser-r2-worker temporarily for testing
   - "browser-r2-worker" # Legacy worker to be migrated

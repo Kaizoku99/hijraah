@@ -1,27 +1,31 @@
 #!/usr/bin/env node
 
-import { exec } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { exec } from "child_process";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
+const rootDir = path.resolve(__dirname, "..");
 
-console.log('Starting CSS build process...');
+console.log("Starting CSS build process...");
 
-// Check for file existence 
-const inputFile = path.join(rootDir, 'src', 'app', 'globals.css');
-const outputFile = path.join(rootDir, 'public', 'styles.css');
+// Check for file existence
+const inputFile = path.join(rootDir, "src", "app", "globals.css");
+const outputFile = path.join(rootDir, "public", "styles.css");
 
-console.log('Checking if files exist:');
-console.log(`Input CSS file (globals.css): ${fs.existsSync(inputFile) ? 'Found ✅' : 'Not found ❌'}`);
-console.log(`Output directory (public): ${fs.existsSync(path.dirname(outputFile)) ? 'Found ✅' : 'Not found ❌'}`);
+console.log("Checking if files exist:");
+console.log(
+  `Input CSS file (globals.css): ${fs.existsSync(inputFile) ? "Found ✅" : "Not found ❌"}`,
+);
+console.log(
+  `Output directory (public): ${fs.existsSync(path.dirname(outputFile)) ? "Found ✅" : "Not found ❌"}`,
+);
 
 // For Tailwind CSS v4, we'll use the Next.js builder which has built-in support
 // Create a simple shell CSS file to verify styling works
-console.log('\nCreating a basic CSS file as a temporary measure...');
+console.log("\nCreating a basic CSS file as a temporary measure...");
 
 const basicCss = `/* Basic temporary CSS until Tailwind is properly configured */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -102,10 +106,14 @@ try {
   fs.writeFileSync(outputFile, basicCss);
   console.log(`✅ Created temporary CSS file at ${outputFile}`);
   console.log(`\nTo properly fix Tailwind, please:`);
-  console.log(`1. Make sure @tailwindcss/postcss is installed (npm install -D @tailwindcss/postcss)`);
+  console.log(
+    `1. Make sure @tailwindcss/postcss is installed (npm install -D @tailwindcss/postcss)`,
+  );
   console.log(`2. Verify postcss.config.mjs is correctly set up`);
-  console.log(`3. Use the right import in globals.css: @import "@tailwindcss/postcss";`);
+  console.log(
+    `3. Use the right import in globals.css: @import "@tailwindcss/postcss";`,
+  );
   console.log(`4. Run next build and next start to ensure proper CSS building`);
 } catch (error) {
   console.error(`❌ Error creating temporary CSS file: ${error.message}`);
-} 
+}

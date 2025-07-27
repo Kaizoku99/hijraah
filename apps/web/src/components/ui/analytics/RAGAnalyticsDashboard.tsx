@@ -169,7 +169,7 @@ export function RAGAnalyticsDashboard({
         });
       }
     },
-    [toast]
+    [toast],
   );
 
   const handleMetricsUpdate = useCallback((metrics: RAGMetrics) => {
@@ -192,7 +192,7 @@ export function RAGAnalyticsDashboard({
           analyticsServiceRef.current.getRAGMetrics(state.timeRange),
           analyticsServiceRef.current.getUsageTimeSeries(
             state.timeRange,
-            state.granularity
+            state.granularity,
           ),
           analyticsServiceRef.current.getUserAnalytics(undefined, 20),
           analyticsServiceRef.current.getDocumentAnalytics(20),
@@ -253,7 +253,7 @@ export function RAGAnalyticsDashboard({
     try {
       const data = await analyticsServiceRef.current.exportAnalyticsData(
         "json",
-        state.timeRange
+        state.timeRange,
       );
       const blob = new Blob([data], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -579,7 +579,7 @@ export function RAGAnalyticsDashboard({
                     <span>Avg Queries per User</span>
                     <span className="font-medium">
                       {state.metrics?.userEngagement.avgQueriesPerUser.toFixed(
-                        1
+                        1,
                       )}
                     </span>
                   </div>
@@ -587,7 +587,7 @@ export function RAGAnalyticsDashboard({
                     value={
                       Math.min(
                         state.metrics?.userEngagement.avgQueriesPerUser || 0,
-                        10
+                        10,
                       ) * 10
                     }
                   />
@@ -646,7 +646,7 @@ export function RAGAnalyticsDashboard({
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
                   {formatDuration(
-                    state.metrics?.performanceMetrics.avgRetrievalTime || 0
+                    state.metrics?.performanceMetrics.avgRetrievalTime || 0,
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -659,7 +659,7 @@ export function RAGAnalyticsDashboard({
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
                   {formatDuration(
-                    state.metrics?.performanceMetrics.avgGenerationTime || 0
+                    state.metrics?.performanceMetrics.avgGenerationTime || 0,
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -672,7 +672,7 @@ export function RAGAnalyticsDashboard({
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold">
                   {(state.metrics?.performanceMetrics.errorRate * 100).toFixed(
-                    2
+                    2,
                   )}
                   %
                 </div>
@@ -924,7 +924,7 @@ export function RAGAnalyticsDashboard({
                             <Badge
                               className={cn(
                                 "text-xs",
-                                getAlertColor(alert.severity)
+                                getAlertColor(alert.severity),
                               )}
                             >
                               {alert.severity}

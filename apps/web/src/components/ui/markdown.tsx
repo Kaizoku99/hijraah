@@ -3,7 +3,15 @@
 import React from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import atomOneDark from "react-syntax-highlighter/dist/esm/styles/prism/atom-one-dark";
+// Using a fallback style for syntax highlighting
+const codeStyle = {
+  backgroundColor: "#1a1a1a",
+  color: "#e6e6e6",
+  padding: "1em",
+  borderRadius: "0.375rem",
+  fontSize: "0.875rem",
+  lineHeight: "1.5",
+};
 import rehypeRaw from "rehype-raw";
 import remarkGfm from "remark-gfm";
 
@@ -21,7 +29,7 @@ export function Markdown({ content, className }: MarkdownProps) {
       const isInline = !className?.startsWith("language-");
 
       return !isInline && match ? (
-        <SyntaxHighlighter style={atomOneDark} language={match[1]} PreTag="div">
+        <SyntaxHighlighter language={match[1]} PreTag="div">
           {String(children).replace(/\n$/, "")}
         </SyntaxHighlighter>
       ) : (

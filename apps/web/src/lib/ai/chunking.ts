@@ -21,7 +21,7 @@ const defaultChunkOverlap = 100; // Overlap in characters
  */
 export function recursiveCharacterTextSplitter(
   text: string,
-  options?: ChunkOptions
+  options?: ChunkOptions,
 ): string[] {
   const chunkSize = options?.chunkSize ?? defaultChunkSize;
   const chunkOverlap = options?.chunkOverlap ?? defaultChunkOverlap;

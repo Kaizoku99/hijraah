@@ -1,7 +1,7 @@
-import { Session } from '@supabase/supabase-js';
+import { Session } from "@supabase/supabase-js";
 
-import { safeAuthOperation } from './errors';
-import { TypedSupabaseClient } from './types';
+import { safeAuthOperation } from "./errors";
+import { TypedSupabaseClient } from "./types";
 
 /**
  * Options for token manager
@@ -70,7 +70,7 @@ export class TokenManager {
     try {
       // Get current session
       const { data, error } = await this.supabase.auth.getSession();
-      
+
       if (error) {
         throw error;
       }
@@ -79,7 +79,7 @@ export class TokenManager {
         this.scheduleNextRefresh(data.session);
       }
     } catch (error) {
-      console.error('Failed to start refresh scheduler:', error);
+      console.error("Failed to start refresh scheduler:", error);
       if (this.onRefreshError) {
         this.onRefreshError(error as Error);
       }
@@ -107,10 +107,10 @@ export class TokenManager {
     const expiryTime = session.expires_at * 1000; // Convert to milliseconds
     const currentTime = Date.now();
     const timeUntilExpiry = expiryTime - currentTime;
-    
+
     // Refresh the token 'refreshThreshold' seconds before it expires
-    const refreshTime = timeUntilExpiry - (this.refreshThreshold * 1000);
-    
+    const refreshTime = timeUntilExpiry - this.refreshThreshold * 1000;
+
     // If token is already near expiry or expired, refresh immediately
     return Math.max(0, refreshTime);
   }
@@ -122,7 +122,7 @@ export class TokenManager {
     if (!session) return;
 
     const nextRefreshTime = this.calculateNextRefreshTime(session);
-    
+
     // If token is already expired or very close to expiring, refresh immediately
     if (nextRefreshTime <= 0) {
       this.refreshSession();
@@ -148,7 +148,7 @@ export class TokenManager {
 
     try {
       const { data, error } = await this.supabase.auth.refreshSession();
-      
+
       if (error) {
         throw error;
       }
@@ -168,7 +168,7 @@ export class TokenManager {
 
       return null;
     } catch (error) {
-      console.error('Session refresh failed:', error);
+      console.error("Session refresh failed:", error);
       if (this.onRefreshError) {
         this.onRefreshError(error as Error);
       }
@@ -185,7 +185,7 @@ export class TokenManager {
     try {
       // Get current session
       const { data, error } = await this.supabase.auth.getSession();
-      
+
       if (error) {
         throw error;
       }
@@ -209,7 +209,7 @@ export class TokenManager {
 
       return session;
     } catch (error) {
-      console.error('Failed to get session:', error);
+      console.error("Failed to get session:", error);
       return null;
     }
   }
@@ -227,4 +227,4 @@ export class TokenManager {
  */
 export function createTokenManager(options: TokenManagerOptions): TokenManager {
   return new TokenManager(options);
-} 
+}

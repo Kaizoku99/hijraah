@@ -42,7 +42,7 @@ const formSchema = z
       .regex(/[0-9]/, "Password must contain at least one number")
       .regex(
         /[^A-Za-z0-9]/,
-        "Password must contain at least one special character"
+        "Password must contain at least one special character",
       ),
     confirmPassword: z.string(),
     firstName: z.string().min(2, "First name must be at least 2 characters"),
@@ -100,13 +100,13 @@ export function RegisterForm() {
       } else {
         // Handle case where signUp succeeds but doesn't return a user (shouldn't typically happen with email/pass)
         toast.error(
-          "Registration completed, but user data is missing. Please try logging in."
+          "Registration completed, but user data is missing. Please try logging in.",
         );
       }
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(
-        error.message || "An unexpected error occurred during registration."
+        error.message || "An unexpected error occurred during registration.",
       );
     } finally {
       setIsLoading(false);

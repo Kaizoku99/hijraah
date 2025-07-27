@@ -30,9 +30,7 @@ GRANT USAGE ON SCHEMA net TO anon, authenticated, service_role;
 -- ===================================================
 
 -- 1. get_related_edges ------------------------------------------------------
-DROP FUNCTION IF EXISTS public.get_related_edges(text[]);
-
-CREATE FUNCTION public.get_related_edges(p_entity_names text[])
+CREATE OR REPLACE FUNCTION public.get_related_edges(p_entity_names text[])
 RETURNS TABLE (
     relationship_type text,
     source_entity_id uuid,
@@ -59,9 +57,7 @@ $$;
 GRANT EXECUTE ON FUNCTION public.get_related_edges(text[]) TO anon, authenticated;
 
 -- 2. is_admin ---------------------------------------------------------------
-DROP FUNCTION IF EXISTS public.is_admin();
-
-CREATE FUNCTION public.is_admin()
+CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
 LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public, auth, extensions
@@ -79,9 +75,7 @@ END;
 $$;
 
 -- 3. match_image_embeddings -------------------------------------------------
-DROP FUNCTION IF EXISTS public.match_image_embeddings(vector, int);
-
-CREATE FUNCTION public.match_image_embeddings(
+CREATE OR REPLACE FUNCTION public.match_image_embeddings(
   p_query_embedding vector(1536),
   p_match_count INT DEFAULT 5
 )
@@ -105,9 +99,7 @@ $$;
 GRANT EXECUTE ON FUNCTION public.match_image_embeddings(vector, int) TO anon, authenticated;
 
 -- 4. search_rag_hybrid ------------------------------------------------------
-DROP FUNCTION IF EXISTS public.search_rag_hybrid(vector, text, integer, double precision);
-
-CREATE FUNCTION public.search_rag_hybrid(
+CREATE OR REPLACE FUNCTION public.search_rag_hybrid(
     p_query_embedding vector(1536),
     p_query_text TEXT,
     p_match_count INT DEFAULT 10,

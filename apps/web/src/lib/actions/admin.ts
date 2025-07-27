@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
  * This uses the service role key (only on server) to securely check the user's role.
  */
 export async function verifyUserIsAdmin(
-  userId: string | undefined
+  userId: string | undefined,
 ): Promise<boolean> {
   if (!userId) {
     return false;
@@ -30,7 +30,7 @@ export async function verifyUserIsAdmin(
     if (error) {
       console.error(
         `Error checking admin_users table for user ${userId}:`,
-        error.message
+        error.message,
       );
       return false;
     }
@@ -39,7 +39,7 @@ export async function verifyUserIsAdmin(
   } catch (error: any) {
     console.error(
       `Exception during admin status check for user ${userId}:`,
-      error.message
+      error.message,
     );
     return false;
   }

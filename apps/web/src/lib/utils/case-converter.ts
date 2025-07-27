@@ -18,7 +18,7 @@ export function toSnakeCase<T>(obj: any): T {
         ...result,
         [snakeCase(key)]: toSnakeCase(obj[key]),
       }),
-      {} as T
+      {} as T,
     );
     return result;
   }
@@ -43,7 +43,7 @@ export function toCamelCase<T>(obj: any): T {
         ...result,
         [camelCase(key)]: toCamelCase(obj[key]),
       }),
-      {} as T
+      {} as T,
     );
     return result;
   }

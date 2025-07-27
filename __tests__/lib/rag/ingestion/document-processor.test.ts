@@ -31,7 +31,7 @@ describe("DocumentProcessor", () => {
       () => ({
         splitText: mockSplitText,
         splitDocuments: jest.fn(), // Keep this if other parts of the code use it
-      })
+      }),
     );
     mockTextSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
@@ -78,7 +78,7 @@ More details here.`;
     expect(result.rawText).toBe(scrapedMarkdown);
     expect(result.chunks).toHaveLength(2);
     expect(result.chunks[0].content).toBe(
-      "Big News\nThis is some important content."
+      "Big News\nThis is some important content.",
     );
     expect(result.chunks[0].metadata.chunkIndex).toBe(0);
     expect(result.chunks[0].metadata.documentId).toBe(result.documentId);
@@ -95,7 +95,7 @@ More details here.`;
     });
 
     await expect(processor.processDocument(testDoc)).rejects.toThrow(
-      "Failed to scrape URL: https://example.com/bad-url, Error: Failed to scrape"
+      "Failed to scrape URL: https://example.com/bad-url, Error: Failed to scrape",
     );
   });
 
@@ -141,7 +141,7 @@ More details here.`;
       .mockRejectedValue(embeddingError);
 
     await expect(processor.processDocument(testDoc)).rejects.toThrow(
-      "Embedding API failed"
+      "Embedding API failed",
     );
   });
 });

@@ -165,12 +165,12 @@ export function UnifiedChatHeader({
       setIsLoadingSessions(true);
       console.log(
         "[UnifiedChatHeader] Fetching sessions via API for chatId:",
-        chatId
+        chatId,
       );
       try {
         const sessionApiUrl = "/api/chat?limit=50";
         console.log(
-          `[UnifiedChatHeader] Fetching sessions from: ${sessionApiUrl}`
+          `[UnifiedChatHeader] Fetching sessions from: ${sessionApiUrl}`,
         );
 
         // Get the current session token for auth
@@ -183,12 +183,12 @@ export function UnifiedChatHeader({
           console.log("[UnifiedChatHeader] Using auth token for request");
         } else {
           console.warn(
-            "[UnifiedChatHeader] No auth token available for request!"
+            "[UnifiedChatHeader] No auth token available for request!",
           );
           if (supabase) {
             // Try to refresh the session to get a new token
             console.log(
-              "[UnifiedChatHeader] Attempting to refresh auth session"
+              "[UnifiedChatHeader] Attempting to refresh auth session",
             );
             const { error } = await supabase.auth.refreshSession();
             if (error) {
@@ -202,7 +202,7 @@ export function UnifiedChatHeader({
               console.log("[UnifiedChatHeader] Using refreshed auth token");
             } else {
               throw new Error(
-                "Failed to obtain a valid auth token after refresh"
+                "Failed to obtain a valid auth token after refresh",
               );
             }
           } else {
@@ -219,7 +219,7 @@ export function UnifiedChatHeader({
             throw new Error("Authentication failed. Please log in again.");
           }
           throw new Error(
-            `API Error: ${response.status} ${response.statusText}`
+            `API Error: ${response.status} ${response.statusText}`,
           );
         }
 
@@ -229,13 +229,13 @@ export function UnifiedChatHeader({
 
         console.log(
           "[UnifiedChatHeader] Data from /api/chat:",
-          fetchedSessions
+          fetchedSessions,
         );
 
         if (!Array.isArray(fetchedSessions)) {
           console.error(
             "[UnifiedChatHeader] API response 'chats' is not an array:",
-            fetchedSessions
+            fetchedSessions,
           );
           throw new Error("Invalid data format received from API.");
         }
@@ -244,25 +244,25 @@ export function UnifiedChatHeader({
 
         console.log(
           "[UnifiedChatHeader] Attempting to find session with ID:",
-          chatId
+          chatId,
         );
         const currentChat = fetchedSessions.find(
-          (session: ChatSession) => session.id === chatId
+          (session: ChatSession) => session.id === chatId,
         );
         console.log(
           "[UnifiedChatHeader] Found currentChat from API data:",
-          currentChat
+          currentChat,
         );
 
         if (currentChat) {
           console.log(
             "[UnifiedChatHeader] Current chat is_archived from API data:",
-            currentChat.is_archived
+            currentChat.is_archived,
           );
           setCurrentChatIsArchived(!!currentChat.is_archived);
         } else {
           console.log(
-            "[UnifiedChatHeader] Current chat not found in fetched API data."
+            "[UnifiedChatHeader] Current chat not found in fetched API data.",
           );
           setCurrentChatIsArchived(false);
         }
@@ -307,7 +307,7 @@ export function UnifiedChatHeader({
   }, [chatId, toast, supabase]);
 
   const visibilityOption = chatVisibilityOptions.find(
-    (option) => option.value === selectedVisibility
+    (option) => option.value === selectedVisibility,
   );
   const VisibilityIcon = visibilityOption?.icon || Lock;
 
@@ -459,7 +459,7 @@ export function UnifiedChatHeader({
       toast({ title: "Title updated" });
       setIsEditingTitle(false);
       setSessions((prev) =>
-        prev.map((s) => (s.id === chatId ? { ...s, title: trimmedTitle } : s))
+        prev.map((s) => (s.id === chatId ? { ...s, title: trimmedTitle } : s)),
       );
       if (onTitleChange) {
         onTitleChange(trimmedTitle);

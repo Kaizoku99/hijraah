@@ -360,7 +360,7 @@ export class UserApplicationService {
 
   async updateUserSettings(
     userId: string,
-    settings: Partial<UserSettings>
+    settings: Partial<UserSettings>,
   ): Promise<User> {
     // 1. Use domain service for validation
     const validatedSettings = this.userService.validateUserSettings(settings);
@@ -374,7 +374,7 @@ export class UserApplicationService {
     // 4. Persist through repository
     const savedProfile = await this.userRepository.update(
       existingUser.id,
-      dbSettings
+      dbSettings,
     );
 
     // 5. Return domain entity
@@ -395,7 +395,7 @@ We now use Zod for request validation:
 // Example from src/infrastructure/api/validators/index.ts
 export function validate<T extends z.ZodTypeAny>(
   schema: T,
-  type: ValidationType = "body"
+  type: ValidationType = "body",
 ) {
   return async (c: Context, next: Next) => {
     // Validation logic
@@ -417,9 +417,9 @@ userRouter.patch(
     // API controller logic
     const updatedUser = await userAppService.updateUserSettings(
       user.id,
-      settings
+      settings,
     );
-  }
+  },
 );
 ```
 
@@ -495,7 +495,7 @@ export class CaseService {
   }
   isValidStatusTransition(
     currentStatus: CaseStatus,
-    newStatus: CaseStatus
+    newStatus: CaseStatus,
   ): boolean {
     /* ... */
   }
@@ -507,14 +507,14 @@ export class CaseService {
   }
   calculateCompletionPercentage(
     caseInstance: Case,
-    uploadedDocuments: string[]
+    uploadedDocuments: string[],
   ): number {
     /* ... */
   }
   createDocumentEvent(
     documentId: string,
     documentName: string,
-    uploadedBy: string
+    uploadedBy: string,
   ): TimelineEvent {
     /* ... */
   }
@@ -541,7 +541,7 @@ export class CaseRepository extends BaseRepository<Case, CaseRecord> {
     /* ... */
   }
   getWithDetails(
-    caseId: string
+    caseId: string,
   ): Promise<{ case: CaseRecord; documents: any[]; messages: any[] } | null> {
     /* ... */
   }
@@ -586,7 +586,7 @@ export class CaseApplicationService {
   }
   async getCaseWithDetails(
     caseId: string,
-    userId?: string
+    userId?: string,
   ): Promise<{ case: Case; documents: Document[]; messages: any[] }> {
     /* ... */
   }
@@ -598,7 +598,7 @@ export class CaseApplicationService {
   async updateCase(
     caseId: string,
     userId: string,
-    data: object
+    data: object,
   ): Promise<Case> {
     /* ... */
   }
@@ -606,7 +606,7 @@ export class CaseApplicationService {
     caseId: string,
     userId: string,
     newStatus: CaseStatus,
-    reason?: string
+    reason?: string,
   ): Promise<Case> {
     /* ... */
   }
@@ -616,7 +616,7 @@ export class CaseApplicationService {
     caseId: string,
     assignedUserId: string,
     role: string,
-    assignedByUserId: string
+    assignedByUserId: string,
   ): Promise<Case> {
     /* ... */
   }
@@ -624,7 +624,7 @@ export class CaseApplicationService {
     caseId: string,
     targetUserId: string,
     removedByUserId: string,
-    reason?: string
+    reason?: string,
   ): Promise<Case> {
     /* ... */
   }
@@ -633,7 +633,7 @@ export class CaseApplicationService {
   async addDocument(
     caseId: string,
     documentId: string,
-    userId: string
+    userId: string,
   ): Promise<Case> {
     /* ... */
   }
@@ -688,14 +688,14 @@ caseRouter.patch(
   zValidator("json", statusChangeSchema),
   async (c) => {
     /* Change case status */
-  }
+  },
 );
 caseRouter.post(
   "/:id/assign",
   zValidator("json", assignUserSchema),
   async (c) => {
     /* Assign a user to a case */
-  }
+  },
 );
 caseRouter.delete("/:id/assign/:userId", async (c) => {
   /* Remove a user assignment */
@@ -769,7 +769,7 @@ api.use(
     ...RATE_LIMITS.DEFAULT,
     includeHeaders: true,
     errorMessage: "Global rate limit exceeded. Please try again later.",
-  })
+  }),
 );
 
 // Case-specific rate limiting
@@ -779,7 +779,7 @@ caseRouter.use(
     resourceType: ResourceType.CASE_MANAGEMENT,
     includeHeaders: true,
     errorMessage: "Rate limit exceeded for case management operations.",
-  })
+  }),
 );
 
 // Document upload-specific rate limiting
@@ -789,7 +789,7 @@ caseRouter.use(
     resourceType: ResourceType.DOCUMENT_UPLOAD,
     includeHeaders: true,
     errorMessage: "Rate limit exceeded for document uploads.",
-  })
+  }),
 );
 ```
 

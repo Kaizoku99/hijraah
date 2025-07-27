@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "files": [
+    "webpack-runtime.js",
+    "webpack-runtime.js.map",
+    "instrumentation.js.map",
+    "chunks/7675.js",
+    "chunks/7675.js.map"
+  ]
+}

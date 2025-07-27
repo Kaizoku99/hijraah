@@ -7,7 +7,6 @@ import { AppSidebar } from "@/components/ui/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 
-
 export const metadata: Metadata = {
   // Updated title for consolidated structure
   title: "Unified Chat - Hijraah",

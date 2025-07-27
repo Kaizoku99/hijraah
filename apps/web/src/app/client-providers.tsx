@@ -1,6 +1,6 @@
 "use client";
 
-import { NextIntlClientProvider , IntlErrorCode } from "next-intl";
+import { NextIntlClientProvider, IntlErrorCode } from "next-intl";
 import { ReactNode } from "react";
 
 import { getLocaleConfig } from "@/i18n/i18n";
@@ -49,7 +49,7 @@ export function IntlClientProvider({
         if (process.env.NODE_ENV === "development") {
           console.debug(
             `Missing translation: ${namespace ? `${namespace}.${key}` : key}`,
-            error
+            error,
           );
         }
 

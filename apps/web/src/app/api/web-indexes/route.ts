@@ -61,8 +61,8 @@ export async function GET(request: NextRequest) {
       query = query.where(
         and(
           eq(webIndexes.userId, session.user.id),
-          eq(webIndexes.isActive, true)
-        )
+          eq(webIndexes.isActive, true),
+        ),
       );
     }
 
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching web indexes:", error);
     return NextResponse.json(
       { error: "Failed to fetch web indexes" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -96,15 +96,15 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           eq(webIndexes.userId, session.user.id),
-          eq(webIndexes.namespace, validatedData.namespace)
-        )
+          eq(webIndexes.namespace, validatedData.namespace),
+        ),
       )
       .limit(1);
 
     if (existingIndex.length > 0) {
       return NextResponse.json(
         { error: "Namespace already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -137,14 +137,14 @@ export async function POST(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation failed", details: error.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.error("Error creating web index:", error);
     return NextResponse.json(
       { error: "Failed to create web index" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -163,7 +163,7 @@ export async function PUT(request: NextRequest) {
     if (!indexId) {
       return NextResponse.json(
         { error: "Index ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -175,14 +175,14 @@ export async function PUT(request: NextRequest) {
       .select({ id: webIndexes.id })
       .from(webIndexes)
       .where(
-        and(eq(webIndexes.id, indexId), eq(webIndexes.userId, session.user.id))
+        and(eq(webIndexes.id, indexId), eq(webIndexes.userId, session.user.id)),
       )
       .limit(1);
 
     if (existingIndex.length === 0) {
       return NextResponse.json(
         { error: "Web index not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -201,14 +201,14 @@ export async function PUT(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation failed", details: error.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.error("Error updating web index:", error);
     return NextResponse.json(
       { error: "Failed to update web index" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -227,7 +227,7 @@ export async function DELETE(request: NextRequest) {
     if (!indexId) {
       return NextResponse.json(
         { error: "Index ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -236,14 +236,14 @@ export async function DELETE(request: NextRequest) {
       .select({ id: webIndexes.id })
       .from(webIndexes)
       .where(
-        and(eq(webIndexes.id, indexId), eq(webIndexes.userId, session.user.id))
+        and(eq(webIndexes.id, indexId), eq(webIndexes.userId, session.user.id)),
       )
       .limit(1);
 
     if (existingIndex.length === 0) {
       return NextResponse.json(
         { error: "Web index not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -261,7 +261,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Error deleting web index:", error);
     return NextResponse.json(
       { error: "Failed to delete web index" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

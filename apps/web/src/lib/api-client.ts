@@ -1,4 +1,4 @@
-import { getSupabaseClient } from './supabase/client';
+import { getSupabaseClient } from "./supabase/client";
 
 interface ApiClientOptions {
   baseUrl?: string;
@@ -15,18 +15,21 @@ export class ApiClient {
   private supabase = getSupabaseClient();
 
   constructor(options: ApiClientOptions = {}) {
-    this.baseUrl = options.baseUrl || '/api';
+    this.baseUrl = options.baseUrl || "/api";
   }
 
   private async getAuthHeader(): Promise<HeadersInit> {
-    const { data: { session }, error } = await this.supabase.auth.getSession();
+    const {
+      data: { session },
+      error,
+    } = await this.supabase.auth.getSession();
     if (error || !session) {
-      throw new Error('Not authenticated');
+      throw new Error("Not authenticated");
     }
 
     return {
-      'Authorization': `Bearer ${session.access_token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
     };
   }
 
@@ -42,25 +45,25 @@ export class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || 'API request failed');
+      throw new Error(error.message || "API request failed");
     }
 
     return response.json();
   }
 
   async processQuery(query: string, filters?: QueryFilters) {
-    return this.fetchWithAuth('/ai/chat', {
-      method: 'POST',
+    return this.fetchWithAuth("/ai/chat", {
+      method: "POST",
       body: JSON.stringify({ query, filters }),
     });
   }
 
   async compareCountries(countries: string[], category: string) {
-    return this.fetchWithAuth('/ai/compare', {
-      method: 'POST',
+    return this.fetchWithAuth("/ai/compare", {
+      method: "POST",
       body: JSON.stringify({ countries, category }),
     });
   }
 
   // Add more API methods as needed...
-} 
+}

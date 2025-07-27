@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const CountryConfig = z.object({
   name: z.string(),
@@ -17,13 +17,17 @@ export const CountryConfig = z.object({
   country_code: z.string().optional(),
   is_active: z.boolean(),
   trackChanges: z.boolean().optional().default(false),
-  pageOptions: z.object({
-    formats: z.array(z.string()).optional(),
-    changeTrackingOptions: z.object({
-      modes: z.array(z.enum(['git-diff', 'json'])).optional(),
-      schema: z.record(z.any()).optional(),
-    }).optional(),
-  }).optional(),
+  pageOptions: z
+    .object({
+      formats: z.array(z.string()).optional(),
+      changeTrackingOptions: z
+        .object({
+          modes: z.array(z.enum(["git-diff", "json"])).optional(),
+          schema: z.record(z.any()).optional(),
+        })
+        .optional(),
+    })
+    .optional(),
 });
 
 export type CountryConfigType = z.infer<typeof CountryConfig>;
@@ -33,4 +37,4 @@ export type CountryConfigType = z.infer<typeof CountryConfig>;
 
 // Remove ScrapedData schema - content goes to R2, metadata to scraped_sources table
 // export const ScrapedData = z.object({ ... });
-// export type ScrapedDataType = z.infer<typeof ScrapedData>; 
+// export type ScrapedDataType = z.infer<typeof ScrapedData>;

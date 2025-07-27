@@ -28,7 +28,7 @@ export function createMockUser(overrides: Partial<User> = {}): User {
  * Create a mock extended user based on our application's needs
  */
 export function createMockExtendedUser(
-  overrides: Partial<ExtendedUser> = {}
+  overrides: Partial<ExtendedUser> = {},
 ): ExtendedUser {
   const user = createMockUser(overrides); // Utilize the base mock user
 

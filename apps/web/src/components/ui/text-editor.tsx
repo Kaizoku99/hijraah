@@ -94,7 +94,7 @@ function PureEditor({
   useEffect(() => {
     if (editorRef.current && content) {
       const currentContent = buildContentFromDocument(
-        editorRef.current.state.doc
+        editorRef.current.state.doc,
       );
 
       if (status === "streaming") {
@@ -103,7 +103,7 @@ function PureEditor({
         const transaction = editorRef.current.state.tr.replaceWith(
           0,
           editorRef.current.state.doc.content.size,
-          newDocument.content
+          newDocument.content,
         );
 
         transaction.setMeta("no-save", true);
@@ -117,7 +117,7 @@ function PureEditor({
         const transaction = editorRef.current.state.tr.replaceWith(
           0,
           editorRef.current.state.doc.content.size,
-          newDocument.content
+          newDocument.content,
         );
 
         transaction.setMeta("no-save", true);
@@ -130,14 +130,14 @@ function PureEditor({
     if (editorRef.current?.state.doc && content) {
       const projectedSuggestions = projectWithPositions(
         editorRef.current.state.doc,
-        suggestions
+        suggestions,
       ).filter(
-        (suggestion) => suggestion.selectionStart && suggestion.selectionEnd
+        (suggestion) => suggestion.selectionStart && suggestion.selectionEnd,
       );
 
       const decorations = createDecorations(
         projectedSuggestions,
-        editorRef.current
+        editorRef.current,
       );
 
       const transaction = editorRef.current.state.tr;

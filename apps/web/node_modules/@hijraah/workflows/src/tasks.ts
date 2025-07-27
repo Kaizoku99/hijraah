@@ -84,7 +84,7 @@ export const documentProcessingTask = task({
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     try {
@@ -233,7 +233,7 @@ export const webScrapingTask = task({
 
       if (!scrapeResult.success) {
         throw new Error(
-          `Scraping failed: ${scrapeResult.error || "Unknown error"}`
+          `Scraping failed: ${scrapeResult.error || "Unknown error"}`,
         );
       }
 
@@ -312,7 +312,7 @@ export const dailyReportsTask = schedules.task({
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
 
     try {

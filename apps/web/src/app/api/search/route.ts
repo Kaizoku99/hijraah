@@ -19,7 +19,7 @@ app.use("*", cors());
 // Client for semantic search RPC
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // --- Schemas --- //
@@ -67,14 +67,14 @@ app.get("/internal", zValidator("query", internalSearchSchema), async (c) => {
         match_threshold: threshold,
         match_count: limit,
         filter_visibility: visibility, // Pass visibility directly
-      }
+      },
     );
 
     if (error) {
       console.error("Error performing semantic search:", error);
       return c.json(
         { error: "Error during semantic search", details: error.message },
-        500
+        500,
       );
     }
 
@@ -86,7 +86,7 @@ app.get("/internal", zValidator("query", internalSearchSchema), async (c) => {
     console.error("Error in internal search API:", error);
     return c.json(
       { error: "Internal server error", details: error.message },
-      500
+      500,
     );
   }
 });
@@ -119,7 +119,7 @@ app.get("/web", zValidator("query", webSearchSchema), async (c) => {
         ) {
           console.error(
             "Firecrawl search failed or returned unexpected format:",
-            searchResult?.error
+            searchResult?.error,
           );
           return c.json(
             {
@@ -128,7 +128,7 @@ app.get("/web", zValidator("query", webSearchSchema), async (c) => {
                 searchResult?.error ||
                 "Unknown Firecrawl error or invalid format",
             },
-            502
+            502,
           );
         }
 
@@ -175,13 +175,13 @@ app.get("/web", zValidator("query", webSearchSchema), async (c) => {
             error: "Web search service unavailable",
             details: (importError as Error).message,
           },
-          503
+          503,
         ); // 503 Service Unavailable
       }
     } else {
       // Fallback if Firecrawl is not configured
       console.warn(
-        "Firecrawl API key not configured. Returning fallback web search result."
+        "Firecrawl API key not configured. Returning fallback web search result.",
       );
       return c.json({
         success: true,
@@ -210,7 +210,7 @@ app.get("/web", zValidator("query", webSearchSchema), async (c) => {
         details:
           error instanceof Error ? error.message : "An unknown error occurred",
       },
-      { status }
+      { status },
     );
   }
 });

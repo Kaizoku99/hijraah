@@ -118,7 +118,7 @@ function createResponse(data: AnalyzeResponse, status: number): Response {
 function createErrorResponse(
   message: string,
   status: number,
-  requestId: string
+  requestId: string,
 ): Response {
   metrics.errorCount++;
 
@@ -130,7 +130,7 @@ function createErrorResponse(
       error: message,
       requestId,
     },
-    status
+    status,
   );
 }
 
@@ -139,7 +139,7 @@ function createErrorResponse(
  */
 async function generateCacheKey(
   content: string,
-  query: string
+  query: string,
 ): Promise<string> {
   // Create a hash of the content and query for cache key
   const encoder = new TextEncoder();
@@ -224,7 +224,7 @@ async function checkCache(cacheKey: string): Promise<AnalyzeResponse | null> {
     return JSON.parse(data.result) as AnalyzeResponse;
   } catch (error) {
     console.error(
-      `Cache lookup error: ${error instanceof Error ? error.message : String(error)}`
+      `Cache lookup error: ${error instanceof Error ? error.message : String(error)}`,
     );
     metrics.cacheMisses++;
     return null;
@@ -236,7 +236,7 @@ async function checkCache(cacheKey: string): Promise<AnalyzeResponse | null> {
  */
 async function saveToCache(
   cacheKey: string,
-  result: AnalyzeResponse
+  result: AnalyzeResponse,
 ): Promise<void> {
   try {
     const expiresAt = new Date();
@@ -249,7 +249,7 @@ async function saveToCache(
         created_at: new Date().toISOString(),
         expires_at: expiresAt.toISOString(),
       },
-      { onConflict: "cache_key" }
+      { onConflict: "cache_key" },
     );
 
     if (error) {
@@ -257,7 +257,7 @@ async function saveToCache(
     }
   } catch (error) {
     console.error(
-      `Cache save error: ${error instanceof Error ? error.message : String(error)}`
+      `Cache save error: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
@@ -269,7 +269,7 @@ async function analyzeContent(
   content: string,
   query: string,
   depth: number,
-  requestId: string
+  requestId: string,
 ): Promise<AnalyzeResponse> {
   const startTime = performance.now();
 
@@ -343,7 +343,7 @@ FORMAT YOUR RESPONSE IN JSON:
     } catch (parseError) {
       console.error(
         `[${requestId}] Failed to parse OpenAI response:`,
-        parseError
+        parseError,
       );
 
       // Attempt to extract JSON from the response if it's not properly formatted
@@ -354,7 +354,7 @@ FORMAT YOUR RESPONSE IN JSON:
         } catch (extractError) {
           console.error(
             `[${requestId}] Failed to extract JSON from response:`,
-            extractError
+            extractError,
           );
           analysis = {
             summary: "Failed to parse analysis",
@@ -408,7 +408,7 @@ FORMAT YOUR RESPONSE IN JSON:
  */
 async function handleMetricsRequest(
   req: Request,
-  requestId: string
+  requestId: string,
 ): Promise<Response> {
   // Require an admin token for metrics
   const authHeader = req.headers.get("authorization");
@@ -439,7 +439,7 @@ async function handleMetricsRequest(
       ],
       requestId,
     },
-    200
+    200,
   );
 }
 
@@ -453,7 +453,7 @@ Deno.serve(async (req: Request) => {
   metrics.requestCount++;
 
   console.info(
-    `[${requestId}] Request received: ${req.method} ${new URL(req.url).pathname}`
+    `[${requestId}] Request received: ${req.method} ${new URL(req.url).pathname}`,
   );
 
   // Handle CORS preflight request
@@ -490,7 +490,7 @@ Deno.serve(async (req: Request) => {
       return createErrorResponse(
         "Rate limit exceeded. Please try again later.",
         429,
-        requestId
+        requestId,
       );
     }
 
@@ -504,7 +504,7 @@ Deno.serve(async (req: Request) => {
         return createErrorResponse(
           `Invalid request: ${validatedBody.error.message}`,
           400,
-          requestId
+          requestId,
         );
       }
 
@@ -545,13 +545,13 @@ Deno.serve(async (req: Request) => {
             ...result,
             processingTimeMs,
           },
-          200
+          200,
         );
       }
     }
 
     console.info(
-      `[${requestId}] Analyzing content with query: "${query.substring(0, 50)}..." (depth: ${depth})`
+      `[${requestId}] Analyzing content with query: "${query.substring(0, 50)}..." (depth: ${depth})`,
     );
 
     // Process analysis request using OpenAI
@@ -559,7 +559,7 @@ Deno.serve(async (req: Request) => {
       content,
       query,
       depth,
-      requestId
+      requestId,
     );
 
     // Store result in cache if successful
@@ -571,7 +571,7 @@ Deno.serve(async (req: Request) => {
         EdgeRuntime.waitUntil(
           cachePromise.catch((err) => {
             console.error(`[${requestId}] Cache save error:`, err);
-          })
+          }),
         );
       } else {
         await cachePromise;

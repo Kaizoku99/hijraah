@@ -2,13 +2,13 @@
 
 import { Search, Plus, FileText, Globe, Shield } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from 'react';
+import { Suspense } from "react";
 
-import { DocumentList } from '@/components/ui/documents/DocumentList';
-import { ArtifactProvider } from '@/lib/contexts/artifact-context';
-import { Button } from '@/ui/button';
-import { Skeleton } from '@/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs';
+import { DocumentList } from "@/components/ui/documents/DocumentList";
+import { ArtifactProvider } from "@/lib/contexts/artifact-context";
+import { Button } from "@/ui/button";
+import { Skeleton } from "@/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 
 function DocumentListSkeleton() {
   return (
@@ -19,9 +19,11 @@ function DocumentListSkeleton() {
       </div>
       <Skeleton className="h-12 w-full" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array(6).fill(0).map((_, i) => (
-          <Skeleton key={i} className="h-52 w-full rounded-md" />
-        ))}
+        {Array(6)
+          .fill(0)
+          .map((_, i) => (
+            <Skeleton key={i} className="h-52 w-full rounded-md" />
+          ))}
       </div>
     </div>
   );
@@ -71,7 +73,8 @@ export default function DocumentsPage() {
           <div className="mb-4 flex items-center gap-2">
             <FileText className="h-5 w-5 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              These documents are generated with AI assistance based on your inputs.
+              These documents are generated with AI assistance based on your
+              inputs.
             </p>
           </div>
           <ArtifactProvider>
@@ -97,9 +100,12 @@ export default function DocumentsPage() {
 
         <TabsContent value="uploaded" className="space-y-4">
           <div className="bg-muted/50 p-12 rounded-md text-center">
-            <h3 className="text-lg font-medium mb-2">Document Upload Feature</h3>
+            <h3 className="text-lg font-medium mb-2">
+              Document Upload Feature
+            </h3>
             <p className="text-muted-foreground mb-4">
-              This feature is coming soon. You will be able to upload and process documents with AI.
+              This feature is coming soon. You will be able to upload and
+              process documents with AI.
             </p>
           </div>
         </TabsContent>

@@ -96,7 +96,7 @@ export class BatchUploadService extends EventEmitter {
   // Context7 Pattern: Factory method for creating batch uploads
   async createBatch(
     files: File[],
-    config?: Partial<BatchUploadConfig>
+    config?: Partial<BatchUploadConfig>,
   ): Promise<string> {
     const mergedConfig = { ...this.defaultConfig, ...config };
     const batchId = crypto.randomUUID();
@@ -156,7 +156,7 @@ export class BatchUploadService extends EventEmitter {
 
   private async processBatch(
     batchId: string,
-    files: BatchUploadFile[]
+    files: BatchUploadFile[],
   ): Promise<void> {
     const result = this.activeUploads.get(batchId);
     if (!result) return;
@@ -166,7 +166,7 @@ export class BatchUploadService extends EventEmitter {
 
     for (const chunk of chunks) {
       const uploadPromises = chunk.map((file) =>
-        this.processFile(batchId, file)
+        this.processFile(batchId, file),
       );
       await Promise.allSettled(uploadPromises);
     }
@@ -175,7 +175,7 @@ export class BatchUploadService extends EventEmitter {
     result.endTime = new Date();
     result.duration = result.endTime.getTime() - result.startTime.getTime();
     result.successful = result.files.filter(
-      (f) => f.status === "completed"
+      (f) => f.status === "completed",
     ).length;
     result.failed = result.files.filter((f) => f.status === "failed").length;
 
@@ -184,7 +184,7 @@ export class BatchUploadService extends EventEmitter {
 
   private async processFile(
     batchId: string,
-    file: BatchUploadFile
+    file: BatchUploadFile,
   ): Promise<void> {
     try {
       this.emit("file:started", file.id, file.name);
@@ -309,7 +309,7 @@ export class BatchUploadService extends EventEmitter {
 
       if (!config.allowedTypes.includes(file.type)) {
         errors.push(
-          `File ${index + 1} (${file.name}) has unsupported type: ${file.type}`
+          `File ${index + 1} (${file.name}) has unsupported type: ${file.type}`,
         );
       }
     });

@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { createServiceClient } from "@/lib/supabase/client";
 
-
 import type { Context } from "hono";
 
 /**
@@ -139,7 +138,7 @@ export function setupDocumentRoutes(app: Hono) {
         console.error("Documents fetch error:", error);
         throw new HTTPException(500, { message: "Failed to fetch documents" });
       }
-    }
+    },
   );
 
   // Get a specific document

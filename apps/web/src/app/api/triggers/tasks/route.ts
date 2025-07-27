@@ -237,13 +237,13 @@ export async function GET(request: NextRequest) {
 
     if (query.category) {
       filteredTasks = filteredTasks.filter(
-        (task) => task.category === query.category
+        (task) => task.category === query.category,
       );
     }
 
     if (query.status) {
       filteredTasks = filteredTasks.filter(
-        (task) => task.lastRun?.status === query.status
+        (task) => task.lastRun?.status === query.status,
       );
     }
 
@@ -251,7 +251,7 @@ export async function GET(request: NextRequest) {
     const total = filteredTasks.length;
     const paginatedTasks = filteredTasks.slice(
       query.offset,
-      query.offset + query.limit
+      query.offset + query.limit,
     );
 
     const response: TasksApiResponse = {
@@ -269,13 +269,13 @@ export async function GET(request: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid query parameters", details: error.errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

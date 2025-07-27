@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "files": [
+    "../../../webpack-runtime.js",
+    "../../../webpack-runtime.js.map",
+    "../../../chunks/827.js",
+    "../../../chunks/827.js.map",
+    "../../../chunks/7719.js",
+    "../../../chunks/7719.js.map",
+    "../../../chunks/8342.js",
+    "../../../chunks/8342.js.map",
+    "../../../chunks/2256.js",
+    "../../../chunks/2256.js.map",
+    "../../../chunks/3774.js",
+    "../../../chunks/3774.js.map",
+    "../../../chunks/7482.js",
+    "../../../chunks/7482.js.map",
+    "route.js.map",
+    "route_client-reference-manifest.js",
+    "../../../../../package.json",
+    "../../../../../../../package.json"
+  ]
+}

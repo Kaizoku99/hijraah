@@ -90,7 +90,7 @@ export function useCases({
       }));
     } catch (err) {
       setError(
-        err instanceof Error ? err : new Error("Unknown error occurred")
+        err instanceof Error ? err : new Error("Unknown error occurred"),
       );
       setCases([]);
     } finally {

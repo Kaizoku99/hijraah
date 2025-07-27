@@ -252,17 +252,17 @@ COMMENT ON VIEW public.unified_chats IS 'Unified view of existing and ai-chatbot
 CREATE OR REPLACE VIEW public.unified_messages AS
 SELECT
     cm.id,
-    cm.chat_id as "chatId",
+    cm.session_id as "chatId",
     cm.role,
     CASE 
         WHEN cm.content IS NOT NULL THEN 
             json_build_array(json_build_object('type', 'text', 'text', cm.content))::jsonb
         ELSE '[]'::jsonb
     END as parts,
-    COALESCE(cm.attachments, '[]'::jsonb) as attachments,
+    COALESCE(cm.metadata, '[]'::jsonb) as attachments,
     cm.created_at as "createdAt"
 FROM public.chat_messages cm
-WHERE cm.chat_id IN (SELECT id FROM public.chat_sessions)
+WHERE cm.session_id IN (SELECT id FROM public.chat_sessions)
 UNION ALL
 SELECT
     m.id,
@@ -303,7 +303,7 @@ CREATE POLICY "Users can manage their own chats"
     USING (
         auth.role() = 'service_role' OR
         "userId" IN (
-            SELECT id FROM public."User" u 
+            SELECT u.id FROM public."User" u 
             JOIN auth.users au ON u.email = au.email 
             WHERE au.id = auth.uid()
         )
@@ -375,7 +375,7 @@ CREATE POLICY "Users can manage their own documents"
     USING (
         auth.role() = 'service_role' OR
         "userId" IN (
-            SELECT id FROM public."User" u 
+            SELECT u.id FROM public."User" u 
             JOIN auth.users au ON u.email = au.email 
             WHERE au.id = auth.uid()
         )
@@ -388,12 +388,12 @@ CREATE POLICY "Users can manage suggestions for their documents"
     USING (
         auth.role() = 'service_role' OR
         ("userId" IN (
-            SELECT id FROM public."User" u 
+            SELECT u.id FROM public."User" u 
             JOIN auth.users au ON u.email = au.email 
             WHERE au.id = auth.uid()
         ) OR
         "documentId" IN (
-            SELECT id FROM public."Document" d
+            SELECT d.id FROM public."Document" d
             JOIN public."User" u ON d."userId" = u.id
             JOIN auth.users au ON u.email = au.email
             WHERE au.id = auth.uid()

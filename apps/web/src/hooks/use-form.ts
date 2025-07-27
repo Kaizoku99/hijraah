@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
-import { useForm as useHookForm, DefaultValues } from 'react-hook-form';
-import { z } from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm as useHookForm, DefaultValues } from "react-hook-form";
+import { z } from "zod";
 
-import { useToast } from '@/shared/hooks/use-toast';
+import { useToast } from "@/shared/hooks/use-toast";
 
 interface UseFormProps<T extends z.ZodType> {
   schema: T;
@@ -30,14 +30,15 @@ export function useForm<T extends z.ZodType>({
       await onSubmit(data);
       form.reset();
       toast({
-        title: 'Success',
-        description: 'Form submitted successfully',
+        title: "Success",
+        description: "Form submitted successfully",
       });
     } catch (error) {
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Something went wrong',
-        variant: 'destructive',
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);

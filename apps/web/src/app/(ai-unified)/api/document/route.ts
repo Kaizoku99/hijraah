@@ -4,7 +4,7 @@ import {
   deleteDocumentsByIdAfterTimestamp,
   getDocumentsById,
   saveDocument,
-} from "@/supabase/queries"; // Adjusted path
+} from "@/supabase/queries"; // Using path alias
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

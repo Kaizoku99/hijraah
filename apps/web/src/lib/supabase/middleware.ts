@@ -45,7 +45,7 @@ export async function updateSession(request: NextRequest) {
           response.cookies.set(name, "", { ...options, maxAge: 0 });
         },
       },
-    }
+    },
   );
 
   // This will refresh the user's session if needed

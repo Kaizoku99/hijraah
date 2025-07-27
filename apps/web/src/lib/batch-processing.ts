@@ -21,7 +21,7 @@ import { RateLimitService } from "@/services/rate-limit-service";
 export const checkRateLimit = RateLimitService.isAllowed;
 export const getUserTier = async (userId: string) => {
   console.warn(
-    "getUserTier from batch-processing is deprecated. Use user service instead."
+    "getUserTier from batch-processing is deprecated. Use user service instead.",
   );
   return "standard" as const;
 };
@@ -31,7 +31,7 @@ export async function canProcessBatch(userId: string, documentCount: number) {
   const result = await RateLimitService.isAllowed(
     userId,
     "batchProcessing",
-    "standard"
+    "standard",
   );
 
   const maxBatchSizes = {
@@ -67,7 +67,7 @@ export async function canProcessBatch(userId: string, documentCount: number) {
 export async function processInParallel<T, R>(
   processingFn: (item: T) => Promise<R>,
   items: T[],
-  concurrency: number = 3
+  concurrency: number = 3,
 ): Promise<R[]> {
   const results: R[] = [];
 
@@ -126,7 +126,7 @@ export async function getBatchStatus(batchId: string): Promise<{
  */
 export async function checkUploadQuota(
   userId: string,
-  fileSize: number
+  fileSize: number,
 ): Promise<{
   allowed: boolean;
   reason?: string;

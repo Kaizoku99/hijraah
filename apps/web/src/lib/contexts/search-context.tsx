@@ -1,6 +1,6 @@
 "use client";
 
-import { useCompletion } from "ai/react";
+import { useCompletion } from "@ai-sdk/react";
 import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState } from "react";
 

@@ -122,7 +122,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
         try {
           // Context7 - Provider Isolation: Fetch suggestions
           const response = await fetch(
-            `/api/suggestions?documentId=${documentId}`
+            `/api/suggestions?documentId=${documentId}`,
           );
           const suggestions = response.ok ? await response.json() : [];
 
@@ -146,7 +146,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             suggestions: [],
           });
         }
-      }
+      },
     );
   },
 
@@ -196,7 +196,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             };
           });
         }
-      }
+      },
     );
   },
 
@@ -259,7 +259,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             span.setAttributes({
               "artifact.action_success": true,
             });
-          }
+          },
         );
       },
       isDisabled: ({ currentVersionIndex }) => {
@@ -282,7 +282,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             span.setAttributes({
               "artifact.action_success": true,
             });
-          }
+          },
         );
       },
       isDisabled: ({ currentVersionIndex }) => {
@@ -305,7 +305,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             span.setAttributes({
               "artifact.action_success": true,
             });
-          }
+          },
         );
       },
       isDisabled: ({ isCurrentVersion }) => {
@@ -339,7 +339,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
                   error instanceof Error ? error.message : String(error),
               });
             }
-          }
+          },
         );
       },
     },
@@ -372,7 +372,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             span.setAttributes({
               "artifact.toolbar_action_success": true,
             });
-          }
+          },
         );
       },
     },
@@ -401,7 +401,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
             span.setAttributes({
               "artifact.toolbar_action_success": true,
             });
-          }
+          },
         );
       },
     },

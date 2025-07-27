@@ -27,7 +27,7 @@ function validateGuestAuthRequest(data: any): GuestAuthRequest {
   if (action === "convert") {
     if (!email || !password || !guestUserId) {
       throw new Error(
-        "Email, password, and guestUserId required for conversion"
+        "Email, password, and guestUserId required for conversion",
       );
     }
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     if (!authConfig.guestSessionEnabled) {
       return NextResponse.json(
         { error: "Guest authentication is disabled" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         ) {
           return NextResponse.json(
             { error: "Missing required fields for conversion" },
-            { status: 400 }
+            { status: 400 },
           );
         }
 
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
           validatedRequest.guestUserId,
           validatedRequest.email,
           validatedRequest.password,
-          validatedRequest.fullName
+          validatedRequest.fullName,
         );
 
         // Clear guest session cookies
@@ -183,7 +183,7 @@ export async function POST(request: NextRequest) {
             ? error.message
             : "Guest authentication failed",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
     if (!authConfig.guestSessionEnabled) {
       return NextResponse.json(
         { isGuest: false, isAuthenticated: false },
-        { status: 200 }
+        { status: 200 },
       );
     }
 
@@ -263,7 +263,7 @@ export async function GET(request: NextRequest) {
         isGuest: false,
         isAuthenticated: false,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

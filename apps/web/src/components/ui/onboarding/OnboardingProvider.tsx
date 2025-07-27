@@ -43,7 +43,7 @@ interface OnboardingContextType {
 }
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const useOnboarding = () => {
@@ -66,7 +66,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
   );
 
   // Fetch the current user
@@ -86,7 +86,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
         if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
           setLocalState((prev) => ({ ...prev, hideForSession: false }));
         }
-      }
+      },
     );
 
     return () => {
@@ -107,7 +107,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
       ...persistentState,
       hideForSession: localState.hideForSession,
     }),
-    [persistentState, localState.hideForSession]
+    [persistentState, localState.hideForSession],
   );
 
   // --- Actions --- //
@@ -180,7 +180,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
   const resetOnboarding = useCallback(() => {
     console.log(
       "[OnboardingProvider] Resetting onboarding. Current state:",
-      combinedState
+      combinedState,
     );
     const firstStepId = ONBOARDING_STEPS_ORDER[0];
     const newState = {
@@ -201,14 +201,14 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
     (stepId: OnboardingStepId) => {
       console.log(
         `[OnboardingProvider] completeStep called with stepId: ${stepId}. Current state:`,
-        combinedState
+        combinedState,
       );
 
       // This function is primarily for step components to signal completion
       // and trigger moving to the next step.
       if (combinedState.currentStep === stepId && !combinedState.isCompleted) {
         console.log(
-          `[OnboardingProvider] Completing step: ${stepId}, moving to next.`
+          `[OnboardingProvider] Completing step: ${stepId}, moving to next.`,
         );
         // Check if there's a specific action key for this step completion
         const stepConfig = ONBOARDING_STEPS_CONFIG.find((s) => s.id === stepId);
@@ -224,7 +224,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
           }).catch((error) => {
             console.error(
               `Failed to mark step ${stepId} action ${stepConfig.actionKey} as completed:`,
-              error
+              error,
             );
             // Don't block UI flow for this
           });
@@ -232,7 +232,7 @@ export const OnboardingProvider: React.FC<{ children: React.ReactNode }> = ({
         nextStep();
       }
     },
-    [combinedState.currentStep, combinedState.isCompleted, nextStep]
+    [combinedState.currentStep, combinedState.isCompleted, nextStep],
   );
 
   return (

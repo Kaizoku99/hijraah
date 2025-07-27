@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { AuthError } from "./errors";
 import { ExtendedUser } from "@/types/auth";
-import { aiChatbotUser } from "@/../../packages/database/src/schema";
+import { aiChatbotUser } from "@hijraah/database/schema";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { Client } from "pg";
@@ -164,7 +164,7 @@ function createGuestSupabaseClient() {
         persistSession: false, // Guests don't persist sessions in Supabase
         autoRefreshToken: false,
       },
-    }
+    },
   );
 }
 
@@ -194,7 +194,7 @@ function createGuestServerClient(cookieStore?: any) {
         persistSession: false,
         autoRefreshToken: false,
       },
-    }
+    },
   );
 }
 
@@ -256,7 +256,7 @@ export async function createGuestSession(metadata?: {
 export function setGuestSessionCookies(
   guestUser: UserWithGuest,
   cookieStore: any,
-  maxAge: number = 24 * 60 * 60 // 24 hours
+  maxAge: number = 24 * 60 * 60, // 24 hours
 ): void {
   try {
     const cookieOptions = {
@@ -272,7 +272,7 @@ export function setGuestSessionCookies(
     cookieStore.set(
       "guest_session_id",
       guestUser.guestSessionId || "",
-      cookieOptions
+      cookieOptions,
     );
     cookieStore.set("is_guest_user", "true", {
       ...cookieOptions,
@@ -302,7 +302,7 @@ export function setGuestSessionCookies(
  * Context7 - Resumability: Retrieve stateless sessions
  */
 export function getGuestSessionFromCookies(
-  cookieStore: any
+  cookieStore: any,
 ): UserWithGuest | null {
   try {
     const isGuest = cookieStore.get("is_guest_user")?.value === "true";
@@ -375,7 +375,7 @@ export async function convertGuestToRegular(
   guestUserId: string,
   email: string,
   password: string,
-  fullName?: string
+  fullName?: string,
 ): Promise<UserWithGuest> {
   try {
     const supabase = createGuestSupabaseClient();
@@ -395,7 +395,7 @@ export async function convertGuestToRegular(
 
     if (error) {
       throw new AuthError(
-        `Failed to convert guest to regular user: ${error.message}`
+        `Failed to convert guest to regular user: ${error.message}`,
       );
     }
 
@@ -415,7 +415,7 @@ export async function convertGuestToRegular(
 
     // Context7 - Observability: Log conversion
     console.log(
-      `Guest user ${guestUserId} converted to regular user ${data.user.id}`
+      `Guest user ${guestUserId} converted to regular user ${data.user.id}`,
     );
 
     return extendedUser;

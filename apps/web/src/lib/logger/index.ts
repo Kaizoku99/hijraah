@@ -1,4 +1,4 @@
-type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogEntry {
   level: LogLevel;
@@ -9,14 +9,17 @@ interface LogEntry {
 
 class Logger {
   private static instance: Logger;
-  private logLevel: LogLevel = 'info';
+  private logLevel: LogLevel = "info";
   private buffer: LogEntry[] = [];
   private readonly maxBufferSize = 1000;
 
   private constructor() {
     // Set log level from environment
     const envLogLevel = process.env.LOG_LEVEL as LogLevel;
-    if (envLogLevel && ['debug', 'info', 'warn', 'error'].includes(envLogLevel)) {
+    if (
+      envLogLevel &&
+      ["debug", "info", "warn", "error"].includes(envLogLevel)
+    ) {
       this.logLevel = envLogLevel;
     }
   }
@@ -39,7 +42,7 @@ class Logger {
   }
 
   private formatMessage(entry: LogEntry): string {
-    const context = entry.context ? ` ${JSON.stringify(entry.context)}` : '';
+    const context = entry.context ? ` ${JSON.stringify(entry.context)}` : "";
     return `[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}${context}`;
   }
 
@@ -50,7 +53,11 @@ class Logger {
     }
   }
 
-  private createLogEntry(level: LogLevel, message: string, context?: Record<string, unknown>): LogEntry {
+  private createLogEntry(
+    level: LogLevel,
+    message: string,
+    context?: Record<string, unknown>,
+  ): LogEntry {
     return {
       level,
       message,
@@ -60,43 +67,49 @@ class Logger {
   }
 
   public debug(message: string, context?: Record<string, unknown>) {
-    if (this.shouldLog('debug')) {
-      const entry = this.createLogEntry('debug', message, context);
+    if (this.shouldLog("debug")) {
+      const entry = this.createLogEntry("debug", message, context);
       this.addToBuffer(entry);
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.debug(this.formatMessage(entry));
       }
     }
   }
 
   public info(message: string, context?: Record<string, unknown>) {
-    if (this.shouldLog('info')) {
-      const entry = this.createLogEntry('info', message, context);
+    if (this.shouldLog("info")) {
+      const entry = this.createLogEntry("info", message, context);
       this.addToBuffer(entry);
       console.info(this.formatMessage(entry));
     }
   }
 
   public warn(message: string, context?: Record<string, unknown>) {
-    if (this.shouldLog('warn')) {
-      const entry = this.createLogEntry('warn', message, context);
+    if (this.shouldLog("warn")) {
+      const entry = this.createLogEntry("warn", message, context);
       this.addToBuffer(entry);
       console.warn(this.formatMessage(entry));
     }
   }
 
-  public error(message: string, error?: Error, context?: Record<string, unknown>) {
-    if (this.shouldLog('error')) {
-      const errorContext = error ? {
-        ...context,
-        error: {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        },
-      } : context;
+  public error(
+    message: string,
+    error?: Error,
+    context?: Record<string, unknown>,
+  ) {
+    if (this.shouldLog("error")) {
+      const errorContext = error
+        ? {
+            ...context,
+            error: {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+            },
+          }
+        : context;
 
-      const entry = this.createLogEntry('error', message, errorContext);
+      const entry = this.createLogEntry("error", message, errorContext);
       this.addToBuffer(entry);
       console.error(this.formatMessage(entry));
     }
@@ -115,4 +128,4 @@ class Logger {
   }
 }
 
-export const logger = Logger.getInstance(); 
+export const logger = Logger.getInstance();

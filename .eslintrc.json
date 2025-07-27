@@ -4,9 +4,7 @@
     "plugin:import/recommended",
     "plugin:import/typescript"
   ],
-  "plugins": [
-    "import"
-  ],
+  "plugins": ["import"],
   "settings": {
     "import/resolver": {
       "typescript": {
@@ -37,9 +35,7 @@
             "position": "before"
           }
         ],
-        "pathGroupsExcludedImportTypes": [
-          "builtin"
-        ],
+        "pathGroupsExcludedImportTypes": ["builtin"],
         "alphabetize": {
           "order": "asc",
           "caseInsensitive": true
@@ -68,9 +64,7 @@
   },
   "overrides": [
     {
-      "files": [
-        "src/_shared/emails/**/*.tsx"
-      ],
+      "files": ["src/_shared/emails/**/*.tsx"],
       "rules": {
         "@next/next/no-head-element": "off",
         "@next/next/no-img-element": "off"

@@ -9,4 +9,4 @@ api_tests:
       junit: newman/*.xml
     paths:
       - newman/*.html
-      - artillery-report.json 
+      - artillery-report.json

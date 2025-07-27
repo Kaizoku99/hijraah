@@ -18,7 +18,7 @@ export function UnifiedArtifact() {
   };
 
   const definition = artifactDefinitions.find(
-    (def) => def.kind === artifactData.kind
+    (def) => def.kind === artifactData.kind,
   );
 
   const ArtifactComponent = definition?.component;
@@ -28,7 +28,7 @@ export function UnifiedArtifact() {
       className={cn(
         "absolute right-0 top-0 bottom-0 z-10 w-full md:w-[30vw] bg-background border-l shadow-lg",
         "h-[calc(100vh-4rem)]",
-        "mt-16"
+        "mt-16",
       )}
     >
       <div className="flex flex-col h-full">

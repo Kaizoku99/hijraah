@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { UnifiedChatContainer } from "@/components/ui/unified-chat/UnifiedChatContainer";
 import { ChatRepository } from "@/_infrastructure/repositories/chat-repository";
-import { createServerClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 interface ChatPageProps {
   params: {
@@ -11,7 +11,7 @@ interface ChatPageProps {
 }
 
 export default async function ChatPage({ params }: ChatPageProps) {
-  const supabase = createServerClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

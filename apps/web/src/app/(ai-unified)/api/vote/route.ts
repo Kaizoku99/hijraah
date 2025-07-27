@@ -76,7 +76,7 @@ export async function PATCH(request: Request) {
   if (currentChatSession.userId !== user.id) {
     return new Response(
       "Unauthorized: You do not own the chat this message belongs to",
-      { status: 401 }
+      { status: 401 },
     );
   }
 

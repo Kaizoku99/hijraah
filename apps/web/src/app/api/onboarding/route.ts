@@ -80,7 +80,7 @@ onboarding.openapi(
             deleteCookie(c, key, options);
           },
         },
-      }
+      },
     );
 
     const { data, error } = await supabase
@@ -113,7 +113,7 @@ onboarding.openapi(
       progress: data.progress,
       isCompleted: data.is_completed,
     });
-  }
+  },
 );
 
 // PATCH /api/onboarding - Update onboarding state
@@ -164,7 +164,7 @@ onboarding.openapi(
             deleteCookie(c, key, options);
           },
         },
-      }
+      },
     );
     const body = await c.req.json();
 
@@ -199,7 +199,7 @@ onboarding.openapi(
       progress: data.progress,
       isCompleted: data.is_completed,
     });
-  }
+  },
 );
 
 // POST /api/onboarding/actions - Mark onboarding action as completed
@@ -252,7 +252,7 @@ onboarding.openapi(
             deleteCookie(c, key, options);
           },
         },
-      }
+      },
     );
     const body = await c.req.json();
 
@@ -268,7 +268,7 @@ onboarding.openapi(
     }
 
     return c.json({ success: true });
-  }
+  },
 );
 
 // GET /api/onboarding/actions - Get all completed onboarding actions
@@ -310,7 +310,7 @@ onboarding.openapi(
             deleteCookie(c, key, options);
           },
         },
-      }
+      },
     );
 
     const { data, error } = await supabase
@@ -327,9 +327,9 @@ onboarding.openapi(
       data.map((action) => ({
         actionKey: action.action_key,
         isCompleted: action.is_completed,
-      }))
+      })),
     );
-  }
+  },
 );
 
 // Reset /api/onboarding/reset - Reset onboarding state
@@ -373,7 +373,7 @@ onboarding.openapi(
             deleteCookie(c, key, options);
           },
         },
-      }
+      },
     );
 
     // Reset onboarding state
@@ -402,7 +402,7 @@ onboarding.openapi(
     }
 
     return c.json({ success: true });
-  }
+  },
 );
 
 export const GET = onboarding.fetch;

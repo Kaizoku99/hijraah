@@ -31,7 +31,7 @@ function getSupabaseClient(): SupabaseClient {
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error(
-      "Missing environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+      "Missing environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
     );
   }
 
@@ -73,14 +73,14 @@ async function processDocument(document: Record<string, any>) {
       .eq("id", documentId);
     if (updateProcessError) {
       throw new Error(
-        `Failed to update status to 'processing': ${updateProcessError.message}`
+        `Failed to update status to 'processing': ${updateProcessError.message}`,
       );
     }
     console.log(`Document ${documentId} status set to 'processing'.`);
   } catch (error) {
     console.error(
       `Error updating status to processing for ${documentId}:`,
-      error
+      error,
     );
     // Don't necessarily stop here, maybe processing can still occur,
     // but log it. If critical, re-throw.
@@ -91,7 +91,7 @@ async function processDocument(document: Record<string, any>) {
   let fileContent: ArrayBuffer;
   try {
     console.log(
-      `Downloading file from bucket '${bucket}', path '${filePath}'...`
+      `Downloading file from bucket '${bucket}', path '${filePath}'...`,
     );
     const { data: blob, error: downloadError } = await supabase.storage
       .from(bucket)
@@ -105,7 +105,7 @@ async function processDocument(document: Record<string, any>) {
     }
     fileContent = await blob.arrayBuffer();
     console.log(
-      `Successfully downloaded ${fileContent.byteLength} bytes for document ${documentId}.`
+      `Successfully downloaded ${fileContent.byteLength} bytes for document ${documentId}.`,
     );
   } catch (error) {
     console.error(`Error downloading file for document ${documentId}:`, error);
@@ -115,7 +115,7 @@ async function processDocument(document: Record<string, any>) {
       .update({ status: "failed" })
       .eq("id", documentId);
     console.log(
-      `Document ${documentId} status set to 'failed' due to download error.`
+      `Document ${documentId} status set to 'failed' due to download error.`,
     );
     throw error; // Propagate error
   }
@@ -127,7 +127,7 @@ async function processDocument(document: Record<string, any>) {
   let processingError = null;
   try {
     console.log(
-      `Starting placeholder processing for document ${documentId}...`
+      `Starting placeholder processing for document ${documentId}...`,
     );
     // --- Replace with your actual processing logic ---
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate work
@@ -140,7 +140,7 @@ async function processDocument(document: Record<string, any>) {
   } catch (error) {
     console.error(
       `Error during processing logic for document ${documentId}:`,
-      error
+      error,
     );
     processingError = error; // Store error to update status later
   }
@@ -164,7 +164,7 @@ async function processDocument(document: Record<string, any>) {
 
     if (updateFinalError) {
       throw new Error(
-        `Failed to update status to '${finalStatus}': ${updateFinalError.message}`
+        `Failed to update status to '${finalStatus}': ${updateFinalError.message}`,
       );
     }
     console.log(`Document ${documentId} status set to '${finalStatus}'.`);
@@ -176,7 +176,7 @@ async function processDocument(document: Record<string, any>) {
   } catch (error) {
     console.error(
       `Error finalizing status or processing error for document ${documentId}:`,
-      error
+      error,
     );
     // If updating the final status fails, it's hard to recover state automatically.
     // Log extensively. Manual intervention might be needed.
@@ -213,7 +213,7 @@ Deno.serve(async (req: Request) => {
 
       if (triggerProcessing) {
         console.log(
-          `Trigger condition met for document ID: ${payload.record.id}`
+          `Trigger condition met for document ID: ${payload.record.id}`,
         );
         await processDocument(payload.record);
         return new Response(
@@ -223,18 +223,18 @@ Deno.serve(async (req: Request) => {
           {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
             status: 200,
-          }
+          },
         );
       } else {
         console.log(
-          `Skipping processing for document ${payload.record.id} - Condition not met (Type: ${payload.type}, Status: ${payload.record.status})`
+          `Skipping processing for document ${payload.record.id} - Condition not met (Type: ${payload.type}, Status: ${payload.record.status})`,
         );
         return new Response(
           JSON.stringify({ message: "Skipped processing - condition not met" }),
           {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
             status: 200, // Acknowledge receipt, even if skipped
-          }
+          },
         );
       }
     } else {
@@ -244,7 +244,7 @@ Deno.serve(async (req: Request) => {
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 400, // Bad Request or 200 if simply acknowledging
-        }
+        },
       );
     }
   } catch (error: any) {

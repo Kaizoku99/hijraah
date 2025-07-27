@@ -24,7 +24,7 @@ export class ImmigrationAIProcessor {
   constructor(
     private openaiApiKey: string,
     supabaseUrl: string,
-    supabaseKey: string
+    supabaseKey: string,
   ) {
     this.supabase = createClient<Database>(supabaseUrl, supabaseKey);
     this.openai = new OpenAI({
@@ -39,7 +39,7 @@ export class ImmigrationAIProcessor {
       country?: string;
       category?: string;
       language?: string;
-    } = {}
+    } = {},
   ): Promise<Document[]> {
     try {
       const cacheKey = `content:${JSON.stringify({ query, filters })}`;
@@ -55,7 +55,7 @@ export class ImmigrationAIProcessor {
           filter_country: filters.country,
           filter_category: filters.category,
           filter_language: filters.language,
-        }
+        },
       );
 
       if (error) throw new Error(`Failed to fetch documents: ${error.message}`);
@@ -94,7 +94,7 @@ export class ImmigrationAIProcessor {
   }
 
   private createReadableStream(
-    response: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>
+    response: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
   ): ReadableStream {
     return new ReadableStream({
       async start(controller) {
@@ -120,7 +120,7 @@ export class ImmigrationAIProcessor {
       country?: string;
       category?: string;
       language?: string;
-    } = {}
+    } = {},
   ): Promise<Response> {
     try {
       const relevantDocs = await this.getRelevantContent(query, filters);
@@ -133,7 +133,7 @@ Country: ${doc.country}
 Category: ${doc.category}
 Content: ${doc.content}
 ---
-`
+`,
         )
         .join("\n");
 
@@ -207,7 +207,7 @@ Remember to:
           (doc) => `
 Title: ${doc.title}
 Content: ${doc.content}
-`
+`,
         )
         .join("\n");
 
@@ -239,7 +239,7 @@ Content: ${doc.content}
 
   async compareCountries(
     countries: string[],
-    category: string
+    category: string,
   ): Promise<string> {
     try {
       const cacheKey = `comparison:${JSON.stringify({ countries, category })}`;
@@ -248,8 +248,8 @@ Content: ${doc.content}
 
       const relevantDocs = await Promise.all(
         countries.map((country) =>
-          this.getRelevantContent("", { country, category })
-        )
+          this.getRelevantContent("", { country, category }),
+        ),
       );
 
       const context = countries
@@ -258,7 +258,7 @@ Content: ${doc.content}
 Information for ${country}:
 ${relevantDocs[i].map((doc: Document) => doc.content).join("\n")}
 ---
-`
+`,
         )
         .join("\n");
 

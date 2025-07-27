@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
-import { chatService } from '@/lib/services/chat';
+import { chatService } from "@/lib/services/chat";
 
 export function useTypingStatus(conversationId: string, userId: string) {
   const typingTimeoutRef = useRef<NodeJS.Timeout>();

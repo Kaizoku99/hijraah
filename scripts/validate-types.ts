@@ -61,7 +61,7 @@ const validateTypes = () => {
 
   // Validate notification_type enum
   console.log(
-    `- notification_type: ${JSON.stringify(enums.notification_type)}`
+    `- notification_type: ${JSON.stringify(enums.notification_type)}`,
   );
   if (
     enums.notification_type.includes("system") &&

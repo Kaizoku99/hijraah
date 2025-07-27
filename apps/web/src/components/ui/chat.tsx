@@ -103,7 +103,7 @@ export function Chat({
 
   const { data: votesData } = useSWR<ChatMessageVote[]>(
     messages.length >= 2 && id ? `/api/vote?sessionId=${id}` : null,
-    fetcher
+    fetcher,
   );
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);

@@ -173,9 +173,9 @@ function ArtifactSystemCore({
             "artifact.documents_count": result?.length || 0,
           });
           return result;
-        }
+        },
       );
-    }
+    },
   );
 
   const [mode, setMode] = useState<"edit" | "diff">("edit");
@@ -215,7 +215,7 @@ function ArtifactSystemCore({
                 mostRecentDocument.content?.length || 0,
             });
           }
-        }
+        },
       );
     }
   }, [documents, setArtifact, chatId, artifact.kind]);
@@ -275,7 +275,7 @@ function ArtifactSystemCore({
                         headers: {
                           "Content-Type": "application/json",
                         },
-                      }
+                      },
                     );
 
                     apiSpan.setAttributes({
@@ -285,7 +285,7 @@ function ArtifactSystemCore({
                     if (!response.ok) {
                       throw new Error(`Save failed: ${response.status}`);
                     }
-                  }
+                  },
                 );
 
                 setIsContentDirty(false);
@@ -304,17 +304,17 @@ function ArtifactSystemCore({
               }
               return currentDocuments;
             },
-            { revalidate: false }
+            { revalidate: false },
           );
-        }
+        },
       );
     },
-    [artifact, mutate, chatId]
+    [artifact, mutate, chatId],
   );
 
   const debouncedHandleContentChange = useDebounceCallback(
     handleContentChange,
-    2000
+    2000,
   );
 
   // Context7 - Modularity: Content saving abstraction
@@ -330,7 +330,7 @@ function ArtifactSystemCore({
         }
       }
     },
-    [document, debouncedHandleContentChange, handleContentChange]
+    [document, debouncedHandleContentChange, handleContentChange],
   );
 
   // Context7 - Data-as-Code: Version management
@@ -377,7 +377,7 @@ function ArtifactSystemCore({
           "artifact.new_version": currentVersionIndex,
           "artifact.new_mode": mode,
         });
-      }
+      },
     );
   };
 
@@ -394,7 +394,7 @@ function ArtifactSystemCore({
 
   // Context7 - Provider Isolation: Artifact definition lookup
   const artifactDefinition = artifactDefinitions.find(
-    (definition) => definition.kind === artifact.kind
+    (definition) => definition.kind === artifact.kind,
   );
 
   if (!artifactDefinition) {
@@ -419,7 +419,7 @@ function ArtifactSystemCore({
               documentId: artifact.documentId,
               setMetadata,
             });
-          }
+          },
         );
       }
     }
@@ -602,7 +602,7 @@ function ArtifactSystemCore({
                         new Date(),
                         {
                           addSuffix: true,
-                        }
+                        },
                       )}`}
                     </div>
                   ) : (
@@ -687,7 +687,7 @@ export const ArtifactSystem = memo(
       prevProps.status === nextProps.status &&
       prevProps.isReadonly === nextProps.isReadonly
     );
-  }
+  },
 );
 
 ArtifactSystem.displayName = "ArtifactSystem";

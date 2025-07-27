@@ -1,4 +1,9 @@
-import { Document, DocumentType, DocumentStatus, DocumentVersion } from '../entities/document';
+import {
+  Document,
+  DocumentType,
+  DocumentStatus,
+  DocumentVersion,
+} from "../entities/document";
 
 /**
  * Document Service handles domain logic for document operations
@@ -12,39 +17,47 @@ export class DocumentService {
 
     // Basic validation
     if (!document.name || document.name.trim().length === 0) {
-      errors.push('Document name is required');
+      errors.push("Document name is required");
     }
 
-    if (!document.type || !Object.values(DocumentType).includes(document.type)) {
-      errors.push('Valid document type is required');
+    if (
+      !document.type ||
+      !Object.values(DocumentType).includes(document.type)
+    ) {
+      errors.push("Valid document type is required");
     }
 
-    if (!document.status || !Object.values(DocumentStatus).includes(document.status)) {
-      errors.push('Valid document status is required');
+    if (
+      !document.status ||
+      !Object.values(DocumentStatus).includes(document.status)
+    ) {
+      errors.push("Valid document status is required");
     }
 
     // Validate dates
     if (document.expiryDate && document.expiryDate < new Date()) {
-      errors.push('Expiry date cannot be in the past');
+      errors.push("Expiry date cannot be in the past");
     }
 
     if (document.issuedDate && document.issuedDate > new Date()) {
-      errors.push('Issue date cannot be in the future');
+      errors.push("Issue date cannot be in the future");
     }
 
     // Validate specific document types
     if (document.type === DocumentType.PASSPORT && !document.documentNumber) {
-      errors.push('Passport requires a document number');
+      errors.push("Passport requires a document number");
     }
 
-    if (document.type === DocumentType.VISA && 
-        (!document.expiryDate || !document.issuedDate || !document.documentNumber)) {
-      errors.push('Visa requires expiry date, issue date, and document number');
+    if (
+      document.type === DocumentType.VISA &&
+      (!document.expiryDate || !document.issuedDate || !document.documentNumber)
+    ) {
+      errors.push("Visa requires expiry date, issue date, and document number");
     }
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -54,11 +67,11 @@ export class DocumentService {
   sanitizeFileName(fileName: string): string {
     // Remove path traversal attempts and illegal characters
     const sanitized = fileName
-      .replace(/[/\\?%*:|"<>]/g, '_') // Replace illegal chars with underscores
-      .replace(/^\.+/, '') // Remove leading dots
+      .replace(/[/\\?%*:|"<>]/g, "_") // Replace illegal chars with underscores
+      .replace(/^\.+/, "") // Remove leading dots
       .trim();
 
-    return sanitized || 'unnamed_document';
+    return sanitized || "unnamed_document";
   }
 
   /**
@@ -67,16 +80,26 @@ export class DocumentService {
   isValidMimeType(mimeType: string): boolean {
     const allowedMimeTypes = [
       // PDF
-      'application/pdf',
+      "application/pdf",
       // Images
-      'image/jpeg', 'image/png', 'image/gif', 'image/tiff', 'image/bmp', 'image/webp',
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/tiff",
+      "image/bmp",
+      "image/webp",
       // Documents
-      'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'text/plain', 'text/csv',
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "text/plain",
+      "text/csv",
       // Archives (may be needed for bundles of documents)
-      'application/zip', 'application/x-rar-compressed',
+      "application/zip",
+      "application/x-rar-compressed",
     ];
 
     return allowedMimeTypes.includes(mimeType);
@@ -119,22 +142,29 @@ export class DocumentService {
   /**
    * Generates a structured file path for storage
    */
-  generateStoragePath(userId: string, documentType: DocumentType, fileName: string): string {
+  generateStoragePath(
+    userId: string,
+    documentType: DocumentType,
+    fileName: string,
+  ): string {
     const timestamp = new Date().getTime();
     const sanitizedFileName = this.sanitizeFileName(fileName);
-    
+
     return `documents/${userId}/${documentType}/${timestamp}_${sanitizedFileName}`;
   }
 
   /**
    * Extracts metadata from file if possible
    */
-  async extractMetadata(file: File | Blob, fileName: string): Promise<Record<string, any>> {
+  async extractMetadata(
+    file: File | Blob,
+    fileName: string,
+  ): Promise<Record<string, any>> {
     const metadata: Record<string, any> = {
       originalName: fileName,
       fileSize: file.size,
       mimeType: file.type,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     };
 
     // Here we could add more sophisticated metadata extraction
@@ -148,11 +178,11 @@ export class DocumentService {
    * Creates a timeline event for document operations
    */
   createDocumentEvent(
-    eventType: 'created' | 'updated' | 'shared' | 'revoked' | 'deleted',
+    eventType: "created" | "updated" | "shared" | "revoked" | "deleted",
     documentId: string,
     documentName: string,
     performedBy: string,
-    details?: Record<string, any>
+    details?: Record<string, any>,
   ): any {
     return {
       id: crypto.randomUUID(),
@@ -164,8 +194,8 @@ export class DocumentService {
       metadata: {
         documentId,
         documentName,
-        ...details
-      }
+        ...details,
+      },
     };
   }
 
@@ -177,47 +207,49 @@ export class DocumentService {
     if (document.ownerId === userId) {
       return false;
     }
-    
+
     // Don't share if already shared
-    const existingAccess = document.access.find(a => a.userId === userId);
-    if (existingAccess && (!existingAccess.expiresAt || existingAccess.expiresAt > new Date())) {
+    const existingAccess = document.access.find((a) => a.userId === userId);
+    if (
+      existingAccess &&
+      (!existingAccess.expiresAt || existingAccess.expiresAt > new Date())
+    ) {
       return false;
     }
-    
+
     return true;
   }
 
   /**
    * Validates status transition
    */
-  isValidStatusTransition(currentStatus: DocumentStatus, newStatus: DocumentStatus): boolean {
+  isValidStatusTransition(
+    currentStatus: DocumentStatus,
+    newStatus: DocumentStatus,
+  ): boolean {
     // Define allowed transitions
     const allowedTransitions: Record<DocumentStatus, DocumentStatus[]> = {
       [DocumentStatus.DRAFT]: [
         DocumentStatus.PENDING_REVIEW,
         DocumentStatus.APPROVED,
-        DocumentStatus.REJECTED
+        DocumentStatus.REJECTED,
       ],
       [DocumentStatus.PENDING_REVIEW]: [
         DocumentStatus.APPROVED,
-        DocumentStatus.REJECTED
+        DocumentStatus.REJECTED,
       ],
       [DocumentStatus.APPROVED]: [
         DocumentStatus.EXPIRED,
-        DocumentStatus.REVOKED
+        DocumentStatus.REVOKED,
       ],
       [DocumentStatus.REJECTED]: [
         DocumentStatus.DRAFT,
-        DocumentStatus.PENDING_REVIEW
+        DocumentStatus.PENDING_REVIEW,
       ],
-      [DocumentStatus.EXPIRED]: [
-        DocumentStatus.DRAFT
-      ],
-      [DocumentStatus.REVOKED]: [
-        DocumentStatus.DRAFT
-      ]
+      [DocumentStatus.EXPIRED]: [DocumentStatus.DRAFT],
+      [DocumentStatus.REVOKED]: [DocumentStatus.DRAFT],
     };
-    
+
     // Check if transition is allowed
     return allowedTransitions[currentStatus]?.includes(newStatus) || false;
   }
@@ -229,13 +261,15 @@ export class DocumentService {
   async calculateFileHash(file: Blob): Promise<string> {
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
       return hashHex;
     } catch (error) {
-      console.error('Error calculating file hash:', error);
-      return '';
+      console.error("Error calculating file hash:", error);
+      return "";
     }
   }
-} 
+}

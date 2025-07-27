@@ -16,7 +16,7 @@ export function Logo({ className, showText = true }: LogoProps = {}) {
       href="/"
       className={cn(
         "flex items-center gap-2 group transition-opacity hover:opacity-90",
-        className
+        className,
       )}
       aria-label="Hijraah - Immigration Platform"
     >

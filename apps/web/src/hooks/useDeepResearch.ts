@@ -30,7 +30,7 @@ export function useDeepResearch() {
     async (sessionId: string) => {
       try {
         const response = await fetch(
-          `/api/deep-research?sessionId=${sessionId}`
+          `/api/deep-research?sessionId=${sessionId}`,
         );
 
         if (!response.ok) {
@@ -104,7 +104,7 @@ export function useDeepResearch() {
         console.error("Error polling for updates:", err);
       }
     },
-    [addActivity, addSource, setDepth, updateProgress]
+    [addActivity, addSource, setDepth, updateProgress],
   );
 
   const startResearch = useCallback(
@@ -185,7 +185,7 @@ export function useDeepResearch() {
         setIsLoading(false);
       }
     },
-    [addActivity, clearState, initProgress, setDepth, pollForUpdates]
+    [addActivity, clearState, initProgress, setDepth, pollForUpdates],
   );
 
   return {

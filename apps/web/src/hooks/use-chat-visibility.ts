@@ -22,7 +22,7 @@ export function useChatVisibility({
     null,
     {
       fallbackData: initialVisibility,
-    }
+    },
   );
 
   const visibilityType = useMemo(() => {
@@ -50,7 +50,7 @@ export function useChatVisibility({
             })
           : [];
       },
-      { revalidate: false }
+      { revalidate: false },
     );
 
     updateChatVisibility({

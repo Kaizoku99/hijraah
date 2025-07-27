@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
-import { locales, defaultLocale, Locale } from '@/i18n';
+import { locales, defaultLocale, Locale } from "@/i18n";
 
 interface ValidationResult {
   missingKeys: string[];
@@ -13,9 +13,10 @@ interface ValidationResult {
 export class TranslationValidator {
   private translationsPath: string;
   private defaultTranslations: Record<string, any> = {};
-  private localeTranslations: Record<Locale, Record<string, any>> = {} as Record<Locale, Record<string, any>>;
+  private localeTranslations: Record<Locale, Record<string, any>> =
+    {} as Record<Locale, Record<string, any>>;
 
-  constructor(translationsPath = path.join(process.cwd(), 'src/messages')) {
+  constructor(translationsPath = path.join(process.cwd(), "src/messages")) {
     this.translationsPath = translationsPath;
   }
 
@@ -34,7 +35,7 @@ export class TranslationValidator {
         }
       }
     } catch (error) {
-      console.error('Failed to initialize translation validator:', error);
+      console.error("Failed to initialize translation validator:", error);
     }
   }
 
@@ -44,7 +45,7 @@ export class TranslationValidator {
   private async loadTranslations(locale: string): Promise<Record<string, any>> {
     try {
       const filePath = path.join(this.translationsPath, `${locale}.json`);
-      const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+      const fileContent = await fs.promises.readFile(filePath, "utf-8");
       return JSON.parse(fileContent);
     } catch (error) {
       console.error(`Failed to load translations for ${locale}:`, error);
@@ -56,16 +57,19 @@ export class TranslationValidator {
    * Flatten a nested object into key-value pairs with dot notation
    * Example: { a: { b: 'c' } } -> { 'a.b': 'c' }
    */
-  private flattenObject(obj: Record<string, any>, prefix = ''): Record<string, string> {
+  private flattenObject(
+    obj: Record<string, any>,
+    prefix = "",
+  ): Record<string, string> {
     return Object.keys(obj).reduce((acc: Record<string, string>, key) => {
       const prefixedKey = prefix ? `${prefix}.${key}` : key;
-      
-      if (typeof obj[key] === 'object' && obj[key] !== null) {
+
+      if (typeof obj[key] === "object" && obj[key] !== null) {
         Object.assign(acc, this.flattenObject(obj[key], prefixedKey));
       } else {
         acc[prefixedKey] = obj[key];
       }
-      
+
       return acc;
     }, {});
   }
@@ -79,27 +83,29 @@ export class TranslationValidator {
         missingKeys: [],
         extraKeys: [],
         locale,
-        isValid: true
+        isValid: true,
       };
     }
 
     const flattenedDefault = this.flattenObject(this.defaultTranslations);
-    const flattenedLocale = this.flattenObject(this.localeTranslations[locale] || {});
+    const flattenedLocale = this.flattenObject(
+      this.localeTranslations[locale] || {},
+    );
 
     const defaultKeys = Object.keys(flattenedDefault);
     const localeKeys = Object.keys(flattenedLocale);
 
     // Find keys in default but missing in locale
-    const missingKeys = defaultKeys.filter(key => !localeKeys.includes(key));
-    
+    const missingKeys = defaultKeys.filter((key) => !localeKeys.includes(key));
+
     // Find extra keys in locale not in default
-    const extraKeys = localeKeys.filter(key => !defaultKeys.includes(key));
+    const extraKeys = localeKeys.filter((key) => !defaultKeys.includes(key));
 
     return {
       missingKeys,
       extraKeys,
       locale,
-      isValid: missingKeys.length === 0 && extraKeys.length === 0
+      isValid: missingKeys.length === 0 && extraKeys.length === 0,
     };
   }
 
@@ -107,12 +113,15 @@ export class TranslationValidator {
    * Validate all locales against the default locale
    */
   validateAll(): Record<Locale, ValidationResult> {
-    const results: Record<Locale, ValidationResult> = {} as Record<Locale, ValidationResult>;
-    
+    const results: Record<Locale, ValidationResult> = {} as Record<
+      Locale,
+      ValidationResult
+    >;
+
     for (const locale of locales) {
       results[locale] = this.validateLocale(locale);
     }
-    
+
     return results;
   }
 
@@ -121,41 +130,41 @@ export class TranslationValidator {
    */
   generateReport(): string {
     const results = this.validateAll();
-    let report = 'Translation Validation Report\n';
-    report += '==============================\n\n';
-    
+    let report = "Translation Validation Report\n";
+    report += "==============================\n\n";
+
     let isValid = true;
-    
+
     for (const locale of locales) {
       if (locale === defaultLocale) continue;
-      
+
       const result = results[locale];
       report += `Locale: ${locale}\n`;
       report += `- Missing keys: ${result.missingKeys.length}\n`;
       report += `- Extra keys: ${result.extraKeys.length}\n`;
       report += `- Valid: ${result.isValid}\n\n`;
-      
+
       if (result.missingKeys.length > 0) {
-        report += 'Missing keys:\n';
-        result.missingKeys.forEach(key => {
+        report += "Missing keys:\n";
+        result.missingKeys.forEach((key) => {
           report += `  - ${key}\n`;
         });
-        report += '\n';
+        report += "\n";
       }
-      
+
       if (result.extraKeys.length > 0) {
-        report += 'Extra keys:\n';
-        result.extraKeys.forEach(key => {
+        report += "Extra keys:\n";
+        result.extraKeys.forEach((key) => {
           report += `  - ${key}\n`;
         });
-        report += '\n';
+        report += "\n";
       }
-      
+
       isValid = isValid && result.isValid;
     }
-    
-    report += `Overall status: ${isValid ? 'VALID' : 'INVALID'}\n`;
-    
+
+    report += `Overall status: ${isValid ? "VALID" : "INVALID"}\n`;
+
     return report;
   }
 
@@ -168,9 +177,11 @@ export class TranslationValidator {
     }
 
     const flattenedDefault = this.flattenObject(this.defaultTranslations);
-    const flattenedLocale = this.flattenObject(this.localeTranslations[locale] || {});
+    const flattenedLocale = this.flattenObject(
+      this.localeTranslations[locale] || {},
+    );
     const defaultKeys = Object.keys(flattenedDefault);
-    
+
     return defaultKeys.reduce((acc: Record<string, string>, key) => {
       if (!Object.keys(flattenedLocale).includes(key)) {
         acc[key] = flattenedDefault[key];
@@ -182,40 +193,47 @@ export class TranslationValidator {
   /**
    * Export missing translations for a specific locale to a JSON file
    */
-  async exportMissingTranslations(locale: Locale, outputPath?: string): Promise<string> {
+  async exportMissingTranslations(
+    locale: Locale,
+    outputPath?: string,
+  ): Promise<string> {
     const missingTranslations = this.getMissingTranslations(locale);
-    
+
     if (Object.keys(missingTranslations).length === 0) {
       return `No missing translations found for ${locale}`;
     }
-    
-    const exportPath = outputPath || path.join(this.translationsPath, `${locale}_missing.json`);
-    
+
+    const exportPath =
+      outputPath || path.join(this.translationsPath, `${locale}_missing.json`);
+
     // Convert flat object back to nested structure
-    const nestedTranslations = Object.entries(missingTranslations).reduce((acc: Record<string, any>, [key, value]) => {
-      const parts = key.split('.');
-      let current = acc;
-      
-      for (let i = 0; i < parts.length - 1; i++) {
-        const part = parts[i];
-        if (!current[part]) {
-          current[part] = {};
+    const nestedTranslations = Object.entries(missingTranslations).reduce(
+      (acc: Record<string, any>, [key, value]) => {
+        const parts = key.split(".");
+        let current = acc;
+
+        for (let i = 0; i < parts.length - 1; i++) {
+          const part = parts[i];
+          if (!current[part]) {
+            current[part] = {};
+          }
+          current = current[part];
         }
-        current = current[part];
-      }
-      
-      current[parts[parts.length - 1]] = value;
-      
-      return acc;
-    }, {});
-    
+
+        current[parts[parts.length - 1]] = value;
+
+        return acc;
+      },
+      {},
+    );
+
     // Write to file
     await fs.promises.writeFile(
       exportPath,
       JSON.stringify(nestedTranslations, null, 2),
-      'utf-8'
+      "utf-8",
     );
-    
+
     return `Missing translations exported to ${exportPath}`;
   }
-} 
+}

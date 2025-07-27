@@ -105,7 +105,7 @@ const getWeatherTool = tool({
   },
   execute: async ({ latitude, longitude }) => {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto`
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto`,
     );
     const weatherData = await response.json();
     return weatherData;
@@ -210,7 +210,7 @@ const postRequestSchema = z.object({
       role: z.enum(["user", "assistant", "system"]),
       content: z.string().min(1).max(10000),
       createdAt: z.date().optional(),
-    })
+    }),
   ),
   selectedChatModel: z.nativeEnum(ChatModelType),
   visibility: z.enum(chatVisibilityEnumValues).optional(),
@@ -270,12 +270,12 @@ import {
 
 async function enhanceWithRAGContext(
   userMessage: string,
-  userId: string
+  userId: string,
 ): Promise<string | null> {
   try {
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
     const openaiClient = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -288,13 +288,13 @@ async function enhanceWithRAGContext(
     const searchResults = await retriever.search(userMessage, { userId });
     const context = generator.buildContext(
       searchResults,
-      (searchResults as any).userContext
+      (searchResults as any).userContext,
     );
     return generator.createSystemPrompt(context);
   } catch (error) {
     logger.error(
       "RAG context enhancement failed",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return null;
   }
@@ -333,7 +333,7 @@ export async function POST(request: Request) {
     const rateLimitResult = await RateLimitService.isAllowed(
       userId,
       "api",
-      "standard"
+      "standard",
     );
     if (!rateLimitResult.success) {
       return new Response("Rate limit exceeded", {
@@ -428,7 +428,7 @@ export async function POST(request: Request) {
       try {
         const ragContext = await enhanceWithRAGContext(
           userMessageContent,
-          userId
+          userId,
         );
         if (ragContext) {
           systemPrompt = `${systemPrompt}\n\n${ragContext}`;
@@ -654,7 +654,7 @@ export async function POST(request: Request) {
           } catch (error) {
             logger.error(
               "Failed to save assistant message",
-              error instanceof Error ? error : new Error(String(error))
+              error instanceof Error ? error : new Error(String(error)),
             );
           }
         },
@@ -672,14 +672,14 @@ export async function POST(request: Request) {
           const resumableStream = await streamContext.resumableStream(
             streamId,
             () =>
-              result.toUIMessageStreamResponse() as unknown as ReadableStream<string>
+              result.toUIMessageStreamResponse() as unknown as ReadableStream<string>,
           );
           await chatRepository.storeStreamId(chatId, streamId);
           return resumableStream;
         } catch (error) {
           logger.warn(
             "Failed to create resumable stream, using regular stream",
-            { error }
+            { error },
           );
         }
       }
@@ -737,7 +737,7 @@ export async function POST(request: Request) {
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -752,7 +752,7 @@ export async function POST(request: Request) {
 async function handleGenerateTitle(
   chatId: string,
   userId: string,
-  chatRepository: ChatRepository
+  chatRepository: ChatRepository,
 ) {
   try {
     const chat = await chatRepository.getChatById(chatId);
@@ -775,7 +775,7 @@ async function handleGenerateTitle(
   } catch (error) {
     logger.error(
       "Failed to generate title",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return new Response("Failed to generate title", { status: 500 });
   }
@@ -807,7 +807,7 @@ export async function GET(request: Request) {
         try {
           const resumedStream = await streamContext.resumableStream(
             streamId,
-            () => new ReadableStream<string>()
+            () => new ReadableStream<string>(),
           );
           return resumedStream;
         } catch (error) {
@@ -845,7 +845,7 @@ export async function GET(request: Request) {
   } catch (error) {
     logger.error(
       "GET error",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return new Response("Internal server error", { status: 500 });
   }
@@ -896,7 +896,7 @@ export async function PATCH(request: Request) {
   } catch (error) {
     logger.error(
       "PATCH error",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     if (error instanceof z.ZodError) {
       return new Response(
@@ -904,7 +904,7 @@ export async function PATCH(request: Request) {
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        }
+        },
       );
     }
     return new Response("Internal server error", { status: 500 });
@@ -940,7 +940,7 @@ export async function DELETE(request: Request) {
   } catch (error) {
     logger.error(
       "DELETE error",
-      error instanceof Error ? error : new Error(String(error))
+      error instanceof Error ? error : new Error(String(error)),
     );
     return new Response("Internal server error", { status: 500 });
   }

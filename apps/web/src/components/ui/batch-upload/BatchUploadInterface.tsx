@@ -136,7 +136,7 @@ export function BatchUploadInterface({
         description: `Processing ${totalFiles} files...`,
       });
     },
-    [toast]
+    [toast],
   );
 
   const handleBatchProgress = useCallback(
@@ -145,7 +145,7 @@ export function BatchUploadInterface({
         const updatedBatches = prev.activeBatches.map((batch) =>
           batch.batchId === batchId
             ? { ...batch, files: batch.files.map((f) => ({ ...f, progress })) }
-            : batch
+            : batch,
         );
 
         const currentBatch =
@@ -163,7 +163,7 @@ export function BatchUploadInterface({
         };
       });
     },
-    []
+    [],
   );
 
   const handleBatchCompleted = useCallback(
@@ -188,7 +188,7 @@ export function BatchUploadInterface({
       onBatchComplete?.(result);
       setActiveTab("results");
     },
-    [toast, onBatchComplete]
+    [toast, onBatchComplete],
   );
 
   const handleFileStarted = useCallback((fileId: string, fileName: string) => {
@@ -199,7 +199,7 @@ export function BatchUploadInterface({
     (fileId: string, documentId: string) => {
       console.log(`File completed: ${fileId} -> ${documentId}`);
     },
-    []
+    [],
   );
 
   const handleFileFailed = useCallback((fileId: string, error: string) => {
@@ -230,7 +230,7 @@ export function BatchUploadInterface({
       const selectedFiles = Array.from(e.target.files || []);
       addFiles(selectedFiles);
     },
-    []
+    [],
   );
 
   const addFiles = useCallback((newFiles: File[]) => {
@@ -257,7 +257,7 @@ export function BatchUploadInterface({
     try {
       const batchId = await uploadServiceRef.current.createBatch(
         state.selectedFiles,
-        config
+        config,
       );
 
       setState((prev) => ({
@@ -397,7 +397,7 @@ export function BatchUploadInterface({
                   "border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer",
                   state.isDragging
                     ? "border-primary bg-primary/5"
-                    : "border-muted-foreground/25 hover:border-primary/50"
+                    : "border-muted-foreground/25 hover:border-primary/50",
                 )}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -495,7 +495,7 @@ export function BatchUploadInterface({
                         ((state.currentBatch.successful +
                           state.currentBatch.failed) /
                           state.currentBatch.totalFiles) *
-                          100
+                          100,
                       )}
                       %
                     </span>
@@ -524,7 +524,7 @@ export function BatchUploadInterface({
                         state.currentBatch.files.filter(
                           (f) =>
                             f.status === "uploading" ||
-                            f.status === "processing"
+                            f.status === "processing",
                         ).length
                       }
                     </p>
@@ -569,7 +569,7 @@ export function BatchUploadInterface({
                           <Badge
                             className={cn(
                               "text-xs",
-                              getStatusColor(file.status)
+                              getStatusColor(file.status),
                             )}
                           >
                             {getStatusIcon(file.status)}
@@ -672,7 +672,7 @@ export function BatchUploadInterface({
                           <Badge
                             className={cn(
                               "text-xs",
-                              getStatusColor(file.status)
+                              getStatusColor(file.status),
                             )}
                           >
                             {getStatusIcon(file.status)}

@@ -60,7 +60,7 @@ interface DeepResearchContextType {
   toggleActive: () => void;
   setActive: (active: boolean) => void;
   addActivity: (
-    activity: ActivityItem & { completedSteps?: number; totalSteps?: number }
+    activity: ActivityItem & { completedSteps?: number; totalSteps?: number },
   ) => void;
   addSource: (source: SourceItem) => void;
   setDepth: (current: number, max: number) => void;
@@ -83,7 +83,7 @@ const initialState: DeepResearchState = {
 
 function deepResearchReducer(
   state: DeepResearchState,
-  action: DeepResearchAction
+  action: DeepResearchAction,
 ): DeepResearchState {
   switch (action.type) {
     case "TOGGLE_ACTIVE":
@@ -164,7 +164,7 @@ function deepResearchReducer(
 }
 
 const DeepResearchContext = createContext<DeepResearchContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function DeepResearchProvider({ children }: { children: ReactNode }) {
@@ -180,11 +180,11 @@ export function DeepResearchProvider({ children }: { children: ReactNode }) {
 
   const addActivity = useCallback(
     (
-      activity: ActivityItem & { completedSteps?: number; totalSteps?: number }
+      activity: ActivityItem & { completedSteps?: number; totalSteps?: number },
     ) => {
       dispatch({ type: "ADD_ACTIVITY", payload: activity });
     },
-    []
+    [],
   );
 
   const addSource = useCallback((source: SourceItem) => {
@@ -238,7 +238,7 @@ export function useDeepResearch() {
   const context = useContext(DeepResearchContext);
   if (context === undefined) {
     throw new Error(
-      "useDeepResearch must be used within a DeepResearchProvider"
+      "useDeepResearch must be used within a DeepResearchProvider",
     );
   }
   return context;

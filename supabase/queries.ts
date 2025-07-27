@@ -44,7 +44,7 @@ const db = drizzle(client);
 
 // Helper function to map ArtifactType to the database 'kind' enum
 function mapArtifactTypeToDbKind(
-  artifactType: ArtifactType
+  artifactType: ArtifactType,
 ): "text" | "code" | "image" | "sheet" {
   switch (artifactType) {
     case "document":
@@ -163,7 +163,7 @@ export async function getChatSessionsByUserId({
         .where(
           whereCondition
             ? and(whereCondition, eq(chatSessions.userId, userId))
-            : eq(chatSessions.userId, userId)
+            : eq(chatSessions.userId, userId),
         )
         .orderBy(desc(chatSessions.createdAt))
         .limit(extendedLimit);
@@ -181,7 +181,7 @@ export async function getChatSessionsByUserId({
         throw new Error(`Chat session with id ${startingAfter} not found`);
       }
       filteredSessions = await query(
-        gt(chatSessions.createdAt, selectedSession.createdAt!)
+        gt(chatSessions.createdAt, selectedSession.createdAt!),
       );
     } else if (endingBefore) {
       const [selectedSession] = await db
@@ -194,7 +194,7 @@ export async function getChatSessionsByUserId({
         throw new Error(`Chat session with id ${endingBefore} not found`);
       }
       filteredSessions = await query(
-        lt(chatSessions.createdAt, selectedSession.createdAt!)
+        lt(chatSessions.createdAt, selectedSession.createdAt!),
       );
     } else {
       filteredSessions = await query();
@@ -256,7 +256,7 @@ export async function getChatMessagesBySessionId({
   } catch (error) {
     console.error(
       "Failed to get chat messages by session id from database",
-      error
+      error,
     );
     throw error;
   }
@@ -311,7 +311,7 @@ export async function getVotesForMessagesInSession({
   } catch (error) {
     console.error(
       "Failed to get votes for messages in session from database",
-      error
+      error,
     );
     throw error;
   }
@@ -395,7 +395,7 @@ export async function deleteDocumentsByIdAfterTimestamp({
       .where(and(eq(artifacts.id, id), lt(artifacts.createdAt, timestamp)));
   } catch (error) {
     console.error(
-      "Failed to delete documents by id after timestamp from database"
+      "Failed to delete documents by id after timestamp from database",
     );
     throw error;
   }
@@ -430,7 +430,7 @@ export async function getSuggestionsByDocumentId({
   } catch (error) {
     console.error(
       "Failed to get suggestions by document id from database",
-      error
+      error,
     );
     throw error;
   }
@@ -463,8 +463,8 @@ export async function deleteMessagesByChatIdAfterTimestamp({
       .where(
         and(
           eq(chatMessages.sessionId, chatId),
-          lt(chatMessages.createdAt, timestamp)
-        )
+          lt(chatMessages.createdAt, timestamp),
+        ),
       );
 
     if (messagesToDelete.length === 0) {
@@ -480,7 +480,7 @@ export async function deleteMessagesByChatIdAfterTimestamp({
   } catch (error) {
     console.error(
       "Failed to delete messages by chat id after timestamp from database",
-      error
+      error,
     );
     throw error;
   }
@@ -519,7 +519,7 @@ export async function getMessageCountByUserId({
       .select({ value: count() })
       .from(chatMessages)
       .where(
-        and(eq(chatMessages.userId, id), gte(chatMessages.createdAt, date))
+        and(eq(chatMessages.userId, id), gte(chatMessages.createdAt, date)),
       );
 
     return result[0].value;

@@ -27,11 +27,11 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(
-    user?.user_metadata?.avatar_url
+    user?.user_metadata?.avatar_url,
   );
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.name || "",
@@ -77,7 +77,7 @@ export default function ProfilePage() {
   }, [user, avatarUrl, supabase]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setFormData((prev) => ({
       ...prev,

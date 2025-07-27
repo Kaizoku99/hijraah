@@ -317,7 +317,7 @@ export class KnowledgeGraphBuilder {
   async queryPath(
     startEntity: string,
     endEntity: string,
-    maxDepth: number = 3
+    maxDepth: number = 3,
   ): Promise<GraphPath[]> {
     // Implement path finding algorithm
     return this.findShortestPaths(startEntity, endEntity, maxDepth);
@@ -332,7 +332,7 @@ export class KnowledgeGraphBuilder {
 export class HybridRetriever {
   async retrieve(
     query: string,
-    options: RetrievalOptions
+    options: RetrievalOptions,
   ): Promise<RetrievalResult> {
     // 1. Generate query embedding
     const embedding = await this.generateQueryEmbedding(query);
@@ -395,7 +395,7 @@ export class ContextAwareGenerator {
   async generate(
     query: string,
     retrievedContext: RetrievalResult,
-    userContext: UserContext
+    userContext: UserContext,
   ) {
     const data = new StreamData();
 

@@ -18,7 +18,7 @@ const chatCompletionSchema = z.object({
     z.object({
       role: z.enum(["user", "assistant", "system"]),
       content: z.string(),
-    })
+    }),
   ),
   max_tokens: z.number().optional(),
   temperature: z.number().min(0).max(2).default(0.7),
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: { message: "Unauthorized", type: "authentication_error" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
             type: "invalid_request_error",
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
         .where(
           and(
             eq(webIndexes.id, validatedData.web_index_id),
-            eq(webIndexes.userId, session.user.id)
-          )
+            eq(webIndexes.userId, session.user.id),
+          ),
         )
         .limit(1);
 
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
             {
               limit: 5,
               webIndexId: validatedData.web_index_id,
-            }
+            },
           );
 
           sources = retrievalResult.documents;
@@ -117,7 +117,7 @@ Instructions:
         } catch (ragError) {
           console.warn(
             "RAG retrieval failed, continuing without context:",
-            ragError
+            ragError,
           );
         }
       }
@@ -142,8 +142,8 @@ Instructions:
           .where(
             and(
               eq(chatSessions.id, validatedData.chat_session_id),
-              eq(chatSessions.userId, session.user.id)
-            )
+              eq(chatSessions.userId, session.user.id),
+            ),
           )
           .limit(1);
 
@@ -224,7 +224,7 @@ Instructions:
             details: error.errors,
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -235,7 +235,7 @@ Instructions:
           type: "api_error",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

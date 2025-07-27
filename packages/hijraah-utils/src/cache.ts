@@ -90,7 +90,7 @@ export class CacheManager {
   async set<T = any>(
     key: string,
     value: T,
-    options: CacheOptions = {}
+    options: CacheOptions = {},
   ): Promise<boolean> {
     try {
       const { ttl = CacheTTL.MEDIUM } = options;
@@ -150,7 +150,7 @@ export class CacheManager {
 
   async mset(
     keyValuePairs: Record<string, any>,
-    ttl?: number
+    ttl?: number,
   ): Promise<boolean> {
     try {
       const pipeline = this.redis.pipeline();
@@ -184,7 +184,7 @@ export class CacheManager {
   async getAndUpdate<T = any>(
     key: string,
     updater: (current: T | null) => T,
-    ttl?: number
+    ttl?: number,
   ): Promise<T> {
     try {
       const current = await this.get<T>(key);
@@ -203,7 +203,7 @@ export class VectorCache extends CacheManager {
   async storeEmbedding(
     documentId: string,
     embedding: VectorEmbedding,
-    ttl: number = CacheTTL.EXTENDED
+    ttl: number = CacheTTL.EXTENDED,
   ): Promise<boolean> {
     const key = CacheKeys.embedding(documentId);
     return this.set(key, embedding, { ttl });
@@ -218,7 +218,7 @@ export class VectorCache extends CacheManager {
     query: string,
     results: any[],
     total: number,
-    filters?: Record<string, any>
+    filters?: Record<string, any>,
   ): Promise<boolean> {
     const key = CacheKeys.embeddingSearch(query);
     const cacheData: SearchResultCache = {
@@ -241,7 +241,7 @@ export class SessionCache extends CacheManager {
   async storeUserSession(
     userId: string,
     sessionData: any,
-    ttl: number = CacheTTL.LONG
+    ttl: number = CacheTTL.LONG,
   ): Promise<boolean> {
     const key = CacheKeys.userSession(userId);
     return this.set(key, sessionData, { ttl });
@@ -254,7 +254,7 @@ export class SessionCache extends CacheManager {
 
   async storeUserPreferences(
     userId: string,
-    preferences: any
+    preferences: any,
   ): Promise<boolean> {
     const key = CacheKeys.userPreferences(userId);
     return this.set(key, preferences, { ttl: CacheTTL.EXTENDED });
@@ -270,7 +270,7 @@ export class ChatCache extends CacheManager {
   async storeChatSession(
     chatId: string,
     sessionData: any,
-    ttl: number = CacheTTL.LONG
+    ttl: number = CacheTTL.LONG,
   ): Promise<boolean> {
     const key = CacheKeys.chatSession(chatId);
     return this.set(key, sessionData, { ttl });
@@ -284,7 +284,7 @@ export class ChatCache extends CacheManager {
   async storeChatMessages(
     chatId: string,
     messages: any[],
-    ttl: number = CacheTTL.MEDIUM
+    ttl: number = CacheTTL.MEDIUM,
   ): Promise<boolean> {
     const key = CacheKeys.chatMessages(chatId);
     return this.set(key, messages, { ttl });
@@ -304,7 +304,7 @@ export const chatCache = new ChatCache();
 
 // ===== CACHE WARMING UTILITIES =====
 export async function warmCache(
-  keys: Array<{ key: string; fetcher: () => Promise<any>; ttl?: number }>
+  keys: Array<{ key: string; fetcher: () => Promise<any>; ttl?: number }>,
 ) {
   const results = await Promise.allSettled(
     keys.map(async ({ key, fetcher, ttl }) => {
@@ -313,14 +313,14 @@ export async function warmCache(
         const data = await fetcher();
         await cache.set(key, data, { ttl });
       }
-    })
+    }),
   );
 
   const failed = results.filter(
-    (result) => result.status === "rejected"
+    (result) => result.status === "rejected",
   ).length;
   console.log(
-    `Cache warming completed: ${keys.length - failed}/${keys.length} successful`
+    `Cache warming completed: ${keys.length - failed}/${keys.length} successful`,
   );
 }
 

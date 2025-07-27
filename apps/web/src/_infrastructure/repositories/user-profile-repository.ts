@@ -144,7 +144,7 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
     userId: string,
     settings: {
       emailNotifications?: boolean;
-    }
+    },
   ): Promise<UserPreferences> {
     const client = await this.getClient();
     const { data, error } = await client
@@ -165,7 +165,7 @@ export class UserProfileRepository extends BaseRepository<UserProfile> {
    */
   async updatePreferences(
     userId: string,
-    preferences: Partial<UserPreferencesUpdate>
+    preferences: Partial<UserPreferencesUpdate>,
   ): Promise<UserPreferences> {
     const client = await this.getClient();
     const { data, error } = await client

@@ -1,14 +1,14 @@
-import { Context, Next } from 'hono';
+import { Context, Next } from "hono";
 
-import { logger } from './logger';
-import { supabase } from './supabase/client';
-import { createServiceClient } from './supabase/server-pages';
+import { logger } from "./logger";
+import { supabase } from "./supabase/client";
+import { createServiceClient } from "./supabase/server-pages";
 
 // Circuit breaker states
-type State = 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+type State = "CLOSED" | "OPEN" | "HALF_OPEN";
 
 // Error categories for more granular handling
-type ErrorCategory = 'TIMEOUT' | 'NETWORK' | 'SERVER' | 'AUTH' | 'UNKNOWN';
+type ErrorCategory = "TIMEOUT" | "NETWORK" | "SERVER" | "AUTH" | "UNKNOWN";
 
 // Telemetry event types
 interface TelemetryEvent extends Record<string, unknown> {
@@ -42,30 +42,30 @@ const DEFAULT_OPTIONS: Required<CircuitBreakerOptions> = {
   maxRetries: 3,
   enableTelemetry: true,
   telemetryCallback: (event) => {
-    logger.info('Circuit Breaker Telemetry:', event);
+    logger.info("Circuit Breaker Telemetry:", event);
   },
 };
 
 // Error categorization
 function categorizeError(error: Error): ErrorCategory {
-  if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
-    return 'TIMEOUT';
+  if (error.name === "TimeoutError" || error.message.includes("timeout")) {
+    return "TIMEOUT";
   }
-  if (error.name === 'NetworkError' || error.message.includes('network')) {
-    return 'NETWORK';
+  if (error.name === "NetworkError" || error.message.includes("network")) {
+    return "NETWORK";
   }
-  if (error.name === 'AuthError' || error.message.includes('auth')) {
-    return 'AUTH';
+  if (error.name === "AuthError" || error.message.includes("auth")) {
+    return "AUTH";
   }
-  if (error.message.includes('server')) {
-    return 'SERVER';
+  if (error.message.includes("server")) {
+    return "SERVER";
   }
-  return 'UNKNOWN';
+  return "UNKNOWN";
 }
 
 // Circuit breaker implementation
 class CircuitBreaker<Args extends any[] = any[], R = any> {
-  private state: State = 'CLOSED';
+  private state: State = "CLOSED";
   private failures = 0;
   private successes = 0;
   private lastFailureTime: number | null = null;
@@ -100,7 +100,7 @@ class CircuitBreaker<Args extends any[] = any[], R = any> {
     const oldState = this.state;
     this.state = newState;
 
-    if (newState === 'CLOSED') {
+    if (newState === "CLOSED") {
       this.failures = 0;
       this.successes = 0;
       this.errorCounts = {
@@ -119,7 +119,7 @@ class CircuitBreaker<Args extends any[] = any[], R = any> {
 
     logger.info(
       `Circuit breaker state changed from ${oldState} to ${newState}${
-        category ? ` due to ${category}` : ''
+        category ? ` due to ${category}` : ""
       }`,
     );
   }
@@ -138,10 +138,10 @@ class CircuitBreaker<Args extends any[] = any[], R = any> {
       this.successes++;
 
       if (
-        this.state === 'HALF_OPEN' &&
+        this.state === "HALF_OPEN" &&
         this.successes >= this.options.successThreshold
       ) {
-        this.moveToState('CLOSED');
+        this.moveToState("CLOSED");
       }
 
       return result;
@@ -159,7 +159,7 @@ class CircuitBreaker<Args extends any[] = any[], R = any> {
 
       // Check if we should trip the circuit
       if (this.failures >= this.options.maxFailures) {
-        this.moveToState('OPEN', category);
+        this.moveToState("OPEN", category);
         throw error;
       }
 
@@ -186,14 +186,14 @@ class CircuitBreaker<Args extends any[] = any[], R = any> {
     action: (...args: Args) => Promise<R>,
     ...args: Args
   ): Promise<R> {
-    if (this.state === 'OPEN') {
+    if (this.state === "OPEN") {
       if (
         this.lastFailureTime &&
         Date.now() - this.lastFailureTime >= this.options.resetTimeout
       ) {
-        this.moveToState('HALF_OPEN');
+        this.moveToState("HALF_OPEN");
       } else {
-        const error = new Error('Circuit breaker is OPEN');
+        const error = new Error("Circuit breaker is OPEN");
         this.emitTelemetry({ error });
         throw error;
       }
@@ -249,15 +249,15 @@ export function circuitBreakerMiddleware(
     } catch (error) {
       if (
         error instanceof Error &&
-        error.message === 'Circuit breaker is OPEN'
+        error.message === "Circuit breaker is OPEN"
       ) {
         c.status(503);
         c.header(
-          'Retry-After',
+          "Retry-After",
           Math.ceil(options.resetTimeout! / 1000).toString(),
         );
         return c.json({
-          error: 'Service temporarily unavailable',
+          error: "Service temporarily unavailable",
           metrics: breaker.getMetrics(),
         });
       }

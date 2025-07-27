@@ -1,4 +1,4 @@
-import { AuthError as SupabaseAuthError } from '@supabase/supabase-js';
+import { AuthError as SupabaseAuthError } from "@supabase/supabase-js";
 
 /**
  * Base class for all authentication errors
@@ -8,9 +8,14 @@ export class AuthError extends Error {
   public status?: number;
   public originalError?: Error;
 
-  constructor(message: string, code: string, originalError?: Error, status?: number) {
+  constructor(
+    message: string,
+    code: string,
+    originalError?: Error,
+    status?: number,
+  ) {
     super(message);
-    this.name = 'AuthError';
+    this.name = "AuthError";
     this.code = code;
     this.status = status;
     this.originalError = originalError;
@@ -24,7 +29,7 @@ export class AuthError extends Error {
       name: this.name,
       message: this.message,
       code: this.code,
-      status: this.status
+      status: this.status,
     };
   }
 
@@ -36,15 +41,15 @@ export class AuthError extends Error {
       JSON.stringify({
         error: {
           message: this.message,
-          code: this.code
-        }
+          code: this.code,
+        },
       }),
       {
         status: this.status || 500,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
 }
@@ -53,9 +58,9 @@ export class AuthError extends Error {
  * Error thrown when user is not authenticated
  */
 export class UnauthorizedError extends AuthError {
-  constructor(message = 'Authentication required', originalError?: Error) {
-    super(message, 'auth/unauthorized', originalError, 401);
-    this.name = 'UnauthorizedError';
+  constructor(message = "Authentication required", originalError?: Error) {
+    super(message, "auth/unauthorized", originalError, 401);
+    this.name = "UnauthorizedError";
   }
 }
 
@@ -63,9 +68,9 @@ export class UnauthorizedError extends AuthError {
  * Error thrown when user doesn't have sufficient permissions
  */
 export class ForbiddenError extends AuthError {
-  constructor(message = 'Insufficient permissions', originalError?: Error) {
-    super(message, 'auth/forbidden', originalError, 403);
-    this.name = 'ForbiddenError';
+  constructor(message = "Insufficient permissions", originalError?: Error) {
+    super(message, "auth/forbidden", originalError, 403);
+    this.name = "ForbiddenError";
   }
 }
 
@@ -73,9 +78,9 @@ export class ForbiddenError extends AuthError {
  * Error thrown when there's an issue with session management
  */
 export class SessionError extends AuthError {
-  constructor(message = 'Session error', originalError?: Error) {
-    super(message, 'auth/session-error', originalError, 400);
-    this.name = 'SessionError';
+  constructor(message = "Session error", originalError?: Error) {
+    super(message, "auth/session-error", originalError, 400);
+    this.name = "SessionError";
   }
 }
 
@@ -83,9 +88,9 @@ export class SessionError extends AuthError {
  * Error thrown when credentials are invalid
  */
 export class InvalidCredentialsError extends AuthError {
-  constructor(message = 'Invalid credentials', originalError?: Error) {
-    super(message, 'auth/invalid-credentials', originalError, 401);
-    this.name = 'InvalidCredentialsError';
+  constructor(message = "Invalid credentials", originalError?: Error) {
+    super(message, "auth/invalid-credentials", originalError, 401);
+    this.name = "InvalidCredentialsError";
   }
 }
 
@@ -93,9 +98,9 @@ export class InvalidCredentialsError extends AuthError {
  * Error thrown for user-related operations failures
  */
 export class UserOperationError extends AuthError {
-  constructor(message = 'User operation failed', originalError?: Error) {
-    super(message, 'auth/user-operation-failed', originalError, 400);
-    this.name = 'UserOperationError';
+  constructor(message = "User operation failed", originalError?: Error) {
+    super(message, "auth/user-operation-failed", originalError, 400);
+    this.name = "UserOperationError";
   }
 }
 
@@ -103,9 +108,12 @@ export class UserOperationError extends AuthError {
  * Error thrown for configuration issues
  */
 export class ConfigurationError extends AuthError {
-  constructor(message = 'Authentication configuration error', originalError?: Error) {
-    super(message, 'auth/configuration-error', originalError, 500);
-    this.name = 'ConfigurationError';
+  constructor(
+    message = "Authentication configuration error",
+    originalError?: Error,
+  ) {
+    super(message, "auth/configuration-error", originalError, 500);
+    this.name = "ConfigurationError";
   }
 }
 
@@ -118,9 +126,11 @@ interface ErrorWithStatus extends Error {
 /**
  * Converts Supabase errors to our custom error types
  */
-export function handleSupabaseError(error: Error | SupabaseAuthError | ErrorWithStatus | null | undefined): AuthError {
+export function handleSupabaseError(
+  error: Error | SupabaseAuthError | ErrorWithStatus | null | undefined,
+): AuthError {
   if (!error) {
-    return new AuthError('Unknown error', 'auth/unknown');
+    return new AuthError("Unknown error", "auth/unknown");
   }
 
   // Errors with status property
@@ -132,25 +142,29 @@ export function handleSupabaseError(error: Error | SupabaseAuthError | ErrorWith
       case 403:
         return new ForbiddenError(error.message, error);
       case 400:
-        if (error.message.includes('credentials')) {
+        if (error.message.includes("credentials")) {
           return new InvalidCredentialsError(error.message, error);
         }
-        if (error.message.includes('session')) {
+        if (error.message.includes("session")) {
           return new SessionError(error.message, error);
         }
         return new UserOperationError(error.message, error);
       default:
         return new AuthError(
-          error.message, 
-          `auth/error-${errorWithStatus.status || 'unknown'}`, 
-          error, 
-          errorWithStatus.status
+          error.message,
+          `auth/error-${errorWithStatus.status || "unknown"}`,
+          error,
+          errorWithStatus.status,
         );
     }
   }
 
   // Generic errors
-  return new AuthError(error.message || 'Unknown error', 'auth/unknown-error', error);
+  return new AuthError(
+    error.message || "Unknown error",
+    "auth/unknown-error",
+    error,
+  );
 }
 
 /**
@@ -158,7 +172,7 @@ export function handleSupabaseError(error: Error | SupabaseAuthError | ErrorWith
  */
 export async function safeAuthOperation<T>(
   operation: () => Promise<T>,
-  errorMessage = 'Authentication operation failed'
+  errorMessage = "Authentication operation failed",
 ): Promise<T> {
   try {
     return await operation();
@@ -175,8 +189,8 @@ export function createAuthErrorHandler() {
     if (error instanceof AuthError) {
       return error.toResponse();
     }
-    
+
     const authError = handleSupabaseError(error as Error);
     return authError.toResponse();
   };
-} 
+}

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 255, "column": 0}, "map": {"version":3,"sources":["file://E%3A/downloads/Hijraah/sentry.server.config.ts"],"sourcesContent":["// This file configures the initialization of Sentry on the server.\r\n// The config you add here will be used whenever the server handles a request.\r\n// https://docs.sentry.io/platforms/javascript/guides/nextjs/\r\n\r\nimport * as Sentry from \"@sentry/nextjs\";\r\n\r\nSentry.init({\r\n  dsn: process.env.SENTRY_DSN,\r\n\r\n  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.\r\n  tracesSampleRate: 1,\r\n\r\n  // Setting this option to true will print useful information to the console while you're setting up Sentry.\r\n  debug: false,\r\n});\r\n"],"names":[],"mappings":"AAAA,mEAAmE;AACnE,8EAA8E;AAC9E,6DAA6D;;AAE7D;;AAEA,CAAA,GAAA,4RAAA,CAAA,OAAW,AAAD,EAAE;IACV,KAAK,QAAQ,GAAG,CAAC,UAAU;IAE3B,mHAAmH;IACnH,kBAAkB;IAElB,2GAA2G;IAC3G,OAAO;AACT","debugId":null}}]
+}

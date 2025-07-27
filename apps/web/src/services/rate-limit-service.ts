@@ -30,14 +30,14 @@ export class RateLimitService {
   static async isAllowed(
     identifier: string,
     action: RateLimitAction,
-    tier: UserTier = "standard"
+    tier: UserTier = "standard",
   ): Promise<RateLimitResult> {
     try {
       const limiter = limiters[action]?.[tier];
 
       if (!limiter) {
         throw new Error(
-          `No rate limiter found for action: ${action}, tier: ${tier}`
+          `No rate limiter found for action: ${action}, tier: ${tier}`,
         );
       }
 
@@ -54,7 +54,7 @@ export class RateLimitService {
     } catch (error) {
       console.error(
         `Rate limit check failed for ${action}:${tier}:${identifier}`,
-        error
+        error,
       );
 
       // Fail open - allow request if rate limiting system fails
@@ -75,7 +75,7 @@ export class RateLimitService {
   static async getRemainingLimit(
     identifier: string,
     action: RateLimitAction,
-    tier: UserTier = "standard"
+    tier: UserTier = "standard",
   ): Promise<number> {
     const response = await this.isAllowed(identifier, action, tier);
     return response.remaining;
@@ -87,7 +87,7 @@ export class RateLimitService {
   static async getResetTime(
     identifier: string,
     action: RateLimitAction,
-    tier: UserTier = "standard"
+    tier: UserTier = "standard",
   ): Promise<Date> {
     const response = await this.isAllowed(identifier, action, tier);
     return response.reset;
@@ -99,13 +99,13 @@ export class RateLimitService {
    */
   static async checkMultiple(
     identifier: string,
-    checks: Array<{ action: RateLimitAction; tier: UserTier }>
+    checks: Array<{ action: RateLimitAction; tier: UserTier }>,
   ): Promise<Record<string, RateLimitResult>> {
     const results = await Promise.all(
       checks.map(async ({ action, tier }) => {
         const result = await this.isAllowed(identifier, action, tier);
         return [`${action}:${tier}`, result] as const;
-      })
+      }),
     );
 
     return Object.fromEntries(results);

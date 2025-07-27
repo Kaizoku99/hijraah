@@ -1,13 +1,9 @@
-'use client'
+"use client";
 
-import React from 'react'
+import React from "react";
 
 export const Loading = () => {
-  return (
-    <div>
-      {/* Add component implementation */}
-    </div>
-  )
-}
+  return <div>{/* Add component implementation */}</div>;
+};
 
-export default Loading
+export default Loading;

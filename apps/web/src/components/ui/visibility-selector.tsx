@@ -58,7 +58,7 @@ export function VisibilitySelector({
 
   const selectedVisibility = useMemo(
     () => visibilities.find((visibility) => visibility.id === visibilityType),
-    [visibilityType]
+    [visibilityType],
   );
 
   return (
@@ -67,7 +67,7 @@ export function VisibilitySelector({
         asChild
         className={cn(
           "w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
-          className
+          className,
         )}
       >
         <Button

@@ -27,7 +27,7 @@ export class SearchEngine {
 
   async search(
     query: string,
-    options: SearchOptions = {}
+    options: SearchOptions = {},
   ): Promise<SearchResult[]> {
     const {
       k = 10,
@@ -45,7 +45,7 @@ export class SearchEngine {
           query_embedding: embedding,
           match_count: k,
           filter: options.filters ? JSON.stringify(options.filters) : "{}",
-        }
+        },
       );
 
       if (error) throw error;
@@ -68,7 +68,7 @@ export class SearchEngine {
         results = this.combineResults(
           this.transformVectorResults(vectorResults),
           this.transformFirecrawlResults(firecrawlResults),
-          hybridWeights
+          hybridWeights,
         );
       }
 
@@ -99,7 +99,7 @@ export class SearchEngine {
   }
 
   private transformFirecrawlResults(
-    results: FirecrawlSearchResult[]
+    results: FirecrawlSearchResult[],
   ): SearchResult[] {
     return results.map((r) => ({
       url: r.url,
@@ -118,7 +118,7 @@ export class SearchEngine {
   private combineResults(
     vectorResults: SearchResult[],
     firecrawlResults: SearchResult[],
-    weights: { vector: number; firecrawl: number }
+    weights: { vector: number; firecrawl: number },
   ): SearchResult[] {
     const combined = new Map<string, SearchResult>();
 

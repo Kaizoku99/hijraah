@@ -36,7 +36,7 @@ export type ChatAttachmentInsert =
 // Initialize typed Supabase client (Vercel pattern)
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
 // ============================================================================
@@ -102,7 +102,7 @@ export async function saveChat({
             file_type: att.contentType,
             file_size: 0, // Default size, should be provided in actual implementation
             created_at: new Date().toISOString(),
-          })
+          }),
         );
 
         const { error: attachmentsError } = await supabase
@@ -140,7 +140,7 @@ export async function getChatById(id: string) {
       `
       *,
       chat_attachments (*)
-    `
+    `,
     )
     .eq("session_id", id)
     .order("created_at", { ascending: true });
@@ -271,7 +271,7 @@ export function convertToAIMessages(dbMessages: ChatMessageRow[]) {
   return dbMessages
     .sort(
       (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
     )
     .map((msg) => ({
       role: msg.role as "user" | "assistant" | "system",

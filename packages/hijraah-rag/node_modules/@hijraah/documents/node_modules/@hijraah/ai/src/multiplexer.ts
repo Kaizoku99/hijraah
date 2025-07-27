@@ -8,10 +8,9 @@ import {
   customProvider,
   generateText,
   streamText,
-  LanguageModelV1Middleware,
   type GenerateTextResult,
   type StreamTextResult,
-  type CoreMessage,
+  type ModelMessage,
 } from "ai";
 import { Redis } from "@upstash/redis";
 import { z } from "zod";
@@ -32,7 +31,7 @@ export interface ModelConfig {
     tools: boolean;
     streaming: boolean;
   };
-  maxTokens: number;
+  maxOutputTokens: number;
   contextWindow: number;
 }
 
@@ -45,10 +44,10 @@ export interface MultiplexerOptions {
 }
 
 export interface GenerationRequest {
-  messages: CoreMessage[];
+  messages: ModelMessage[];
   model?: string;
   temperature?: number;
-  maxTokens?: number;
+  maxOutputTokens?: number;
   stream?: boolean;
   tools?: any;
   userId?: string;
@@ -85,7 +84,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 4096,
+      maxOutputTokens: 4096,
       contextWindow: 128000,
     });
 
@@ -101,7 +100,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 4096,
+      maxOutputTokens: 4096,
       contextWindow: 128000,
     });
 
@@ -118,7 +117,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 8192,
+      maxOutputTokens: 8192,
       contextWindow: 200000,
     });
 
@@ -134,7 +133,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 4096,
+      maxOutputTokens: 4096,
       contextWindow: 200000,
     });
 
@@ -151,7 +150,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 8192,
+      maxOutputTokens: 8192,
       contextWindow: 1000000,
     });
 
@@ -168,7 +167,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 4096,
+      maxOutputTokens: 4096,
       contextWindow: 64000,
     });
 
@@ -185,7 +184,7 @@ export class EnhancedModelMultiplexer {
         tools: true,
         streaming: true,
       },
-      maxTokens: 4096,
+      maxOutputTokens: 4096,
       contextWindow: 128000,
     });
   }
@@ -235,7 +234,7 @@ export class EnhancedModelMultiplexer {
     if (this.modelConfigs.has(requestedModel)) {
       const isAvailable = await this.checkModelAvailability(
         requestedModel,
-        request.userId
+        request.userId,
       );
       if (isAvailable) {
         return requestedModel;
@@ -269,7 +268,7 @@ export class EnhancedModelMultiplexer {
     for (const candidate of candidates) {
       const isAvailable = await this.checkModelAvailability(
         candidate.id,
-        request.userId
+        request.userId,
       );
       if (isAvailable) {
         return candidate.id;
@@ -282,7 +281,7 @@ export class EnhancedModelMultiplexer {
 
   private async checkModelAvailability(
     modelId: string,
-    userId?: string
+    userId?: string,
   ): Promise<boolean> {
     const config = this.modelConfigs.get(modelId);
     if (!config) return false;
@@ -336,8 +335,8 @@ export class EnhancedModelMultiplexer {
 
   // Enhanced generateText with automatic failover
   async generateText(
-    request: GenerationRequest
-  ): Promise<GenerateTextResult<any>> {
+    request: GenerationRequest,
+  ): Promise<GenerateTextResult<any, any>> {
     const selectedModel = await this.selectModel(request);
     let lastError: Error | null = null;
 
@@ -352,7 +351,7 @@ export class EnhancedModelMultiplexer {
           model,
           messages: request.messages,
           temperature: request.temperature,
-          maxTokens: request.maxTokens,
+          maxOutputTokens: request.maxOutputTokens,
           tools: request.tools,
         });
 
@@ -364,14 +363,14 @@ export class EnhancedModelMultiplexer {
         lastError = error as Error;
         console.warn(
           `Model ${selectedModel} failed on attempt ${attempt + 1}:`,
-          error
+          error,
         );
 
         // Try fallback model
         if (attempt < this.options.maxRetries - 1) {
           const fallbackModel = await this.selectFallbackModel(
             selectedModel,
-            request
+            request,
           );
           if (fallbackModel !== selectedModel) {
             // Update rate limit for fallback model
@@ -386,7 +385,9 @@ export class EnhancedModelMultiplexer {
   }
 
   // Enhanced streamText with automatic failover
-  async streamText(request: GenerationRequest): Promise<StreamTextResult<any>> {
+  async streamText(
+    request: GenerationRequest,
+  ): Promise<StreamTextResult<any, any>> {
     const selectedModel = await this.selectModel(request);
 
     // Track usage
@@ -395,11 +396,11 @@ export class EnhancedModelMultiplexer {
     try {
       const model = this.provider.languageModel(selectedModel);
 
-      const result = await streamText({
+      const result = streamText({
         model,
         messages: request.messages,
         temperature: request.temperature,
-        maxTokens: request.maxTokens,
+        maxOutputTokens: request.maxOutputTokens,
         tools: request.tools,
         onFinish: async ({ usage }) => {
           // Log usage when streaming completes
@@ -414,7 +415,7 @@ export class EnhancedModelMultiplexer {
       // Try fallback for streaming
       const fallbackModel = await this.selectFallbackModel(
         selectedModel,
-        request
+        request,
       );
       if (fallbackModel !== selectedModel) {
         const model = this.provider.languageModel(fallbackModel);
@@ -424,7 +425,7 @@ export class EnhancedModelMultiplexer {
           model,
           messages: request.messages,
           temperature: request.temperature,
-          maxTokens: request.maxTokens,
+          maxOutputTokens: request.maxOutputTokens,
           tools: request.tools,
           onFinish: async ({ usage }) => {
             await this.logUsage(fallbackModel, usage, request.userId);
@@ -438,7 +439,7 @@ export class EnhancedModelMultiplexer {
 
   private async selectFallbackModel(
     failedModel: string,
-    request: GenerationRequest
+    request: GenerationRequest,
   ): Promise<string> {
     // Select a different model based on the same criteria
     const alternatives = Array.from(this.modelConfigs.values())
@@ -448,7 +449,7 @@ export class EnhancedModelMultiplexer {
     for (const alternative of alternatives) {
       const isAvailable = await this.checkModelAvailability(
         alternative.id,
-        request.userId
+        request.userId,
       );
       if (isAvailable) {
         return alternative.id;
@@ -488,7 +489,7 @@ export class EnhancedModelMultiplexer {
   async getUsageStats(
     modelId?: string,
     userId?: string,
-    days: number = 7
+    days: number = 7,
   ): Promise<any> {
     if (!this.redis) return null;
 
@@ -515,7 +516,7 @@ export class EnhancedModelMultiplexer {
           acc.requests += 1;
           return acc;
         },
-        { promptTokens: 0, completionTokens: 0, totalTokens: 0, requests: 0 }
+        { promptTokens: 0, completionTokens: 0, totalTokens: 0, requests: 0 },
       );
 
       stats[date] = dayStats;

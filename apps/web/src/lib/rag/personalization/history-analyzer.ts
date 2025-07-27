@@ -16,7 +16,7 @@ export class QueryHistoryAnalyzer {
 
   async getTopInterests(
     userId: string,
-    limit = 5
+    limit = 5,
   ): Promise<HistoricalInterest[]> {
     const { data, error } = await this.supabase
       .from("user_query_history")

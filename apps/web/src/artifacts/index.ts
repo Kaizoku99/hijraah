@@ -41,10 +41,10 @@ export interface ArtifactDefinition {
   onStreamPart?: (params: {
     streamPart: DataStreamDelta; // Updated to use centralized type
     setArtifact: (
-      updater: (prev: BaseArtifactData) => BaseArtifactData
+      updater: (prev: BaseArtifactData) => BaseArtifactData,
     ) => void; // Updated type
     setMetadata?: (
-      updater: (prev: Record<string, any>) => Record<string, any>
+      updater: (prev: Record<string, any>) => Record<string, any>,
     ) => void; // Updated type
   }) => void; // Handler for specific stream deltas
 }

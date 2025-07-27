@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "files": [
+    "../webpack-runtime.js",
+    "../webpack-runtime.js.map",
+    "_app.js.map",
+    "../../../../../node_modules/.pnpm/next@15.3.0-canary.31_@babe_be67f368de2727c847f3a61f5e6cf4fa/node_modules/next/dist/pages/_app.js",
+    "../../../../../package.json"
+  ]
+}

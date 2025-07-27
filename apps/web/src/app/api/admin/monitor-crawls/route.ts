@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         error: "Monitoring failed",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
         error: "Manual monitoring failed",
         details: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

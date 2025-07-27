@@ -1,6 +1,6 @@
 /**
  * Document domain entity
- * 
+ *
  * This entity represents a document in the domain model.
  */
 
@@ -9,28 +9,28 @@
  */
 
 export enum DocumentType {
-  PASSPORT = 'passport',
-  VISA = 'visa',
-  BIRTH_CERTIFICATE = 'birth_certificate',
-  MARRIAGE_CERTIFICATE = 'marriage_certificate',
-  ACADEMIC_RECORD = 'academic_record',
-  EMPLOYMENT_RECORD = 'employment_record',
-  FINANCIAL_RECORD = 'financial_record',
-  MEDICAL_RECORD = 'medical_record',
-  LEGAL_DOCUMENT = 'legal_document',
-  TRAVEL_DOCUMENT = 'travel_document',
-  IDENTIFICATION = 'identification',
-  SUPPORTING_DOCUMENT = 'supporting_document',
-  OTHER = 'other'
+  PASSPORT = "passport",
+  VISA = "visa",
+  BIRTH_CERTIFICATE = "birth_certificate",
+  MARRIAGE_CERTIFICATE = "marriage_certificate",
+  ACADEMIC_RECORD = "academic_record",
+  EMPLOYMENT_RECORD = "employment_record",
+  FINANCIAL_RECORD = "financial_record",
+  MEDICAL_RECORD = "medical_record",
+  LEGAL_DOCUMENT = "legal_document",
+  TRAVEL_DOCUMENT = "travel_document",
+  IDENTIFICATION = "identification",
+  SUPPORTING_DOCUMENT = "supporting_document",
+  OTHER = "other",
 }
 
 export enum DocumentStatus {
-  DRAFT = 'draft',
-  PENDING_REVIEW = 'pending_review',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired',
-  REVOKED = 'revoked'
+  DRAFT = "draft",
+  PENDING_REVIEW = "pending_review",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  EXPIRED = "expired",
+  REVOKED = "revoked",
 }
 
 export interface DocumentVersion {
@@ -49,7 +49,7 @@ export interface DocumentAccess {
   id: string;
   documentId: string;
   userId: string;
-  permission: 'view' | 'edit' | 'delete' | 'admin';
+  permission: "view" | "edit" | "delete" | "admin";
   grantedBy: string;
   grantedAt: Date;
   expiresAt?: Date;
@@ -118,16 +118,20 @@ export class Document {
   /**
    * Check if a user has specific access to the document
    */
-  hasAccess(userId: string, permission: 'view' | 'edit' | 'delete' | 'admin'): boolean {
+  hasAccess(
+    userId: string,
+    permission: "view" | "edit" | "delete" | "admin",
+  ): boolean {
     // Owner always has full access
     if (this.ownerId === userId) {
       return true;
     }
 
     // Check access records
-    const userAccess = this.access.find(access => 
-      access.userId === userId && 
-      (!access.expiresAt || access.expiresAt > new Date())
+    const userAccess = this.access.find(
+      (access) =>
+        access.userId === userId &&
+        (!access.expiresAt || access.expiresAt > new Date()),
     );
 
     if (!userAccess) {
@@ -135,20 +139,20 @@ export class Document {
     }
 
     // Admin permission grants all access
-    if (userAccess.permission === 'admin') {
+    if (userAccess.permission === "admin") {
       return true;
     }
 
     // Match specific permission
-    if (permission === 'view') {
+    if (permission === "view") {
       // Any permission level grants view access
       return true;
-    } else if (permission === 'edit') {
+    } else if (permission === "edit") {
       // Edit or admin permission grants edit access
-      return ['edit', 'admin'].includes(userAccess.permission);
-    } else if (permission === 'delete') {
+      return ["edit", "admin"].includes(userAccess.permission);
+    } else if (permission === "delete") {
       // Only delete or admin permission grants delete access
-      return ['delete', 'admin'].includes(userAccess.permission);
+      return ["delete", "admin"].includes(userAccess.permission);
     }
 
     return false;
@@ -157,15 +161,15 @@ export class Document {
   /**
    * Add a new version to the document
    */
-  addVersion(version: Omit<DocumentVersion, 'documentId'>): Document {
+  addVersion(version: Omit<DocumentVersion, "documentId">): Document {
     const newVersion: DocumentVersion = {
       ...version,
-      documentId: this.id
+      documentId: this.id,
     };
 
     this.versions.push(newVersion);
     this.updatedAt = new Date();
-    
+
     return this;
   }
 
@@ -178,8 +182,8 @@ export class Document {
     }
 
     // Sort versions by creation date (newest first)
-    const sortedVersions = [...this.versions].sort((a, b) => 
-      b.createdAt.getTime() - a.createdAt.getTime()
+    const sortedVersions = [...this.versions].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
 
     return sortedVersions[0];
@@ -188,13 +192,15 @@ export class Document {
   /**
    * Grant access to a user
    */
-  grantAccess(access: Omit<DocumentAccess, 'documentId'>): Document {
+  grantAccess(access: Omit<DocumentAccess, "documentId">): Document {
     // Check if access already exists
-    const existingAccessIndex = this.access.findIndex(a => a.userId === access.userId);
-    
+    const existingAccessIndex = this.access.findIndex(
+      (a) => a.userId === access.userId,
+    );
+
     const newAccess: DocumentAccess = {
       ...access,
-      documentId: this.id
+      documentId: this.id,
     };
 
     if (existingAccessIndex >= 0) {
@@ -206,7 +212,7 @@ export class Document {
     }
 
     this.updatedAt = new Date();
-    
+
     return this;
   }
 
@@ -214,9 +220,9 @@ export class Document {
    * Revoke access from a user
    */
   revokeAccess(userId: string): Document {
-    this.access = this.access.filter(access => access.userId !== userId);
+    this.access = this.access.filter((access) => access.userId !== userId);
     this.updatedAt = new Date();
-    
+
     return this;
   }
 
@@ -228,7 +234,7 @@ export class Document {
       this.caseIds.push(caseId);
       this.updatedAt = new Date();
     }
-    
+
     return this;
   }
 
@@ -236,9 +242,9 @@ export class Document {
    * Remove document from a case
    */
   removeFromCase(caseId: string): Document {
-    this.caseIds = this.caseIds.filter(id => id !== caseId);
+    this.caseIds = this.caseIds.filter((id) => id !== caseId);
     this.updatedAt = new Date();
-    
+
     return this;
   }
 
@@ -248,10 +254,10 @@ export class Document {
   updateMetadata(metadata: Record<string, any>): Document {
     this.metadata = {
       ...this.metadata,
-      ...metadata
+      ...metadata,
     };
     this.updatedAt = new Date();
-    
+
     return this;
   }
 
@@ -262,16 +268,16 @@ export class Document {
     // Could add validation here if needed
     this.status = status;
     this.updatedAt = new Date();
-    
+
     // Add audit info to metadata
     this.metadata.statusHistory = this.metadata.statusHistory || [];
     this.metadata.statusHistory.push({
       from: this.status,
       to: status,
       changedBy: userId,
-      changedAt: new Date()
+      changedAt: new Date(),
     });
-    
+
     return this;
   }
 
@@ -294,11 +300,12 @@ export class Document {
     if (data.expiryDate !== undefined) this.expiryDate = data.expiryDate;
     if (data.issuedBy !== undefined) this.issuedBy = data.issuedBy;
     if (data.issuedDate !== undefined) this.issuedDate = data.issuedDate;
-    if (data.documentNumber !== undefined) this.documentNumber = data.documentNumber;
+    if (data.documentNumber !== undefined)
+      this.documentNumber = data.documentNumber;
     if (data.tags !== undefined) this.tags = data.tags;
-    
+
     this.updatedAt = new Date();
-    
+
     return this;
   }
 
@@ -324,7 +331,7 @@ export class Document {
       metadata: this.metadata,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
-      latestVersion: this.getLatestVersion()
+      latestVersion: this.getLatestVersion(),
     };
   }
 
@@ -339,10 +346,10 @@ export class Document {
     };
 
     // Parse versions
-    const versions = Array.isArray(data.versions) 
+    const versions = Array.isArray(data.versions)
       ? data.versions.map((v: any) => ({
           ...v,
-          createdAt: parseDate(v.createdAt) || new Date()
+          createdAt: parseDate(v.createdAt) || new Date(),
         }))
       : [];
 
@@ -351,7 +358,7 @@ export class Document {
       ? data.access.map((a: any) => ({
           ...a,
           grantedAt: parseDate(a.grantedAt) || new Date(),
-          expiresAt: parseDate(a.expiresAt)
+          expiresAt: parseDate(a.expiresAt),
         }))
       : [];
 
@@ -372,7 +379,7 @@ export class Document {
       tags: data.tags || [],
       metadata: data.metadata || {},
       createdAt: parseDate(data.created_at || data.createdAt) || new Date(),
-      updatedAt: parseDate(data.updated_at || data.updatedAt) || new Date()
+      updatedAt: parseDate(data.updated_at || data.updatedAt) || new Date(),
     });
   }
-} 
+}

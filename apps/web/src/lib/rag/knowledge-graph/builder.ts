@@ -42,7 +42,7 @@ export class KnowledgeGraphBuilder {
     const extractedEntities = await this.extractEntities(document);
     const extractedRelationships = await this.extractRelationships(
       document,
-      extractedEntities
+      extractedEntities,
     );
 
     // 2. Upsert entities and relationships into KG
@@ -64,7 +64,7 @@ export class KnowledgeGraphBuilder {
     // 4. (Optional) recalc graph metrics – TBD
 
     console.log(
-      `Built and stored graph for document ${document.documentId}: ${entities.length} entities, ${relationships.length} relationships`
+      `Built and stored graph for document ${document.documentId}: ${entities.length} entities, ${relationships.length} relationships`,
     );
 
     return {
@@ -75,7 +75,7 @@ export class KnowledgeGraphBuilder {
 
   private async storeGraphData(
     entities: Entity[],
-    relationships: Relationship[]
+    relationships: Relationship[],
   ): Promise<void> {
     if (entities.length > 0) {
       const entityRecords = entities.map((e) => ({
@@ -116,7 +116,7 @@ export class KnowledgeGraphBuilder {
   }
 
   private async extractEntities(
-    document: RAGProcessedDocument
+    document: RAGProcessedDocument,
   ): Promise<Entity[]> {
     const entities: Entity[] = [];
 
@@ -173,7 +173,7 @@ export class KnowledgeGraphBuilder {
 
   private async extractRelationships(
     document: RAGProcessedDocument,
-    entities: Entity[]
+    entities: Entity[],
   ): Promise<Relationship[]> {
     const relationships: Relationship[] = [];
 
@@ -247,7 +247,7 @@ export class KnowledgeGraphBuilder {
   async queryPath(
     startEntity: string,
     endEntity: string,
-    maxDepth: number = 3
+    maxDepth: number = 3,
   ): Promise<{ path: string[]; relationships: string[] }[]> {
     // Resolve entity IDs
     const start = await this.getEntityByName(startEntity);
@@ -305,7 +305,7 @@ export class KnowledgeGraphBuilder {
     const { data, error } = await this.supabase
       .from("kg_relationships")
       .select(
-        "target_entity_id, relationship_type, target:target_entity_id ( entity_name )"
+        "target_entity_id, relationship_type, target:target_entity_id ( entity_name )",
       )
       .eq("source_entity_id", entityId);
     if (error) return [];
@@ -343,7 +343,7 @@ export class KnowledgeGraphBuilder {
           updated_at: new Date().toISOString(),
           confidence_score: this.adjustConfidence(
             existing.confidence_score ?? 0.8,
-            1
+            1,
           ),
         })
         .eq("id", existing.id);
@@ -369,7 +369,7 @@ export class KnowledgeGraphBuilder {
    * Create relationship if not exists.
    */
   private async createRelationship(
-    rel: Relationship
+    rel: Relationship,
   ): Promise<Relationship | null> {
     const { data: existing } = await this.supabase
       .from("kg_relationships")
@@ -401,7 +401,7 @@ export class KnowledgeGraphBuilder {
    */
   private async updateTemporalData(
     document: RAGProcessedDocument,
-    entities: Entity[]
+    entities: Entity[],
   ) {
     const text = document.rawText;
 

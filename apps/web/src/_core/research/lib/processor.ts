@@ -24,7 +24,7 @@ export class ResearchProcessor {
       country?: string;
       category?: string;
       depth?: "basic" | "detailed" | "comprehensive";
-    }
+    },
   ): Promise<string> {
     try {
       const cacheKey = `research:${JSON.stringify({ query, options })}`; // Reinstated cache logic
@@ -64,7 +64,7 @@ export class ResearchProcessor {
   }
 
   private getSystemPrompt(
-    depth: "basic" | "detailed" | "comprehensive"
+    depth: "basic" | "detailed" | "comprehensive",
   ): string {
     const basePrompt = `You are an expert immigration research system. Analyze the provided information and generate a comprehensive research report.
 
@@ -101,7 +101,7 @@ Instructions:
     options: {
       country?: string;
       category?: string;
-    }
+    },
   ): Promise<DomainDocument[]> {
     const { data: documents, error } = await this.supabase
       .from("documents")

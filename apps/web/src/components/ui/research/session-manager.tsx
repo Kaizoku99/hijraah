@@ -60,14 +60,14 @@ export function ResearchSessionManager({
 }: ResearchSessionManagerProps) {
   const [sessions, setSessions] = useState<ResearchSession[]>([]);
   const [filteredSessions, setFilteredSessions] = useState<ResearchSession[]>(
-    []
+    [],
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSession, setSelectedSession] =
     useState<ResearchSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"all" | "active" | "archived">(
-    "all"
+    "all",
   );
 
   // Simulate fetching sessions
@@ -85,7 +85,7 @@ export function ResearchSessionManager({
       // Select initial session if ID is provided and session exists
       if (initialSelectedSessionId) {
         const initialSession = data.find(
-          (s) => s.id === initialSelectedSessionId
+          (s) => s.id === initialSelectedSessionId,
         );
         if (initialSession) {
           setSelectedSession(initialSession);
@@ -111,7 +111,7 @@ export function ResearchSessionManager({
           session.description
             .toLowerCase()
             .includes(searchQuery.toLowerCase()) ||
-          session.category.toLowerCase().includes(searchQuery.toLowerCase())
+          session.category.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -176,8 +176,8 @@ export function ResearchSessionManager({
       sessions.map((session) =>
         session.id === id
           ? { ...session, status: "archived" as const, updatedAt: new Date() }
-          : session
-      )
+          : session,
+      ),
     );
 
     if (onSessionArchive) {
@@ -208,17 +208,17 @@ export function ResearchSessionManager({
         country?: string;
         category?: string;
         depth: "basic" | "detailed" | "comprehensive";
-      }
+      },
     ) => {
       setIsResearchLoading(true);
       // In a real scenario, this would use selectedSession.id or other details
       // to perform research, e.g., call an API.
       console.log(
-        `Researching for session ${selectedSession.id}: Query - ${query}, Options - ${JSON.stringify(options)}`
+        `Researching for session ${selectedSession.id}: Query - ${query}, Options - ${JSON.stringify(options)}`,
       );
       await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
       setResearchResult(
-        `Results for query "${query}" on session "${selectedSession.title}". Options: ${JSON.stringify(options)}`
+        `Results for query "${query}" on session "${selectedSession.title}". Options: ${JSON.stringify(options)}`,
       );
       setIsResearchLoading(false);
     };

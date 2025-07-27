@@ -23,7 +23,7 @@ export const DocumentSchema = z.object({
         content: z.string(),
         metadata: z.record(z.any()).optional(),
         embedding: z.array(z.number()).optional(),
-      })
+      }),
     )
     .optional(),
 });
@@ -113,7 +113,7 @@ export class EnhancedDocumentProcessor {
   // Main processing entry point
   async processDocument(
     input: string | Buffer | File,
-    options: Partial<ProcessingOptions> = {}
+    options: Partial<ProcessingOptions> = {},
   ): Promise<ProcessingResult> {
     const startTime = Date.now();
     const processingOptions = ProcessingOptionsSchema.parse(options);
@@ -134,7 +134,7 @@ export class EnhancedDocumentProcessor {
       // Process document through pipeline
       const result = await this.processDocumentPipeline(
         document,
-        processingOptions
+        processingOptions,
       );
 
       // Cache result
@@ -147,14 +147,14 @@ export class EnhancedDocumentProcessor {
     } catch (error) {
       console.error("Document processing failed:", error);
       throw new Error(
-        `Document processing failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Document processing failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
 
   // Extract content from various input types
   private async extractContent(
-    input: string | Buffer | File
+    input: string | Buffer | File,
   ): Promise<Document> {
     let content: string;
     let format: Document["format"];
@@ -181,7 +181,7 @@ export class EnhancedDocumentProcessor {
       const buffer = await input.arrayBuffer();
       const result = await this.processFileBuffer(
         Buffer.from(buffer),
-        input.name
+        input.name,
       );
       content = result.content;
       format = result.format;
@@ -233,7 +233,7 @@ export class EnhancedDocumentProcessor {
     } catch (error) {
       console.error("Webpage processing failed:", error);
       throw new Error(
-        `Webpage processing failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Webpage processing failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -241,7 +241,7 @@ export class EnhancedDocumentProcessor {
   // Process file buffer based on extension/content
   private async processFileBuffer(
     buffer: Buffer,
-    filename?: string
+    filename?: string,
   ): Promise<{
     content: string;
     format: Document["format"];
@@ -297,7 +297,7 @@ export class EnhancedDocumentProcessor {
       };
     } catch (error) {
       throw new Error(
-        `PDF processing failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `PDF processing failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -323,7 +323,7 @@ export class EnhancedDocumentProcessor {
       };
     } catch (error) {
       throw new Error(
-        `DOCX processing failed: ${error instanceof Error ? error.message : "Unknown error"}`
+        `DOCX processing failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -362,7 +362,7 @@ export class EnhancedDocumentProcessor {
   // Main document processing pipeline
   private async processDocumentPipeline(
     document: Document,
-    options: ProcessingOptions
+    options: ProcessingOptions,
   ): Promise<ProcessingResult> {
     const originalSize = document.content.length;
     let processedDocument = { ...document };
@@ -373,7 +373,7 @@ export class EnhancedDocumentProcessor {
     // Step 2: PII Detection and anonymization
     if (options.enablePIIDetection) {
       const piiResult = await this.detectAndAnonymizePII(
-        processedDocument.content
+        processedDocument.content,
       );
       processedDocument.content = piiResult.content;
       processedDocument.metadata = {
@@ -389,7 +389,7 @@ export class EnhancedDocumentProcessor {
       chunks = await this.chunkText(
         processedDocument.content,
         options.chunkSize,
-        options.chunkOverlap
+        options.chunkOverlap,
       );
     }
 
@@ -398,7 +398,7 @@ export class EnhancedDocumentProcessor {
     if (options.enableEmbeddings && chunks) {
       embeddingsGenerated = await this.generateEmbeddings(
         chunks,
-        options.maxConcurrentProcessing
+        options.maxConcurrentProcessing,
       );
     }
 
@@ -453,7 +453,7 @@ export class EnhancedDocumentProcessor {
   private async chunkText(
     content: string,
     chunkSize: number,
-    overlap: number
+    overlap: number,
   ): Promise<Document["chunks"]> {
     const chunks: Document["chunks"] = [];
     const sentences = content
@@ -530,7 +530,7 @@ export class EnhancedDocumentProcessor {
   // Generate embeddings for chunks
   private async generateEmbeddings(
     chunks: NonNullable<Document["chunks"]>,
-    maxConcurrent: number
+    maxConcurrent: number,
   ): Promise<number> {
     let generated = 0;
     const semaphore = new Array(maxConcurrent).fill(null);
@@ -567,7 +567,7 @@ export class EnhancedDocumentProcessor {
         console.warn(
           "Failed to generate embedding for chunk:",
           chunk.id,
-          error
+          error,
         );
       }
     };
@@ -617,7 +617,7 @@ export class EnhancedDocumentProcessor {
         entities.push(type);
         anonymizedContent = anonymizedContent.replace(
           pattern,
-          `[${type.toUpperCase()}_REDACTED]`
+          `[${type.toUpperCase()}_REDACTED]`,
         );
       }
     }
@@ -691,7 +691,7 @@ export class EnhancedDocumentProcessor {
 
   // Cache management
   private async getCachedResult(
-    content: string
+    content: string,
   ): Promise<ProcessingResult | null> {
     if (!this.redis) return null;
 
@@ -707,7 +707,7 @@ export class EnhancedDocumentProcessor {
 
   private async cacheResult(
     content: string,
-    result: ProcessingResult
+    result: ProcessingResult,
   ): Promise<void> {
     if (!this.redis) return;
 

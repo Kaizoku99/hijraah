@@ -1,36 +1,38 @@
-import { deepseek } from '@ai-sdk/deepseek';
-import { openai } from '@ai-sdk/openai';
-import { streamText } from 'ai';
-import { nanoid } from 'nanoid';
+import { deepseek } from "@ai-sdk/deepseek";
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+import { nanoid } from "nanoid";
 
-import { getSupabaseClient } from '../supabase/client';
+import { getSupabaseClient } from "../supabase/client";
 
-import { AIConfig, type ChatMessage } from './config';
+import { AIConfig, type ChatMessage } from "./config";
 
-
-
-export type ChatModel = 'gpt4' | 'deepseek';
+export type ChatModel = "gpt4" | "deepseek";
 
 export async function streamChatResponse(
   messages: ChatMessage[],
-  model: ChatModel = 'gpt4',
+  model: ChatModel = "gpt4",
   options: {
     temperature?: number;
     maxTokens?: number;
     systemPrompt?: string;
-  } = {}
+  } = {},
 ) {
-  const modelConfig = model === 'gpt4' ? AIConfig.models.gpt4 : AIConfig.models.deepseek;
-  const modelClient = model === 'gpt4' ? openai(modelConfig.modelName) : deepseek(modelConfig.modelName);
+  const modelConfig =
+    model === "gpt4" ? AIConfig.models.gpt4 : AIConfig.models.deepseek;
+  const modelClient =
+    model === "gpt4"
+      ? openai(modelConfig.modelName)
+      : deepseek(modelConfig.modelName);
 
   const stream = await streamText({
     model: modelClient,
     messages: [
       {
-        role: 'system',
+        role: "system",
         content: options.systemPrompt || AIConfig.chat.defaultSystemPrompt,
       },
-      ...messages.map(msg => ({
+      ...messages.map((msg) => ({
         role: msg.role,
         content: msg.content,
       })),
@@ -45,20 +47,18 @@ export async function streamChatResponse(
 export async function saveChatHistory(
   messages: ChatMessage[],
   userId: string,
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown>,
 ) {
   const supabase = getSupabaseClient();
   const chatId = nanoid();
 
-  const { error } = await supabase
-    .from('chat_history')
-    .insert({
-      id: chatId,
-      user_id: userId,
-      messages,
-      metadata,
-      created_at: new Date().toISOString(),
-    });
+  const { error } = await supabase.from("chat_history").insert({
+    id: chatId,
+    user_id: userId,
+    messages,
+    metadata,
+    created_at: new Date().toISOString(),
+  });
 
   if (error) throw error;
   return chatId;
@@ -68,10 +68,10 @@ export async function getChatHistory(userId: string) {
   const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
-    .from('chat_history')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .from("chat_history")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   return data;
@@ -79,30 +79,33 @@ export async function getChatHistory(userId: string) {
 
 export function processChatContext(
   messages: ChatMessage[],
-  maxLength = AIConfig.chat.maxHistoryLength
+  maxLength = AIConfig.chat.maxHistoryLength,
 ): ChatMessage[] {
   return messages
     .slice(-maxLength)
-    .map(msg => ({
+    .map((msg) => ({
       ...msg,
       content: msg.content.trim(),
     }))
-    .filter(msg => msg.content.length > 0);
+    .filter((msg) => msg.content.length > 0);
 }
 
-export async function generateChatTitle(messages: ChatMessage[]): Promise<string> {
-  const firstUserMessage = messages.find(msg => msg.role === 'user')?.content;
-  if (!firstUserMessage) return 'New Chat';
+export async function generateChatTitle(
+  messages: ChatMessage[],
+): Promise<string> {
+  const firstUserMessage = messages.find((msg) => msg.role === "user")?.content;
+  if (!firstUserMessage) return "New Chat";
 
   const stream = await streamText({
-    model: openai('gpt-3.5-turbo'),
+    model: openai("gpt-3.5-turbo"),
     messages: [
       {
-        role: 'system',
-        content: 'Generate a short, concise title (max 6 words) for this chat based on the user\'s first message.',
+        role: "system",
+        content:
+          "Generate a short, concise title (max 6 words) for this chat based on the user's first message.",
       },
       {
-        role: 'user',
+        role: "user",
         content: firstUserMessage,
       },
     ],
@@ -111,5 +114,5 @@ export async function generateChatTitle(messages: ChatMessage[]): Promise<string
   });
 
   const title = await stream.toString();
-  return title.trim() || 'New Chat';
-} 
+  return title.trim() || "New Chat";
+}

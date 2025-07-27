@@ -332,7 +332,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         collapsible="icon"
         className={cn(
           "border-sidebar-border bg-sidebar-background text-sidebar-foreground",
-          rtl ? "border-l ml-auto" : "border-r"
+          rtl ? "border-l ml-auto" : "border-r",
         )}
         {...props}
       >
@@ -371,7 +371,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Filter out admin sections if user is not an admin
   const filteredNavMain = data.navMain.filter(
-    (section) => section.titleKey !== "admin" || isAdmin
+    (section) => section.titleKey !== "admin" || isAdmin,
   );
 
   // Prepare user data for NavUser component if user is authenticated
@@ -435,7 +435,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       className={cn(
         "border-sidebar-border bg-sidebar-background text-sidebar-foreground",
-        rtl ? "border-l ml-auto" : "border-r"
+        rtl ? "border-l ml-auto" : "border-r",
       )}
       {...props}
     >
@@ -516,7 +516,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {item.subMenu && openSubMenu === item.titleKey && (
                     <SidebarMenuSub>
                       {item.subMenu.map((subItem) =>
-                        renderNavItem(subItem, true)
+                        renderNavItem(subItem, true),
                       )}
                     </SidebarMenuSub>
                   )}

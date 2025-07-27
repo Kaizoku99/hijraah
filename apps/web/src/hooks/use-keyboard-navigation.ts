@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState } from "react";
 
 interface UseKeyboardNavigationProps {
   enabled?: boolean;
@@ -28,43 +28,53 @@ export function useKeyboardNavigation({
       if (!enabled || !isFocused) return;
 
       switch (event.key) {
-        case 'ArrowUp':
+        case "ArrowUp":
           event.preventDefault();
           onArrowUp?.();
           break;
-        case 'ArrowDown':
+        case "ArrowDown":
           event.preventDefault();
           onArrowDown?.();
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           event.preventDefault();
           onArrowLeft?.();
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           event.preventDefault();
           onArrowRight?.();
           break;
-        case 'Enter':
+        case "Enter":
           event.preventDefault();
           onEnter?.();
           break;
-        case 'Escape':
+        case "Escape":
           event.preventDefault();
           onEscape?.();
           break;
-        case 'Tab':
+        case "Tab":
           event.preventDefault();
           onTab?.();
           break;
       }
     },
-    [enabled, isFocused, onArrowUp, onArrowDown, onArrowLeft, onArrowRight, onEnter, onEscape, onTab]
+    [
+      enabled,
+      isFocused,
+      onArrowUp,
+      onArrowDown,
+      onArrowLeft,
+      onArrowRight,
+      onEnter,
+      onEscape,
+      onTab,
+    ],
   );
 
   useEffect(() => {
     if (enabled) {
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
     }
   }, [enabled, handleKeyDown]);
 

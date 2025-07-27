@@ -1,4 +1,4 @@
-import { Query, Mutation, MutationEchoArgs } from './generated/graphql';
+import { Query, Mutation, MutationEchoArgs } from "./generated/graphql";
 
 type ResolverContext = {
   user?: any;
@@ -7,9 +7,9 @@ type ResolverContext = {
 
 export const resolvers = {
   Query: {
-    hello: (): Query['hello'] => 'Hello from GraphQL API!'
+    hello: (): Query["hello"] => "Hello from GraphQL API!",
   },
   Mutation: {
-    echo: (_: any, { text }: MutationEchoArgs): Mutation['echo'] => text
-  }
-}; 
+    echo: (_: any, { text }: MutationEchoArgs): Mutation["echo"] => text,
+  },
+};

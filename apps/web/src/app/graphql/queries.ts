@@ -1,4 +1,4 @@
-import { gql } from 'react-query';
+import { gql } from "react-query";
 
 export const GET_ME = gql`
   query GetMe {
@@ -43,4 +43,4 @@ export const GET_CASE = gql`
       }
     }
   }
-`; 
+`;

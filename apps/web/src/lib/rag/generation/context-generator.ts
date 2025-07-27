@@ -29,7 +29,7 @@ export class ContextAwareGenerator {
   async generate(
     query: string,
     retrievedContext: RetrievalResult,
-    userContext?: UserContext | null
+    userContext?: UserContext | null,
   ) {
     const context = this.buildContext(retrievedContext, userContext);
     const systemPrompt = this.createSystemPrompt(context);
@@ -49,7 +49,7 @@ export class ContextAwareGenerator {
       onFinish: async (completion) => {
         const validatedText = await this.validateResponse(
           completion.text,
-          context
+          context,
         );
         const sources = this.addCitations(validatedText, retrievedContext);
         const confidence = completion.finishReason === "stop" ? 0.9 : 0.5;
@@ -74,14 +74,14 @@ export class ContextAwareGenerator {
    */
   public buildContext(
     retrievedContext: RetrievalResult,
-    userContext?: UserContext | null
+    userContext?: UserContext | null,
   ): BuiltContext {
     const chunkContext = retrievedContext.chunks
       .map(
         (chunk, index) =>
           `Source [${index + 1}] (${chunk.metadata.sourceUrl}):\n${
             chunk.content
-          }`
+          }`,
       )
       .join("\n\n---\n\n");
 
@@ -99,7 +99,7 @@ Relationships: ${
         ? retrievedContext.kgContext.relationships
             .map(
               (r) =>
-                `${r.source_entity_name} -> ${r.type} -> ${r.target_entity_name}`
+                `${r.source_entity_name} -> ${r.type} -> ${r.target_entity_name}`,
             )
             .join(", ")
         : "None"
@@ -155,7 +155,7 @@ User Profile:
    */
   private async validateResponse(
     response: string,
-    context: BuiltContext
+    context: BuiltContext,
   ): Promise<string> {
     if (!response || response.trim().length === 0) {
       return "I am sorry, but I could not generate a response based on the provided information.";
@@ -168,7 +168,7 @@ User Profile:
    */
   private addCitations(
     responseText: string,
-    retrievedContext: RetrievalResult
+    retrievedContext: RetrievalResult,
   ): GeneratedResponse["sources"] {
     const mentionedSources = new Set<number>();
     const regex = /\[(\d+)\]/g;

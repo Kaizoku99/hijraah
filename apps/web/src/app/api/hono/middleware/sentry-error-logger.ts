@@ -53,7 +53,7 @@ function getRequestData(c: Context): Record<string, any> {
  * Middleware to handle errors and log them centrally with Sentry
  */
 export function sentryErrorLoggerMiddleware(
-  options: { component?: string } = {}
+  options: { component?: string } = {},
 ) {
   return async (c: Context, next: Next) => {
     try {
@@ -206,7 +206,7 @@ export function captureError(
   error: Error | string,
   details?: any,
   userId?: string,
-  component?: string
+  component?: string,
 ): void {
   const errorLog: ErrorLogData = {
     message: error instanceof Error ? error.message : error,
@@ -252,7 +252,7 @@ export function errorDebugHandler(c: Context) {
         success: false,
         error: "This endpoint is only available in development mode",
       },
-      403
+      403,
     );
   }
 

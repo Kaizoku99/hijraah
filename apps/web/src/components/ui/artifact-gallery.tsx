@@ -40,13 +40,7 @@ import {
 } from "@/components/ui/select";
 import { useArtifact } from "@/lib/contexts/artifact-context";
 import { cn } from "@/lib/utils";
-import {
-  Artifact,
-  ArtifactType,
-  ArtifactVisibility,
-} from "@/types/artifact";
-
-
+import { Artifact, ArtifactType, ArtifactVisibility } from "@/types/artifact";
 
 export function ArtifactGallery() {
   const { artifacts, deleteArtifact, updateArtifactVisibility, isLoading } =
@@ -78,7 +72,7 @@ export function ArtifactGallery() {
   const handleUpdateVisibility = async (
     id: string,
     visibility: ArtifactVisibility,
-    e: React.MouseEvent
+    e: React.MouseEvent,
   ) => {
     e.preventDefault();
     e.stopPropagation();
@@ -220,7 +214,7 @@ export function ArtifactGallery() {
                       }}
                     >
                       {getVisibilityIcon(
-                        artifact.visibility as ArtifactVisibility
+                        artifact.visibility as ArtifactVisibility,
                       )}
                     </Button>
                     <Button

@@ -49,7 +49,7 @@ export function dbMessageToAIMessage(message: DBChatMessageRow): AIMessage {
 export function aiMessageToDbFormat(
   message: AIMessage,
   sessionId: string,
-  userId: string
+  userId: string,
 ): Partial<DBChatMessageRow> {
   return {
     id: message.id,

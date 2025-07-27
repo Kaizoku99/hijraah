@@ -21,7 +21,6 @@ import {
   addSourceValidation, // <-- Add import for validation function
 } from "@/lib/supabase/scraping-sources"; // Assuming this path and functions exist
 
-
 // Import SourceCategory
 import type { SourceCategory } from "@/lib/supabase/scraping-sources";
 
@@ -49,7 +48,7 @@ type HonoVariables = {
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
   process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-  { auth: { persistSession: false } } // Recommended for server-side admin client
+  { auth: { persistSession: false } }, // Recommended for server-side admin client
 );
 
 // API Key for cron job authentication
@@ -150,12 +149,12 @@ if (
     r2AccountId,
     r2AccessKeyId,
     r2SecretAccessKey,
-    r2BucketName
+    r2BucketName,
   );
   console.log("[Scraping API] ScraperService initialized successfully.");
 } else {
   console.error(
-    "[Scraping API] Failed to initialize ScraperService: Missing one or more environment variables for Firecrawl, Supabase, or R2."
+    "[Scraping API] Failed to initialize ScraperService: Missing one or more environment variables for Firecrawl, Supabase, or R2.",
   );
   // Depending on how critical this is, you might throw an error or handle routes differently
 }
@@ -171,7 +170,7 @@ app.use("*", cors());
 // Updated Authentication Middleware
 const authMiddleware = async (
   c: Context<{ Variables: HonoVariables }>,
-  next: () => Promise<void>
+  next: () => Promise<void>,
 ) => {
   let authType: HonoVariables["authType"] = "anonymous";
   let sessionData: HonoVariables["session"] = null; // Renamed from 'session' to avoid conflict with c.session
@@ -191,7 +190,7 @@ const authMiddleware = async (
     c.set("session", null); // Explicitly set session to null for apiKey auth
     c.set("userId", undefined); // No userId for apiKey auth
     console.log(
-      "[Auth Middleware] API Key authentication successful for /schedule"
+      "[Auth Middleware] API Key authentication successful for /schedule",
     );
     await next();
     return;
@@ -209,7 +208,7 @@ const authMiddleware = async (
         if (error) {
           console.warn(
             "[Auth Middleware] Supabase token validation error:",
-            error.message
+            error.message,
           );
           // Potentially distinguish between expired/invalid token and other errors
           // For now, treat as anonymous if token is invalid
@@ -218,13 +217,13 @@ const authMiddleware = async (
           sessionData = user; // Store the Supabase user object as sessionData
           userId = user.id;
           console.log(
-            `[Auth Middleware] User session authenticated: ${userId}`
+            `[Auth Middleware] User session authenticated: ${userId}`,
           );
         }
       } catch (e) {
         console.error(
           "[Auth Middleware] Exception during Supabase token validation:",
-          e
+          e,
         );
       }
     } else {
@@ -246,7 +245,7 @@ const authMiddleware = async (
 
   if (requiresSessionAuth && authType !== "session") {
     console.warn(
-      `[Auth Middleware] Unauthorized attempt to access ${method} ${path}`
+      `[Auth Middleware] Unauthorized attempt to access ${method} ${path}`,
     );
     return c.json({ error: "Unauthorized: User session required" }, 401);
   }
@@ -270,7 +269,7 @@ app.post("/", zValidator("json", scrapeSingleSchema), async (c) => {
   const userId = c.get("userId"); // Get userId set by middleware
 
   console.log(
-    `[Scraping API] POST / request for URL: ${data.url}, User: ${userId || "anonymous"}`
+    `[Scraping API] POST / request for URL: ${data.url}, User: ${userId || "anonymous"}`,
   );
 
   try {
@@ -300,7 +299,7 @@ app.post("/", zValidator("json", scrapeSingleSchema), async (c) => {
       try {
         result.immigrationData = await extractImmigrationData(
           result.content,
-          data.url
+          data.url,
         );
       } catch (e) {
         console.error("Extraction failed:", e);
@@ -337,7 +336,7 @@ app.post("/", zValidator("json", scrapeSingleSchema), async (c) => {
     console.error(`[Scraping API] Error scraping URL ${data.url}:`, error);
     return c.json(
       { error: "Failed to scrape URL", details: (error as Error).message },
-      500
+      500,
     );
   }
 });
@@ -349,7 +348,7 @@ app.post("/bulk", zValidator("json", scrapeBulkSchema), async (c) => {
   const results: any[] = [];
 
   console.log(
-    `[Scraping API] POST /bulk request for ${data.urls.length} URLs, User: ${userId || "anonymous"}`
+    `[Scraping API] POST /bulk request for ${data.urls.length} URLs, User: ${userId || "anonymous"}`,
   );
 
   const concurrencyLimit = 5; // Make this configurable if needed
@@ -374,7 +373,7 @@ app.post("/bulk", zValidator("json", scrapeBulkSchema), async (c) => {
           try {
             singleResult.immigrationData = await extractImmigrationData(
               singleResult.content,
-              url
+              url,
             );
           } catch (e: any) {
             singleResult.extractionError = e.message;
@@ -391,7 +390,7 @@ app.post("/bulk", zValidator("json", scrapeBulkSchema), async (c) => {
             singleResult.saveError = e.message; // Log save error for this specific URL
             console.error(
               `[Scraping API] Failed to save scrape result for ${url}:`,
-              e
+              e,
             );
           }
         }
@@ -403,7 +402,7 @@ app.post("/bulk", zValidator("json", scrapeBulkSchema), async (c) => {
         } catch (e) {
           console.error(
             `[Scraping API] Failed to log bulk scrape query for ${url}:`,
-            e
+            e,
           );
           // This error is not specific to singleResult, so not attaching it there
         }
@@ -416,7 +415,7 @@ app.post("/bulk", zValidator("json", scrapeBulkSchema), async (c) => {
       // A small delay might still be useful if hammering the same domain,
       // but p-limit primarily controls concurrent *outgoing* requests.
       return singleResult; // Return the result for this URL
-    })
+    }),
   );
 
   // Wait for all limited promises to resolve
@@ -436,11 +435,11 @@ app.post(
 
     if (!scraperServiceInstance) {
       console.error(
-        "[Scraping API] /country/:configId - ScraperService not initialized."
+        "[Scraping API] /country/:configId - ScraperService not initialized.",
       );
       return c.json(
         { error: "ScraperService not available due to missing configuration." },
-        503
+        503,
       );
     }
 
@@ -453,23 +452,23 @@ app.post(
         {
           error: "Forbidden: Admin access required to trigger country scrape.",
         },
-        403
+        403,
       );
     }
 
     console.log(
-      `[Scraping API] POST /country/${configId} request by User: ${userId || "admin_trigger"}`
+      `[Scraping API] POST /country/${configId} request by User: ${userId || "admin_trigger"}`,
     );
 
     try {
       const config = await scraperServiceInstance.getScrapeConfigById(configId);
       if (!config) {
         console.warn(
-          `[Scraping API] /country/:configId - Configuration ${configId} not found.`
+          `[Scraping API] /country/:configId - Configuration ${configId} not found.`,
         );
         return c.json(
           { error: `Configuration with ID ${configId} not found.` },
-          404
+          404,
         );
       }
 
@@ -479,13 +478,13 @@ app.post(
         .processScrapeConfig(config)
         .then(() => {
           console.log(
-            `[Scraping API] Background processing of scrape config ${configId} completed.`
+            `[Scraping API] Background processing of scrape config ${configId} completed.`,
           );
         })
         .catch((error) => {
           console.error(
             `[Scraping API] Background error processing scrape config ${configId}:`,
-            error
+            error,
           );
           // Consider logging this to a more persistent error tracking system
         });
@@ -496,17 +495,17 @@ app.post(
     } catch (error: any) {
       console.error(
         `[Scraping API] Error initiating /country/${configId} scrape:`,
-        error
+        error,
       );
       return c.json(
         {
           error: "Failed to initiate country scrape process",
           details: error.message,
         },
-        500
+        500,
       );
     }
-  }
+  },
 );
 
 // POST /track-changes - Get change tracking data for a URL
@@ -548,7 +547,7 @@ app.post(
             error:
               "Change tracking data not available. This might be the first time the URL has been scraped.",
           },
-          404
+          404,
         );
       }
 
@@ -567,20 +566,20 @@ app.post(
           error: "Failed to track changes",
           details: error.message,
         },
-        500
+        500,
       );
     }
-  }
+  },
 );
 
 // POST /extract - Placeholder (Logic moved to POST / and POST /track-changes)
 app.post("/extract", async (c) => {
   console.warn(
-    "[Scraping API] /extract endpoint is deprecated. Use POST / and POST /track-changes."
+    "[Scraping API] /extract endpoint is deprecated. Use POST / and POST /track-changes.",
   );
   return c.json(
     { message: "Endpoint deprecated. Use POST / and POST /track-changes." },
-    410
+    410,
   ); // 410 Gone
 });
 
@@ -605,7 +604,7 @@ app.get("/schedule", async (c) => {
 app.post("/schedule", zValidator("json", scheduleTriggerSchema), async (c) => {
   const { sourceIds } = c.req.valid("json");
   console.log(
-    `[Scraping API] POST /schedule triggered manually for sources: ${sourceIds?.join(", ") || "all due"}`
+    `[Scraping API] POST /schedule triggered manually for sources: ${sourceIds?.join(", ") || "all due"}`,
   );
   try {
     const result = await performScheduledScraping(sourceIds);
@@ -633,7 +632,7 @@ adminApp.use("*", async (c, next) => {
 
   if (authType !== "session" || !userId || !isAdmin) {
     console.warn(
-      `[AdminApp Middleware] Unauthorized access attempt. AuthType: ${authType}, UserId: ${userId}, IsAdmin: ${isAdmin}`
+      `[AdminApp Middleware] Unauthorized access attempt. AuthType: ${authType}, UserId: ${userId}, IsAdmin: ${isAdmin}`,
     );
     return c.json({ error: "Forbidden: Admin access required" }, 403);
   }
@@ -697,7 +696,7 @@ adminApp.put(
       console.error("Admin PUT Source/:id Error:", error);
       return c.json({ error: "Failed to update source" }, 500);
     }
-  }
+  },
 );
 
 // DELETE /admin/sources/:id - Delete source
@@ -741,7 +740,7 @@ adminApp.post(
       // Also check if the user is an admin
       console.warn(
         `[Admin Validate] Unauthorized attempt by user: ${userId}, session:`,
-        session
+        session,
       );
       return c.json({ error: "Forbidden: Admin access required" }, 403);
     }
@@ -756,17 +755,17 @@ adminApp.post(
       // Add validation record
       await addSourceValidation(id, score, userId, notes);
       console.log(
-        `[Scraping Admin] Validation added for source ${id} by user ${userId}`
+        `[Scraping Admin] Validation added for source ${id} by user ${userId}`,
       );
       return c.json({ success: true });
     } catch (error: any) {
       console.error(`[Scraping Admin] Error validating source ${id}:`, error);
       return c.json(
         { error: "Failed to add validation", details: error.message },
-        500
+        500,
       );
     }
-  }
+  },
 );
 
 // GET /admin/logs - Get logs
@@ -825,7 +824,7 @@ app.route("/admin", adminApp);
 
 async function performScheduledScraping(specificSourceIds?: string[]) {
   console.log(
-    `[Scheduler] Performing scraping for sources: ${specificSourceIds ? specificSourceIds.join(", ") : "all due"}`
+    `[Scheduler] Performing scraping for sources: ${specificSourceIds ? specificSourceIds.join(", ") : "all due"}`,
   );
 
   let sourcesToScrape: any[] = []; // Ideally, this would be strongly typed based on getScrapingSourceById/getSourcesDueForScraping return type
@@ -834,18 +833,18 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
   try {
     if (specificSourceIds && specificSourceIds.length > 0) {
       const sourcePromises = specificSourceIds.map((id) =>
-        getScrapingSourceById(id)
+        getScrapingSourceById(id),
       );
       sourcesToScrape = (await Promise.all(sourcePromises)).filter(
-        (source) => source !== null
+        (source) => source !== null,
       ) as any[]; // Type assertion after filter
       console.log(
-        `[Scheduler] Fetched ${sourcesToScrape.length} specific sources by ID.`
+        `[Scheduler] Fetched ${sourcesToScrape.length} specific sources by ID.`,
       );
     } else {
       sourcesToScrape = await getSourcesDueForScraping();
       console.log(
-        `[Scheduler] Fetched ${sourcesToScrape.length} sources due for scraping.`
+        `[Scheduler] Fetched ${sourcesToScrape.length} sources due for scraping.`,
       );
     }
   } catch (error: any) {
@@ -909,7 +908,7 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
 
     try {
       console.log(
-        `[Scheduler] Scraping URL: ${source.url} for source ID: ${source.id}`
+        `[Scheduler] Scraping URL: ${source.url} for source ID: ${source.id}`,
       );
       // TODO: Incorporate source-specific scrape options if available (e.g., from source.config)
       const scrapedContent = await firecrawlScrape(source.url, {
@@ -927,7 +926,7 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
         } catch (e: any) {
           console.warn(
             `[Scheduler] Summarization failed for ${source.url}:`,
-            e.message
+            e.message,
           );
           scrapeDetail.summary = "Summarization failed: " + e.message;
         }
@@ -936,12 +935,12 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
         try {
           scrapeDetail.extractedData = await extractImmigrationData(
             scrapedContent.content,
-            source.url
+            source.url,
           );
         } catch (e: any) {
           console.warn(
             `[Scheduler] Extraction failed for ${source.url}:`,
-            e.message
+            e.message,
           );
           scrapeDetail.extractedData = {
             error: "Extraction failed: " + e.message,
@@ -972,14 +971,14 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
           "error",
           undefined,
           undefined,
-          errorMessage
+          errorMessage,
         );
         results.failed++;
       }
     } catch (error: any) {
       console.error(
         `[Scheduler] Error scraping ${source.url} (ID: ${source.id}):`,
-        error
+        error,
       );
       scrapeDetail.error = error.message;
       scrapeDetail.message = "Scraping process threw an exception.";
@@ -988,7 +987,7 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
         "error",
         undefined,
         undefined,
-        error.message
+        error.message,
       );
       results.failed++;
     }
@@ -1000,7 +999,7 @@ async function performScheduledScraping(specificSourceIds?: string[]) {
   }
 
   console.log(
-    `[Scheduler] Finished. Total: ${results.totalFetched}, Processed: ${results.processed}, Successful: ${results.successful}, Failed: ${results.failed}`
+    `[Scheduler] Finished. Total: ${results.totalFetched}, Processed: ${results.processed}, Successful: ${results.successful}, Failed: ${results.failed}`,
   );
   return {
     message: `Scheduled scraping finished. Processed ${results.processed} of ${results.totalFetched} sources. Success: ${results.successful}, Failures: ${results.failed}.`,

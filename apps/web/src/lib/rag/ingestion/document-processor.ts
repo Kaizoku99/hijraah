@@ -65,7 +65,7 @@ const ClassificationResponseSchema = z.object({
       z.object({
         category: z.enum(IMMIGRATION_CATEGORIES),
         confidence: z.number().min(0).max(1),
-      })
+      }),
     )
     .optional(),
   document_language: z.string().optional(),
@@ -101,12 +101,12 @@ export class DocumentProcessor {
       classification = await this.classifyText(rawText);
       console.log(
         `[DocumentProcessor] Classification complete for doc ${document.id}:`,
-        classification?.primary_category
+        classification?.primary_category,
       );
     } catch (err) {
       console.warn(
         `[DocumentProcessor] Classification failed for doc ${document.id}:`,
-        (err as Error).message
+        (err as Error).message,
       );
     }
 
@@ -116,7 +116,7 @@ export class DocumentProcessor {
       chunkContents.map(async (content, index) => {
         const embedding = await this.generateEmbedding(content);
         const confidence = evaluateSourceConfidence(
-          document.sourceUrl ?? document.storagePath ?? ""
+          document.sourceUrl ?? document.storagePath ?? "",
         );
         const src = document.sourceUrl ?? "uploaded";
         return {
@@ -129,11 +129,11 @@ export class DocumentProcessor {
             confidence,
           },
         };
-      })
+      }),
     );
 
     console.log(
-      `Document ${document.id} processed. ${chunks.length} chunks created.`
+      `Document ${document.id} processed. ${chunks.length} chunks created.`,
     );
 
     return {
@@ -157,7 +157,7 @@ export class DocumentProcessor {
         return scrapeResult.markdown;
       }
       throw new Error(
-        `Failed to scrape URL: ${document.sourceUrl}, Error: ${scrapeResult.error}`
+        `Failed to scrape URL: ${document.sourceUrl}, Error: ${scrapeResult.error}`,
       );
     }
 
@@ -169,14 +169,14 @@ export class DocumentProcessor {
 
       if (error || !data) {
         throw new Error(
-          `Failed to download file at ${document.storagePath}: ${error?.message}`
+          `Failed to download file at ${document.storagePath}: ${error?.message}`,
         );
       }
 
       const fileBuffer = Buffer.from(await data.arrayBuffer());
 
       console.log(
-        `[DocumentProcessor] Running Mistral OCR on storagePath: ${document.storagePath}`
+        `[DocumentProcessor] Running Mistral OCR on storagePath: ${document.storagePath}`,
       );
 
       const text = await runMistralOCR(fileBuffer, document.fileType);

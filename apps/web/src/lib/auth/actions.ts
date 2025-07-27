@@ -111,7 +111,7 @@ export async function createUser(
     role?: string;
     avatarUrl?: string;
     settings?: Record<string, any>;
-  }
+  },
 ) {
   const supabase = createSupabaseServiceClient();
 
@@ -175,7 +175,7 @@ export async function updateUserRole(userId: string, role: UserRole) {
  */
 export async function updateUserSettings(
   userId: string,
-  settings: Record<string, any>
+  settings: Record<string, any>,
 ) {
   const supabase = createSupabaseServiceClient();
 

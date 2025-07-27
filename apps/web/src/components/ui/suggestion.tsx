@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useWindowSize } from "usehooks-ts";
 
-
 import { Button } from "@/components/ui/button";
 import type { UISuggestion } from "@/lib/editor/suggestions";
 import { cn } from "@/lib/utils";

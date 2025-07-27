@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react"
+import { ChevronRight, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -16,25 +16,27 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/shared/ui/ui/sidebar"
+} from "@/shared/ui/ui/sidebar";
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    isActive?: boolean
+    title: string;
+    url: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
     items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+      title: string;
+      url: string;
+    }[];
+  }[];
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-sidebar-muted-foreground">Platform</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-sidebar-muted-foreground">
+        Platform
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -45,7 +47,10 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title} className="hover:bg-sidebar-accent hover:text-sidebar-foreground">
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  className="hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                >
                   {item.icon && <item.icon className="text-sidebar-primary" />}
                   <span>{item.title}</span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 text-sidebar-muted" />
@@ -55,7 +60,10 @@ export function NavMain({
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild className="hover:bg-sidebar-accent hover:text-sidebar-foreground text-sidebar-muted-foreground">
+                      <SidebarMenuSubButton
+                        asChild
+                        className="hover:bg-sidebar-accent hover:text-sidebar-foreground text-sidebar-muted-foreground"
+                      >
                         <a href={subItem.url}>
                           <span>{subItem.title}</span>
                         </a>
@@ -69,5 +77,5 @@ export function NavMain({
         ))}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

@@ -43,7 +43,7 @@ function PureArtifactMessages({
       {messages.map((message, index) => {
         const currentUserVote = votes?.find(
           (vote) =>
-            vote.messageId === message.id && vote.userId === currentUserId
+            vote.messageId === message.id && vote.userId === currentUserId,
         );
         return (
           <PreviewMessage
@@ -70,7 +70,7 @@ function PureArtifactMessages({
 
 function areEqual(
   prevProps: ArtifactMessagesProps,
-  nextProps: ArtifactMessagesProps
+  nextProps: ArtifactMessagesProps,
 ) {
   if (
     prevProps.artifactStatus === "streaming" &&

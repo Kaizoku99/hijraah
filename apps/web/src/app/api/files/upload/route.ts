@@ -6,11 +6,10 @@ import { z } from "zod";
 
 import { auth } from "@/lib/auth";
 
-
 // Initialize Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
 // File validation schema using Zod
@@ -37,7 +36,7 @@ const FileSchema = z.object({
       },
       {
         message: "File type not allowed",
-      }
+      },
     ),
   chatId: z.string().min(1, { message: "Chat ID is required" }),
   messageId: z.string().nullable().optional(),
@@ -59,7 +58,7 @@ export async function POST(request: Request) {
     if (request.body === null) {
       return NextResponse.json(
         { error: "Request body is empty" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -81,7 +80,7 @@ export async function POST(request: Request) {
         .join(", ");
       console.error(
         "Zod validation failed:",
-        JSON.stringify(validationResult.error.flatten(), null, 2)
+        JSON.stringify(validationResult.error.flatten(), null, 2),
       );
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
@@ -97,7 +96,7 @@ export async function POST(request: Request) {
     if (chatError || !chat) {
       return NextResponse.json(
         { error: "Chat not found or access denied" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -133,7 +132,7 @@ export async function POST(request: Request) {
       console.error("Error storing attachment metadata:", attachmentError);
       return NextResponse.json(
         { error: "Failed to store attachment metadata" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -148,7 +147,7 @@ export async function POST(request: Request) {
     console.error("Error processing file upload:", error);
     return NextResponse.json(
       { error: "Failed to process file upload" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

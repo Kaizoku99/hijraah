@@ -158,7 +158,7 @@ export function UnifiedMessageInput({
               size: file.size,
               url: data.url,
             } as ExtendedAttachment;
-          })
+          }),
         );
 
         setAttachments([...attachments, ...newAttachments]);
@@ -246,7 +246,7 @@ export function UnifiedMessageInput({
             size: file.size,
             url: data.url,
           } as ExtendedAttachment;
-        })
+        }),
       );
       setAttachments([...attachments, ...newAttachments]);
       toast({
@@ -276,7 +276,7 @@ export function UnifiedMessageInput({
       className={cn(
         "relative border-t bg-background", // Added bg-background
         isDraggingOver &&
-          "after:absolute after:inset-0 after:bg-primary/10 after:border-2 after:border-dashed after:border-primary after:rounded-md after:z-10"
+          "after:absolute after:inset-0 after:bg-primary/10 after:border-2 after:border-dashed after:border-primary after:rounded-md after:z-10",
       )}
     >
       <form
@@ -376,7 +376,7 @@ export function UnifiedMessageInput({
                 disabled={isLoading} // Disable mic if AI is responding
                 className={cn(
                   "text-muted-foreground",
-                  isRecording && "text-red-500 animate-pulse"
+                  isRecording && "text-red-500 animate-pulse",
                 )}
                 onClick={isRecording ? stopRecording : startRecording}
                 aria-label={

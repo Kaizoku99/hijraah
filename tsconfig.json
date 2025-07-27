@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,105 +20,39 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./apps/web/src/*"
-      ],
-      "@/app/*": [
-        "./apps/web/src/app/*"
-      ],
-      "@/core/*": [
-        "./apps/web/src/_core/*"
-      ],
-      "@/application/*": [
-        "./apps/web/src/_application/*"
-      ],
-      "@/infrastructure/*": [
-        "./apps/web/src/_infrastructure/*"
-      ],
-      "@/shared/*": [
-        "./apps/web/src/_shared/*"
-      ],
-      "@/ui/*": [
-        "./apps/web/src/components/ui/*"
-      ],
-      "@/hooks/*": [
-        "./apps/web/src/hooks/*"
-      ],
-      "@/lib/*": [
-        "./apps/web/src/lib/*"
-      ],
-      "@/utils/*": [
-        "./apps/web/src/lib/utils/*"
-      ],
-      "@/config/*": [
-        "./apps/web/src/config/*"
-      ],
-      "@/api/*": [
-        "./apps/web/src/_infrastructure/api/*"
-      ],
-      "@/stores/*": [
-        "./apps/web/src/_application/stores/*"
-      ],
-      "@/auth/*": [
-        "./apps/web/src/_core/auth/*"
-      ],
-      "@/chat/*": [
-        "./apps/web/src/_core/chat/*"
-      ],
-      "@/documents/*": [
-        "./apps/web/src/_core/documents/*"
-      ],
-      "@/immigration/*": [
-        "./apps/web/src/_core/immigration/*"
-      ],
-      "@/features/*": [
-        "./apps/web/src/features/*"
-      ],
-      "@/lib/supabase/client": [
-        "./apps/web/src/lib/supabase/client"
-      ],
-      "@/lib/supabase/server": [
-        "./apps/web/src/lib/supabase/server"
-      ],
-      "@/supabase/*": [
-        "./supabase/*"
-      ],
-      "@/lib/db/*": [
-        "./apps/web/src/lib/db/*"
-      ],
-      "@/shared/ui/*": [
-        "apps/web/src/_shared/ui/*"
-      ],
-      "@/components/*": [
-        "apps/web/src/components/*"
-      ],
-      "@/types/*": [
-        "./apps/web/src/types/*"
-      ],
-      "@/actions/*": [
-        "./apps/web/src/lib/actions/*"
-      ],
-      "@/i18n": [
-        "./apps/web/src/i18n/i18n"
-      ],
-      "@/i18n/*": [
-        "./apps/web/src/i18n/*"
-      ],
-      "@/emails/*": [
-        "./apps/web/src/_shared/emails/*"
-      ],
-      "@/env.mjs": [
-        "./apps/web/src/env.mjs"
-      ],
-      "@/tests/*": [
-        "./__tests__/*"
-      ],
-      "@/artifacts/*": [
-        "./apps/web/src/artifacts/*"
-      ],
-      "@/styles/*": [
-        "./apps/web/src/styles/*"
-      ]
+      "@/*": ["./apps/web/src/*"],
+      "@/app/*": ["./apps/web/src/app/*"],
+      "@/core/*": ["./apps/web/src/_core/*"],
+      "@/application/*": ["./apps/web/src/_application/*"],
+      "@/infrastructure/*": ["./apps/web/src/_infrastructure/*"],
+      "@/shared/*": ["./apps/web/src/_shared/*"],
+      "@/ui/*": ["./apps/web/src/components/ui/*"],
+      "@/hooks/*": ["./apps/web/src/hooks/*"],
+      "@/lib/*": ["./apps/web/src/lib/*"],
+      "@/utils/*": ["./apps/web/src/lib/utils/*"],
+      "@/config/*": ["./apps/web/src/config/*"],
+      "@/api/*": ["./apps/web/src/_infrastructure/api/*"],
+      "@/stores/*": ["./apps/web/src/_application/stores/*"],
+      "@/auth/*": ["./apps/web/src/_core/auth/*"],
+      "@/chat/*": ["./apps/web/src/_core/chat/*"],
+      "@/documents/*": ["./apps/web/src/_core/documents/*"],
+      "@/immigration/*": ["./apps/web/src/_core/immigration/*"],
+      "@/features/*": ["./apps/web/src/features/*"],
+      "@/lib/supabase/client": ["./apps/web/src/lib/supabase/client"],
+      "@/lib/supabase/server": ["./apps/web/src/lib/supabase/server"],
+      "@/supabase/*": ["./supabase/*"],
+      "@/lib/db/*": ["./apps/web/src/lib/db/*"],
+      "@/shared/ui/*": ["apps/web/src/_shared/ui/*"],
+      "@/components/*": ["apps/web/src/components/*"],
+      "@/types/*": ["./apps/web/src/types/*"],
+      "@/actions/*": ["./apps/web/src/lib/actions/*"],
+      "@/i18n": ["./apps/web/src/i18n/i18n"],
+      "@/i18n/*": ["./apps/web/src/i18n/*"],
+      "@/emails/*": ["./apps/web/src/_shared/emails/*"],
+      "@/env.mjs": ["./apps/web/src/env.mjs"],
+      "@/tests/*": ["./__tests__/*"],
+      "@/artifacts/*": ["./apps/web/src/artifacts/*"],
+      "@/styles/*": ["./apps/web/src/styles/*"]
     },
     "baseUrl": "."
   },

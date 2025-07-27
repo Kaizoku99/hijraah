@@ -70,7 +70,7 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
         "error",
         "Internal error: userId undefined after auth check",
         "chat-rate-limiter",
-        { requestId }
+        { requestId },
       );
       recordMetric("internal_errors", 1, {
         service: "chat-rate-limiter",
@@ -88,7 +88,7 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
         requestId,
       },
       undefined,
-      userId
+      userId,
     );
 
     // Check rate limits for chat resources
@@ -108,7 +108,7 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
           requestId,
         },
         undefined,
-        userId
+        userId,
       );
 
       recordMetric("rate_limit_exceeded", 1, {
@@ -163,7 +163,7 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
           requestId,
         },
         undefined,
-        userId
+        userId,
       );
 
       recordMetric("queued_requests", 1, {
@@ -194,14 +194,14 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
               "X-Request-ID": requestId,
             },
             body: JSON.stringify(req.body),
-          }
+          },
         );
 
         const data = await fetchResponse.json();
         return { status: fetchResponse.status, data };
       },
       { requestId },
-      userId
+      userId,
     );
 
     // Log successful response
@@ -214,7 +214,7 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
         requestId,
       },
       undefined,
-      userId
+      userId,
     );
 
     recordMetric("successful_requests", 1, {
@@ -238,7 +238,7 @@ app.post("/chat-rate-limiter", async (req: Request, res: Response) => {
         requestId,
       },
       undefined,
-      userId
+      userId,
     );
 
     recordMetric("error_requests", 1, {

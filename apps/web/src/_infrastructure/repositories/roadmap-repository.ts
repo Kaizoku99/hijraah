@@ -37,7 +37,7 @@ export class RoadmapRepository {
    * Get all roadmaps
    */
   async getAll(
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<Roadmap[]> {
     const client = await this.getClient();
     const { data, error } = await client
@@ -45,12 +45,12 @@ export class RoadmapRepository {
       .select("*")
       .range(
         options.offset || 0,
-        (options.offset || 0) + (options.limit || 100) - 1
+        (options.offset || 0) + (options.limit || 100) - 1,
       );
 
     if (error) throw error;
     return (data || []).map((record) =>
-      this.toDomainEntity(record as RoadmapRecord)
+      this.toDomainEntity(record as RoadmapRecord),
     );
   }
 
@@ -69,7 +69,7 @@ export class RoadmapRepository {
       throw new Error(`Failed to get roadmaps by case ID: ${error.message}`);
 
     return (data || []).map((record) =>
-      this.toDomainEntity(record as RoadmapRecord)
+      this.toDomainEntity(record as RoadmapRecord),
     );
   }
 
@@ -88,7 +88,7 @@ export class RoadmapRepository {
       throw new Error(`Failed to get roadmaps by user ID: ${error.message}`);
 
     return (data || []).map((record) =>
-      this.toDomainEntity(record as RoadmapRecord)
+      this.toDomainEntity(record as RoadmapRecord),
     );
   }
 
@@ -175,7 +175,7 @@ export class RoadmapRepository {
     roadmapId: string,
     milestoneId: string,
     status: "not_started" | "in_progress" | "completed" | "blocked" | "overdue",
-    completionPercentage: number
+    completionPercentage: number,
   ): Promise<Roadmap> {
     // First get the current roadmap
     const roadmap = await this.getById(roadmapId);
@@ -185,7 +185,7 @@ export class RoadmapRepository {
     const updatedRoadmap = roadmap.updateMilestoneStatus(
       milestoneId,
       status,
-      completionPercentage
+      completionPercentage,
     );
 
     // Update in the database

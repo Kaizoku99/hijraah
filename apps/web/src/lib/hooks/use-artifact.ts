@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from "react";
 import useSWR from "swr";
 
-import { UIArtifact } from "../../../ai-chatbot/components/artifact";
+import { UIArtifact } from "../../types/components";
 
 export const initialArtifactData: UIArtifact = {
   documentId: "init",
@@ -41,7 +41,7 @@ export function useArtifact() {
     null,
     {
       fallbackData: initialArtifactData,
-    }
+    },
   );
 
   const artifact = useMemo(() => {
@@ -61,7 +61,7 @@ export function useArtifact() {
         return updaterFn;
       });
     },
-    [setLocalArtifact]
+    [setLocalArtifact],
   );
 
   const { data: localArtifactMetadata, mutate: setLocalArtifactMetadata } =
@@ -71,7 +71,7 @@ export function useArtifact() {
       null,
       {
         fallbackData: null,
-      }
+      },
     );
 
   return useMemo(
@@ -81,6 +81,6 @@ export function useArtifact() {
       metadata: localArtifactMetadata,
       setMetadata: setLocalArtifactMetadata,
     }),
-    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata]
+    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata],
   );
 }

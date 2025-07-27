@@ -6,7 +6,7 @@ import { type Locale } from "@/i18n";
 export function formatDate(
   date: Date | string | number,
   locale: Locale,
-  format: "short" | "long" | "time" = "short"
+  format: "short" | "long" | "time" = "short",
 ): string {
   const dateObj = new Date(date);
 
@@ -37,7 +37,7 @@ export function formatDate(
 export function formatNumber(
   number: number,
   locale: Locale,
-  options: Intl.NumberFormatOptions = {}
+  options: Intl.NumberFormatOptions = {},
 ): string {
   return new Intl.NumberFormat(locale, options).format(number);
 }
@@ -48,7 +48,7 @@ export function formatNumber(
 export function formatCurrency(
   amount: number,
   locale: Locale,
-  currency: string = "USD"
+  currency: string = "USD",
 ): string {
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -63,7 +63,7 @@ export function formatCurrency(
 export function formatPercent(
   number: number,
   locale: Locale,
-  decimals: number = 0
+  decimals: number = 0,
 ): string {
   return new Intl.NumberFormat(locale, {
     style: "percent",
@@ -93,12 +93,12 @@ export function formatFileSize(bytes: number, locale: Locale): string {
  */
 export function formatRelativeTime(
   date: Date | string | number,
-  locale: Locale
+  locale: Locale,
 ): string {
   const now = new Date();
   const targetDate = new Date(date);
   const diffInSeconds = Math.floor(
-    (targetDate.getTime() - now.getTime()) / 1000
+    (targetDate.getTime() - now.getTime()) / 1000,
   );
 
   const rtf = new Intl.RelativeTimeFormat(locale, {
@@ -139,7 +139,7 @@ export function formatRelativeTime(
 export function formatList(
   items: string[],
   locale: Locale,
-  type: "conjunction" | "disjunction" = "conjunction"
+  type: "conjunction" | "disjunction" = "conjunction",
 ): string {
   return new Intl.ListFormat(locale, { type, style: "long" }).format(items);
 }

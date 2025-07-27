@@ -9,7 +9,7 @@ describe("search_rag_hybrid RPC", () => {
 
   if (!supabaseUrl || !serviceRoleKey) {
     console.warn(
-      "SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set; skipping integration test."
+      "SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set; skipping integration test.",
     );
     return;
   }

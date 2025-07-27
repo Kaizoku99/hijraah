@@ -62,7 +62,7 @@ export const ProfileSetup: React.FC = () => {
   // Alternatively, pass the user object via context if already available
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
   );
 
   const form = useForm<ProfileFormValues>({
@@ -91,13 +91,13 @@ export const ProfileSetup: React.FC = () => {
   const onSubmit = async (data: ProfileFormValues) => {
     console.log(
       "[ProfileSetup] onSubmit: Triggered. Current context user state:",
-      user
+      user,
     );
 
     if (!user) {
       toast.error("User not authenticated. Please log in again.");
       console.log(
-        "[ProfileSetup] onSubmit: Failing because user from context is null/undefined."
+        "[ProfileSetup] onSubmit: Failing because user from context is null/undefined.",
       );
       return;
     }
@@ -123,7 +123,7 @@ export const ProfileSetup: React.FC = () => {
             language: data.preferredLanguage,
             updated_at: new Date().toISOString(),
           },
-          { onConflict: "id" } // Use 'id' for conflict resolution
+          { onConflict: "id" }, // Use 'id' for conflict resolution
         );
 
       if (error) {
@@ -156,7 +156,7 @@ export const ProfileSetup: React.FC = () => {
     } catch (error: any) {
       console.error("Error in profile setup submission:", error);
       toast.error(
-        `An unexpected error occurred: ${error.message || "Unknown error"}`
+        `An unexpected error occurred: ${error.message || "Unknown error"}`,
       );
     } finally {
       // Ensure isSubmitting is reset even if completion timeout hasn't finished

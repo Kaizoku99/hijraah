@@ -136,7 +136,7 @@ export class TaskStreamService extends EventEmitter {
   // Context7 Pattern: Subscription management with cleanup
   subscribe(
     taskId: string,
-    callback: (event: TaskStreamEvent) => void
+    callback: (event: TaskStreamEvent) => void,
   ): () => void {
     if (!this.subscribers.has(taskId)) {
       this.subscribers.set(taskId, new Set());
@@ -200,7 +200,7 @@ export class TaskStreamService extends EventEmitter {
   getSubscriberCount(): number {
     return Array.from(this.subscribers.values()).reduce(
       (total, set) => total + set.size,
-      0
+      0,
     );
   }
 
@@ -264,7 +264,7 @@ export class TaskStreamService extends EventEmitter {
 
       const delay = Math.min(
         this.options.reconnectInterval * Math.pow(2, this.reconnectAttempts),
-        30000 // Max 30 seconds
+        30000, // Max 30 seconds
       );
 
       this.reconnectTimer = setTimeout(() => {
@@ -275,7 +275,7 @@ export class TaskStreamService extends EventEmitter {
       }, delay);
 
       console.log(
-        `[TaskStream] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1}/${this.options.maxReconnectAttempts})`
+        `[TaskStream] Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1}/${this.options.maxReconnectAttempts})`,
       );
     } else {
       console.error("[TaskStream] Max reconnection attempts reached");
@@ -300,7 +300,7 @@ export class TaskStreamService extends EventEmitter {
 
 // Context7 Pattern: Factory function with singleton management
 export function createTaskStream(
-  options?: TaskStreamOptions
+  options?: TaskStreamOptions,
 ): TaskStreamService {
   return TaskStreamService.getInstance(options);
 }
@@ -308,7 +308,7 @@ export function createTaskStream(
 // Context7 Pattern: Hook for React integration
 export function useTaskStream(
   taskId: string | "*" = "*",
-  options?: TaskStreamOptions
+  options?: TaskStreamOptions,
 ) {
   const streamService = TaskStreamService.getInstance(options);
 

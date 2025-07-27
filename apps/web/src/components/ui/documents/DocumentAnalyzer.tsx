@@ -71,7 +71,7 @@ export function DocumentAnalyzer({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<DocumentAnalysis | null>(
-    null
+    null,
   );
   const [activeTab, setActiveTab] = useState("upload");
 
@@ -444,7 +444,7 @@ export function DocumentAnalyzer({
                           <p className="text-sm font-medium">{key}:</p>
                           <p className="text-sm">{value as string}</p>
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 </div>

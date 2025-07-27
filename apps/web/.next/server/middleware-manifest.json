@@ -1,0 +1,37 @@
+{
+  "version": 3,
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/node_modules__pnpm_d12b0fee._.js",
+        "server/edge/chunks/[root-of-the-server]__2b4d01ae._.js",
+        "server/edge/chunks/apps_web_edge-wrapper_30f6d110.js",
+        "server/edge/chunks/_0032a2fa._.js",
+        "server/edge/chunks/41428_@formatjs_intl-localematcher_lib_afff050a._.js",
+        "server/edge/chunks/729cd_@supabase_auth-js_dist_module_35b11193._.js",
+        "server/edge/chunks/node_modules__pnpm_ce470d41._.js",
+        "server/edge/chunks/[root-of-the-server]__1099446e._.js",
+        "server/edge/chunks/apps_web_edge-wrapper_b9de5d65.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "matchers": [
+        {
+          "regexp": "^(?:\\/(_next\\/data\\/[^/]{1,}))?(?:\\/((?!_next\\/static|_next\\/image|favicon.ico|public|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$|.*\\.ico$).*))(\\\\.json)?[\\/#\\?]?$",
+          "originalSource": "/((?!_next/static|_next/image|favicon.ico|public|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.svg$|.*\\.ico$).*)"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "development",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "xpTUo7BhxXsebE3/oVndcftNbsLszV0ORRvT09fW7eo=",
+        "__NEXT_PREVIEW_MODE_ID": "23c5b78c4e0974bf73e8d2c25e7944ad",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "1d56bc468d395d5fab5d0c567b6474968a8d2eeafbe2d43b2fe10f0de7296e80",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "4f2d1e9a1740d5cd2d23bdfaf06f52e4a801a00b49441bcc78652de497ad2ca9"
+      }
+    }
+  },
+  "sortedMiddleware": ["/"],
+  "functions": {}
+}

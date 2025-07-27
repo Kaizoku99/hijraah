@@ -43,7 +43,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
   }: {
     streamPart: any;
     setMetadata: (
-      updater: (metadata: TextArtifactMetadata) => TextArtifactMetadata
+      updater: (metadata: TextArtifactMetadata) => TextArtifactMetadata,
     ) => void;
     setArtifact: (updater: (draftArtifact: any) => any) => void;
   }) => {
@@ -135,7 +135,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
         handleVersionChange,
       }: {
         handleVersionChange: (
-          type: "next" | "prev" | "toggle" | "latest"
+          type: "next" | "prev" | "toggle" | "latest",
         ) => void;
       }) => {
         handleVersionChange("toggle");
@@ -159,7 +159,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
         handleVersionChange,
       }: {
         handleVersionChange: (
-          type: "next" | "prev" | "toggle" | "latest"
+          type: "next" | "prev" | "toggle" | "latest",
         ) => void;
       }) => {
         handleVersionChange("prev");
@@ -183,7 +183,7 @@ export const textArtifact = new Artifact<"text", TextArtifactMetadata>({
         handleVersionChange,
       }: {
         handleVersionChange: (
-          type: "next" | "prev" | "toggle" | "latest"
+          type: "next" | "prev" | "toggle" | "latest",
         ) => void;
       }) => {
         handleVersionChange("next");

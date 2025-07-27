@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { Case } from "@/types/cases"; // Correct the import path for Case type
 import { Document } from "@/types/documents"; // Assuming types are defined
 
-
 // Mock API functions (Replace with actual data fetching)
 const fetchDashboardData = async (): Promise<{
   cases: Case[];

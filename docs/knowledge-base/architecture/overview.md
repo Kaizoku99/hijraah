@@ -60,6 +60,7 @@ Hijraah is built as a modern web application with a clear separation of concerns
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: Next.js 15 with TypeScript
 - **UI Library**: React 18.3
 - **Styling**: Tailwind CSS 4.0 with Shadcn UI
@@ -69,6 +70,7 @@ Hijraah is built as a modern web application with a clear separation of concerns
 - **Charts & Visualization**: Recharts for data visualization
 
 ### Backend
+
 - **API Framework**: Hono.js for high-performance API routes
 - **Server-side**: Next.js Server Components and API Routes
 - **Authentication**: Supabase Auth with JWT tokens
@@ -78,12 +80,14 @@ Hijraah is built as a modern web application with a clear separation of concerns
 - **File Storage**: Supabase Storage
 
 ### AI & Data Processing
+
 - **AI Models**: Vercel AI SDK with OpenAI and Anthropic integration
 - **Vector Database**: pgvector for semantic search
 - **Document Processing**: PDF-lib and tesseract.js for OCR
 - **Web Scraping**: Custom implementation based on Firecrawl with Puppeteer
 
 ### DevOps & Infrastructure
+
 - **Deployment**: Vercel for frontend, Supabase for backend services
 - **CI/CD**: GitHub Actions
 - **Monitoring**: Sentry for error tracking
@@ -93,35 +97,41 @@ Hijraah is built as a modern web application with a clear separation of concerns
 ## Core Application Components
 
 ### 1. Authentication System
+
 - Supabase Auth with email/password, social login, and MFA
 - Custom session management with JWT tokens
 - Role-based access control for different user types
 
 ### 2. Document Management
+
 - Secure document upload and storage
 - Automatic document classification
 - OCR processing for text extraction
 - Version control for document updates
 
 ### 3. Immigration Research
+
 - AI-powered research assistant
 - Semantic search for immigration topics
 - Language translation for multilingual support
 - Citation management for information sources
 
 ### 4. Process Tracking
+
 - Application status tracking
 - Timeline visualization
 - Notification system for status updates
 - Calendar integration for deadlines
 
 ### 5. Community Features
+
 - Forum for community questions
 - Expert verification system
 - Knowledge sharing platform
 - Reputation system
 
 ### 6. API & Integration
+
 - RESTful API with Hono.js
 - GraphQL API with Yoga
 - Webhook support for external integrations
@@ -203,4 +213,4 @@ Hijraah is built as a modern web application with a clear separation of concerns
 
 ## Reference Architecture Diagram
 
-For a detailed view of the system interactions, refer to `docs/architecture-diagrams/detailed-system.png`. 
+For a detailed view of the system interactions, refer to `docs/architecture-diagrams/detailed-system.png`.

@@ -44,7 +44,7 @@ export function SearchDocuments() {
 
     try {
       const response = await fetch(
-        `/api/search?query=${encodeURIComponent(currentQuery)}`
+        `/api/search?query=${encodeURIComponent(currentQuery)}`,
       );
 
       if (!response.ok) {

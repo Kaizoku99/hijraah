@@ -201,19 +201,19 @@ export interface ABTestingEvents {
   "variant:assigned": (
     userId: string,
     testId: string,
-    variantId: string
+    variantId: string,
   ) => void;
   "metric:recorded": (
     testId: string,
     variantId: string,
     metric: string,
-    value: number
+    value: number,
   ) => void;
   "milestone:reached": (testId: string, milestone: string) => void;
   "significance:achieved": (
     testId: string,
     metric: string,
-    confidence: number
+    confidence: number,
   ) => void;
   "issue:detected": (testId: string, issue: string) => void;
 }
@@ -263,7 +263,7 @@ export class ABTestingService extends EventEmitter {
   // Context7 Pattern: Factory method for test creation
   async createTest(
     testConfig: Omit<ABTest, "id" | "status" | "results" | "createdAt">,
-    userId: string
+    userId: string,
   ): Promise<ABTest> {
     try {
       const test: ABTest = {
@@ -336,7 +336,7 @@ export class ABTestingService extends EventEmitter {
     testId: string,
     userId: string,
     sessionId: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<ABTestVariant | null> {
     try {
       // Check cache first
@@ -364,7 +364,7 @@ export class ABTestingService extends EventEmitter {
 
       if (existingAssignment) {
         const variant = test.variants.find(
-          (v) => v.id === existingAssignment.variant_id
+          (v) => v.id === existingAssignment.variant_id,
         );
         if (variant) {
           this.assignmentCache.set(cacheKey, variant.id);
@@ -407,7 +407,7 @@ export class ABTestingService extends EventEmitter {
     userId: string,
     metric: string,
     value: number,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<void> {
     try {
       // Store metric event
@@ -456,7 +456,7 @@ export class ABTestingService extends EventEmitter {
       const recommendations = this.generateRecommendations(
         test,
         variantResults,
-        statistics
+        statistics,
       );
 
       // Update results summary
@@ -489,7 +489,7 @@ export class ABTestingService extends EventEmitter {
       | "equal"
       | "weighted"
       | "adaptive"
-      | "thompson_sampling" = "weighted"
+      | "thompson_sampling" = "weighted",
   ): Promise<void> {
     try {
       const test = await this.getTest(testId);
@@ -498,7 +498,7 @@ export class ABTestingService extends EventEmitter {
       // Validate allocation sums to 100
       const totalAllocation = Object.values(allocation).reduce(
         (sum, val) => sum + val,
-        0
+        0,
       );
       if (Math.abs(totalAllocation - 100) > 0.01) {
         throw new Error("Traffic allocation must sum to 100%");
@@ -540,7 +540,7 @@ export class ABTestingService extends EventEmitter {
         testId,
         "traffic_changed",
         "Traffic allocation updated",
-        { allocation }
+        { allocation },
       );
     } catch (error) {
       console.error("Failed to update traffic allocation:", error);
@@ -619,7 +619,7 @@ export class ABTestingService extends EventEmitter {
       await this.recordTimelineEvent(
         testId,
         "ended",
-        reason || "Test manually stopped"
+        reason || "Test manually stopped",
       );
 
       this.emit("test:ended", updatedTest, finalResults || test.results);
@@ -633,7 +633,7 @@ export class ABTestingService extends EventEmitter {
   private selectVariant(
     test: ABTest,
     userId: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): ABTestVariant | null {
     const activeVariants = test.variants.filter((v) => v.status === "active");
     if (activeVariants.length === 0) return null;
@@ -654,7 +654,7 @@ export class ABTestingService extends EventEmitter {
 
   private selectEqualVariant(
     variants: ABTestVariant[],
-    userId: string
+    userId: string,
   ): ABTestVariant {
     const hash = this.hashUserId(userId);
     const index = hash % variants.length;
@@ -663,7 +663,7 @@ export class ABTestingService extends EventEmitter {
 
   private selectWeightedVariant(
     variants: ABTestVariant[],
-    userId: string
+    userId: string,
   ): ABTestVariant {
     const hash = this.hashUserId(userId);
     const random = (hash % 10000) / 10000; // 0 to 1
@@ -682,13 +682,13 @@ export class ABTestingService extends EventEmitter {
   private selectAdaptiveVariant(
     variants: ABTestVariant[],
     userId: string,
-    test: ABTest
+    test: ABTest,
   ): ABTestVariant {
     // Simplified adaptive selection - in production, would use more sophisticated algorithms
     const bestPerforming = variants.reduce((best, current) =>
       current.metrics.conversionRate > best.metrics.conversionRate
         ? current
-        : best
+        : best,
     );
 
     // 70% to best performing, 30% equal among others
@@ -701,7 +701,7 @@ export class ABTestingService extends EventEmitter {
       return (
         this.selectEqualVariant(
           variants.filter((v) => v.id !== bestPerforming.id),
-          userId
+          userId,
         ) || bestPerforming
       );
     }
@@ -710,7 +710,7 @@ export class ABTestingService extends EventEmitter {
   private selectThompsonSamplingVariant(
     variants: ABTestVariant[],
     userId: string,
-    test: ABTest
+    test: ABTest,
   ): ABTestVariant {
     // Simplified Thompson Sampling - would implement proper Beta distribution sampling
     const samples = variants.map((variant) => {
@@ -722,7 +722,7 @@ export class ABTestingService extends EventEmitter {
     });
 
     const bestSample = samples.reduce((best, current) =>
-      current.sample > best.sample ? current : best
+      current.sample > best.sample ? current : best,
     );
 
     return bestSample.variant;
@@ -763,7 +763,7 @@ export class ABTestingService extends EventEmitter {
 
   private async getVariantMetrics(
     testId: string,
-    variantId: string
+    variantId: string,
   ): Promise<VariantResults> {
     const { data } = await this.supabase.rpc("get_variant_metrics", {
       p_test_id: testId,
@@ -802,7 +802,7 @@ export class ABTestingService extends EventEmitter {
 
     const totalAllocation = test.variants.reduce(
       (sum, v) => sum + v.allocation,
-      0
+      0,
     );
     if (Math.abs(totalAllocation - 100) > 0.01) {
       throw new Error("Variant allocations must sum to 100%");
@@ -816,7 +816,7 @@ export class ABTestingService extends EventEmitter {
 
   private async calculateStatistics(
     test: ABTest,
-    variantResults: Record<string, VariantResults>
+    variantResults: Record<string, VariantResults>,
   ): Promise<StatisticalAnalysis> {
     // Simplified statistical analysis - would implement proper statistical tests
     const control = test.variants.find((v) => v.isControl);
@@ -842,7 +842,7 @@ export class ABTestingService extends EventEmitter {
       const se = Math.sqrt(
         pooledRate *
           (1 - pooledRate) *
-          (1 / controlResults.sessions + 1 / variantResults_.sessions)
+          (1 / controlResults.sessions + 1 / variantResults_.sessions),
       );
       const zScore = effectSize / se;
       const pValue = 2 * (1 - this.normalCDF(Math.abs(zScore)));
@@ -871,7 +871,7 @@ export class ABTestingService extends EventEmitter {
   private generateRecommendations(
     test: ABTest,
     variantResults: Record<string, VariantResults>,
-    statistics: StatisticalAnalysis
+    statistics: StatisticalAnalysis,
   ): Recommendation[] {
     const recommendations: Recommendation[] = [];
 
@@ -880,7 +880,9 @@ export class ABTestingService extends EventEmitter {
     ) {
       const bestVariant = Object.entries(variantResults).reduce(
         (best, [id, results]) =>
-          results.conversionRate > best[1].conversionRate ? [id, results] : best
+          results.conversionRate > best[1].conversionRate
+            ? [id, results]
+            : best,
       );
 
       recommendations.push({
@@ -942,20 +944,20 @@ export class ABTestingService extends EventEmitter {
   private calculateSummary(
     test: ABTest,
     variantResults: Record<string, VariantResults>,
-    statistics: StatisticalAnalysis
+    statistics: StatisticalAnalysis,
   ): ResultSummary {
     const totalSessions = Object.values(variantResults).reduce(
       (sum, r) => sum + r.sessions,
-      0
+      0,
     );
     const totalQueries = Object.values(variantResults).reduce(
       (sum, r) => sum + r.queries,
-      0
+      0,
     );
 
     const bestVariant = Object.entries(variantResults).reduce(
       (best, [id, results]) =>
-        results.conversionRate > best[1].conversionRate ? [id, results] : best
+        results.conversionRate > best[1].conversionRate ? [id, results] : best,
     );
 
     return {
@@ -981,7 +983,7 @@ export class ABTestingService extends EventEmitter {
 
   private determineResultStatus(
     statistics: StatisticalAnalysis,
-    config: ABTestConfiguration
+    config: ABTestConfiguration,
   ): ABTestResults["status"] {
     if (statistics.pValue < config.successCriteria.significanceLevel) {
       return "conclusive";
@@ -996,7 +998,7 @@ export class ABTestingService extends EventEmitter {
     testId: string,
     type: TimelineEvent["type"],
     description: string,
-    data?: Record<string, any>
+    data?: Record<string, any>,
   ): Promise<void> {
     const event: TimelineEvent = {
       timestamp: new Date().toISOString(),
@@ -1031,7 +1033,7 @@ export class ABTestingService extends EventEmitter {
             "significance:achieved",
             test.id,
             "conversion_rate",
-            1 - results.statistics.pValue
+            1 - results.statistics.pValue,
           );
         }
       }

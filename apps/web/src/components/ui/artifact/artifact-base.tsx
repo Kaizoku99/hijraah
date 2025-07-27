@@ -115,7 +115,7 @@ export class Artifact<K extends ArtifactKind, T = any>
   public readonly actions: ArtifactAction<T>[];
   public readonly toolbar: ArtifactToolbarAction[];
   public readonly initialize?: (
-    context: ArtifactInitContext<T>
+    context: ArtifactInitContext<T>,
   ) => Promise<void>;
   public readonly onStreamPart?: (context: StreamHandlingContext<T>) => void;
 
@@ -137,7 +137,7 @@ export class Artifact<K extends ArtifactKind, T = any>
    * Context7 - Observability: Wrap initialization with tracing
    */
   private wrapInitialize(
-    originalInitialize: (context: ArtifactInitContext<T>) => Promise<void>
+    originalInitialize: (context: ArtifactInitContext<T>) => Promise<void>,
   ) {
     return async (context: ArtifactInitContext<T>) => {
       return createTracedOperation(
@@ -153,7 +153,7 @@ export class Artifact<K extends ArtifactKind, T = any>
           span.setAttributes({
             "artifact.initialize_success": true,
           });
-        }
+        },
       );
     };
   }
@@ -162,7 +162,7 @@ export class Artifact<K extends ArtifactKind, T = any>
    * Context7 - Observability: Wrap stream handling with tracing
    */
   private wrapStreamHandler(
-    originalHandler: (context: StreamHandlingContext<T>) => void
+    originalHandler: (context: StreamHandlingContext<T>) => void,
   ) {
     return (context: StreamHandlingContext<T>) => {
       createTracedOperation(
@@ -178,7 +178,7 @@ export class Artifact<K extends ArtifactKind, T = any>
           span.setAttributes({
             "artifact.stream_handled": true,
           });
-        }
+        },
       );
     };
   }
@@ -187,7 +187,7 @@ export class Artifact<K extends ArtifactKind, T = any>
    * Context7 - Modularity: Create traced action wrapper
    */
   protected createTracedAction<ActionT = T>(
-    action: ArtifactAction<ActionT>
+    action: ArtifactAction<ActionT>,
   ): ArtifactAction<ActionT> {
     return {
       ...action,
@@ -206,7 +206,7 @@ export class Artifact<K extends ArtifactKind, T = any>
             span.setAttributes({
               "artifact.action_success": true,
             });
-          }
+          },
         );
       },
     };
@@ -216,7 +216,7 @@ export class Artifact<K extends ArtifactKind, T = any>
    * Context7 - Modularity: Create traced toolbar action wrapper
    */
   protected createTracedToolbarAction(
-    action: ArtifactToolbarAction
+    action: ArtifactToolbarAction,
   ): ArtifactToolbarAction {
     return {
       ...action,
@@ -234,7 +234,7 @@ export class Artifact<K extends ArtifactKind, T = any>
             span.setAttributes({
               "artifact.toolbar_action_success": true,
             });
-          }
+          },
         );
       },
     };
@@ -274,7 +274,7 @@ export class Artifact<K extends ArtifactKind, T = any>
 
 // Context7 - Modularity: Helper function to create artifact instances
 export function createArtifact<K extends ArtifactKind, T = any>(
-  definition: ArtifactDefinition<K, T>
+  definition: ArtifactDefinition<K, T>,
 ): Artifact<K, T> {
   const artifact = new Artifact(definition);
 
@@ -354,7 +354,7 @@ export const artifactUtils = {
       case "code":
         // Look for function/class names
         const funcMatch = content.match(
-          /(?:function|class|const|let|var)\s+([a-zA-Z_][a-zA-Z0-9_]*)/
+          /(?:function|class|const|let|var)\s+([a-zA-Z_][a-zA-Z0-9_]*)/,
         );
         if (funcMatch) {
           return funcMatch[1];

@@ -1,4 +1,4 @@
-import { Loader2, AlertCircle, Link, ExternalLink , Info } from "lucide-react";
+import { Loader2, AlertCircle, Link, ExternalLink, Info } from "lucide-react";
 import NextLink from "next/link";
 import React, { useState, useCallback } from "react";
 
@@ -27,7 +27,6 @@ import { useHijraahApi } from "@/hooks/useHijarahApi";
 import { ScrapeHistoryEntry } from "@/types/api";
 import { useToast } from "@/ui/use-toast";
 
-
 export function WebScraper() {
   const [url, setUrl] = useState("");
   const [bulkUrls, setBulkUrls] = useState("");
@@ -52,7 +51,7 @@ export function WebScraper() {
       const { data, error } = await scraping.scrapeUrl(
         url,
         selector,
-        saveToStorage
+        saveToStorage,
       );
 
       if (error) {
@@ -93,7 +92,7 @@ export function WebScraper() {
       const { data, error } = await scraping.bulkScrape(
         urls,
         selector,
-        saveToStorage
+        saveToStorage,
       );
 
       if (error) {
@@ -120,7 +119,7 @@ ${data.results
 Status: ${result.success ? "✅ Success" : "❌ Failed"}
 ${result.error ? `Error: ${result.error}` : ""}
 ${result.storageUrl ? `Storage URL: ${result.storageUrl}` : ""}
-`
+`,
   )
   .join("\n")}
 `;

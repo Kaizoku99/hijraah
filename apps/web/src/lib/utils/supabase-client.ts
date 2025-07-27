@@ -14,12 +14,12 @@ export type SupabaseRole = "anon" | "service";
  *   const admin = createSupabaseClient("service");
  */
 export function createSupabaseClient(
-  role: SupabaseRole = "anon"
+  role: SupabaseRole = "anon",
 ): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   if (!url) {
     throw new Error(
-      "Supabase URL is missing. Set NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL."
+      "Supabase URL is missing. Set NEXT_PUBLIC_SUPABASE_URL or SUPABASE_URL.",
     );
   }
 
@@ -32,7 +32,7 @@ export function createSupabaseClient(
 
   if (!key) {
     throw new Error(
-      `Supabase ${role} key is missing. Check environment variables.`
+      `Supabase ${role} key is missing. Check environment variables.`,
     );
   }
 

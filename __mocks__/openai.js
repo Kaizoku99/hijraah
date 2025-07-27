@@ -9,4 +9,4 @@ module.exports = class OpenAI {
       create: jest.fn(),
     };
   }
-}; 
+};

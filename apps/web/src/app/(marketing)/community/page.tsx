@@ -1,33 +1,33 @@
 "use client";
 
-import { MessageSquare, ThumbsUp, Share2 } from 'lucide-react';
-import Image from 'next/image';
-import { useState } from 'react';
+import { MessageSquare, ThumbsUp, Share2 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 
-import { Avatar } from '@/ui/avatar';
-import { Button } from '@/ui/button';
-import { Card } from '@/ui/card';
-import { Input } from '@/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs';
+import { Avatar } from "@/ui/avatar";
+import { Button } from "@/ui/button";
+import { Card } from "@/ui/card";
+import { Input } from "@/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 
 const posts = [
   {
     id: 1,
     author: {
-      name: 'John Doe',
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e',
+      name: "John Doe",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
     },
-    title: 'My Immigration Success Story',
-    content: 'After 2 years of hard work and dedication...',
+    title: "My Immigration Success Story",
+    content: "After 2 years of hard work and dedication...",
     likes: 42,
     comments: 12,
-    category: 'success-stories',
+    category: "success-stories",
   },
   // Add more posts
 ];
 
 export default function CommunityPage() {
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState("all");
 
   return (
     <div className="container py-8">

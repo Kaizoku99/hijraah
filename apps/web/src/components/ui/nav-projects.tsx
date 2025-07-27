@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Folder,
@@ -6,7 +6,7 @@ import {
   MoreHorizontal,
   Trash2,
   type LucideIcon,
-} from "lucide-react"
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -23,26 +23,31 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/shared/ui/ui/sidebar"
+} from "@/shared/ui/ui/sidebar";
 
 export function NavProjects({
   projects,
 }: {
   projects: {
-    name: string
-    url: string
-    icon: LucideIcon
-  }[]
+    name: string;
+    url: string;
+    icon: LucideIcon;
+  }[];
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel className="text-sidebar-muted-foreground">Projects</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-sidebar-muted-foreground">
+        Projects
+      </SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild className="hover:bg-sidebar-accent hover:text-sidebar-foreground">
+            <SidebarMenuButton
+              asChild
+              className="hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            >
               <a href={item.url}>
                 <item.icon className="text-sidebar-primary" />
                 <span>{item.name}</span>
@@ -50,7 +55,10 @@ export function NavProjects({
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuAction showOnHover className="text-sidebar-muted hover:text-sidebar-foreground">
+                <SidebarMenuAction
+                  showOnHover
+                  className="text-sidebar-muted hover:text-sidebar-foreground"
+                >
                   <MoreHorizontal />
                   <span className="sr-only">More</span>
                 </SidebarMenuAction>
@@ -85,5 +93,5 @@ export function NavProjects({
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

@@ -45,7 +45,7 @@ export const ChatResponseSchema = z.object({
         "content_filter",
         "function_call",
       ]),
-    })
+    }),
   ),
   usage: z
     .object({
@@ -122,7 +122,7 @@ export class HijraahChatService {
         origin: this.config.corsOrigin || "*",
         allowMethods: ["GET", "POST", "OPTIONS"],
         allowHeaders: ["Content-Type", "Authorization"],
-      })
+      }),
     );
 
     // Logger middleware
@@ -148,7 +148,7 @@ export class HijraahChatService {
       if (current === 1) {
         await this.redis.expire(
           key,
-          Math.floor(this.config.rateLimitWindow / 1000)
+          Math.floor(this.config.rateLimitWindow / 1000),
         );
       }
 
@@ -267,7 +267,7 @@ export class HijraahChatService {
             request.user,
             chatId,
             request.messages,
-            response.choices[0].message
+            response.choices[0].message,
           );
         }
 
@@ -284,7 +284,7 @@ export class HijraahChatService {
                 details: error.errors,
               },
             },
-            400
+            400,
           );
         }
 
@@ -295,7 +295,7 @@ export class HijraahChatService {
               type: "api_error",
             },
           },
-          500
+          500,
         );
       }
     });
@@ -317,7 +317,7 @@ export class HijraahChatService {
             : {};
           const result = await this.documentProcessor.processDocument(
             file,
-            processingOptions
+            processingOptions,
           );
 
           return c.json({
@@ -339,7 +339,7 @@ export class HijraahChatService {
                 type: "processing_error",
               },
             },
-            500
+            500,
           );
         }
       });
@@ -367,7 +367,7 @@ export class HijraahChatService {
                   JSON.stringify({
                     type: "error",
                     message: "Invalid message format",
-                  })
+                  }),
                 );
               }
             },
@@ -387,7 +387,7 @@ export class HijraahChatService {
               console.error("WebSocket error:", event);
             },
           };
-        })
+        }),
       );
     }
 
@@ -401,7 +401,7 @@ export class HijraahChatService {
         const conversations = await this.getConversationHistory(
           userId,
           limit,
-          offset
+          offset,
         );
         return c.json({ conversations });
       } catch (error) {
@@ -421,7 +421,7 @@ export class HijraahChatService {
       maxTokens?: number;
       userId?: string;
       metadata?: Record<string, any>;
-    }
+    },
   ) {
     const stream = new ReadableStream({
       async start(controller) {
@@ -495,7 +495,7 @@ export class HijraahChatService {
                 content: m.content,
                 timestamp: new Date().toISOString(),
               })),
-              assistantMessage
+              assistantMessage,
             );
           }
         } catch (error) {
@@ -518,7 +518,7 @@ export class HijraahChatService {
 
   private async handleWebSocketMessage(
     ws: WebSocket,
-    data: any
+    data: any,
   ): Promise<void> {
     const { type, payload } = data;
 
@@ -549,7 +549,7 @@ export class HijraahChatService {
               JSON.stringify({
                 type: "chunk",
                 content: chunk,
-              })
+              }),
             );
           }
 
@@ -557,14 +557,14 @@ export class HijraahChatService {
             JSON.stringify({
               type: "complete",
               content: fullContent,
-            })
+            }),
           );
         } catch (error) {
           ws.send(
             JSON.stringify({
               type: "error",
               message: "Chat processing failed",
-            })
+            }),
           );
         }
         break;
@@ -578,7 +578,7 @@ export class HijraahChatService {
           JSON.stringify({
             type: "error",
             message: "Unknown message type",
-          })
+          }),
         );
     }
   }
@@ -587,7 +587,7 @@ export class HijraahChatService {
     userId: string,
     chatId: string,
     userMessages: ChatMessage[],
-    assistantMessage: ChatMessage
+    assistantMessage: ChatMessage,
   ): Promise<void> {
     if (!this.redis) return;
 
@@ -604,7 +604,7 @@ export class HijraahChatService {
           messages: allMessages,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        })
+        }),
       );
 
       // Add to user's conversation list
@@ -621,7 +621,7 @@ export class HijraahChatService {
   private async getConversationHistory(
     userId: string,
     limit: number,
-    offset: number
+    offset: number,
   ): Promise<any[]> {
     if (!this.redis) return [];
 
@@ -630,7 +630,7 @@ export class HijraahChatService {
       const chatIds = await this.redis.zrevrange(
         userConversationsKey,
         offset,
-        offset + limit - 1
+        offset + limit - 1,
       );
 
       const conversations = [];

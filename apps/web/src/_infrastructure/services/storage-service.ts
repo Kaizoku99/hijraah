@@ -222,7 +222,7 @@ export class StorageService {
 
       if (!data) {
         throw new Error(
-          "Failed to move file: No data returned from copy operation"
+          "Failed to move file: No data returned from copy operation",
         );
       }
 
@@ -260,7 +260,7 @@ export class StorageService {
         column: "name" | "created_at" | "updated_at";
         order: "asc" | "desc";
       };
-    } = {}
+    } = {},
   ): Promise<
     {
       name: string;
@@ -331,7 +331,7 @@ export class StorageService {
       }
 
       const bucketExists = buckets?.some(
-        (bucket) => bucket.name === this.bucketName
+        (bucket) => bucket.name === this.bucketName,
       );
 
       if (!bucketExists) {
@@ -353,7 +353,7 @@ export class StorageService {
               "application/zip",
             ],
             fileSizeLimit: 20971520, // 20MB
-          }
+          },
         );
 
         if (createError) {
@@ -372,7 +372,7 @@ export class StorageService {
    */
   async updateMetadata(
     path: string,
-    metadata: Record<string, any>
+    metadata: Record<string, any>,
   ): Promise<void> {
     try {
       // Currently, Supabase does not provide a direct method to update metadata

@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     console.error("Failed to get chat history:", error);
     return Response.json(
       { error: "Failed to load chat history" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

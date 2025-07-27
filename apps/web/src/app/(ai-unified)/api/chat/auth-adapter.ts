@@ -27,7 +27,7 @@ export class AuthenticationError extends Error {
   constructor(
     message: string,
     public statusCode: number = 401,
-    correlationId?: string
+    correlationId?: string,
   ) {
     super(message);
     this.name = "AuthenticationError";
@@ -40,7 +40,7 @@ export class AuthenticationError extends Error {
  * Context7 - Modularity: Clean adapter pattern with distributed tracing
  */
 export async function authenticateRequest(
-  request: NextRequest
+  request: NextRequest,
 ): Promise<AuthResult> {
   const correlationId = generateCorrelationId();
 
@@ -68,7 +68,7 @@ export async function authenticateRequest(
         // Method 2: Cookie-based authentication (web app)
         const cookieAuth = await authenticateWithCookies(
           request,
-          correlationId
+          correlationId,
         );
         if (cookieAuth) {
           span.setAttributes({ "auth.method": "cookies" });
@@ -78,7 +78,7 @@ export async function authenticateRequest(
         // Method 3: Guest session authentication
         const guestAuth = await authenticateGuestSession(
           request,
-          correlationId
+          correlationId,
         );
         if (guestAuth) {
           span.setAttributes({ "auth.method": "guest_session" });
@@ -88,7 +88,7 @@ export async function authenticateRequest(
         throw new AuthenticationError(
           "No valid authentication method found",
           401,
-          correlationId
+          correlationId,
         );
       } catch (error) {
         // Context7 - Observability: Enhanced error logging with tracing
@@ -109,10 +109,10 @@ export async function authenticateRequest(
         throw new AuthenticationError(
           "Authentication service error",
           500,
-          correlationId
+          correlationId,
         );
       }
-    }
+    },
   );
 }
 
@@ -122,7 +122,7 @@ export async function authenticateRequest(
  */
 async function authenticateWithBearerToken(
   authHeader: string,
-  correlationId: string
+  correlationId: string,
 ): Promise<AuthResult> {
   return createTracedOperation(
     {
@@ -137,7 +137,7 @@ async function authenticateWithBearerToken(
         throw new AuthenticationError(
           "Invalid bearer token format",
           401,
-          correlationId
+          correlationId,
         );
       }
 
@@ -162,7 +162,7 @@ async function authenticateWithBearerToken(
             throw new AuthenticationError(
               "Invalid or expired token",
               401,
-              correlationId
+              correlationId,
             );
           }
 
@@ -196,9 +196,9 @@ async function authenticateWithBearerToken(
             permissions: getUserPermissions(userWithGuest),
             correlationId,
           };
-        }
+        },
       );
-    }
+    },
   );
 }
 
@@ -208,7 +208,7 @@ async function authenticateWithBearerToken(
  */
 async function authenticateWithCookies(
   request: NextRequest,
-  correlationId: string
+  correlationId: string,
 ): Promise<AuthResult | null> {
   return createTracedOperation(
     {
@@ -236,7 +236,7 @@ async function authenticateWithCookies(
         await authTracing.traceAuthAttempt(
           "cookies",
           auth.user.id,
-          auth.isGuest
+          auth.isGuest,
         );
 
         return {
@@ -254,7 +254,7 @@ async function authenticateWithCookies(
         });
         return null;
       }
-    }
+    },
   );
 }
 
@@ -264,7 +264,7 @@ async function authenticateWithCookies(
  */
 async function authenticateGuestSession(
   request: NextRequest,
-  correlationId: string
+  correlationId: string,
 ): Promise<AuthResult | null> {
   return createTracedOperation(
     {
@@ -309,7 +309,7 @@ async function authenticateGuestSession(
         });
         return null;
       }
-    }
+    },
   );
 }
 
@@ -390,7 +390,7 @@ export function requirePermission(auth: AuthResult, permission: string): void {
     throw new AuthenticationError(
       `Permission required: ${permission}`,
       403,
-      auth.correlationId
+      auth.correlationId,
     );
   }
 }
@@ -413,7 +413,7 @@ export function createAuthErrorResponse(error: AuthenticationError): Response {
         "Content-Type": "application/json",
         "X-Correlation-ID": error.correlationId,
       },
-    }
+    },
   );
 }
 

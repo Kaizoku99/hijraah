@@ -28,7 +28,7 @@ export class ImageRetriever {
       ) {
         // Retry once with large model
         console.warn(
-          "text-embedding-3-small unavailable, retrying with text-embedding-3-large"
+          "text-embedding-3-small unavailable, retrying with text-embedding-3-large",
         );
         embedding = (
           await this.openai.embeddings.create({

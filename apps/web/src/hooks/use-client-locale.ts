@@ -14,7 +14,7 @@ export function useClientLocale(): Locale {
 
   // Extract locale from URL path, checking for exact match or path prefix
   const pathnameLocale = locales.find(
-    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`),
   );
 
   // Return the detected locale, or the default locale if none is found in the path

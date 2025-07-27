@@ -86,7 +86,7 @@ export const ACTION_SPECIFIC_RATE_LIMITS: {
  */
 function createActionRateLimiter(
   action: RateLimitAction,
-  tier: SubscriptionTier
+  tier: SubscriptionTier,
 ): Ratelimit | null {
   const actionLimitsTiered = ACTION_SPECIFIC_RATE_LIMITS[action];
   if (!actionLimitsTiered) return null;
@@ -170,7 +170,7 @@ const rateLimiterCache = new Map<string, Ratelimit>();
  */
 function getRateLimiter(
   tier: SubscriptionTier,
-  resourceType: ResourceType
+  resourceType: ResourceType,
 ): Ratelimit {
   const cacheKey = `${tier}:${resourceType}`;
 
@@ -198,7 +198,7 @@ function getRateLimiter(
  */
 export async function getUserTier(
   supabaseClient: SupabaseClient,
-  userId: string
+  userId: string,
 ): Promise<SubscriptionTier> {
   try {
     const { data, error } = await supabaseClient
@@ -210,7 +210,7 @@ export async function getUserTier(
     if (error) throw error;
     if (!data || !data.tier) {
       console.debug(
-        `No subscription found for user ${userId}, defaulting to free tier`
+        `No subscription found for user ${userId}, defaulting to free tier`,
       );
       return SubscriptionTier.FREE;
     }
@@ -242,7 +242,7 @@ interface SubscriptionRateLimitOptions {
  * Subscription-aware rate limiting middleware
  */
 export function subscriptionRateLimit(
-  options: SubscriptionRateLimitOptions
+  options: SubscriptionRateLimitOptions,
 ): MiddlewareHandler<AppEnv> {
   const { resourceType, errorMessage } = options;
 
@@ -305,7 +305,7 @@ export function subscriptionRateLimit(
               reset: new Date(result.reset).toISOString(),
             },
           },
-          429
+          429,
         );
       }
 

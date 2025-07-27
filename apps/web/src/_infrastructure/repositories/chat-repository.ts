@@ -65,7 +65,7 @@ export class ChatRepository extends BaseRepository<
       orderBy?: string;
       case_id?: string;
       withMessages?: boolean;
-    }
+    },
   ): Promise<DBChatSessionRow[]> {
     const client = await this.getClient();
 
@@ -105,7 +105,7 @@ export class ChatRepository extends BaseRepository<
     if (options?.offset) {
       query = query.range(
         options.offset,
-        options.offset + (options.limit || 10) - 1
+        options.offset + (options.limit || 10) - 1,
       );
     }
 
@@ -172,7 +172,7 @@ export class ChatRepository extends BaseRepository<
     if (messagesError) {
       console.error("Error fetching chat messages:", messagesError);
       throw new Error(
-        `Failed to fetch chat messages: ${messagesError.message}`
+        `Failed to fetch chat messages: ${messagesError.message}`,
       );
     }
 
@@ -190,7 +190,7 @@ export class ChatRepository extends BaseRepository<
       if (attachmentsError) {
         console.error("Error fetching chat attachments:", attachmentsError);
         throw new Error(
-          `Failed to fetch chat attachments: ${attachmentsError.message}`
+          `Failed to fetch chat attachments: ${attachmentsError.message}`,
         );
       }
 
@@ -209,7 +209,7 @@ export class ChatRepository extends BaseRepository<
    */
   async addMessage(
     chatId: string,
-    messageData: Omit<DBChatMessageInsert, "session_id">
+    messageData: Omit<DBChatMessageInsert, "session_id">,
   ): Promise<DBChatMessageRow> {
     const client = await this.getClient();
 
@@ -360,7 +360,7 @@ export class ChatRepository extends BaseRepository<
       if (updateError) {
         console.error(
           `Error deleting stream IDs for chat ${chatId}:`,
-          updateError
+          updateError,
         );
       }
     }
@@ -394,7 +394,7 @@ export class ChatRepository extends BaseRepository<
   fromDomainEntity(entity: Chat): Partial<DBChatSessionRow> {
     const entityObject = entity.toObject();
     const snakeCaseObject = toSnakeCase(
-      entityObject
+      entityObject,
     ) as Partial<DBChatSessionRow>;
     return snakeCaseObject;
   }

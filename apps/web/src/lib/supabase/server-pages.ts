@@ -11,7 +11,7 @@ export const createServiceClient = () => {
         autoRefreshToken: false,
         persistSession: false,
       },
-    }
+    },
   );
 };
 
@@ -44,6 +44,6 @@ export const createServerClient = (context?: {
       global: {
         headers,
       },
-    }
+    },
   );
 };

@@ -56,11 +56,11 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
   // Apply specific rate limits using string literals
   const caseManagementLimit = subscriptionRateLimit(
     "caseManagement",
-    () => supabase
+    () => supabase,
   );
   const documentUploadLimit = subscriptionRateLimit(
     "documentUpload",
-    () => supabase
+    () => supabase,
   );
 
   // Apply general case management limit to most routes
@@ -199,7 +199,7 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
           caseId,
           user.id,
           status,
-          reason
+          reason,
         );
         return c.json({ success: true, data: updatedCase });
       } catch (error: any) {
@@ -215,7 +215,7 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
         console.error("Error changing case status:", error);
         return c.json({ error: "Failed to change case status" }, 500);
       }
-    }
+    },
   );
 
   caseApi.post(
@@ -233,7 +233,7 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
           caseId,
           userId,
           role,
-          user.id
+          user.id,
         );
         return c.json({ success: true, data: updatedCase });
       } catch (error: any) {
@@ -246,7 +246,7 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
         console.error("Error assigning user to case:", error);
         return c.json({ error: "Failed to assign user to case" }, 500);
       }
-    }
+    },
   );
 
   caseApi.delete("/:id/assign/:userId", async (c) => {
@@ -262,7 +262,7 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
         caseId,
         targetUserId,
         user.id,
-        reason
+        reason,
       );
       return c.json({ success: true, data: updatedCase });
     } catch (error: any) {
@@ -291,7 +291,7 @@ export function setupCaseRoutes(app: Hono<AppEnv>) {
       const updatedCase = await caseService.addDocument(
         caseId,
         documentId,
-        user.id
+        user.id,
       );
       return c.json({ success: true, data: updatedCase });
     } catch (error: any) {

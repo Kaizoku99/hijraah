@@ -115,7 +115,7 @@ export default async function LocaleLayout({
         className={cn(
           inter.className,
           fontClass,
-          "h-full m-0 p-0 overflow-x-hidden antialiased"
+          "h-full m-0 p-0 overflow-x-hidden antialiased",
         )}
       >
         <NuqsAdapter>

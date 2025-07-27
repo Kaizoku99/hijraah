@@ -126,7 +126,7 @@ export class DomainMapper {
    * Maps a domain chat session entity to database row
    */
   static fromChatSessionDomain(
-    domain: ChatSessionDomain
+    domain: ChatSessionDomain,
   ): Partial<DBChatSessionRow> {
     return {
       id: domain.id,
@@ -169,7 +169,7 @@ export class DomainMapper {
    * Maps a domain chat message entity to database row
    */
   static fromChatMessageDomain(
-    domain: ChatMessageDomain
+    domain: ChatMessageDomain,
   ): Partial<DBChatMessageRow> {
     return {
       id: domain.id,
@@ -290,7 +290,7 @@ export class DomainMapper {
    * Maps a domain user profile entity to database row
    */
   static fromUserProfileDomain(
-    domain: UserProfileDomain
+    domain: UserProfileDomain,
   ): Partial<DBUserProfileRow> {
     return {
       id: domain.id,

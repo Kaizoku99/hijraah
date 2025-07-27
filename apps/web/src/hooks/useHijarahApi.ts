@@ -18,7 +18,7 @@ export function useHijraahApi() {
       endpoint: string,
       method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
       body?: any,
-      customHeaders?: Record<string, string>
+      customHeaders?: Record<string, string>,
     ): Promise<{ data: T | null; error: string | null }> => {
       // Set loading state
       setLoading(true);
@@ -70,7 +70,7 @@ export function useHijraahApi() {
         setLoading(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   // Research session methods
@@ -80,7 +80,7 @@ export function useHijraahApi() {
       return apiRequest<{ sessionId: string; message: string }>(
         "research/start",
         "POST",
-        { query, maxDepth }
+        { query, maxDepth },
       );
     },
 
@@ -102,7 +102,7 @@ export function useHijraahApi() {
     cancel: async (sessionId: string) => {
       return apiRequest<{ message: string }>(
         `research/${sessionId}/cancel`,
-        "POST"
+        "POST",
       );
     },
   };
@@ -113,12 +113,12 @@ export function useHijraahApi() {
     createEmbedding: async (
       text: string,
       metadata?: any,
-      collectionId?: string
+      collectionId?: string,
     ) => {
       return apiRequest<{ embeddingId: string; message: string }>(
         "vector-search/embed",
         "POST",
-        { text, metadata, collectionId }
+        { text, metadata, collectionId },
       );
     },
 
@@ -127,7 +127,7 @@ export function useHijraahApi() {
       query: string,
       limit: number = 10,
       threshold: number = 0.7,
-      collectionId?: string
+      collectionId?: string,
     ) => {
       return apiRequest<{ results: any[] }>("vector-search/search", "POST", {
         query,
@@ -140,7 +140,7 @@ export function useHijraahApi() {
     // Bulk embed content
     bulkEmbed: async (
       texts: { text: string; metadata?: any }[],
-      collectionId?: string
+      collectionId?: string,
     ) => {
       return apiRequest<{
         processedCount: number;
@@ -153,7 +153,7 @@ export function useHijraahApi() {
     deleteEmbedding: async (id: string) => {
       return apiRequest<{ message: string }>(
         `vector-search/embeddings/${id}`,
-        "DELETE"
+        "DELETE",
       );
     },
   };
@@ -164,7 +164,7 @@ export function useHijraahApi() {
     scrapeUrl: async (
       url: string,
       selector?: string,
-      saveToStorage: boolean = true
+      saveToStorage: boolean = true,
     ) => {
       return apiRequest<{
         content: string;
@@ -177,7 +177,7 @@ export function useHijraahApi() {
     bulkScrape: async (
       urls: string[],
       selector?: string,
-      saveToStorage: boolean = true
+      saveToStorage: boolean = true,
     ) => {
       return apiRequest<{ results: any[] }>("scraping/bulk-scrape", "POST", {
         urls,
@@ -195,7 +195,7 @@ export function useHijraahApi() {
     deleteHistoryEntry: async (id: string) => {
       return apiRequest<{ message: string }>(
         `scraping/history/${id}`,
-        "DELETE"
+        "DELETE",
       );
     },
   };
@@ -216,7 +216,7 @@ export function useHijraahApi() {
       return apiRequest<{ profile: any; message: string }>(
         "auth/profile",
         "PUT",
-        profileData
+        profileData,
       );
     },
   };

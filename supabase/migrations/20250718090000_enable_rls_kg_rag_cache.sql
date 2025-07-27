@@ -25,7 +25,7 @@ CREATE POLICY "Authenticated users can view active kg_entities"
 DROP POLICY IF EXISTS "Service role can manage kg_entities" ON public.kg_entities;
 CREATE POLICY "Service role can manage kg_entities"
   ON public.kg_entities FOR ALL
-  USING (auth.role() = 'service_role' OR auth.is_admin());
+  USING (auth.role() = 'service_role' OR (select public.is_admin()));
 
 -- kg_relationships ---------------------------------------------------------
 ALTER TABLE public.kg_relationships ENABLE ROW LEVEL SECURITY;
@@ -39,7 +39,7 @@ CREATE POLICY "Authenticated users can view kg_relationships"
 DROP POLICY IF EXISTS "Service role can manage kg_relationships" ON public.kg_relationships;
 CREATE POLICY "Service role can manage kg_relationships"
   ON public.kg_relationships FOR ALL
-  USING (auth.role() = 'service_role' OR auth.is_admin());
+  USING (auth.role() = 'service_role' OR (select public.is_admin()));
 
 -- ===================================================
 -- SECTION 2: Enhanced Document Chunks
@@ -136,7 +136,7 @@ CREATE POLICY "Authenticated users can view policy timeline"
 DROP POLICY IF EXISTS "Service role can manage policy timeline" ON public.policy_timeline;
 CREATE POLICY "Service role can manage policy timeline"
   ON public.policy_timeline FOR ALL
-  USING (auth.role() = 'service_role' OR auth.is_admin());
+  USING (auth.role() = 'service_role' OR (select public.is_admin()));
 
 -- ===================================================
 -- SECTION 6: Comments & Documentation

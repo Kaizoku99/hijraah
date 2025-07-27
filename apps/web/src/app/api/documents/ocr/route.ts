@@ -79,7 +79,7 @@ app.post("/", async (c) => {
     if (!validation.success) {
       return c.json(
         { error: "Invalid input", details: validation.error.errors },
-        400
+        400,
       );
     }
     const validatedData = validation.data;
@@ -99,7 +99,7 @@ app.post("/", async (c) => {
     if (cacheError) {
       console.error(
         `[OCR API] Error checking cache for fileId ${fileId}:`,
-        cacheError
+        cacheError,
       );
       // Decide if this should be fatal or just log and continue
     }
@@ -116,7 +116,7 @@ app.post("/", async (c) => {
     // --- File Fetching Logic ---
     if (validatedData.fileContent) {
       console.log(
-        `[OCR API] Using provided base64 content for fileId: ${fileId}`
+        `[OCR API] Using provided base64 content for fileId: ${fileId}`,
       );
       fileBuffer = Buffer.from(validatedData.fileContent, "base64");
       fileSourceDescription = "provided base64 content";
@@ -132,18 +132,18 @@ app.post("/", async (c) => {
       } catch (fetchError) {
         console.error(
           `[OCR API] Error fetching file from URL ${validatedData.fileUrl} for fileId ${fileId}:`,
-          fetchError
+          fetchError,
         );
         return c.json(
           {
             error: `Failed to fetch file from provided URL: ${(fetchError as Error).message}`,
           },
-          500
+          500,
         );
       }
     } else if (validatedData.filePath) {
       console.log(
-        `[OCR API] Fetching from storage path: ${validatedData.filePath} for fileId: ${fileId}`
+        `[OCR API] Fetching from storage path: ${validatedData.filePath} for fileId: ${fileId}`,
       );
       fileSourceDescription = `storage path: ${validatedData.filePath}`;
       // Determine bucket based on call type or context if needed
@@ -154,7 +154,7 @@ app.post("/", async (c) => {
         : validatedData.filePath;
 
       console.log(
-        `[OCR API] Attempting download from bucket '${bucket}', path '${path}'`
+        `[OCR API] Attempting download from bucket '${bucket}', path '${path}'`,
       );
 
       // Use supabaseAdmin if accessing restricted buckets like 'documents'
@@ -166,40 +166,40 @@ app.post("/", async (c) => {
       if (downloadError) {
         console.error(
           `[OCR API] Error downloading file ${path} from bucket ${bucket} for fileId ${fileId}:`,
-          downloadError
+          downloadError,
         );
         return c.json(
           {
             error: `Failed to download document from storage (${bucket}): ${downloadError.message}`,
           },
-          500
+          500,
         );
       }
       if (!fileData) {
         console.error(
-          `[OCR API] No file data found for path ${path} in bucket ${bucket}, fileId ${fileId}.`
+          `[OCR API] No file data found for path ${path} in bucket ${bucket}, fileId ${fileId}.`,
         );
         return c.json({ error: "Document not found in storage" }, 404);
       }
       fileBuffer = Buffer.from(await fileData.arrayBuffer());
       console.log(
-        `[OCR API] Successfully downloaded ${path} from bucket ${bucket}`
+        `[OCR API] Successfully downloaded ${path} from bucket ${bucket}`,
       );
     } else {
       console.error(
-        `[OCR API] No file content, URL, or path provided for fileId: ${fileId}`
+        `[OCR API] No file content, URL, or path provided for fileId: ${fileId}`,
       );
       return c.json({ error: "No file content, URL, or path provided" }, 400);
     }
 
     if (!fileBuffer) {
       console.error(
-        `[OCR API] Failed to obtain file buffer for fileId: ${fileId} from ${fileSourceDescription}`
+        `[OCR API] Failed to obtain file buffer for fileId: ${fileId} from ${fileSourceDescription}`,
       );
       return c.json({ error: "Failed to obtain file buffer" }, 500);
     }
     console.log(
-      `[OCR API] File buffer obtained (size: ${fileBuffer.length} bytes) for fileId: ${fileId}`
+      `[OCR API] File buffer obtained (size: ${fileBuffer.length} bytes) for fileId: ${fileId}`,
     );
 
     // --- Call shared OCR util ---
@@ -208,11 +208,11 @@ app.post("/", async (c) => {
       const startTime = Date.now();
       const extractedText = await runMistralOCR(
         fileBuffer,
-        validatedData.fileType
+        validatedData.fileType,
       );
       const processTime = Date.now() - startTime;
       console.log(
-        `[OCR API] OCR completed for fileId: ${fileId} in ${processTime}ms.`
+        `[OCR API] OCR completed for fileId: ${fileId} in ${processTime}ms.`,
       );
 
       // Build result compatible with previous schema
@@ -239,18 +239,18 @@ app.post("/", async (c) => {
             result: ocrResult, // Cache the standardized result
             created_at: new Date().toISOString(),
           },
-          { onConflict: "file_id" }
+          { onConflict: "file_id" },
         ); // Specify conflict resolution if needed
 
       if (upsertError) {
         console.error(
           `[OCR API] Error caching OCR result for fileId ${fileId}:`,
-          upsertError
+          upsertError,
         );
         // Decide if this should be fatal or just logged
       } else {
         console.log(
-          `[OCR API] Successfully cached OCR result for fileId: ${fileId}`
+          `[OCR API] Successfully cached OCR result for fileId: ${fileId}`,
         );
       }
 
@@ -258,7 +258,7 @@ app.post("/", async (c) => {
     } catch (aiError) {
       console.error(
         `[OCR API] Vercel AI SDK/Mistral error for fileId ${fileId}:`,
-        aiError
+        aiError,
       );
       return c.json(
         {
@@ -267,7 +267,7 @@ app.post("/", async (c) => {
               ? aiError.message
               : "Failed to process document with AI OCR",
         },
-        500 // Use 500 for AI backend errors
+        500, // Use 500 for AI backend errors
       );
     }
   } catch (error) {
@@ -276,14 +276,14 @@ app.post("/", async (c) => {
     if (error instanceof z.ZodError) {
       return c.json(
         { error: "Invalid request body format", details: error.errors },
-        400
+        400,
       );
     }
     return c.json(
       {
         error: error instanceof Error ? error.message : "Internal server error",
       },
-      500
+      500,
     );
   }
 });
@@ -313,11 +313,11 @@ app.post("/question", async (c) => {
     if (ocrError || !ocrData || !ocrData.result?.text) {
       console.error(
         `[OCR Q&A] Error fetching cached OCR result for fileId ${fileId}:`,
-        ocrError || "Not Found"
+        ocrError || "Not Found",
       );
       return c.json(
         { error: "Failed to fetch or parse OCR result for Q&A" },
-        404
+        404,
       ); // 404 if not found/processed
     }
     console.log(`[OCR Q&A] Found cached OCR text for fileId: ${fileId}`);
@@ -325,7 +325,7 @@ app.post("/question", async (c) => {
     // Generate an answer using Mistral AI SDK via generateText
     try {
       console.log(
-        `[OCR Q&A] Sending Q&A request to Mistral via Vercel AI SDK for fileId: ${fileId}`
+        `[OCR Q&A] Sending Q&A request to Mistral via Vercel AI SDK for fileId: ${fileId}`,
       );
       const startTime = Date.now();
       const {
@@ -355,7 +355,7 @@ Question: ${question}`,
       });
       const processTime = Date.now() - startTime;
       console.log(
-        `[OCR Q&A] Received answer from Mistral via Vercel AI SDK for fileId: ${fileId}. Time: ${processTime}ms. Reason: ${finishReason}. Usage: ${JSON.stringify(usage)}`
+        `[OCR Q&A] Received answer from Mistral via Vercel AI SDK for fileId: ${fileId}. Time: ${processTime}ms. Reason: ${finishReason}. Usage: ${JSON.stringify(usage)}`,
       );
 
       const finalAnswer =
@@ -376,7 +376,7 @@ Question: ${question}`,
       if (historyError) {
         console.error(
           `[OCR Q&A] Error saving Q&A history for fileId ${fileId}:`,
-          historyError
+          historyError,
         );
         // Log error but likely still return the answer
       }
@@ -385,7 +385,7 @@ Question: ${question}`,
     } catch (mistralError) {
       console.error(
         `[OCR Q&A] Vercel AI SDK/Mistral chat error for fileId ${fileId}:`,
-        mistralError
+        mistralError,
       );
       return c.json(
         {
@@ -393,7 +393,7 @@ Question: ${question}`,
             (mistralError as Error).message ||
             "Failed to process question with Mistral AI",
         },
-        500 // Use 500 for AI backend errors
+        500, // Use 500 for AI backend errors
       );
     }
   } catch (error) {
@@ -405,7 +405,7 @@ Question: ${question}`,
             ? error.message
             : "Internal server error in Q&A",
       },
-      500
+      500,
     );
   }
 });
@@ -428,7 +428,7 @@ app.get("/:fileId/history", async (c) => {
     if (error) {
       console.error(
         `[OCR History] Error fetching history for fileId ${fileId}:`,
-        error
+        error,
       );
       return c.json({ error: "Failed to fetch question history" }, 500);
     }
@@ -443,7 +443,7 @@ app.get("/:fileId/history", async (c) => {
             ? error.message
             : "Internal server error fetching history",
       },
-      500
+      500,
     );
   }
 });

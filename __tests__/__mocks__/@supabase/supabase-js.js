@@ -24,4 +24,4 @@ module.exports = {
   mockUpsert: mockQueryBuilder.upsert,
   mockInsert: mockQueryBuilder.insert,
   mockOr: mockQueryBuilder.or,
-}; 
+};

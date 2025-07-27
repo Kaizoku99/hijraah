@@ -19,7 +19,7 @@ export const createChatSession = withCircuitBreaker(
 
     if (error) throw error;
     return data;
-  }
+  },
 );
 
 export const getChatSessions = withCircuitBreaker(
@@ -34,7 +34,7 @@ export const getChatSessions = withCircuitBreaker(
 
     if (error) throw error;
     return data;
-  }
+  },
 );
 
 export const getChatMessages = withCircuitBreaker(
@@ -49,7 +49,7 @@ export const getChatMessages = withCircuitBreaker(
 
     if (error) throw error;
     return data;
-  }
+  },
 );
 
 export const sendChatMessage = withCircuitBreaker(
@@ -68,12 +68,12 @@ export const sendChatMessage = withCircuitBreaker(
 
     if (error) throw error;
     return data;
-  }
+  },
 );
 
 export const subscribeToChatMessages = (
   sessionId: string,
-  callback: (message: ChatMessage) => void
+  callback: (message: ChatMessage) => void,
 ) => {
   const supabase = getSupabaseClient();
   return supabase
@@ -88,7 +88,7 @@ export const subscribeToChatMessages = (
       },
       (payload) => {
         callback(payload.new as ChatMessage);
-      }
+      },
     )
     .subscribe();
 };

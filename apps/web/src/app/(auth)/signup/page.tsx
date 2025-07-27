@@ -1,25 +1,24 @@
 "use client";
 
-import { createBrowserClient } from '@supabase/ssr';
-import { Github } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { createBrowserClient } from "@supabase/ssr";
+import { Github } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { Button } from '@/ui/button';
-import { Input } from '@/ui/input';
-import { Label } from '@/ui/label';
-import { useToast } from '@/ui/use-toast';
-
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
+import { Label } from "@/ui/label";
+import { useToast } from "@/ui/use-toast";
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
@@ -42,7 +41,7 @@ export default function SignUpPage() {
         description: "Please check your email to confirm your account.",
       });
 
-      router.push('/login');
+      router.push("/login");
     } catch (error: any) {
       toast({
         title: "Error",
@@ -57,7 +56,7 @@ export default function SignUpPage() {
   const handleGoogleSignUp = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${location.origin}/auth/callback`,
         },
@@ -77,7 +76,9 @@ export default function SignUpPage() {
     <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight">Create an account</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Create an account
+          </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign up to get started with Hijraah
           </p>
@@ -110,7 +111,7 @@ export default function SignUpPage() {
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Creating account...' : 'Create account'}
+            {loading ? "Creating account..." : "Create account"}
           </Button>
         </form>
 

@@ -18,12 +18,12 @@ export async function register() {
   // Sentry wizard's registration logic
   if (process.env.NEXT_RUNTIME === "nodejs") {
     // Dynamically import server config to avoid bundling it in edge runtime
-    await import("../sentry.server.config"); // Corrected path
+    await import("../../../sentry.server.config"); // Path to root directory
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {
     // Dynamically import edge config to avoid bundling it in nodejs runtime
-    await import("../sentry.edge.config"); // Corrected path
+    await import("../../../sentry.edge.config"); // Path to root directory
   }
 }
 

@@ -9,7 +9,7 @@ import {
 import { supabase } from "../_shared/utils";
 
 async function getImmigrationRules(
-  programType: string
+  programType: string,
 ): Promise<ImmigrationRules> {
   const { data, error } = await supabase
     .from("immigration_rules")
@@ -33,7 +33,7 @@ function checkBasicEligibility(params: {
   // Check qualifications
   if (rules.required_qualifications) {
     const missingQuals = rules.required_qualifications.filter(
-      (qual: string) => !userProfile.qualifications.includes(qual)
+      (qual: string) => !userProfile.qualifications.includes(qual),
     );
     if (missingQuals.length > 0) {
       missing.push(`Required qualifications: ${missingQuals.join(", ")}`);
@@ -46,7 +46,7 @@ function checkBasicEligibility(params: {
     userProfile.workExperience < rules.minimum_work_experience
   ) {
     missing.push(
-      `Minimum ${rules.minimum_work_experience} years of work experience required`
+      `Minimum ${rules.minimum_work_experience} years of work experience required`,
     );
     recommendations.push("Gain more work experience in your field");
   }

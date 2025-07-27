@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
 interface UseChatScrollProps {
   chatRef: React.RefObject<HTMLDivElement>;
@@ -34,7 +34,7 @@ export function useChatScroll({
           }
         });
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (shouldLoadMore && loadMore) {
@@ -42,19 +42,12 @@ export function useChatScroll({
     }
 
     if (shouldAutoScroll) {
-      bottomDiv.scrollIntoView({ behavior: 'smooth' });
+      bottomDiv.scrollIntoView({ behavior: "smooth" });
       setHasInitialized(true);
     }
 
     return () => {
       observer.disconnect();
     };
-  }, [
-    chatRef,
-    bottomRef,
-    shouldLoadMore,
-    loadMore,
-    hasInitialized,
-    count,
-  ]);
-} 
+  }, [chatRef, bottomRef, shouldLoadMore, loadMore, hasInitialized, count]);
+}

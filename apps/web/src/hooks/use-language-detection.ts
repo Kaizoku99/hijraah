@@ -78,7 +78,7 @@ export function useLanguageDetection(options: LanguageDetectionOptions = {}) {
       const currentPath = window.location.pathname;
       const hasLocalePrefix = locales.some(
         (locale) =>
-          currentPath === `/${locale}` || currentPath.startsWith(`/${locale}/`)
+          currentPath === `/${locale}` || currentPath.startsWith(`/${locale}/`),
       );
 
       // If URL doesn't have locale prefix and detected locale is different from default,
@@ -172,7 +172,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
             detectedLocale = segment as Locale;
             if (options.debug) {
               console.log(
-                `[useLanguageDetection] Detected from URL: ${detectedLocale}`
+                `[useLanguageDetection] Detected from URL: ${detectedLocale}`,
               );
             }
           }
@@ -188,7 +188,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
             acc[key] = value;
             return acc;
           },
-          {} as Record<string, string>
+          {} as Record<string, string>,
         );
 
         const cookieValue = cookies[options.cookieName];
@@ -196,7 +196,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
           detectedLocale = cookieValue as Locale;
           if (options.debug) {
             console.log(
-              `[useLanguageDetection] Detected from cookie: ${detectedLocale}`
+              `[useLanguageDetection] Detected from cookie: ${detectedLocale}`,
             );
           }
         }
@@ -211,7 +211,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
             detectedLocale = storedLocale as Locale;
             if (options.debug) {
               console.log(
-                `[useLanguageDetection] Detected from localStorage: ${detectedLocale}`
+                `[useLanguageDetection] Detected from localStorage: ${detectedLocale}`,
               );
             }
           }
@@ -244,7 +244,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
 
             // Language match without region (e.g., 'en-US' matches 'en')
             const match = locales.find((locale) =>
-              locale.toLowerCase().startsWith(normalizedLang)
+              locale.toLowerCase().startsWith(normalizedLang),
             );
 
             if (match) {
@@ -255,7 +255,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
 
           if (detectedLocale && options.debug) {
             console.log(
-              `[useLanguageDetection] Detected from navigator: ${detectedLocale}`
+              `[useLanguageDetection] Detected from navigator: ${detectedLocale}`,
             );
           }
         }
@@ -269,7 +269,7 @@ function detectLanguage(options: Required<LanguageDetectionOptions>): Locale {
           detectedLocale = htmlLang as Locale;
           if (options.debug) {
             console.log(
-              `[useLanguageDetection] Detected from HTML lang: ${detectedLocale}`
+              `[useLanguageDetection] Detected from HTML lang: ${detectedLocale}`,
             );
           }
         }

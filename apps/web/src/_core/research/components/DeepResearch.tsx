@@ -24,7 +24,7 @@ interface DeepResearchProps {
       country?: string;
       category?: string;
       depth: "basic" | "detailed" | "comprehensive";
-    }
+    },
   ) => Promise<void>;
   isLoading: boolean;
   results: string | null;
@@ -133,7 +133,7 @@ export function DeepResearch({
               <Select
                 value={selectedDepth}
                 onValueChange={(
-                  value: "basic" | "detailed" | "comprehensive"
+                  value: "basic" | "detailed" | "comprehensive",
                 ) => setSelectedDepth(value)}
               >
                 <SelectTrigger>

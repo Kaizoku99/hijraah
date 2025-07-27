@@ -14,15 +14,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-
 export type MessageEditorProps = {
   message: Message;
   setMode: Dispatch<SetStateAction<"view" | "edit">>;
   setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[])
+    messages: Message[] | ((messages: Message[]) => Message[]),
   ) => void;
   reload: (
-    chatRequestOptions?: ChatRequestOptions
+    chatRequestOptions?: ChatRequestOptions,
   ) => Promise<string | null | undefined>;
 };
 

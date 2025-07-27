@@ -13,7 +13,7 @@ import { mistral } from "@ai-sdk/mistral";
  */
 export async function runMistralOCR(
   fileBuffer: Buffer,
-  mimeType?: string
+  mimeType?: string,
 ): Promise<string> {
   // Initialise on demand – env var MISTRAL_API_KEY must be set
   const mistralLlm = mistral("mistral-large-latest");

@@ -23,6 +23,7 @@ src/_infrastructure/supabase/
 ```
 
 Key files:
+
 - `client.ts` - Browser client
 - `server.ts` - Server-side client
 - `realtime.ts` - Realtime subscriptions

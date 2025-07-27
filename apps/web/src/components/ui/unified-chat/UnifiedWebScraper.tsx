@@ -265,7 +265,7 @@ ${
 `
     : `- Content length: ${result.content.length} characters`
 }
-`
+`,
   )
   .join("\n")}
 
@@ -459,7 +459,7 @@ Would you like me to analyze this information further?`,
                             <div>
                               <span className="font-medium">Countries:</span>{" "}
                               {result.metadata.immigrationData.countries.join(
-                                ", "
+                                ", ",
                               )}
                             </div>
                           )}
@@ -467,7 +467,7 @@ Would you like me to analyze this information further?`,
                             <div>
                               <span className="font-medium">Visa Types:</span>{" "}
                               {result.metadata.immigrationData.visaTypes.join(
-                                ", "
+                                ", ",
                               )}
                             </div>
                           )}
@@ -478,7 +478,7 @@ Would you like me to analyze this information further?`,
                                 {result.metadata.immigrationData.requirements.map(
                                   (req, i) => (
                                     <li key={i}>{req}</li>
-                                  )
+                                  ),
                                 )}
                               </ul>
                             </div>

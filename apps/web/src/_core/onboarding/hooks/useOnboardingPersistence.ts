@@ -40,7 +40,7 @@ const defaultOnboardingState: OnboardingState = {
  */
 export function useOnboardingPersistence(user: User | null) {
   const [onboardingState, setOnboardingState] = useState<OnboardingState>(
-    defaultOnboardingState
+    defaultOnboardingState,
   );
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,7 +57,7 @@ export function useOnboardingPersistence(user: User | null) {
 
     const fetchState = async () => {
       console.log(
-        "[OnboardingPersistence] fetchState: START. Setting isLoading=true."
+        "[OnboardingPersistence] fetchState: START. Setting isLoading=true.",
       );
       setIsLoading(true);
       console.log("[OnboardingPersistence] Checking state for user:", user.id);
@@ -74,7 +74,7 @@ export function useOnboardingPersistence(user: User | null) {
             "[OnboardingPersistence] Error fetching state (raw):",
             error,
             "Error fetching state (JSON):",
-            JSON.stringify(error, Object.getOwnPropertyNames(error))
+            JSON.stringify(error, Object.getOwnPropertyNames(error)),
           );
           toast.error("Failed to load onboarding progress.");
           // Keep default state but indicate loading finished
@@ -114,13 +114,13 @@ export function useOnboardingPersistence(user: User | null) {
           "[OnboardingPersistence] Unexpected error fetching state (raw):",
           err,
           "Unexpected error fetching state (JSON):",
-          JSON.stringify(err, Object.getOwnPropertyNames(err))
+          JSON.stringify(err, Object.getOwnPropertyNames(err)),
         );
         toast.error("An error occurred while loading onboarding progress.");
         setOnboardingState((prev) => ({ ...prev, isActive: false }));
       } finally {
         console.log(
-          "[OnboardingPersistence] fetchState: FINALLY. Setting isLoading=false."
+          "[OnboardingPersistence] fetchState: FINALLY. Setting isLoading=false.",
         );
         setIsLoading(false);
       }
@@ -140,7 +140,7 @@ export function useOnboardingPersistence(user: User | null) {
       };
       console.log(
         "[OnboardingPersistence] updateOnboardingState: START. Applying local state:",
-        updatedLocalState
+        updatedLocalState,
       );
 
       // Update local state immediately
@@ -151,7 +151,7 @@ export function useOnboardingPersistence(user: User | null) {
           console.log(
             "[OnboardingPersistence] updateOnboardingState: BEFORE upsert for user:",
             user.id,
-            { ...newState }
+            { ...newState },
           );
           const { error } = await supabase.from("user_onboarding").upsert({
             user_id: user.id,
@@ -164,29 +164,29 @@ export function useOnboardingPersistence(user: User | null) {
           if (error) {
             console.error(
               "[OnboardingPersistence] updateOnboardingState: Upsert error:",
-              error
+              error,
             );
             toast.error("Failed to save onboarding progress.");
             // Optionally revert local state or handle error
           } else {
             console.log(
-              "[OnboardingPersistence] updateOnboardingState: Upsert SUCCESSFUL."
+              "[OnboardingPersistence] updateOnboardingState: Upsert SUCCESSFUL.",
             );
           }
         } catch (err) {
           console.error(
             "[OnboardingPersistence] updateOnboardingState: Unexpected upsert error:",
-            err
+            err,
           );
           toast.error("An error occurred while saving onboarding progress.");
         }
       } else {
         console.log(
-          "[OnboardingPersistence] updateOnboardingState: Onboarding not active, skipping upsert."
+          "[OnboardingPersistence] updateOnboardingState: Onboarding not active, skipping upsert.",
         );
       }
     },
-    [user, supabase, onboardingState]
+    [user, supabase, onboardingState],
   ); // Include onboardingState in dependencies
 
   return { onboardingState, updateOnboardingState, isLoading };

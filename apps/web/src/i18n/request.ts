@@ -33,7 +33,7 @@ const getMessageFallback = ({
   if (process.env.NODE_ENV === "development") {
     console.warn(
       `Missing translation: ${namespace ? `${namespace}.${key}` : key}`,
-      error
+      error,
     );
   }
 
@@ -78,7 +78,7 @@ export default getRequestConfig(async () => {
         // Fallback to defaultLocale messages if resolvedLocale is somehow unexpected
         // (should ideally be caught by locales.includes check earlier)
         console.warn(
-          `Unexpected resolvedLocale: ${resolvedLocale}, loading default ${defaultLocale} messages.`
+          `Unexpected resolvedLocale: ${resolvedLocale}, loading default ${defaultLocale} messages.`,
         );
         messages = (await import(`@/i18n/locales/${defaultLocale}.json`))
           .default;
@@ -86,7 +86,7 @@ export default getRequestConfig(async () => {
   } catch (error) {
     console.error(
       `Failed to load translations for ${resolvedLocale}, falling back to default. Error:`,
-      error
+      error,
     );
     // Fallback to default locale messages on any error
     try {
@@ -94,7 +94,7 @@ export default getRequestConfig(async () => {
     } catch (fallbackError) {
       console.error(
         `Failed to load default locale messages for ${defaultLocale}:`,
-        fallbackError
+        fallbackError,
       );
       messages = {
         common: { loading: "Loading...", error: "An error occurred" },

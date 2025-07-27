@@ -10,7 +10,6 @@ import { SidebarLeftIcon } from "./icons";
 
 import type { ComponentProps } from "react";
 
-
 export function SidebarToggle({
   className,
 }: ComponentProps<typeof SidebarTrigger>) {

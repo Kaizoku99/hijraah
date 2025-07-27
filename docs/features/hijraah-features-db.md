@@ -5,6 +5,7 @@
 ### Must-haves (MVP Requirements)
 
 #### Core AI Chat System
+
 - Basic chat interface with AI assistant
 - Immigration process guidance
 - Document requirement information
@@ -13,6 +14,7 @@
 - Chat history persistence
 
 #### User Management
+
 - User registration and authentication
 - Basic profile management
 - Session handling
@@ -20,6 +22,7 @@
 - Email verification
 
 #### Document Management
+
 - Secure document upload
 - Basic document categorization
 - Document storage
@@ -27,6 +30,7 @@
 - Document deletion
 
 #### Case Management
+
 - Basic case creation
 - Status tracking
 - Timeline view
@@ -34,6 +38,7 @@
 - Basic progress tracking
 
 #### Security Features
+
 - Data encryption
 - Secure authentication
 - Basic access control
@@ -43,6 +48,7 @@
 ### Should-haves (High Priority)
 
 #### Enhanced AI Features
+
 - Multi-turn conversation context
 - Personalized recommendations
 - Multiple language support
@@ -50,6 +56,7 @@
 - Integration with external immigration data
 
 #### Document Features
+
 - Document validation
 - Version control
 - Document sharing
@@ -57,6 +64,7 @@
 - Document expiry tracking
 
 #### Assessment Tools
+
 - Detailed eligibility calculator
 - Points calculator
 - Requirements checker
@@ -64,6 +72,7 @@
 - Timeline estimator
 
 #### User Experience
+
 - Dashboard customization
 - Progress visualization
 - Notification system
@@ -73,6 +82,7 @@
 ### Could-haves (Desired)
 
 #### Advanced Features
+
 - Document translation
 - OCR functionality
 - Professional network
@@ -80,6 +90,7 @@
 - Community forum
 
 #### Integration Features
+
 - Calendar integration
 - Payment processing
 - Email notifications
@@ -87,6 +98,7 @@
 - Third-party API integrations
 
 #### Analytics
+
 - Usage tracking
 - Performance metrics
 - User feedback analysis
@@ -94,6 +106,7 @@
 - ROI calculator
 
 #### Administration
+
 - Admin dashboard
 - User management
 - Content management
@@ -103,6 +116,7 @@
 ### Won't-haves (Out of Scope)
 
 #### Features
+
 - Legal representation
 - Direct visa application submission
 - Immigration authority integration
@@ -110,6 +124,7 @@
 - In-person consultations
 
 #### Services
+
 - Travel arrangements
 - Housing assistance
 - Job placement
@@ -121,7 +136,9 @@
 ### Core Tables
 
 #### users
+
 Purpose: Store user account information and profiles
+
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -141,7 +158,9 @@ CREATE TABLE users (
 ```
 
 #### immigration_cases
+
 Purpose: Track individual immigration cases and their progress
+
 ```sql
 CREATE TABLE immigration_cases (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -155,15 +174,17 @@ CREATE TABLE immigration_cases (
     target_date DATE,
     requirements JSONB,
     notes TEXT,
-    CONSTRAINT fk_user 
-        FOREIGN KEY(user_id) 
-        REFERENCES users(id) 
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id)
         ON DELETE CASCADE
 );
 ```
 
 #### documents
+
 Purpose: Manage uploaded documents and their metadata
+
 ```sql
 CREATE TABLE documents (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -177,15 +198,17 @@ CREATE TABLE documents (
     expires_at DATE,
     metadata JSONB,
     version INTEGER DEFAULT 1,
-    CONSTRAINT fk_case 
-        FOREIGN KEY(case_id) 
-        REFERENCES immigration_cases(id) 
+    CONSTRAINT fk_case
+        FOREIGN KEY(case_id)
+        REFERENCES immigration_cases(id)
         ON DELETE CASCADE
 );
 ```
 
 #### chat_sessions
+
 Purpose: Store AI chat interactions and context
+
 ```sql
 CREATE TABLE chat_sessions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -195,15 +218,17 @@ CREATE TABLE chat_sessions (
     ended_at TIMESTAMP WITH TIME ZONE,
     context JSONB,
     metadata JSONB,
-    CONSTRAINT fk_user 
-        FOREIGN KEY(user_id) 
-        REFERENCES users(id) 
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id)
         ON DELETE CASCADE
 );
 ```
 
 #### chat_messages
+
 Purpose: Store individual chat messages
+
 ```sql
 CREATE TABLE chat_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -212,9 +237,9 @@ CREATE TABLE chat_messages (
     content TEXT NOT NULL,
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     metadata JSONB,
-    CONSTRAINT fk_session 
-        FOREIGN KEY(session_id) 
-        REFERENCES chat_sessions(id) 
+    CONSTRAINT fk_session
+        FOREIGN KEY(session_id)
+        REFERENCES chat_sessions(id)
         ON DELETE CASCADE
 );
 ```
@@ -222,7 +247,9 @@ CREATE TABLE chat_messages (
 ### Supporting Tables
 
 #### eligibility_assessments
+
 Purpose: Store user eligibility assessments and results
+
 ```sql
 CREATE TABLE eligibility_assessments (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -233,15 +260,17 @@ CREATE TABLE eligibility_assessments (
     results JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     valid_until DATE,
-    CONSTRAINT fk_user 
-        FOREIGN KEY(user_id) 
-        REFERENCES users(id) 
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id)
         ON DELETE CASCADE
 );
 ```
 
 #### tasks
+
 Purpose: Track immigration process tasks and deadlines
+
 ```sql
 CREATE TABLE tasks (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -253,15 +282,17 @@ CREATE TABLE tasks (
     priority INTEGER DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP WITH TIME ZONE,
-    CONSTRAINT fk_case 
-        FOREIGN KEY(case_id) 
-        REFERENCES immigration_cases(id) 
+    CONSTRAINT fk_case
+        FOREIGN KEY(case_id)
+        REFERENCES immigration_cases(id)
         ON DELETE CASCADE
 );
 ```
 
 #### notifications
+
 Purpose: Manage system notifications and alerts
+
 ```sql
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -272,9 +303,9 @@ CREATE TABLE notifications (
     read_at TIMESTAMP WITH TIME ZONE,
     action_url VARCHAR(255),
     priority INTEGER DEFAULT 1,
-    CONSTRAINT fk_user 
-        FOREIGN KEY(user_id) 
-        REFERENCES users(id) 
+    CONSTRAINT fk_user
+        FOREIGN KEY(user_id)
+        REFERENCES users(id)
         ON DELETE CASCADE
 );
 ```
@@ -282,7 +313,9 @@ CREATE TABLE notifications (
 ### Audit Tables
 
 #### activity_logs
+
 Purpose: Track user activities and system events
+
 ```sql
 CREATE TABLE activity_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -300,6 +333,7 @@ CREATE TABLE activity_logs (
 ### Relationships Overview
 
 1. One-to-Many Relationships:
+
    - User → Immigration Cases
    - User → Documents
    - User → Chat Sessions
@@ -308,6 +342,7 @@ CREATE TABLE activity_logs (
    - Chat Session → Chat Messages
 
 2. Many-to-One Relationships:
+
    - Documents → Immigration Case
    - Tasks → Immigration Case
    - Chat Messages → Chat Session

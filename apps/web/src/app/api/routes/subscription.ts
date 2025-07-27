@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { Hono , Context } from "hono";
+import { Hono, Context } from "hono";
 import { z } from "zod";
 
 import type { AppEnv } from "@/app/api/[[...route]]/route"; // Import AppEnv
@@ -105,7 +105,7 @@ export function setupSubscriptionRoutes(app: Hono<AppEnv>) {
         console.error("Error updating subscription plan:", error);
         return c.json({ error: error.message || "Failed to update plan" }, 500);
       }
-    }
+    },
   );
 
   /**
@@ -131,7 +131,7 @@ export function setupSubscriptionRoutes(app: Hono<AppEnv>) {
         // In reality, call Stripe API here
 
         console.log(
-          `Mock Checkout URL for user ${user.id}, plan ${plan}: ${checkoutUrl}`
+          `Mock Checkout URL for user ${user.id}, plan ${plan}: ${checkoutUrl}`,
         );
 
         return c.json({ success: true, data: { checkoutUrl, plan } });
@@ -139,10 +139,10 @@ export function setupSubscriptionRoutes(app: Hono<AppEnv>) {
         console.error("Error creating checkout session:", error);
         return c.json(
           { error: error.message || "Failed to create checkout" },
-          500
+          500,
         );
       }
-    }
+    },
   );
 
   /**

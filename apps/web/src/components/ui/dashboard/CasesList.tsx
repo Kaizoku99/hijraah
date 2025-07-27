@@ -125,7 +125,7 @@ export function CasesList({ cases, onCaseUpdated }: CasesListProps) {
             "transition-all",
             expandedCaseId === caseItem.id
               ? "border-primary shadow-md"
-              : "hover:shadow-sm"
+              : "hover:shadow-sm",
           )}
         >
           <CardHeader className="p-4">

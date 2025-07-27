@@ -157,7 +157,7 @@ export async function loadAgent(agentId: string): Promise<Agent | null> {
 export async function createAgentForUser(
   userId: string,
   type: AgentType,
-  initialMessages: ChatMessage[] = []
+  initialMessages: ChatMessage[] = [],
 ): Promise<Agent> {
   const agent = createAgentByType(type, {
     userId,
@@ -173,7 +173,7 @@ export async function createAgentForUser(
 // Factory function to create an agent by type
 function createAgentByType(
   type: AgentType,
-  initialState?: Partial<AgentState>
+  initialState?: Partial<AgentState>,
 ): Agent {
   switch (type) {
     case AgentType.VISA_ASSISTANT:

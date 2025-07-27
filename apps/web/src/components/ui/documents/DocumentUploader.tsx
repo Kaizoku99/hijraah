@@ -27,7 +27,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { useSupabaseBrowser } from "@/lib/supabase/client";
 import { uploadFile } from "@/lib/supabase/storage"; // Assuming this handles Buffer upload correctly
 
-
 // Define the structure of the document record
 interface DocumentRecord {
   id: string;
@@ -72,7 +71,7 @@ export function DocumentUploader({
   const createInitialDocumentRecord = async (
     supabaseClient: SupabaseClient,
     userId: string,
-    file: File
+    file: File,
   ): Promise<string> => {
     const { data: initialDoc, error: insertError } = await supabaseClient
       .from("documents")
@@ -89,7 +88,7 @@ export function DocumentUploader({
       throw new Error(
         `Failed to create database record: ${
           insertError?.message || "No ID returned"
-        }`
+        }`,
       );
     }
     return initialDoc.id;
@@ -98,7 +97,7 @@ export function DocumentUploader({
   const uploadFileToStorage = async (
     fileBuffer: Buffer,
     referenceFileName: string,
-    bucket: string
+    bucket: string,
   ): Promise<string> => {
     // Assuming uploadFile from storage.ts handles Buffer and returns path
     const uploadedPath = await uploadFile(
@@ -108,7 +107,7 @@ export function DocumentUploader({
       {
         contentType: file?.type || "application/octet-stream", // Use state 'file' here
         cacheControl: "3600",
-      }
+      },
     );
     if (!uploadedPath) {
       throw new Error("File upload succeeded but no path was returned.");
@@ -119,7 +118,7 @@ export function DocumentUploader({
   const updateDocumentRecord = async (
     supabaseClient: SupabaseClient,
     documentId: string,
-    filePath: string
+    filePath: string,
   ): Promise<void> => {
     const { error: updateError } = await supabaseClient
       .from("documents")
@@ -131,7 +130,7 @@ export function DocumentUploader({
 
     if (updateError) {
       throw new Error(
-        `Failed to update database record with file path: ${updateError.message}`
+        `Failed to update database record with file path: ${updateError.message}`,
       );
     }
   };
@@ -140,20 +139,20 @@ export function DocumentUploader({
     supabaseClient: SupabaseClient,
     documentId: string | null,
     uploadedFilePath: string | null,
-    bucket: string
+    bucket: string,
   ) => {
     console.warn(
-      `Upload failed. Attempting cleanup for doc: ${documentId}, path: ${uploadedFilePath}`
+      `Upload failed. Attempting cleanup for doc: ${documentId}, path: ${uploadedFilePath}`,
     );
     if (uploadedFilePath) {
       try {
         await supabaseClient.storage.from(bucket).remove([uploadedFilePath]);
         console.log(
-          `Successfully deleted orphaned storage file: ${uploadedFilePath}`
+          `Successfully deleted orphaned storage file: ${uploadedFilePath}`,
         );
       } catch (storageError: any) {
         console.error(
-          `Failed to delete orphaned storage file ${uploadedFilePath}: ${storageError.message}`
+          `Failed to delete orphaned storage file ${uploadedFilePath}: ${storageError.message}`,
         );
       }
     }
@@ -166,7 +165,7 @@ export function DocumentUploader({
         console.log(`Successfully marked document ${documentId} as failed.`);
       } catch (dbError: any) {
         console.error(
-          `Failed to mark document ${documentId} as failed: ${dbError.message}`
+          `Failed to mark document ${documentId} as failed: ${dbError.message}`,
         );
       }
     }
@@ -232,7 +231,7 @@ export function DocumentUploader({
       uploadedFilePath = await uploadFileToStorage(
         fileBuffer,
         referenceFileName,
-        bucket
+        bucket,
       );
       setUploadProgress(70); // Assuming upload takes bulk of time
 
@@ -244,7 +243,7 @@ export function DocumentUploader({
 
       // 5. Trigger Background Processing via API
       console.log(
-        `Triggering processing for doc: ${documentId}, path: ${uploadedFilePath}, type: ${file.type}`
+        `Triggering processing for doc: ${documentId}, path: ${uploadedFilePath}, type: ${file.type}`,
       );
       try {
         const processResponse = await fetch("/api/documents/process", {
@@ -264,11 +263,11 @@ export function DocumentUploader({
           throw new Error(
             `Failed to trigger processing: ${
               errorData.error || processResponse.statusText
-            }`
+            }`,
           );
         }
         console.log(
-          `Successfully triggered processing for document ${documentId}`
+          `Successfully triggered processing for document ${documentId}`,
         );
         // *** Call the completion callback here ***
         onUploadComplete?.();
@@ -276,7 +275,7 @@ export function DocumentUploader({
         // Log this error, but don't necessarily fail the whole upload
         // The file is uploaded, processing can perhaps be retried later.
         console.error(
-          `Error triggering background processing for ${documentId}: ${processError.message}`
+          `Error triggering background processing for ${documentId}: ${processError.message}`,
         );
         toast({
           title: "Processing Trigger Failed",
@@ -336,7 +335,7 @@ export function DocumentUploader({
     setLastError(null);
     // Reset the file input visually (optional but good UX)
     const fileInput = document.getElementById(
-      "file"
+      "file",
     ) as HTMLInputElement | null;
     if (fileInput) {
       fileInput.value = "";
@@ -354,7 +353,7 @@ export function DocumentUploader({
         "uploading",
         "updatingRecord",
       ].includes(uploadState),
-    [uploadState]
+    [uploadState],
   );
 
   const uploadButtonText = useMemo(() => {

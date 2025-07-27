@@ -12,7 +12,7 @@ import type { User } from "@supabase/supabase-js";
  * For Next.js API routes
  */
 export async function getAuthenticatedUser(
-  request: Request
+  request: Request,
 ): Promise<ExtendedUser | null> {
   const supabase = createServerSupabaseClientForApiRoute();
 
@@ -59,6 +59,6 @@ function createServerSupabaseClientForApiRoute() {
           return cookieStore.get(name)?.value;
         },
       },
-    }
+    },
   );
 }

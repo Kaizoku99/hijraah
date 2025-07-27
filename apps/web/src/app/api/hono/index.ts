@@ -91,7 +91,7 @@ app.use(
     allowHeaders: ["Content-Type", "Authorization", "X-Request-Id"],
     maxAge: 86400,
     credentials: true,
-  })
+  }),
 );
 app.use("*", prettyJSON());
 
@@ -115,7 +115,7 @@ app.use(
   rateLimitMiddleware({
     ...RATE_LIMITS.DEFAULT,
     errorMessage: "Too many requests. Please try again later.",
-  })
+  }),
 );
 
 // Health check endpoint - no caching
@@ -157,7 +157,7 @@ app.get(
         "/api/subscription": "Subscription management",
         "/admin": "API monitoring and administration (protected)",
       },
-    })
+    }),
 );
 
 // Admin/monitoring endpoints (protected with admin-level access)
@@ -171,7 +171,7 @@ const monitoringRoutes = new Hono()
     c.json({
       success: true,
       stats: await getRedisStats(),
-    })
+    }),
   )
   .post("/cache/clear", async (c) => {
     const clearedKeys = await clearRedisCache();
@@ -188,7 +188,7 @@ const monitoringRoutes = new Hono()
           success: false,
           error: "Pattern is required",
         },
-        400
+        400,
       );
     }
 
@@ -208,7 +208,7 @@ const monitoringRoutes = new Hono()
           success: false,
           error: "Key parameter is required",
         },
-        400
+        400,
       );
     }
 
@@ -235,7 +235,7 @@ const monitoringRoutes = new Hono()
           success: false,
           error: "User ID is required",
         },
-        400
+        400,
       );
     }
 
@@ -265,7 +265,7 @@ const monitoringRoutes = new Hono()
     c.json({
       success: true,
       metrics: getPerformanceMetrics(),
-    })
+    }),
   )
   .post("/performance/reset", (c) => {
     resetPerformanceMetrics();
@@ -281,7 +281,7 @@ const monitoringRoutes = new Hono()
       success: true,
       enabled: process.env.AUTO_SCALING_ENABLED === "true",
       state: getScalingState(),
-    })
+    }),
   )
 
   // System status
@@ -376,7 +376,7 @@ researchApp.use(
   "*",
   redisApiCacheMiddleware({
     ttl: 60,
-  })
+  }),
 ); // Short cache for research endpoints
 researchApp.route("/", researchRoutes);
 app.route("/api/research", researchApp);
@@ -390,7 +390,7 @@ scrapingApp.use(
   "*",
   redisApiCacheMiddleware({
     ttl: 300,
-  })
+  }),
 );
 scrapingApp.route("/", scrapingRoutes);
 app.route("/api/scraping", scrapingApp);
@@ -402,7 +402,7 @@ vectorSearchApp.use(
   "*",
   redisApiCacheMiddleware({
     ttl: 120,
-  })
+  }),
 ); // 2 minute cache for vector search
 vectorSearchApp.route("/", vectorSearchRoutes);
 app.route("/api/vector-search", vectorSearchApp);
@@ -424,7 +424,7 @@ app.onError((err, c) => {
       error: err.message || "An unknown error occurred",
       requestId: c.get("requestId" as any) || "unknown",
     },
-    500
+    500,
   );
 });
 

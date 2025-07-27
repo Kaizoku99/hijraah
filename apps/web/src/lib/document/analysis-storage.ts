@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-import { DocumentAnalysis, DocumentType } from '@/types/documents';
+import { DocumentAnalysis, DocumentType } from "@/types/documents";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -11,9 +11,11 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 /**
  * Save document analysis result to the database
  */
-export async function saveDocumentAnalysisResult(analysisResult: Omit<DocumentAnalysis, 'id'>): Promise<DocumentAnalysis> {
+export async function saveDocumentAnalysisResult(
+  analysisResult: Omit<DocumentAnalysis, "id">,
+): Promise<DocumentAnalysis> {
   const { data, error } = await supabase
-    .from('document_analyses')
+    .from("document_analyses")
     .insert({
       user_id: analysisResult.userId,
       document_type: analysisResult.documentType,
@@ -29,7 +31,7 @@ export async function saveDocumentAnalysisResult(analysisResult: Omit<DocumentAn
     .single();
 
   if (error) {
-    console.error('Error saving document analysis result:', error);
+    console.error("Error saving document analysis result:", error);
     throw new Error(`Failed to save document analysis: ${error.message}`);
   }
 
@@ -50,18 +52,20 @@ export async function saveDocumentAnalysisResult(analysisResult: Omit<DocumentAn
 /**
  * Get document analysis result by ID
  */
-export async function getDocumentAnalysisById(id: string): Promise<DocumentAnalysis | null> {
+export async function getDocumentAnalysisById(
+  id: string,
+): Promise<DocumentAnalysis | null> {
   const { data, error } = await supabase
-    .from('document_analyses')
-    .select('*')
-    .eq('id', id)
+    .from("document_analyses")
+    .select("*")
+    .eq("id", id)
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === "PGRST116") {
       return null; // Not found
     }
-    console.error('Error fetching document analysis:', error);
+    console.error("Error fetching document analysis:", error);
     throw new Error(`Failed to fetch document analysis: ${error.message}`);
   }
 
@@ -82,19 +86,21 @@ export async function getDocumentAnalysisById(id: string): Promise<DocumentAnaly
 /**
  * Get document analyses by user ID
  */
-export async function getDocumentAnalysesByUserId(userId: string): Promise<DocumentAnalysis[]> {
+export async function getDocumentAnalysesByUserId(
+  userId: string,
+): Promise<DocumentAnalysis[]> {
   const { data, error } = await supabase
-    .from('document_analyses')
-    .select('*')
-    .eq('user_id', userId)
-    .order('analysis_date', { ascending: false });
+    .from("document_analyses")
+    .select("*")
+    .eq("user_id", userId)
+    .order("analysis_date", { ascending: false });
 
   if (error) {
-    console.error('Error fetching document analyses:', error);
+    console.error("Error fetching document analyses:", error);
     throw new Error(`Failed to fetch document analyses: ${error.message}`);
   }
 
-  return data.map(item => ({
+  return data.map((item) => ({
     id: item.id,
     userId: item.user_id,
     documentType: item.document_type as DocumentType,
@@ -106,4 +112,4 @@ export async function getDocumentAnalysesByUserId(userId: string): Promise<Docum
     errorMessage: item.error_message,
     confidence: item.confidence,
   }));
-} 
+}

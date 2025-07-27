@@ -12,7 +12,7 @@ interface DetectorOptions extends HonoDetectorOptions {
  * Middleware for language detection in API routes
  */
 export function languageDetectionMiddleware(
-  options: Partial<DetectorOptions> = {}
+  options: Partial<DetectorOptions> = {},
 ): MiddlewareHandler {
   // Set up default options
   const defaultOptions: Partial<DetectorOptions> = {

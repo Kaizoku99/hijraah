@@ -37,7 +37,7 @@ Deno.serve(async (req) => {
     if (!serviceEndpoint) {
       return new Response(
         JSON.stringify({ error: "Service endpoint not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
 

@@ -1,19 +1,19 @@
 /**
  * Mistral OCR API Integration
- * 
+ *
  * This file provides functions to interact with the Mistral OCR API for document processing
  * and text extraction from images and PDFs.
  */
 
-import fs from 'fs';
+import fs from "fs";
 
-import { Mistral } from '@mistralai/mistralai';
+import { Mistral } from "@mistralai/mistralai";
 
-import { createPresignedUrl } from '@/lib/supabase/storage';
+import { createPresignedUrl } from "@/lib/supabase/storage";
 
 // Initialize Mistral client
 const mistralClient = new Mistral({
-  apiKey: process.env.MISTRAL_API_KEY || '',
+  apiKey: process.env.MISTRAL_API_KEY || "",
 });
 
 interface MistralOCROptions {
@@ -25,7 +25,7 @@ interface MistralOCROptions {
 
 interface MistralOCRResponse {
   content: Array<{
-    type: 'text' | 'image';
+    type: "text" | "image";
     text?: string;
     image_data?: string;
     page_number?: number;
@@ -39,21 +39,21 @@ interface MistralOCRResponse {
 
 /**
  * Process a document with Mistral OCR API
- * 
+ *
  * @param documentUrl URL of the document to process
  * @param options Processing options
  * @returns Structured content from the document
  */
 export async function processMistralOCR(
-  documentUrl: string, 
-  options: MistralOCROptions = {}
+  documentUrl: string,
+  options: MistralOCROptions = {},
 ): Promise<MistralOCRResponse> {
   try {
     // Generate a presigned URL if it's a Supabase URL
     let accessibleUrl = documentUrl;
-    if (documentUrl.includes('supabase')) {
-      const bucket = 'documents';
-      const path = documentUrl.split('/').pop() || '';
+    if (documentUrl.includes("supabase")) {
+      const bucket = "documents";
+      const path = documentUrl.split("/").pop() || "";
       accessibleUrl = await createPresignedUrl(bucket, path);
     }
 
@@ -62,21 +62,23 @@ export async function processMistralOCR(
       model: "mistral-ocr-latest",
       document: {
         type: "document_url",
-        documentUrl: accessibleUrl
+        documentUrl: accessibleUrl,
       },
-      include_image_base64: options.includeImageBase64 ?? false
+      include_image_base64: options.includeImageBase64 ?? false,
     });
 
     return ocrResponse as unknown as MistralOCRResponse;
   } catch (error) {
-    console.error('Mistral OCR processing error:', error);
-    throw new Error(`Failed to process document with Mistral OCR: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Mistral OCR processing error:", error);
+    throw new Error(
+      `Failed to process document with Mistral OCR: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
 /**
  * Process a document with Mistral OCR API using file upload
- * 
+ *
  * @param file File buffer to process
  * @param filename Original filename
  * @param options Processing options
@@ -85,7 +87,7 @@ export async function processMistralOCR(
 export async function processMistralOCRWithFileUpload(
   file: Buffer,
   filename: string,
-  options: MistralOCROptions = {}
+  options: MistralOCROptions = {},
 ): Promise<MistralOCRResponse> {
   try {
     // First upload the file to Mistral
@@ -94,7 +96,7 @@ export async function processMistralOCRWithFileUpload(
         fileName: filename,
         content: file,
       },
-      purpose: "ocr"
+      purpose: "ocr",
     });
 
     // Get a signed URL to process the file
@@ -109,33 +111,35 @@ export async function processMistralOCRWithFileUpload(
         type: "document_url",
         documentUrl: signedUrl.url,
       },
-      include_image_base64: options.includeImageBase64 ?? false
+      include_image_base64: options.includeImageBase64 ?? false,
     });
 
     return ocrResponse as unknown as MistralOCRResponse;
   } catch (error) {
-    console.error('Mistral OCR processing error:', error);
-    throw new Error(`Failed to process document with Mistral OCR: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Mistral OCR processing error:", error);
+    throw new Error(
+      `Failed to process document with Mistral OCR: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
 /**
  * Process an image with Mistral OCR API
- * 
+ *
  * @param imageUrl URL of the image to process
  * @param options Processing options
  * @returns Structured content from the image
  */
 export async function processMistralOCRWithImage(
   imageUrl: string,
-  options: MistralOCROptions = {}
+  options: MistralOCROptions = {},
 ): Promise<MistralOCRResponse> {
   try {
     // Generate a presigned URL if it's a Supabase URL
     let accessibleUrl = imageUrl;
-    if (imageUrl.includes('supabase')) {
-      const bucket = 'documents';
-      const path = imageUrl.split('/').pop() || '';
+    if (imageUrl.includes("supabase")) {
+      const bucket = "documents";
+      const path = imageUrl.split("/").pop() || "";
       accessibleUrl = await createPresignedUrl(bucket, path);
     }
 
@@ -144,36 +148,38 @@ export async function processMistralOCRWithImage(
       model: "mistral-ocr-latest",
       document: {
         type: "image_url",
-        imageUrl: accessibleUrl
+        imageUrl: accessibleUrl,
       },
-      include_image_base64: options.includeImageBase64 ?? false
+      include_image_base64: options.includeImageBase64 ?? false,
     });
 
     return ocrResponse as unknown as MistralOCRResponse;
   } catch (error) {
-    console.error('Mistral OCR processing error:', error);
-    throw new Error(`Failed to process image with Mistral OCR: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Mistral OCR processing error:", error);
+    throw new Error(
+      `Failed to process image with Mistral OCR: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
 /**
  * Document understanding with Mistral
  * Ask questions about document content
- * 
+ *
  * @param documentUrl URL of the document to process
  * @param question Question to ask about the document
  * @returns Answer to the question based on document content
  */
 export async function askDocumentQuestion(
   documentUrl: string,
-  question: string
+  question: string,
 ): Promise<string> {
   try {
     // Generate a presigned URL if it's a Supabase URL
     let accessibleUrl = documentUrl;
-    if (documentUrl.includes('supabase')) {
-      const bucket = 'documents';
-      const path = documentUrl.split('/').pop() || '';
+    if (documentUrl.includes("supabase")) {
+      const bucket = "documents";
+      const path = documentUrl.split("/").pop() || "";
       accessibleUrl = await createPresignedUrl(bucket, path);
     }
 
@@ -199,42 +205,46 @@ export async function askDocumentQuestion(
 
     return chatResponse.choices[0].message.content;
   } catch (error) {
-    console.error('Document understanding error:', error);
-    throw new Error(`Failed to process document question: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Document understanding error:", error);
+    throw new Error(
+      `Failed to process document question: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
 /**
  * Extract plain text from Mistral OCR response
- * 
+ *
  * @param ocrResponse Response from Mistral OCR API
  * @returns Plain text content from the document
  */
-export function extractPlainTextFromOCRResponse(ocrResponse: MistralOCRResponse): string {
+export function extractPlainTextFromOCRResponse(
+  ocrResponse: MistralOCRResponse,
+): string {
   return ocrResponse.content
-    .filter(item => item.type === 'text' && item.text)
-    .map(item => item.text)
-    .join('\n');
+    .filter((item) => item.type === "text" && item.text)
+    .map((item) => item.text)
+    .join("\n");
 }
 
 /**
  * Get content type based on file extension
  */
 function getContentType(filename: string): string {
-  const extension = filename.split('.').pop()?.toLowerCase();
-  
+  const extension = filename.split(".").pop()?.toLowerCase();
+
   switch (extension) {
-    case 'pdf':
-      return 'application/pdf';
-    case 'png':
-      return 'image/png';
-    case 'jpg':
-    case 'jpeg':
-      return 'image/jpeg';
-    case 'tiff':
-    case 'tif':
-      return 'image/tiff';
+    case "pdf":
+      return "application/pdf";
+    case "png":
+      return "image/png";
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "tiff":
+    case "tif":
+      return "image/tiff";
     default:
-      return 'application/octet-stream';
+      return "application/octet-stream";
   }
-} 
+}

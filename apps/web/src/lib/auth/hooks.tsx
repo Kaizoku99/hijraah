@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   // Sign out
@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   // Reset password
@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   // Update password
@@ -202,7 +202,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       }
     },
-    [supabase]
+    [supabase],
   );
 
   // Set up auth listener

@@ -1,24 +1,34 @@
-import { tool } from 'ai';
-import { z } from 'zod';
+import { tool } from "ai";
+import { z } from "zod";
 
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 /**
  * Tool for searching the web using Firecrawl or other available search services
  */
 export const searchTool = {
-  description: 'Search for web pages. Use this to find information on any topic.',
+  description:
+    "Search for web pages. Use this to find information on any topic.",
   parameters: z.object({
-    query: z.string().describe('Search query to find relevant web pages'),
-    maxResults: z.number().optional().describe('Maximum number of results to return (default 5)'),
+    query: z.string().describe("Search query to find relevant web pages"),
+    maxResults: z
+      .number()
+      .optional()
+      .describe("Maximum number of results to return (default 5)"),
   }),
-  execute: async ({ query, maxResults = 5 }: { query: string; maxResults?: number }) => {
+  execute: async ({
+    query,
+    maxResults = 5,
+  }: {
+    query: string;
+    maxResults?: number;
+  }) => {
     try {
       // Initialize search service - in this case we're using an API route that will use Firecrawl
-      const response = await fetch('/api/ai/search', {
-        method: 'POST',
+      const response = await fetch("/api/ai/search", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           query,
@@ -46,18 +56,18 @@ export const searchTool = {
           return result;
         }
       });
-      
+
       // Save search results to the database for future reference
       try {
         const supabase = getSupabaseClient();
-        await supabase.from('search_queries').insert({
+        await supabase.from("search_queries").insert({
           query,
           results: resultsWithFavicons,
           created_at: new Date().toISOString(),
         });
       } catch (dbError) {
         // Don't fail the search if database storage fails
-        console.error('Failed to save search results:', dbError);
+        console.error("Failed to save search results:", dbError);
       }
 
       return {
@@ -65,11 +75,14 @@ export const searchTool = {
         success: true,
       };
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
       return {
-        error: error instanceof Error ? error.message : 'Unknown error occurred during search',
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error occurred during search",
         success: false,
       };
     }
   },
-}; 
+};

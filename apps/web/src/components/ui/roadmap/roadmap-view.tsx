@@ -126,7 +126,7 @@ export default function RoadmapView({ roadmapId, userId }: RoadmapViewProps) {
         // Expand the current phase by default
         if (data.phases) {
           const currentPhase = data.phases.find(
-            (phase) => phase.status === "in_progress"
+            (phase) => phase.status === "in_progress",
           );
 
           if (currentPhase) {
@@ -149,7 +149,7 @@ export default function RoadmapView({ roadmapId, userId }: RoadmapViewProps) {
   const updateMilestoneStatus = async (
     milestoneId: string,
     status: "not_started" | "in_progress" | "completed" | "blocked" | "overdue",
-    completionPercentage: number
+    completionPercentage: number,
   ) => {
     try {
       const { data, error } = await fetch("/api/roadmap/milestone", {
@@ -412,7 +412,7 @@ export default function RoadmapView({ roadmapId, userId }: RoadmapViewProps) {
                               {format(parseISO(milestone.startDate), "MMM d")} -{" "}
                               {format(
                                 parseISO(milestone.endDate),
-                                "MMM d, yyyy"
+                                "MMM d, yyyy",
                               )}
                             </p>
                           </div>
@@ -451,7 +451,7 @@ export default function RoadmapView({ roadmapId, userId }: RoadmapViewProps) {
                                       >
                                         {doc}
                                       </li>
-                                    )
+                                    ),
                                   )}
                                 </ul>
                               </div>
@@ -482,7 +482,7 @@ export default function RoadmapView({ roadmapId, userId }: RoadmapViewProps) {
                                         ? 50
                                         : value === "not_started"
                                           ? 0
-                                          : milestone.completionPercentage
+                                          : milestone.completionPercentage,
                                   )
                                 }
                                 defaultValue={milestone.status}

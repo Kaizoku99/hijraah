@@ -209,7 +209,7 @@ app.get("/api/data", redisCacheMiddleware(), handler);
 app.get(
   "/api/frequently-updated",
   redisCacheMiddleware({ ttl: 60 }), // 1 minute cache
-  handler
+  handler,
 );
 
 // With custom key generation
@@ -218,7 +218,7 @@ app.get(
   redisCacheMiddleware({
     key: (c) => `user-data:${c.get("user")?.id}`,
   }),
-  handler
+  handler,
 );
 ```
 
@@ -237,7 +237,7 @@ app.get("/api/data", subscriptionRateLimit(), handler);
 app.get(
   "/api/research/sessions",
   subscriptionRateLimit({ resourceType: ResourceType.RESEARCH }),
-  handler
+  handler,
 );
 ```
 
@@ -252,7 +252,7 @@ app.use("*", sentryErrorLoggerMiddleware());
 // With component tagging
 app.use(
   "/api/research/*",
-  sentryErrorLoggerMiddleware({ component: "research" })
+  sentryErrorLoggerMiddleware({ component: "research" }),
 );
 ```
 

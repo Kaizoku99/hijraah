@@ -3,7 +3,7 @@
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vs } from "react-syntax-highlighter/dist/esm/styles/prism";
+// Using default styling for syntax highlighting
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,7 +47,6 @@ export function UnifiedCodeBlock({
       </div>
       <SyntaxHighlighter
         language={language}
-        style={vs}
         customStyle={{ margin: 0, borderRadius: "0 0 0.375rem 0.375rem" }}
       >
         {code}

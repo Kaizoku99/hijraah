@@ -1,2 +1,2 @@
 // Generated index file
-export * from './index.types'
+export * from "./index.types";

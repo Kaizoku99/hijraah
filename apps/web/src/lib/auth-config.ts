@@ -40,7 +40,7 @@ export function createSupabaseClient() {
         autoRefreshToken: true,
         detectSessionInUrl: true,
       },
-    }
+    },
   );
 }
 
@@ -77,7 +77,7 @@ export function createSupabaseServerClient(cookieStore?: any) {
         persistSession: true,
         autoRefreshToken: true,
       },
-    }
+    },
   );
 }
 
@@ -95,7 +95,7 @@ export function createSupabaseServiceClient() {
         persistSession: false,
         autoRefreshToken: false,
       },
-    }
+    },
   );
 }
 
@@ -154,7 +154,7 @@ export const permissions = {
  */
 export function hasPermission(
   user: ExtendedUser | UserWithGuest | null,
-  permission: string
+  permission: string,
 ): boolean {
   if (!user) return false;
 
@@ -177,7 +177,7 @@ export function hasPermission(
  * Context7 - Data-as-Code: Predictable permission resolution
  */
 export function getUserPermissions(
-  user: ExtendedUser | UserWithGuest | null
+  user: ExtendedUser | UserWithGuest | null,
 ): string[] {
   if (!user) return [];
 

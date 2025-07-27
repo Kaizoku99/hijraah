@@ -165,7 +165,7 @@ import {
 app.use(
   "/api/scraping/*",
   subscriptionRateLimit({ resourceType: ResourceType.SCRAPING }),
-  handler
+  handler,
 );
 ```
 

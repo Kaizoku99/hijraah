@@ -1,40 +1,30 @@
 {
-    "extends": "@hijraah/typescript-config/nextjs",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "@/*": [
-                "./src/*"
-            ],
-            "@/components/*": [
-                "./src/components/*"
-            ],
-            "@/lib/*": [
-                "./src/lib/*"
-            ],
-            "@/types/*": [
-                "./src/types/*"
-            ],
-            "@/hooks/*": [
-                "./src/hooks/*"
-            ],
-            "@/app/*": [
-                "./src/app/*"
-            ]
-        },
-        "plugins": [
-            {
-                "name": "next"
-            }
-        ]
+  "extends": "@hijraah/typescript-config/nextjs",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/ui/*": ["./src/components/ui/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/supabase/*": ["../../supabase/*"],
+      "@/immigration/*": ["./src/_core/immigration/*"],
+      "@/core/*": ["./src/_core/*"],
+      "@/shared/*": ["./src/_shared/*"]
     },
-    "include": [
-        "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        ".next/types/**/*.ts"
+    "plugins": [
+      {
+        "name": "next"
+      }
     ],
-    "exclude": [
-        "node_modules"
-    ]
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "jsx": "preserve"
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

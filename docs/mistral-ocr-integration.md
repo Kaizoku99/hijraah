@@ -48,7 +48,7 @@ const ocrResponse = await processMistralOCR(
   "https://example.com/document.pdf",
   {
     includeImageBase64: false, // Set to true if you want to get image data in the response
-  }
+  },
 );
 
 // Extract plain text
@@ -83,7 +83,7 @@ const ocrResponse = await processMistralOCRWithImage(
   "https://example.com/image.jpg",
   {
     includeImageBase64: true, // Include the base64 image data in the response
-  }
+  },
 );
 
 // Extract plain text
@@ -100,7 +100,7 @@ import { askDocumentQuestion } from "@/lib/ai/mistral-ocr";
 // Ask a question about a document
 const answer = await askDocumentQuestion(
   "https://example.com/document.pdf",
-  "What is the main topic of this document?"
+  "What is the main topic of this document?",
 );
 
 console.log(answer); // The AI-generated answer based on document content

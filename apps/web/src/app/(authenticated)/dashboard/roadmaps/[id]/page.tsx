@@ -65,7 +65,7 @@ export default function RoadmapDetailPage() {
   const deleteRoadmap = async () => {
     if (
       !confirm(
-        "Are you sure you want to delete this roadmap? This action cannot be undone."
+        "Are you sure you want to delete this roadmap? This action cannot be undone.",
       )
     ) {
       return;

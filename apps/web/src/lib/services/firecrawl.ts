@@ -4,7 +4,7 @@ import {
   webIndexes,
   crawlJobs,
   documents,
-  documentChunks,
+  // documentChunks, // TODO: Add documentChunks table to schema
 } from "@hijraah/database/schema";
 import { eq } from "drizzle-orm";
 import { generateEmbedding } from "@/lib/ai/embeddings";
@@ -78,7 +78,7 @@ export class FirecrawlService {
    * Check the status of a running crawl job
    */
   static async checkCrawlStatus(
-    firecrawlJobId: string
+    firecrawlJobId: string,
   ): Promise<CrawlJobUpdate> {
     try {
       const statusResponse = await firecrawl.checkCrawlStatus(firecrawlJobId);
@@ -113,7 +113,7 @@ export class FirecrawlService {
    */
   static async processCrawlResults(
     webIndexId: string,
-    crawlData: any[]
+    crawlData: any[],
   ): Promise<void> {
     try {
       const [webIndex] = await db
@@ -127,7 +127,7 @@ export class FirecrawlService {
       }
 
       console.log(
-        `Processing ${crawlData.length} pages for web index ${webIndexId}`
+        `Processing ${crawlData.length} pages for web index ${webIndexId}`,
       );
 
       // Process each crawled page
@@ -185,7 +185,7 @@ export class FirecrawlService {
         .where(eq(webIndexes.id, webIndexId));
 
       console.log(
-        `Completed processing ${crawlData.length} pages for web index ${webIndexId}`
+        `Completed processing ${crawlData.length} pages for web index ${webIndexId}`,
       );
     } catch (error) {
       console.error("Error processing crawl results:", error);
@@ -198,7 +198,7 @@ export class FirecrawlService {
    */
   private static async createDocumentEmbeddings(
     documentId: string,
-    content: string
+    content: string,
   ): Promise<void> {
     try {
       // Split content into chunks (simple approach - can be enhanced)
@@ -211,13 +211,14 @@ export class FirecrawlService {
         const embedding = await generateEmbedding(chunk);
 
         // Store chunk with embedding
-        await db.insert(documentChunks).values({
-          documentId: documentId,
-          chunkIndex: i,
-          textContent: chunk,
-          embedding: embedding,
-          tokenCount: Math.ceil(chunk.length / 4), // Rough estimate
-        });
+        // TODO: Re-enable when documentChunks table is added to schema
+        // await db.insert(documentChunks).values({
+        //   documentId: documentId,
+        //   chunkIndex: i,
+        //   textContent: chunk,
+        //   embedding: embedding,
+        //   tokenCount: Math.ceil(chunk.length / 4), // Rough estimate
+        // });
       }
     } catch (error) {
       console.error("Error creating document embeddings:", error);
@@ -231,7 +232,7 @@ export class FirecrawlService {
   private static splitIntoChunks(
     text: string,
     chunkSize: number = 1000,
-    overlap: number = 200
+    overlap: number = 200,
   ): string[] {
     const chunks: string[] = [];
     let start = 0;
@@ -271,7 +272,7 @@ export class FirecrawlService {
 
         try {
           const statusUpdate = await this.checkCrawlStatus(
-            crawl.firecrawlJobId
+            crawl.firecrawlJobId,
           );
 
           // Update crawl job status

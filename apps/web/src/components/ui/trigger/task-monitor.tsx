@@ -351,7 +351,7 @@ export function TaskMonitor({
         setIsRefreshing(false);
       }
     },
-    [taskService, toast]
+    [taskService, toast],
   );
 
   const triggerTask = useCallback(
@@ -393,7 +393,7 @@ Would you like me to notify you when this task completes?`,
         });
       }
     },
-    [taskService, append, chatId, tasks, toast, fetchTasks]
+    [taskService, append, chatId, tasks, toast, fetchTasks],
   );
 
   // Load initial data
@@ -461,7 +461,7 @@ Would you like me to notify you when this task completes?`,
     ? tasks.filter(
         (task) =>
           task.lastRun?.status === "running" ||
-          task.lastRun?.status === "pending"
+          task.lastRun?.status === "pending",
       )
     : selectedCategory
       ? tasks.filter((task) => task.category === selectedCategory)
@@ -473,18 +473,18 @@ Would you like me to notify you when this task completes?`,
       acc[task.category].push(task);
       return acc;
     },
-    {} as Record<string, Task[]>
+    {} as Record<string, Task[]>,
   );
 
   const getOverviewStats = () => {
     const runningTasks = tasks.filter(
-      (t) => t.lastRun?.status === "running"
+      (t) => t.lastRun?.status === "running",
     ).length;
     const avgSuccessRate =
       tasks.reduce((acc, t) => acc + t.successRate, 0) / (tasks.length || 1);
     const totalRuns = tasks.reduce((acc, t) => acc + t.totalRuns, 0);
     const recentFailures = tasks.filter(
-      (t) => t.lastRun?.status === "failed"
+      (t) => t.lastRun?.status === "failed",
     ).length;
 
     return { runningTasks, avgSuccessRate, totalRuns, recentFailures };
@@ -521,7 +521,7 @@ Would you like me to notify you when this task completes?`,
       <Alert
         className={cn(
           "border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950",
-          className
+          className,
         )}
       >
         <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -572,7 +572,7 @@ Would you like me to notify you when this task completes?`,
                       "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300",
                     !isConnected &&
                       connectionState === "disconnected" &&
-                      "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+                      "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300",
                   )}
                 >
                   {isConnected ? (
@@ -707,7 +707,7 @@ Would you like me to notify you when this task completes?`,
                       .sort(
                         (a, b) =>
                           new Date(b.lastRun!.createdAt).getTime() -
-                          new Date(a.lastRun!.createdAt).getTime()
+                          new Date(a.lastRun!.createdAt).getTime(),
                       )
                       .slice(0, 10)
                       .map((task) => (
@@ -721,7 +721,7 @@ Would you like me to notify you when this task completes?`,
                             <Badge
                               className={cn(
                                 "text-xs",
-                                getStatusColor(task.lastRun!.status)
+                                getStatusColor(task.lastRun!.status),
                               )}
                             >
                               {getStatusIcon(task.lastRun!.status)}
@@ -730,7 +730,7 @@ Would you like me to notify you when this task completes?`,
                           </div>
                           <span className="text-xs text-muted-foreground">
                             {new Date(
-                              task.lastRun!.createdAt
+                              task.lastRun!.createdAt,
                             ).toLocaleTimeString()}
                           </span>
                         </div>
@@ -764,7 +764,7 @@ Would you like me to notify you when this task completes?`,
                     {getCategoryIcon(category)}
                     {category} ({categoryTasks.length})
                   </Button>
-                )
+                ),
               )}
             </div>
 
@@ -802,7 +802,7 @@ Would you like me to notify you when this task completes?`,
                           <Badge
                             className={cn(
                               "text-xs",
-                              getStatusColor(task.lastRun.status)
+                              getStatusColor(task.lastRun.status),
                             )}
                           >
                             <span className="flex items-center gap-1">

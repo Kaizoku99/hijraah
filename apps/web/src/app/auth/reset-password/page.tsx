@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { getSupabaseClient } from '@/lib/supabase/client';
-import { Button } from '@/ui/button';
-import { Input } from '@/ui/input';
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
 
 export default function ResetPasswordPage() {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -23,9 +23,9 @@ export default function ResetPasswordPage() {
 
     if (password !== confirmPassword) {
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Passwords do not match',
+        variant: "destructive",
+        title: "Error",
+        description: "Passwords do not match",
       });
       setIsLoading(false);
       return;
@@ -39,16 +39,16 @@ export default function ResetPasswordPage() {
       if (error) throw error;
 
       toast({
-        title: 'Success',
-        description: 'Your password has been reset successfully',
+        title: "Success",
+        description: "Your password has been reset successfully",
       });
 
-      router.push('/auth/login');
+      router.push("/auth/login");
     } catch (error) {
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to reset password',
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to reset password",
       });
     } finally {
       setIsLoading(false);
@@ -90,15 +90,11 @@ export default function ResetPasswordPage() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Resetting password...' : 'Reset Password'}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Resetting password..." : "Reset Password"}
           </Button>
         </form>
       </div>
     </div>
   );
-} 
+}

@@ -16,7 +16,7 @@ export function createMockSupabaseClient(
     session?: Session | null;
     error?: Error | null;
     returnValues?: Record<string, any>;
-  } = {}
+  } = {},
 ): jest.Mocked<TypedSupabaseClient> {
   const user = options.user ?? createMockUser();
   const session = options.session ?? (user ? createMockSession(user) : null);
@@ -109,7 +109,7 @@ export function createMockAuthProvider(
     session?: Session | null;
     isLoading?: boolean;
     isAuthenticated?: boolean;
-  } = {}
+  } = {},
 ) {
   const user = options.user ?? createMockExtendedUser();
   const session = options.session ?? (user ? createMockSession(user) : null);
@@ -135,7 +135,7 @@ export function setupMockMiddlewareContext(
     user?: ExtendedUser | null;
     session?: Session | null;
     isAuthenticated?: boolean;
-  } = {}
+  } = {},
 ) {
   const user = options.user ?? createMockExtendedUser();
   const session = options.session ?? (user ? createMockSession(user) : null);
@@ -158,7 +158,7 @@ export function mockUseAuth(
     session?: Session | null;
     isLoading?: boolean;
     isAuthenticated?: boolean;
-  } = {}
+  } = {},
 ) {
   const mockAuthContext = createMockAuthProvider(options);
 
@@ -178,7 +178,7 @@ export function createServerActionContext(
     user?: User | null;
     session?: Session | null;
     error?: Error | null;
-  } = {}
+  } = {},
 ) {
   const user = options.user ?? createMockUser();
   const session = options.session ?? (user ? createMockSession(user) : null);
@@ -205,7 +205,7 @@ export function setupAuthComponentTest(
     session?: Session | null;
     isLoading?: boolean;
     isAuthenticated?: boolean;
-  } = {}
+  } = {},
 ) {
   // Mock the auth context
   const mockAuth = mockUseAuth(options);

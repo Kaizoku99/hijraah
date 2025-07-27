@@ -151,7 +151,7 @@ export function createBrowserClient(): TypedSupabaseClient {
           persistSession: true,
           autoRefreshToken: true,
         },
-      }
+      },
     ) as TypedSupabaseClient;
   } catch (error) {
     console.error("Failed to create Supabase browser client:", error);
@@ -189,7 +189,7 @@ export function getStorageManager(): AuthStorageManager {
         break;
       case "cookie":
         provider = new CookieStorageProvider(
-          globalAuthConfig.storageOptions?.cookieOptions
+          globalAuthConfig.storageOptions?.cookieOptions,
         );
         break;
       case "local":
@@ -200,7 +200,7 @@ export function getStorageManager(): AuthStorageManager {
 
     storageManager = createStorageManager(
       provider,
-      globalAuthConfig.storageOptions
+      globalAuthConfig.storageOptions,
     );
   }
 
@@ -269,7 +269,7 @@ export function createServerClient(): TypedSupabaseClient {
     return createClient(
       globalAuthConfig.supabaseUrl,
       globalAuthConfig.supabaseKey,
-      options
+      options,
     ) as TypedSupabaseClient;
   } catch (error) {
     console.error("Failed to create Supabase server client:", error);
@@ -310,14 +310,14 @@ export async function checkAuth() {
       console.error("Error fetching session in checkAuth:", sessionError);
       // Throw a specific error if session fetch fails after user verification
       throw new SessionError(
-        "Failed to retrieve session data after user verification"
+        "Failed to retrieve session data after user verification",
       );
     }
 
     if (!session) {
       // This case should ideally not happen if getUser succeeded, but handle defensively
       throw new UnauthorizedError(
-        "No active session found despite verified user"
+        "No active session found despite verified user",
       );
     }
 
@@ -380,7 +380,7 @@ export async function getAuthUserOrRedirect(redirectTo?: string) {
 
   if (!isAuthenticated) {
     safeServerRedirect(
-      redirectTo || globalAuthConfig.logoutRedirectUrl || "/login"
+      redirectTo || globalAuthConfig.logoutRedirectUrl || "/login",
     );
   }
 
@@ -393,7 +393,7 @@ export async function getAuthUserOrRedirect(redirectTo?: string) {
  */
 export async function requirePermission(
   permission: Permission,
-  redirectTo = "/unauthorized"
+  redirectTo = "/unauthorized",
 ) {
   const { user } = await getAuthUserOrRedirect();
 
@@ -403,7 +403,7 @@ export async function requirePermission(
 
     if (!hasAccess) {
       throw new ForbiddenError(
-        `User does not have required permission: ${permission}`
+        `User does not have required permission: ${permission}`,
       );
     }
 
@@ -440,7 +440,7 @@ export async function signOut(redirectTo?: string) {
 
   // Redirect to login page
   safeServerRedirect(
-    redirectTo || globalAuthConfig.logoutRedirectUrl || "/login"
+    redirectTo || globalAuthConfig.logoutRedirectUrl || "/login",
   );
 }
 

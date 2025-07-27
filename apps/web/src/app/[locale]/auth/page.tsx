@@ -1,18 +1,27 @@
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-import { Loader2, GalleryVerticalEnd, ArrowRight, Mail, KeyRound, UserPlus, CheckCircle2, XCircle } from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import {
+  Loader2,
+  GalleryVerticalEnd,
+  ArrowRight,
+  Mail,
+  KeyRound,
+  UserPlus,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
-import { AuthRedirector } from '@/components/ui/auth/AuthRedirector';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/lib/auth/hooks';
-import { registerSchema, RegisterFormValues } from '@/lib/validations/auth';
-import { Button } from '@/ui/button';
+import { AuthRedirector } from "@/components/ui/auth/AuthRedirector";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth/hooks";
+import { registerSchema, RegisterFormValues } from "@/lib/validations/auth";
+import { Button } from "@/ui/button";
 import {
   Card,
   CardContent,
@@ -20,11 +29,11 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-} from '@/ui/card';
-import { FormError } from '@/ui/form-error';
-import { Input } from '@/ui/input';
-import { Label } from '@/ui/label';
-import { PasswordStrengthMeter } from '@/ui/password-strength';
+} from "@/ui/card";
+import { FormError } from "@/ui/form-error";
+import { Input } from "@/ui/input";
+import { Label } from "@/ui/label";
+import { PasswordStrengthMeter } from "@/ui/password-strength";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -40,42 +49,42 @@ export default function RegisterPage() {
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
-    mode: 'onChange',
+    mode: "onChange",
   });
 
   // Watch password for strength indicator
-  const password = watch('password', '');
+  const password = watch("password", "");
 
   // Requirements that we'll check
   const requirements = [
     {
-      id: 'length',
-      label: 'Must be at least 8 characters',
-      isValid: password.length >= 8
+      id: "length",
+      label: "Must be at least 8 characters",
+      isValid: password.length >= 8,
     },
     {
-      id: 'uppercase',
-      label: 'Contains uppercase letter',
-      isValid: /[A-Z]/.test(password)
+      id: "uppercase",
+      label: "Contains uppercase letter",
+      isValid: /[A-Z]/.test(password),
     },
     {
-      id: 'lowercase',
-      label: 'Contains lowercase letter',
-      isValid: /[a-z]/.test(password)
+      id: "lowercase",
+      label: "Contains lowercase letter",
+      isValid: /[a-z]/.test(password),
     },
     {
-      id: 'number',
-      label: 'Contains number',
-      isValid: /[0-9]/.test(password)
+      id: "number",
+      label: "Contains number",
+      isValid: /[0-9]/.test(password),
     },
     {
-      id: 'special',
-      label: 'Contains special character',
-      isValid: /[^A-Za-z0-9]/.test(password)
+      id: "special",
+      label: "Contains special character",
+      isValid: /[^A-Za-z0-9]/.test(password),
     },
   ];
 
@@ -87,26 +96,30 @@ export default function RegisterPage() {
 
       // Initialize onboarding if needed
       try {
-        await fetch('/api/onboarding/init', {
-          method: 'POST',
+        await fetch("/api/onboarding/init", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-          }
+            "Content-Type": "application/json",
+          },
         });
       } catch (err) {
-        console.error('Error initializing onboarding:', err);
+        console.error("Error initializing onboarding:", err);
       }
 
       toast({
-        title: 'Register',
-        description: 'Registration successful! Please check your email to verify your account.',
+        title: "Register",
+        description:
+          "Registration successful! Please check your email to verify your account.",
       });
-      router.push('/auth/login');
+      router.push("/auth/login");
     } catch (error) {
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.',
+        variant: "destructive",
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -125,7 +138,8 @@ export default function RegisterPage() {
         <Link
           href="/"
           className="flex items-center gap-3 self-center transition-transform hover:scale-105"
-          legacyBehavior>
+          legacyBehavior
+        >
           <div className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-md shadow-md">
             <GalleryVerticalEnd className="size-4" />
           </div>
@@ -140,7 +154,9 @@ export default function RegisterPage() {
         >
           <Card className="border-border/30 shadow-lg">
             <CardHeader className="space-y-2 text-center pb-6">
-              <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
+              <CardTitle className="text-2xl font-bold">
+                Create an account
+              </CardTitle>
               <CardDescription className="text-muted-foreground">
                 Enter your details below to create your account
               </CardDescription>
@@ -160,9 +176,11 @@ export default function RegisterPage() {
                         placeholder="name@example.com"
                         className="pl-10"
                         aria-invalid={!!errors.email}
-                        aria-describedby={errors.email ? "email-error" : undefined}
+                        aria-describedby={
+                          errors.email ? "email-error" : undefined
+                        }
                         disabled={isLoading}
-                        {...register('email')}
+                        {...register("email")}
                       />
                     </div>
                     {errors.email && (
@@ -184,9 +202,11 @@ export default function RegisterPage() {
                         type="password"
                         className="pl-10"
                         aria-invalid={!!errors.password}
-                        aria-describedby={errors.password ? "password-error" : undefined}
+                        aria-describedby={
+                          errors.password ? "password-error" : undefined
+                        }
                         disabled={isLoading}
-                        {...register('password')}
+                        {...register("password")}
                       />
                     </div>
                     {errors.password && (
@@ -217,7 +237,13 @@ export default function RegisterPage() {
                             ) : (
                               <XCircle className="h-3.5 w-3.5 text-muted-foreground" />
                             )}
-                            <span className={isValid ? "text-emerald-500" : "text-muted-foreground"}>
+                            <span
+                              className={
+                                isValid
+                                  ? "text-emerald-500"
+                                  : "text-muted-foreground"
+                              }
+                            >
                               {label}
                             </span>
                           </div>
@@ -227,7 +253,10 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password" className="text-sm font-medium">
+                    <Label
+                      htmlFor="confirm-password"
+                      className="text-sm font-medium"
+                    >
                       Confirm Password
                     </Label>
                     <div className="relative">
@@ -237,9 +266,13 @@ export default function RegisterPage() {
                         type="password"
                         className="pl-10"
                         aria-invalid={!!errors.confirmPassword}
-                        aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
+                        aria-describedby={
+                          errors.confirmPassword
+                            ? "confirm-password-error"
+                            : undefined
+                        }
                         disabled={isLoading}
-                        {...register('confirmPassword')}
+                        {...register("confirmPassword")}
                       />
                     </div>
                     {errors.confirmPassword && (
@@ -273,7 +306,10 @@ export default function RegisterPage() {
             <CardFooter className="flex justify-center border-t bg-muted/30 p-4">
               <p className="text-center text-sm">
                 Already have an account?{" "}
-                <Link href="/auth/login" className="text-primary font-medium hover:underline underline-offset-4">
+                <Link
+                  href="/auth/login"
+                  className="text-primary font-medium hover:underline underline-offset-4"
+                >
                   Sign in
                 </Link>
               </p>
@@ -283,13 +319,20 @@ export default function RegisterPage() {
 
         <p className="text-muted-foreground text-center text-xs max-w-xs">
           By clicking Create Account, you agree to our{" "}
-          <Link href="/terms" className="text-primary hover:underline underline-offset-4">
+          <Link
+            href="/terms"
+            className="text-primary hover:underline underline-offset-4"
+          >
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" className="text-primary hover:underline underline-offset-4">
+          <Link
+            href="/privacy"
+            className="text-primary hover:underline underline-offset-4"
+          >
             Privacy Policy
-          </Link>.
+          </Link>
+          .
         </p>
       </motion.div>
     </div>

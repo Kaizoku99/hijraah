@@ -20,7 +20,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 
 import { useOnboarding } from "./OnboardingProvider";
 
-
 interface TaskDisplayProps {
   task: OnboardingTask;
   onComplete: (taskId: string, actionKey: string) => void;
@@ -128,14 +127,14 @@ export const FirstTask: React.FC = () => {
       } catch (error) {
         console.error(
           `Failed to mark action ${actionKey} as completed:`,
-          error
+          error,
         );
       }
 
       // After a delay, complete the *overall* 'first-task' step
       setTimeout(() => completeStep("first-task" as OnboardingStepId), 1500);
     },
-    [completeStep]
+    [completeStep],
   );
 
   const isActive =

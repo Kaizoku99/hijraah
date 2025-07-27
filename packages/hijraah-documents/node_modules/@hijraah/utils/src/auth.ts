@@ -1,12 +1,9 @@
-import NextAuth, { User } from "next-auth";
+import NextAuth, { User , Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
-import { Session } from "next-auth";
-import Google from "next-auth/providers/google";
-import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
-import { SupabaseAdapter } from "@auth/supabase-adapter";
-import { ZodError } from "zod";
-import { z } from "zod";
+import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
+import { z , ZodError } from "zod";
 
 // ===== ENHANCED TYPE DEFINITIONS (Context7 Best Practice) =====
 export interface ExtendedUser extends User {

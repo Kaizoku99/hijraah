@@ -15,7 +15,7 @@ interface ArtifactStore {
   metadata: Record<string, any>;
   setArtifact: (updater: (prev: BaseArtifactData) => BaseArtifactData) => void;
   setMetadata: (
-    updater: (prev: Record<string, any>) => Record<string, any>
+    updater: (prev: Record<string, any>) => Record<string, any>,
   ) => void;
   resetArtifact: () => void;
 }
@@ -71,7 +71,7 @@ export function useArtifact() {
     (
       updaterFn:
         | BaseArtifactData
-        | ((currentArtifact: BaseArtifactData) => BaseArtifactData)
+        | ((currentArtifact: BaseArtifactData) => BaseArtifactData),
     ) => {
       setLocalArtifact((currentArtifact: BaseArtifactData | undefined) => {
         const artifactToUpdate = currentArtifact || initialArtifactData;
@@ -83,7 +83,7 @@ export function useArtifact() {
         return updaterFn;
       });
     },
-    [setLocalArtifact]
+    [setLocalArtifact],
   );
 
   const { data: localArtifactMetadata, mutate: setLocalArtifactMetadata } =
@@ -93,7 +93,7 @@ export function useArtifact() {
       null,
       {
         fallbackData: null,
-      }
+      },
     );
 
   return useMemo(
@@ -103,6 +103,6 @@ export function useArtifact() {
       metadata: localArtifactMetadata,
       setMetadata: setLocalArtifactMetadata,
     }),
-    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata]
+    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata],
   );
 }

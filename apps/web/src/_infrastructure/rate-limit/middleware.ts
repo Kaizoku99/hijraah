@@ -17,7 +17,7 @@ export interface RateLimitMiddlewareOptions {
   getIdentifier?: (context: any) => string | Promise<string>;
   onRateLimitExceeded?: (
     result: RateLimitResult,
-    context: any
+    context: any,
   ) => Response | Promise<Response>;
   skipSuccessfulRequests?: boolean;
 }
@@ -27,7 +27,7 @@ export interface RateLimitMiddlewareOptions {
  * Following Context7 patterns for edge environments
  */
 export function createHonoRateLimitMiddleware(
-  options: RateLimitMiddlewareOptions
+  options: RateLimitMiddlewareOptions,
 ) {
   const {
     action,
@@ -70,7 +70,7 @@ export function createHonoRateLimitMiddleware(
             reset: result.reset.toISOString(),
             retryAfter: Math.ceil((result.reset.getTime() - Date.now()) / 1000),
           },
-          429
+          429,
         );
       }
 
@@ -103,7 +103,7 @@ export function createHonoRateLimitMiddleware(
  * Compatible with Next.js 13+ App Router
  */
 export function createNextRateLimitMiddleware(
-  options: RateLimitMiddlewareOptions
+  options: RateLimitMiddlewareOptions,
 ) {
   const {
     action,
@@ -146,7 +146,7 @@ export function createNextRateLimitMiddleware(
           {
             status: 429,
             headers,
-          }
+          },
         );
       }
 
@@ -172,12 +172,12 @@ export async function withRateLimit<T>(
   identifier: string,
   action: RateLimitAction,
   tier: UserTier,
-  handler: () => Promise<T>
+  handler: () => Promise<T>,
 ): Promise<{ success: boolean; data?: T; rateLimitResult: RateLimitResult }> {
   const rateLimitResult = await RateLimitService.isAllowed(
     identifier,
     action,
-    tier
+    tier,
   );
 
   if (!rateLimitResult.success) {

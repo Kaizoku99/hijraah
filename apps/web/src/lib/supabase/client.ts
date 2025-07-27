@@ -54,20 +54,20 @@ function checkPublicEnvVars() {
   if (process.env.NODE_ENV === "development") {
     console.debug(
       "[Supabase Env] NEXT_PUBLIC_SUPABASE_URL present?",
-      !!supabaseUrl
+      !!supabaseUrl,
     );
     console.debug(
       "[Supabase Env] NEXT_PUBLIC_SUPABASE_ANON_KEY present?",
-      !!supabaseAnonKey
+      !!supabaseAnonKey,
     );
     console.debug(
       "[Supabase Env] SUPABASE_SERVICE_ROLE_KEY present?",
-      !!serviceRoleKey
+      !!serviceRoleKey,
     );
   }
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error(
-      "Missing environment variables NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
+      "Missing environment variables NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY",
     );
     throw new Error("Supabase URL or Anon Key is missing.");
   }
@@ -110,7 +110,7 @@ function getSupabaseBrowserClient(): TypedSSRSupabaseClient {
       global: {
         headers: anonymousHeaders,
       },
-    }
+    },
   );
 
   if (typeof window !== "undefined") {
@@ -149,7 +149,7 @@ export function createClient(): TypedSSRSupabaseClient {
  * @returns Supabase client instance for server-side usage with cookie handling.
  */
 export function createSupabaseServerClient(
-  cookieStore: ReadonlyRequestCookies
+  cookieStore: ReadonlyRequestCookies,
 ): TypedSSRSupabaseClient {
   checkPublicEnvVars();
   return _createServerClient<Database>(supabaseUrl!, supabaseAnonKey!, {
@@ -253,12 +253,12 @@ export const createEdgeClient = (request: Request): TypedSSRSupabaseClient => {
       },
       set(name: string, value: string, options) {
         console.warn(
-          `Attempted to set cookie '${name}' in createEdgeClient. This must be handled by the caller via Response headers.`
+          `Attempted to set cookie '${name}' in createEdgeClient. This must be handled by the caller via Response headers.`,
         );
       },
       remove(name: string, options) {
         console.warn(
-          `Attempted to remove cookie '${name}' in createEdgeClient. This must be handled by the caller via Response headers.`
+          `Attempted to remove cookie '${name}' in createEdgeClient. This must be handled by the caller via Response headers.`,
         );
       },
     },

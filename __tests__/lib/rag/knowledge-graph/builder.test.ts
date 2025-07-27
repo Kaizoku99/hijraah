@@ -105,15 +105,15 @@ describe("KnowledgeGraphBuilder", () => {
     // Mock the fetch calls made by the OpenAI SDK
     fetchSpy
       .mockResolvedValueOnce(
-        new Response(JSON.stringify(mockEntityAPIResponse))
+        new Response(JSON.stringify(mockEntityAPIResponse)),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify(mockRelationshipAPIResponse))
+        new Response(JSON.stringify(mockRelationshipAPIResponse)),
       );
 
     const builder = new KnowledgeGraphBuilder(
       new OpenAI({ apiKey: "test-key" }),
-      mockSupabase as any
+      mockSupabase as any,
     );
 
     // Act
@@ -168,12 +168,12 @@ describe("KnowledgeGraphBuilder", () => {
     };
 
     fetchSpy.mockResolvedValue(
-      new Response(JSON.stringify(mockEmptyAPIResponse))
+      new Response(JSON.stringify(mockEmptyAPIResponse)),
     );
 
     const builder = new KnowledgeGraphBuilder(
       new OpenAI({ apiKey: "test-key" }),
-      mockSupabase as any
+      mockSupabase as any,
     );
 
     // Act

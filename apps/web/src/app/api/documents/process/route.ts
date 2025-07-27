@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
           }
         },
       },
-    }
+    },
   );
 
   // 1. Check Authentication
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         error: "Invalid request body",
         details: error instanceof z.ZodError ? error.errors : null,
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -87,11 +87,11 @@ export async function POST(request: NextRequest) {
   if (docError || !docData) {
     console.error(
       `Document verification failed for user ${user.id} and document ${documentId}:`,
-      docError
+      docError,
     );
     return NextResponse.json(
       { error: "Document not found or access denied" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -107,11 +107,11 @@ export async function POST(request: NextRequest) {
         storagePath: filePath,
         fileType: fileType,
         sourceUrl: `file://${docData.file_path || filePath}`, // Create a file:// URL from the document's file path
-      }
+      },
     );
 
     console.log(
-      `RAG pipeline task triggered successfully for document ${documentId}, Run ID: ${handle.id}`
+      `RAG pipeline task triggered successfully for document ${documentId}, Run ID: ${handle.id}`,
     );
 
     return NextResponse.json({
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error(
       `Error triggering RAG pipeline task for document ${documentId}:`,
-      error
+      error,
     );
     let errorMessage = "Failed to initiate document processing.";
     if (error instanceof Error) {

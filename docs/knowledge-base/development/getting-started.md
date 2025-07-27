@@ -81,7 +81,7 @@ The application will be available at http://localhost:3000.
 /
 ├── app/                  # Next.js App Router structure
 │   ├── (auth)/           # Authentication routes
-│   ├── (dashboard)/      # Dashboard routes 
+│   ├── (dashboard)/      # Dashboard routes
 │   ├── api/              # API routes
 │   └── [...]/            # Other routes
 ├── components/           # Shared UI components
@@ -273,4 +273,4 @@ If you encounter issues not covered in this guide:
 2. Ask in the developer Slack channel
 3. Create a new issue with detailed information about your problem
 
-Welcome to the Hijraah development team! 
+Welcome to the Hijraah development team!

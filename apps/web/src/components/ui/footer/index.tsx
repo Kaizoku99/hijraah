@@ -127,7 +127,7 @@ export function Footer() {
                       href={link.href}
                       className={cn(
                         "text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5",
-                        pathname === link.href && "text-foreground font-medium"
+                        pathname === link.href && "text-foreground font-medium",
                       )}
                       data-active={pathname === link.href ? "true" : undefined}
                     >

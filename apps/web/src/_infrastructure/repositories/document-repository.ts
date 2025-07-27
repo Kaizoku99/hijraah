@@ -114,7 +114,7 @@ export class DocumentRepository {
    * Get all documents
    */
   async getAll(
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<DocumentRecord[]> {
     const client = await this.getClient();
     const { data, error } = await client
@@ -122,7 +122,7 @@ export class DocumentRepository {
       .select("*")
       .range(
         options.offset || 0,
-        (options.offset || 0) + (options.limit || 100) - 1
+        (options.offset || 0) + (options.limit || 100) - 1,
       );
 
     if (error) throw error;
@@ -224,7 +224,7 @@ export class DocumentRepository {
       offset?: number;
       orderBy?: string;
       searchQuery?: string;
-    }
+    },
   ): Promise<DocumentRecord[]> {
     const client = await this.getClient();
     let query = client
@@ -285,7 +285,7 @@ export class DocumentRepository {
     if (options?.offset) {
       query = query.range(
         options.offset,
-        options.offset + (options.limit || 10) - 1
+        options.offset + (options.limit || 10) - 1,
       );
     }
 
@@ -362,7 +362,7 @@ export class DocumentRepository {
    */
   async addVersion(
     documentId: string,
-    version: Omit<DocumentVersion, "documentId">
+    version: Omit<DocumentVersion, "documentId">,
   ): Promise<DocumentVersionRecord | { document_id: string }> {
     const client = await this.getClient();
 
@@ -416,7 +416,7 @@ export class DocumentRepository {
    */
   async grantAccess(
     documentId: string,
-    access: Omit<DocumentAccess, "documentId">
+    access: Omit<DocumentAccess, "documentId">,
   ): Promise<
     | DocumentAccessRecord
     | { document_id: string; user_id: string; permission: string }
@@ -459,7 +459,7 @@ export class DocumentRepository {
             now,
             access.expiresAt ? access.expiresAt.toISOString() : null,
             existingRecords[0].id,
-          ]
+          ],
         );
 
         if (updateResults.length > 0) {
@@ -486,7 +486,7 @@ export class DocumentRepository {
             access.grantedBy,
             now,
             access.expiresAt ? access.expiresAt.toISOString() : null,
-          ]
+          ],
         );
 
         if (insertResults.length > 0) {
@@ -564,7 +564,7 @@ export class DocumentRepository {
     if (fetchError) {
       console.error("Error fetching document metadata:", fetchError);
       throw new Error(
-        `Failed to fetch document metadata: ${fetchError.message}`
+        `Failed to fetch document metadata: ${fetchError.message}`,
       );
     }
 
@@ -591,7 +591,7 @@ export class DocumentRepository {
       if (updateError) {
         console.error("Error adding document to case:", updateError);
         throw new Error(
-          `Failed to add document to case: ${updateError.message}`
+          `Failed to add document to case: ${updateError.message}`,
         );
       }
 
@@ -632,7 +632,7 @@ export class DocumentRepository {
     if (fetchError) {
       console.error("Error fetching document metadata:", fetchError);
       throw new Error(
-        `Failed to fetch document metadata: ${fetchError.message}`
+        `Failed to fetch document metadata: ${fetchError.message}`,
       );
     }
 
@@ -659,7 +659,7 @@ export class DocumentRepository {
       if (updateError) {
         console.error("Error removing document from case:", updateError);
         throw new Error(
-          `Failed to remove document from case: ${updateError.message}`
+          `Failed to remove document from case: ${updateError.message}`,
         );
       }
 
@@ -684,7 +684,7 @@ export class DocumentRepository {
   async userHasAccess(
     documentId: string,
     userId: string,
-    permission: "view" | "edit" | "delete" | "admin" = "view"
+    permission: "view" | "edit" | "delete" | "admin" = "view",
   ): Promise<boolean> {
     const client = await this.getClient();
 
@@ -794,7 +794,7 @@ export class DocumentRepository {
 
       const versionData = await this.executeSql<{ document_id: string }>(
         contentHashSql,
-        [contentHash]
+        [contentHash],
       );
 
       if (!versionData || versionData.length === 0) {
@@ -811,7 +811,7 @@ export class DocumentRepository {
       if (documentsError) {
         console.error("Error fetching documents by IDs:", documentsError);
         throw new Error(
-          `Failed to fetch documents by IDs: ${documentsError.message}`
+          `Failed to fetch documents by IDs: ${documentsError.message}`,
         );
       }
 

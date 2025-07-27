@@ -94,7 +94,7 @@ export interface VersioningEvents {
   "merge:completed": (
     fromVersion: number,
     toVersion: number,
-    result: DocumentVersion
+    result: DocumentVersion,
   ) => void;
   "rollback:executed": (fromVersion: number, toVersion: number) => void;
   "branch:created": (branchName: string, fromVersion: number) => void;
@@ -145,7 +145,7 @@ export class DocumentVersioningService extends EventEmitter {
     title: string,
     content: string,
     metadata: Partial<DocumentVersionMetadata> = {},
-    userId: string
+    userId: string,
   ): Promise<DocumentVersion> {
     try {
       // Get the latest version for comparison
@@ -221,7 +221,7 @@ export class DocumentVersioningService extends EventEmitter {
         await this.redis.setex(
           `version:${version.id}`,
           this.cacheTimeout / 1000,
-          JSON.stringify(version)
+          JSON.stringify(version),
         );
       }
 
@@ -298,7 +298,7 @@ export class DocumentVersioningService extends EventEmitter {
       branch?: string;
       fromVersion?: number;
       toVersion?: number;
-    } = {}
+    } = {},
   ): Promise<DocumentVersion[]> {
     try {
       let query = this.supabase
@@ -314,7 +314,7 @@ export class DocumentVersioningService extends EventEmitter {
       if (options.offset) {
         query = query.range(
           options.offset,
-          options.offset + (options.limit || 50) - 1
+          options.offset + (options.limit || 50) - 1,
         );
       }
 
@@ -353,7 +353,7 @@ export class DocumentVersioningService extends EventEmitter {
   async compareVersions(
     documentId: string,
     fromVersion: number,
-    toVersion: number
+    toVersion: number,
   ): Promise<VersionComparison> {
     try {
       const [fromVer, toVer] = await Promise.all([
@@ -385,12 +385,12 @@ export class DocumentVersioningService extends EventEmitter {
     documentId: string,
     targetVersion: number,
     userId: string,
-    reason?: string
+    reason?: string,
   ): Promise<DocumentVersion> {
     try {
       const targetVer = await this.getVersionByNumber(
         documentId,
-        targetVersion
+        targetVersion,
       );
       if (!targetVer) {
         throw new Error("Target version not found");
@@ -411,7 +411,7 @@ export class DocumentVersioningService extends EventEmitter {
           reason: reason || `Rollback to version ${targetVersion}`,
           parentVersion: latestVersion.version,
         },
-        userId
+        userId,
       );
 
       this.emit("rollback:executed", latestVersion.version, targetVersion);
@@ -427,7 +427,7 @@ export class DocumentVersioningService extends EventEmitter {
     documentId: string,
     branchName: string,
     fromVersion: number,
-    userId: string
+    userId: string,
   ): Promise<void> {
     try {
       const { error } = await this.supabase.from("document_branches").insert({
@@ -453,7 +453,7 @@ export class DocumentVersioningService extends EventEmitter {
     version: number,
     tagName: string,
     description?: string,
-    userId?: string
+    userId?: string,
   ): Promise<void> {
     try {
       const { error } = await this.supabase.from("document_tags").insert({
@@ -538,7 +538,7 @@ export class DocumentVersioningService extends EventEmitter {
 
   // Context7 Pattern: Helper methods for internal operations
   private async getLatestVersion(
-    documentId: string
+    documentId: string,
   ): Promise<DocumentVersion | null> {
     const history = await this.getVersionHistory(documentId, { limit: 1 });
     return history.length > 0 ? history[0] : null;
@@ -546,7 +546,7 @@ export class DocumentVersioningService extends EventEmitter {
 
   private async getVersionByNumber(
     documentId: string,
-    version: number
+    version: number,
   ): Promise<DocumentVersion | null> {
     const { data, error } = await this.supabase
       .from("document_versions")
@@ -583,7 +583,7 @@ export class DocumentVersioningService extends EventEmitter {
 
   private calculateChanges(
     oldContent: string,
-    newContent: string
+    newContent: string,
   ): DocumentChange[] {
     const diffs = this.dmp.diff_main(oldContent, newContent);
     this.dmp.diff_cleanupSemantic(diffs);
@@ -595,7 +595,7 @@ export class DocumentVersioningService extends EventEmitter {
       const contextStart = Math.max(0, position - 50);
       const contextEnd = Math.min(
         oldContent.length,
-        position + text.length + 50
+        position + text.length + 50,
       );
       const context = oldContent.slice(contextStart, contextEnd);
 
@@ -646,7 +646,7 @@ export class DocumentVersioningService extends EventEmitter {
 
   private async analyzeContentQuality(
     content: string,
-    changes: DocumentChange[]
+    changes: DocumentChange[],
   ): Promise<DocumentVersionMetadata["quality"]> {
     const issues: string[] = [];
     const improvements: string[] = [];
@@ -667,7 +667,7 @@ export class DocumentVersioningService extends EventEmitter {
 
   private hasSignificantChanges(changes: DocumentChange[]): boolean {
     const significantChangeCount = changes.filter(
-      (c) => c.type !== "equal" && c.length > 10
+      (c) => c.type !== "equal" && c.length > 10,
     ).length;
 
     return significantChangeCount > 5;
@@ -699,7 +699,7 @@ export class DocumentVersioningService extends EventEmitter {
   }
 
   private async getBranches(
-    documentId: string
+    documentId: string,
   ): Promise<Array<{ name: string; versions: number[] }>> {
     const { data, error } = await this.supabase
       .from("document_branches")
@@ -715,7 +715,7 @@ export class DocumentVersioningService extends EventEmitter {
   }
 
   private async getTags(
-    documentId: string
+    documentId: string,
   ): Promise<Array<{ name: string; version: number }>> {
     const { data, error } = await this.supabase
       .from("document_tags")

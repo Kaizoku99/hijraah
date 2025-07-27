@@ -71,13 +71,13 @@ function createMiddlewareContext(request: NextRequest): MiddlewareContext {
     pathname,
     isAuthRoute: AUTH_ROUTES.some((route) => pathname.startsWith(route)),
     isProtectedRoute: PROTECTED_ROUTES.some((route) =>
-      pathname.startsWith(route)
+      pathname.startsWith(route),
     ),
     isPublicRoute: PUBLIC_ROUTES.some(
-      (route) => pathname === route || pathname.startsWith(route)
+      (route) => pathname === route || pathname.startsWith(route),
     ),
     isGuestAllowedRoute: GUEST_ALLOWED_ROUTES.some((route) =>
-      pathname.startsWith(route)
+      pathname.startsWith(route),
     ),
     userAgent: userAgent.substring(0, 100), // Truncate for logs
     ipAddress,
@@ -100,7 +100,7 @@ function hasGuestSession(request: NextRequest): boolean {
  */
 function createMiddlewareSupabaseClient(
   request: NextRequest,
-  response: NextResponse
+  response: NextResponse,
 ) {
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -121,7 +121,7 @@ function createMiddlewareSupabaseClient(
         persistSession: true,
         autoRefreshToken: true,
       },
-    }
+    },
   );
 }
 
@@ -131,7 +131,7 @@ function createMiddlewareSupabaseClient(
  */
 async function handleGuestUser(
   request: NextRequest,
-  context: MiddlewareContext
+  context: MiddlewareContext,
 ): Promise<NextResponse | null> {
   // Allow guest users on guest-allowed routes
   if (context.isGuestAllowedRoute || context.isPublicRoute) {
@@ -165,7 +165,7 @@ async function handleGuestUser(
 async function handleAuthenticatedUser(
   request: NextRequest,
   context: MiddlewareContext,
-  user: any
+  user: any,
 ): Promise<NextResponse | null> {
   // Redirect authenticated users away from auth routes
   if (context.isAuthRoute) {
@@ -205,7 +205,7 @@ function handleRouteMigration(request: NextRequest): NextResponse | null {
 
   // Check for legacy route mappings
   for (const [legacyPath, unifiedPath] of Object.entries(
-    LEGACY_ROUTE_MAPPINGS
+    LEGACY_ROUTE_MAPPINGS,
   )) {
     if (pathname === legacyPath || pathname.startsWith(legacyPath + "/")) {
       const newPathname = pathname.replace(legacyPath, unifiedPath);
@@ -235,7 +235,7 @@ function handleRouteMigration(request: NextRequest): NextResponse | null {
  */
 async function handleUnauthenticatedUser(
   request: NextRequest,
-  context: MiddlewareContext
+  context: MiddlewareContext,
 ): Promise<NextResponse | null> {
   // Allow access to public and auth routes
   if (context.isPublicRoute || context.isAuthRoute) {

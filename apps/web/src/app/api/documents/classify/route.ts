@@ -12,7 +12,7 @@ const mistralApiKey = process.env.MISTRAL_API_KEY;
 
 if (!internalApiKey || !mistralApiKey) {
   console.error(
-    "Missing required environment variables for Classification API"
+    "Missing required environment variables for Classification API",
   );
 }
 
@@ -47,7 +47,7 @@ const ClassificationResponseSchema = z.object({
       z.object({
         category: z.enum(IMMIGRATION_CATEGORIES),
         confidence: z.number().min(0).max(1),
-      })
+      }),
     )
     .optional(),
   document_language: z.string().optional(),
@@ -86,7 +86,7 @@ app.use("*", async (c, next) => {
   }
   c.header(
     "X-Deprecation",
-    "This endpoint is deprecated; migrate to DocumentProcessor inline classification"
+    "This endpoint is deprecated; migrate to DocumentProcessor inline classification",
   );
   c.header("Access-Control-Expose-Headers", "X-Deprecation");
   await next();
@@ -101,14 +101,14 @@ const classificationModel = mistralApiKey
 app.post("/", zValidator("json", ClassificationRequestSchema), async (c) => {
   if (!classificationModel) {
     console.error(
-      "Classification model not initialized due to missing API key."
+      "Classification model not initialized due to missing API key.",
     );
     return c.json({ error: "Classification service not configured" }, 503);
   }
 
   const { documentId, text } = c.req.valid("json");
   console.log(
-    `[Classify API] Received request for documentId: ${documentId ?? "N/A"}`
+    `[Classify API] Received request for documentId: ${documentId ?? "N/A"}`,
   );
 
   try {
@@ -126,7 +126,7 @@ app.post("/", zValidator("json", ClassificationRequestSchema), async (c) => {
 
     console.log(
       `[Classify API] Successfully classified doc ${documentId ?? "N/A"}. Usage:`,
-      usage
+      usage,
     );
 
     return c.json({ classification: classificationResult });

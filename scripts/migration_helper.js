@@ -5,10 +5,10 @@
 
 // New code using native Promises
 async function asyncOperation() {
-    try {
-        const result = await someAsyncOperation();
-        return result;
-    } catch (error) {
-        throw error;
-    }
-} 
+  try {
+    const result = await someAsyncOperation();
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}

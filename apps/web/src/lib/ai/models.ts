@@ -20,7 +20,7 @@ try {
 } catch (error) {
   // Fireworks SDK is optional, only used for certain models
   console.warn(
-    "Fireworks SDK not installed, some models will not be available"
+    "Fireworks SDK not installed, some models will not be available",
   );
 }
 
@@ -219,14 +219,14 @@ export const customAIProvider = customProvider({
 // Helper function for custom model configuration
 export function customModel(
   modelIdentifier: string,
-  isReasoning: boolean = false
+  isReasoning: boolean = false,
 ) {
   // If reasoning is enabled and no specific reasoning model is provided,
   // use the default reasoning model
   if (isReasoning) {
     // If the model is already a reasoning model, use it directly
     const isAlreadyReasoningModel = reasoningModels.some(
-      (model) => model.id === modelIdentifier
+      (model) => model.id === modelIdentifier,
     );
     if (isAlreadyReasoningModel) {
       return modelIdentifier;
@@ -234,7 +234,7 @@ export function customModel(
 
     // Otherwise, use the default reasoning model for the provider
     const requestedModel = [...models, ...reasoningModels].find(
-      (model) => model.id === modelIdentifier
+      (model) => model.id === modelIdentifier,
     );
     const provider = requestedModel?.provider || "openai";
 

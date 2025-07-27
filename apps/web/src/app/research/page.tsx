@@ -19,7 +19,7 @@ export default function ResearchPage() {
   // Ensure NEXT_PUBLIC_OPENAI_API_KEY is available in the environment.
   const researchProcessor = new ResearchProcessor(
     process.env.NEXT_PUBLIC_OPENAI_API_KEY || "", // Provide a fallback or ensure it's always there
-    supabase // Pass the browser client instance
+    supabase, // Pass the browser client instance
   );
 
   const handleResearch = async (
@@ -28,7 +28,7 @@ export default function ResearchPage() {
       country?: string;
       category?: string;
       depth: "basic" | "detailed" | "comprehensive";
-    }
+    },
   ) => {
     setIsLoading(true);
     try {
@@ -39,7 +39,7 @@ export default function ResearchPage() {
     } catch (error) {
       console.error("Research error:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to complete research"
+        error instanceof Error ? error.message : "Failed to complete research",
       );
       setResults("Failed to complete research. Please try again.");
     } finally {

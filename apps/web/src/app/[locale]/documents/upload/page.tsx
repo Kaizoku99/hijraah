@@ -12,12 +12,10 @@ import { useAuth } from "@/lib/auth/hooks"; // Import useAuth to get user ID
 import { cn } from "@/lib/utils";
 import { DocumentUpload } from "@/types/documents"; // Assuming type location
 
-
-
 // Mock API function (Replace with actual API call)
 const uploadDocumentAPI = async (
   data: Partial<DocumentUpload>,
-  file: File
+  file: File,
 ): Promise<{ success: boolean; error?: string }> => {
   console.log("Uploading document data:", data, "File:", file.name);
   // Simulate API delay for upload
@@ -65,7 +63,7 @@ export default function UploadDocumentsPage() {
         router.push(`/${locale}/documents`); // Redirect to documents list
       } else {
         toast.error(
-          `Error uploading document: ${result.error || "Unknown error"}`
+          `Error uploading document: ${result.error || "Unknown error"}`,
         );
       }
     } catch (error) {

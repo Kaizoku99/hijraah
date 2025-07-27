@@ -84,7 +84,8 @@ const PureChatItem = ({
         <Link
           href={`/chat/${chat.id}`}
           onClick={() => setOpenMobile(false)}
-          legacyBehavior>
+          legacyBehavior
+        >
           <span>{chat.title}</span>
         </Link>
       </SidebarMenuButton>
@@ -281,7 +282,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
         lastWeek: [],
         lastMonth: [],
         older: [],
-      } as GroupedChats
+      } as GroupedChats,
     );
   };
 

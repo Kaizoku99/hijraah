@@ -5,43 +5,44 @@ import {
   CheckCircle,
   BarChart,
   Shield,
-} from 'lucide-react';
-import Image from 'next/image';
+} from "lucide-react";
+import Image from "next/image";
 
-import { Card } from '@/components/ui/card';
+import { Card } from "@/components/ui/card";
 
 const stats = [
   {
-    value: '10K+',
-    label: 'Successful Applications',
+    value: "10K+",
+    label: "Successful Applications",
     icon: CheckCircle,
   },
   {
-    value: '50+',
-    label: 'Countries Served',
+    value: "50+",
+    label: "Countries Served",
     icon: Globe,
   },
   {
-    value: '95%',
-    label: 'Success Rate',
+    value: "95%",
+    label: "Success Rate",
     icon: BarChart,
   },
 ];
 
 const values = [
   {
-    title: 'Expert Guidance',
-    description: 'Our AI is trained on the latest immigration policies and procedures.',
+    title: "Expert Guidance",
+    description:
+      "Our AI is trained on the latest immigration policies and procedures.",
     icon: Award,
   },
   {
-    title: 'User Privacy',
-    description: 'Your data is protected with enterprise-grade security.',
+    title: "User Privacy",
+    description: "Your data is protected with enterprise-grade security.",
     icon: Shield,
   },
   {
-    title: 'Community Support',
-    description: 'Join thousands of others on their immigration journey.',
+    title: "Community Support",
+    description: "Join thousands of others on their immigration journey.",
     icon: Users,
   },
 ];
@@ -113,19 +114,22 @@ export default function AboutPage() {
         <div className="grid md:grid-cols-3 gap-8">
           {[
             {
-              name: 'Sarah Johnson',
-              role: 'Immigration Expert',
-              image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330',
+              name: "Sarah Johnson",
+              role: "Immigration Expert",
+              image:
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
             },
             {
-              name: 'Michael Chen',
-              role: 'AI Specialist',
-              image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
+              name: "Michael Chen",
+              role: "AI Specialist",
+              image:
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
             },
             {
-              name: 'Emily Rodriguez',
-              role: 'Legal Advisor',
-              image: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e',
+              name: "Emily Rodriguez",
+              role: "Legal Advisor",
+              image:
+                "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e",
             },
           ].map((member) => (
             <Card key={member.name} className="p-6 text-center">

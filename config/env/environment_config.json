@@ -2,4 +2,4 @@
   "base_url": "https://api.example.com",
   "api_key": "your-api-key",
   "auth_token": "{{dynamic_token}}"
-} 
+}

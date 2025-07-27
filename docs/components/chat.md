@@ -11,7 +11,7 @@ The chat system consists of several components that work together to provide a r
 A component that renders individual chat messages with support for user and AI messages, loading states, and error handling.
 
 ```tsx
-import { ChatMessage } from '@/components/chat/ChatMessage';
+import { ChatMessage } from "@/components/chat/ChatMessage";
 
 // Example usage
 <ChatMessage
@@ -20,7 +20,7 @@ import { ChatMessage } from '@/components/chat/ChatMessage';
   isLoading={false}
   error={null}
   onRetry={() => {}}
-/>
+/>;
 ```
 
 #### Props
@@ -36,7 +36,7 @@ import { ChatMessage } from '@/components/chat/ChatMessage';
 A component for sending messages with support for attachments and auto-resizing.
 
 ```tsx
-import { ChatInput } from '@/components/chat/ChatInput';
+import { ChatInput } from "@/components/chat/ChatInput";
 
 // Example usage
 <ChatInput
@@ -45,7 +45,7 @@ import { ChatInput } from '@/components/chat/ChatInput';
   placeholder="Type your message..."
   maxLength={4000}
   showAttachments={true}
-/>
+/>;
 ```
 
 #### Props
@@ -63,7 +63,7 @@ import { ChatInput } from '@/components/chat/ChatInput';
 A context provider that manages chat state and provides chat functionality to child components.
 
 ```tsx
-import { ChatProvider, useChat } from '@/contexts/chat';
+import { ChatProvider, useChat } from "@/contexts/chat";
 
 // Wrap your app
 function App() {
@@ -111,11 +111,11 @@ The chat system includes built-in analytics tracking for:
 - Performance metrics
 
 ```tsx
-import { analytics } from '@/lib/services/analytics';
+import { analytics } from "@/lib/services/analytics";
 
 // Track events
 await analytics.trackEvent({
-  type: 'message.created',
+  type: "message.created",
   payload: message,
   timestamp: new Date().toISOString(),
 });
@@ -134,7 +134,7 @@ The system includes comprehensive error handling with:
 - Error tracking and reporting
 
 ```tsx
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Wrap components
 <ErrorBoundary
@@ -143,7 +143,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
   }}
 >
   <YourComponent />
-</ErrorBoundary>
+</ErrorBoundary>;
 ```
 
 ## Loading States
@@ -170,16 +170,19 @@ import { Loading, LoadingOverlay, LoadingButtonContent } from '@/components/ui/l
 ## Best Practices
 
 1. **Error Handling**
+
    - Always wrap chat components with ErrorBoundary
    - Provide retry functionality for failed operations
    - Track and report errors for debugging
 
 2. **Performance**
+
    - Use optimistic updates for better UX
    - Implement proper loading states
    - Cache messages and sessions appropriately
 
 3. **Security**
+
    - Validate all user input
    - Implement proper access control
    - Sanitize message content before display
@@ -202,7 +205,8 @@ npm test ChatMessage.test.tsx
 ```
 
 See the test files for examples of:
+
 - Component testing
 - Context testing
 - Integration testing
-- Error handling testing 
+- Error handling testing

@@ -82,7 +82,7 @@ export class HybridRetriever {
           raw_text: document.rawText,
           status: "processed",
         },
-        { onConflict: "id" }
+        { onConflict: "id" },
       );
 
     if (docError) {
@@ -114,7 +114,7 @@ export class HybridRetriever {
     const { data, error } = await this.supabase
       .from("profiles")
       .select(
-        "id, country_of_residence, country_of_interest, country_of_citizenship, immigration_goals"
+        "id, country_of_residence, country_of_interest, country_of_citizenship, immigration_goals",
       )
       .eq("id", userId)
       .single();
@@ -145,7 +145,7 @@ export class HybridRetriever {
 
   private async understandQuery(
     query: string,
-    userProfile?: UserProfile | null
+    userProfile?: UserProfile | null,
   ): Promise<UnderstoodQuery> {
     const cacheKey = `understood_query_${
       userProfile?.id || "anonymous"
@@ -213,7 +213,7 @@ export class HybridRetriever {
     } catch (error) {
       console.warn(
         "Error understanding query, falling back to basic search:",
-        error
+        error,
       );
       return {
         embedding_query: query,
@@ -223,7 +223,7 @@ export class HybridRetriever {
   }
 
   private async extractEntitiesFromQuery(
-    query: string
+    query: string,
   ): Promise<{ name: string; type: string }[]> {
     try {
       const response = await this.openai.chat.completions.create({
@@ -257,7 +257,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
   }
 
   private async searchKnowledgeGraph(
-    entities: { name: string; type: string }[]
+    entities: { name: string; type: string }[],
   ): Promise<KGContext> {
     if (entities.length === 0) {
       return { entities: [], relationships: [] };
@@ -296,7 +296,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
    * Attempt to fetch a cached retrieval result from the `rag_query_cache` table.
    */
   private async getCachedRetrieval(
-    queryHash: string
+    queryHash: string,
   ): Promise<RetrievalResult | null> {
     const { data, error } = await this.supabase
       .from("rag_query_cache")
@@ -313,7 +313,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
 
     try {
       const chunks = JSON.parse(
-        data.retrieved_chunks
+        data.retrieved_chunks,
       ) as RAGProcessedDocumentChunk[];
       const kgContext = JSON.parse(data.kg_entities) as KGContext;
       return { chunks, kgContext };
@@ -345,7 +345,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
       await this.redis.setex(
         `hybrid:${queryHash}`,
         3600,
-        JSON.stringify(result)
+        JSON.stringify(result),
       );
     } catch (err) {
       console.warn("Cache write error", err);
@@ -355,7 +355,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
   // Enhanced search method with multi-level caching
   async search(
     query: string,
-    options: QueryOptions = {}
+    options: QueryOptions = {},
   ): Promise<RetrievalResult> {
     const startTime = Date.now();
     const queryHash = this.hashQuery(query, options);
@@ -387,7 +387,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
 
       const { embedding_query } = await this.understandQuery(
         query,
-        userProfile
+        userProfile,
       );
       const queryEmbedding = (
         await this.openai.embeddings.create({
@@ -453,7 +453,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
   // Extract existing search logic into private _searchWithoutCache
   private async _searchWithoutCache(
     query: string,
-    options: QueryOptions = {}
+    options: QueryOptions = {},
   ): Promise<RetrievalResult> {
     const { limit = 10, threshold = 0.7, userId } = options;
 
@@ -465,7 +465,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
     // 1. Understand Query (same as before)
     const { embedding_query, full_text_query } = await this.understandQuery(
       query,
-      userProfile
+      userProfile,
     );
 
     // 2. Generate Embedding for the Semantic Part of the Query
@@ -484,7 +484,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
         p_query_text: full_text_query,
         p_match_count: limit,
         p_similarity_threshold: threshold,
-      }
+      },
     );
 
     if (chunksError) {
@@ -497,7 +497,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
     // Structured log for observability (non-cached path)
     console.log(
       "[HybridRetriever] _searchWithoutCache top 3:",
-      rows.slice(0, 3).map((r) => ({ id: r.chunk_id, score: r.final_score }))
+      rows.slice(0, 3).map((r) => ({ id: r.chunk_id, score: r.final_score })),
     );
 
     const retrievedChunks: RAGProcessedDocumentChunk[] = rows.map((item) => ({
@@ -521,7 +521,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
     // 4. Personalization based on user profile
     const personalizedChunks = this.personalizeChunks(
       retrievedChunks,
-      userProfile
+      userProfile,
     );
 
     const rerankedChunks = await this.rerankResults(personalizedChunks, query);
@@ -538,7 +538,7 @@ Example: {"entities": [{"name": "Canada", "type": "Country"}, {"name": "Express 
 
   private async rerankResults(
     chunks: RAGProcessedDocumentChunk[],
-    query: string
+    query: string,
   ): Promise<RAGProcessedDocumentChunk[]> {
     if (chunks.length <= 3) return chunks; // No need to rerank few
 
@@ -587,7 +587,7 @@ Return JSON array now.`,
   // ---------------- PERSONALIZATION ----------------
   private personalizeChunks(
     chunks: RAGProcessedDocumentChunk[],
-    profile: UserProfile | null
+    profile: UserProfile | null,
   ): RAGProcessedDocumentChunk[] {
     if (!profile) return chunks;
 
@@ -639,7 +639,7 @@ Return JSON array now.`,
 
   private histBoost(
     chunk: RAGProcessedDocumentChunk,
-    boost: Record<string, number>
+    boost: Record<string, number>,
   ) {
     for (const key in boost) {
       if (chunk.content.toLowerCase().includes(key)) return boost[key];

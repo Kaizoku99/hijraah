@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
+import Link from "next/link";
+import { useState } from "react";
 
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { useAuth } from '@/lib/auth/hooks';
-import { Button } from '@/ui/button';
-import { Input } from '@/ui/input';
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/lib/auth/hooks";
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { resetPassword } = useAuth();
   const { toast } = useToast();
@@ -22,14 +22,14 @@ export default function ForgotPasswordPage() {
     try {
       await resetPassword(email);
       toast({
-        title: 'Check your email',
-        description: 'We have sent you a password reset link',
+        title: "Check your email",
+        description: "We have sent you a password reset link",
       });
     } catch (error) {
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to send reset email',
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to send reset email",
       });
     } finally {
       setIsLoading(false);
@@ -61,12 +61,8 @@ export default function ForgotPasswordPage() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Sending reset link...' : 'Send Reset Link'}
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "Sending reset link..." : "Send Reset Link"}
           </Button>
         </form>
 
@@ -81,4 +77,4 @@ export default function ForgotPasswordPage() {
       </div>
     </div>
   );
-} 
+}

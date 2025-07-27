@@ -73,7 +73,7 @@ export class RepositoryFactory {
    */
   registerRepository<T, K = string>(
     name: string,
-    repository: BaseRepository<T, K>
+    repository: BaseRepository<T, K>,
   ): void {
     repositoryRegistry[name] = repository;
   }
@@ -99,7 +99,7 @@ export class RepositoryFactory {
 
 // Export a single instance of the repository factory
 export const repositoryFactory = new RepositoryFactory(
-  createSupabaseServiceClient()
+  createSupabaseServiceClient(),
 );
 
 // Export individual repositories for direct access

@@ -166,7 +166,7 @@ export function AdvancedMonitoringDashboard({
         variant: alert.severity === "critical" ? "destructive" : "default",
       });
     },
-    [toast]
+    [toast],
   );
 
   const handleAlertResolved = useCallback(
@@ -181,7 +181,7 @@ export function AdvancedMonitoringDashboard({
         description: "System has returned to normal",
       });
     },
-    [toast]
+    [toast],
   );
 
   const handleHealthDegraded = useCallback(
@@ -192,7 +192,7 @@ export function AdvancedMonitoringDashboard({
         variant: "destructive",
       });
     },
-    [toast]
+    [toast],
   );
 
   const handlePerformanceAnomaly = useCallback(
@@ -203,7 +203,7 @@ export function AdvancedMonitoringDashboard({
         variant: "default",
       });
     },
-    [toast]
+    [toast],
   );
 
   // Context7 Pattern: Data fetching with error handling
@@ -412,7 +412,7 @@ export function AdvancedMonitoringDashboard({
                   <p className="text-2xl font-bold">
                     {
                       state.systemHealth.services.filter(
-                        (s) => s.status === "healthy"
+                        (s) => s.status === "healthy",
                       ).length
                     }
                     /{state.systemHealth.services.length}
@@ -488,7 +488,7 @@ export function AdvancedMonitoringDashboard({
                         <Badge
                           className={cn(
                             "text-xs",
-                            getStatusColor(service.status)
+                            getStatusColor(service.status),
                           )}
                         >
                           {service.status}
@@ -584,7 +584,7 @@ export function AdvancedMonitoringDashboard({
                       <Badge
                         className={cn(
                           "text-xs",
-                          getStatusColor(service.status)
+                          getStatusColor(service.status),
                         )}
                       >
                         {service.status}
@@ -710,7 +710,7 @@ export function AdvancedMonitoringDashboard({
                             <Badge
                               className={cn(
                                 "text-xs",
-                                getStatusColor(alert.severity)
+                                getStatusColor(alert.severity),
                               )}
                             >
                               {alert.severity}
@@ -776,7 +776,7 @@ export function AdvancedMonitoringDashboard({
                         <Badge
                           className={cn(
                             "text-xs",
-                            getStatusColor(trace.status)
+                            getStatusColor(trace.status),
                           )}
                         >
                           {trace.status}

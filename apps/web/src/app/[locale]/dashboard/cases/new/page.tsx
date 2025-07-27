@@ -17,10 +17,9 @@ import { isRTL } from "@/i18n/i18n";
 import { cn } from "@/lib/utils";
 import { Case, CaseStatus } from "@/types/cases"; // Assuming type location
 
-
 // Mock API function (Replace with actual API call)
 const createNewCaseAPI = async (
-  data: Partial<Case>
+  data: Partial<Case>,
 ): Promise<{ success: boolean; error?: string }> => {
   console.log("Submitting new case data:", data);
   // Simulate API delay

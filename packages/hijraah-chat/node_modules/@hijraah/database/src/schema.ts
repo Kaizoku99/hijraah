@@ -20,9 +20,10 @@ import {
 import { relations, sql } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+import { vector } from "pgvector/drizzle-orm";
 
 // ===== SCHEMA ORGANIZATION (Context7 Best Practice) =====
-export const publicSchema = pgSchema("public");
+// Note: public schema is the default, no need to define it explicitly
 export const authSchema = pgSchema("auth");
 export const apiSchema = pgSchema("api");
 
@@ -54,7 +55,7 @@ export const artifactTypeEnum = pgEnum("artifact_type", [
 export const dataTypeEnum = pgEnum("data_type", [
   "chat_messages",
   "documents",
-  "embeddings",
+  "document_chunks",
   "artifacts",
   "user_data",
   "search_history",
@@ -90,7 +91,7 @@ export const aiChatbotChat = pgTable(
   (table) => ({
     userIdIndex: index("idx_chat_user_id").on(table.userId),
     visibilityIndex: index("idx_chat_visibility").on(table.visibility),
-  })
+  }),
 );
 
 export type AIChatbotChat = typeof aiChatbotChat.$inferSelect;
@@ -110,7 +111,7 @@ export const aiChatbotMessage = pgTable(
   (table) => ({
     chatIdIndex: index("idx_message_chat_id").on(table.chatId),
     roleIndex: index("idx_message_role").on(table.role),
-  })
+  }),
 );
 
 export type AIChatbotMessage = typeof aiChatbotMessage.$inferSelect;
@@ -131,7 +132,7 @@ export const aiChatbotMessageV2 = pgTable(
   (table) => ({
     chatIdIndex: index("idx_message_v2_chat_id").on(table.chatId),
     roleIndex: index("idx_message_v2_role").on(table.role),
-  })
+  }),
 );
 
 export type AIChatbotMessageV2 = typeof aiChatbotMessageV2.$inferSelect;
@@ -152,7 +153,7 @@ export const aiChatbotVote = pgTable(
     pk: primaryKey({ columns: [table.chatId, table.messageId] }),
     chatIdIndex: index("idx_vote_chat_id").on(table.chatId),
     messageIdIndex: index("idx_vote_message_id").on(table.messageId),
-  })
+  }),
 );
 
 export type AIChatbotVote = typeof aiChatbotVote.$inferSelect;
@@ -173,7 +174,7 @@ export const aiChatbotVoteV2 = pgTable(
     pk: primaryKey({ columns: [table.chatId, table.messageId] }),
     chatIdIndex: index("idx_vote_v2_chat_id").on(table.chatId),
     messageIdIndex: index("idx_vote_v2_message_id").on(table.messageId),
-  })
+  }),
 );
 
 export type AIChatbotVoteV2 = typeof aiChatbotVoteV2.$inferSelect;
@@ -199,7 +200,7 @@ export const aiChatbotDocument = pgTable(
     pk: primaryKey({ columns: [table.id, table.createdAt] }),
     userIdIndex: index("idx_document_user_id").on(table.userId),
     kindIndex: index("idx_document_kind").on(table.kind),
-  })
+  }),
 );
 
 export type AIChatbotDocument = typeof aiChatbotDocument.$inferSelect;
@@ -228,9 +229,9 @@ export const aiChatbotSuggestion = pgTable(
     userIdIndex: index("idx_suggestion_user_id").on(table.userId),
     documentIndex: index("idx_suggestion_document").on(
       table.documentId,
-      table.documentCreatedAt
+      table.documentCreatedAt,
     ),
-  })
+  }),
 );
 
 export type AIChatbotSuggestion = typeof aiChatbotSuggestion.$inferSelect;
@@ -249,7 +250,7 @@ export const aiChatbotStream = pgTable(
       foreignColumns: [aiChatbotChat.id],
     }),
     chatIdIndex: index("idx_stream_chat_id").on(table.chatId),
-  })
+  }),
 );
 
 export type AIChatbotStream = typeof aiChatbotStream.$inferSelect;
@@ -285,7 +286,7 @@ export const profiles = pgTable(
   (table) => ({
     userIdIndex: index("profiles_user_id_idx").on(table.userId),
     emailIndex: index("profiles_email_idx").on(table.email),
-  })
+  }),
 );
 
 // ===== WEB INDEXES (FIRESTARTER) =====
@@ -337,9 +338,9 @@ export const webIndexes = pgTable(
     isActiveIndex: index("web_indexes_is_active_idx").on(table.isActive),
     namespaceTrgmIndex: index("web_indexes_namespace_trgm_idx").using(
       "gin",
-      sql`namespace gin_trgm_ops`
+      sql`namespace gin_trgm_ops`,
     ),
-  })
+  }),
 );
 
 export const crawlJobs = pgTable(
@@ -361,7 +362,7 @@ export const crawlJobs = pgTable(
   (table) => ({
     webIndexIdIndex: index("crawl_jobs_web_index_id_idx").on(table.webIndexId),
     statusIndex: index("crawl_jobs_status_idx").on(table.status),
-  })
+  }),
 );
 
 // ===== CHAT SYSTEM (UNIFIED AI-CHATBOT + EXISTING) =====
@@ -384,9 +385,9 @@ export const chatSessions = pgTable(
   (table) => ({
     userIdIndex: index("chat_sessions_user_id_idx").on(table.userId),
     webIndexIdIndex: index("chat_sessions_web_index_id_idx").on(
-      table.webIndexId
+      table.webIndexId,
     ),
-  })
+  }),
 );
 
 export const chatMessages = pgTable(
@@ -407,7 +408,7 @@ export const chatMessages = pgTable(
   (table) => ({
     chatIdIndex: index("chat_messages_chat_id_idx").on(table.chatId),
     roleIndex: index("chat_messages_role_idx").on(table.role),
-  })
+  }),
 );
 
 export const chatMessageVotes = pgTable(
@@ -425,9 +426,9 @@ export const chatMessageVotes = pgTable(
   (table) => ({
     messageUserUnique: unique().on(table.messageId, table.userId),
     messageIdIndex: index("chat_message_votes_message_id_idx").on(
-      table.messageId
+      table.messageId,
     ),
-  })
+  }),
 );
 
 // ===== ARTIFACTS (EXTENDED FOR AI-CHATBOT) =====
@@ -453,7 +454,7 @@ export const artifacts = pgTable(
     userIdIndex: index("artifacts_user_id_idx").on(table.userId),
     typeIndex: index("artifacts_type_idx").on(table.type),
     messageIdIndex: index("artifacts_message_id_idx").on(table.messageId),
-  })
+  }),
 );
 
 // ===== SUGGESTIONS =====
@@ -475,7 +476,7 @@ export const suggestions = pgTable(
   (table) => ({
     chatIdIndex: index("suggestions_chat_id_idx").on(table.chatId),
     messageIdIndex: index("suggestions_message_id_idx").on(table.messageId),
-  })
+  }),
 );
 
 // ===== STREAMS =====
@@ -494,7 +495,7 @@ export const streams = pgTable(
   },
   (table) => ({
     chatIdIndex: index("streams_chat_id_idx").on(table.chatId),
-  })
+  }),
 );
 
 // ===== UPSTASH CACHE METADATA =====
@@ -514,9 +515,9 @@ export const upstashCacheMeta = pgTable(
   (table) => ({
     cacheKeyIndex: index("upstash_cache_meta_cache_key_idx").on(table.cacheKey),
     namespaceIndex: index("upstash_cache_meta_namespace_idx").on(
-      table.namespace
+      table.namespace,
     ),
-  })
+  }),
 );
 
 // ===== DOCUMENT STORAGE =====
@@ -545,29 +546,33 @@ export const documents = pgTable(
     webIndexIdIndex: index("documents_web_index_id_idx").on(table.webIndexId),
     sourceIndex: index("documents_source_idx").on(table.source),
     checksumIndex: index("documents_checksum_idx").on(table.checksum),
-  })
+  }),
 );
 
-// ===== EMBEDDINGS =====
-export const embeddings = pgTable(
-  "embeddings",
+// ===== DOCUMENT CHUNKS =====
+export const documentChunksEnhanced = pgTable(
+  "document_chunks_enhanced",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    documentId: uuid("document_id").references(() => documents.id, {
-      onDelete: "cascade",
-    }),
-    content: text("content").notNull(),
-    embedding: text("embedding"), // JSON string of vector
-    chunkIndex: integer("chunk_index").default(0),
+    documentId: uuid("document_id")
+      .notNull()
+      .references(() => documents.id, { onDelete: "cascade" }),
+    chunkIndex: integer("chunk_index").notNull(),
+    textContent: text("text_content").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }),
     tokenCount: integer("token_count"),
-    model: varchar("model", { length: 50 }).default("text-embedding-3-small"),
-    metadata: jsonb("metadata").default({}),
+    entities: jsonb("entities").default([]),
+    keyPhrases: jsonb("key_phrases").default([]),
+    language: varchar("language", { length: 10 }).default("en"),
+    chunkMetadata: jsonb("chunk_metadata").default({}),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
-    documentIdIndex: index("embeddings_document_id_idx").on(table.documentId),
-    modelIndex: index("embeddings_model_idx").on(table.model),
-  })
+    documentIdIndex: index("idx_chunks_enhanced_document_id").on(
+      table.documentId,
+    ),
+    documentChunkUnique: unique().on(table.documentId, table.chunkIndex),
+  }),
 );
 
 // ===== KNOWLEDGE GRAPH =====
@@ -587,7 +592,7 @@ export const entities = pgTable(
   (table) => ({
     nameIndex: index("entities_name_idx").on(table.name),
     typeIndex: index("entities_type_idx").on(table.type),
-  })
+  }),
 );
 
 export const relationships = pgTable(
@@ -609,7 +614,7 @@ export const relationships = pgTable(
     sourceIdIndex: index("relationships_source_id_idx").on(table.sourceId),
     targetIdIndex: index("relationships_target_id_idx").on(table.targetId),
     typeIndex: index("relationships_type_idx").on(table.type),
-  })
+  }),
 );
 
 // ===== PRIVACY & GDPR COMPLIANCE =====
@@ -628,9 +633,9 @@ export const dataRetentionPolicies = pgTable(
   (table) => ({
     userIdIndex: index("data_retention_policies_user_id_idx").on(table.userId),
     dataTypeIndex: index("data_retention_policies_data_type_idx").on(
-      table.dataType
+      table.dataType,
     ),
-  })
+  }),
 );
 
 // ===== AI-CHATBOT RELATIONS =====
@@ -652,7 +657,7 @@ export const aiChatbotChatRelations = relations(
     votes: many(aiChatbotVote),
     votesV2: many(aiChatbotVoteV2),
     streams: many(aiChatbotStream),
-  })
+  }),
 );
 
 export const aiChatbotMessageRelations = relations(
@@ -663,7 +668,7 @@ export const aiChatbotMessageRelations = relations(
       references: [aiChatbotChat.id],
     }),
     votes: many(aiChatbotVote),
-  })
+  }),
 );
 
 export const aiChatbotMessageV2Relations = relations(
@@ -674,7 +679,7 @@ export const aiChatbotMessageV2Relations = relations(
       references: [aiChatbotChat.id],
     }),
     votes: many(aiChatbotVoteV2),
-  })
+  }),
 );
 
 export const aiChatbotDocumentRelations = relations(
@@ -685,7 +690,7 @@ export const aiChatbotDocumentRelations = relations(
       references: [aiChatbotUser.id],
     }),
     suggestions: many(aiChatbotSuggestion),
-  })
+  }),
 );
 
 export const aiChatbotSuggestionRelations = relations(
@@ -702,7 +707,7 @@ export const aiChatbotSuggestionRelations = relations(
       ],
       references: [aiChatbotDocument.id, aiChatbotDocument.createdAt],
     }),
-  })
+  }),
 );
 
 export const aiChatbotStreamRelations = relations(
@@ -712,7 +717,7 @@ export const aiChatbotStreamRelations = relations(
       fields: [aiChatbotStream.chatId],
       references: [aiChatbotChat.id],
     }),
-  })
+  }),
 );
 
 // ===== EXISTING RELATIONS =====
@@ -739,7 +744,7 @@ export const chatSessionsRelations = relations(
       fields: [chatSessions.webIndexId],
       references: [webIndexes.id],
     }),
-  })
+  }),
 );
 
 export const chatMessagesRelations = relations(
@@ -752,7 +757,7 @@ export const chatMessagesRelations = relations(
     votes: many(chatMessageVotes),
     artifacts: many(artifacts),
     suggestions: many(suggestions),
-  })
+  }),
 );
 
 export const artifactsRelations = relations(artifacts, ({ one }) => ({
@@ -767,15 +772,18 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
     fields: [documents.webIndexId],
     references: [webIndexes.id],
   }),
-  embeddings: many(embeddings),
+  documentChunks: many(documentChunksEnhanced),
 }));
 
-export const embeddingsRelations = relations(embeddings, ({ one }) => ({
-  document: one(documents, {
-    fields: [embeddings.documentId],
-    references: [documents.id],
+export const documentChunksEnhancedRelations = relations(
+  documentChunksEnhanced,
+  ({ one }) => ({
+    document: one(documents, {
+      fields: [documentChunksEnhanced.documentId],
+      references: [documents.id],
+    }),
   }),
-}));
+);
 
 export const entitiesRelations = relations(entities, ({ many }) => ({
   sourceRelationships: many(relationships, { relationName: "source" }),
@@ -808,7 +816,7 @@ export type Artifact = typeof artifacts.$inferSelect;
 export type Suggestion = typeof suggestions.$inferSelect;
 export type Stream = typeof streams.$inferSelect;
 export type Document = typeof documents.$inferSelect;
-export type Embedding = typeof embeddings.$inferSelect;
+export type DocumentChunk = typeof documentChunksEnhanced.$inferSelect;
 export type Entity = typeof entities.$inferSelect;
 export type Relationship = typeof relationships.$inferSelect;
 export type UpstashCacheMeta = typeof upstashCacheMeta.$inferSelect;
@@ -821,6 +829,7 @@ export const chatSessionSchema = createSelectSchema(chatSessions);
 export const chatMessageSchema = createSelectSchema(chatMessages);
 export const artifactSchema = createSelectSchema(artifacts);
 export const documentSchema = createSelectSchema(documents);
+export const documentChunkSchema = createSelectSchema(documentChunksEnhanced);
 
 export const insertProfileSchema = createInsertSchema(profiles);
 export const insertWebIndexSchema = createInsertSchema(webIndexes);
@@ -828,6 +837,9 @@ export const insertChatSessionSchema = createInsertSchema(chatSessions);
 export const insertChatMessageSchema = createInsertSchema(chatMessages);
 export const insertArtifactSchema = createInsertSchema(artifacts);
 export const insertDocumentSchema = createInsertSchema(documents);
+export const insertDocumentChunkSchema = createInsertSchema(
+  documentChunksEnhanced,
+);
 
 // AI-Chatbot Zod schemas
 export const aiChatbotUserSchema = createSelectSchema(aiChatbotUser);

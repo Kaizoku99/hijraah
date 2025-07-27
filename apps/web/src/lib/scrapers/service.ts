@@ -26,7 +26,7 @@ export class ScraperService {
     r2AccountId: string,
     r2AccessKeyId: string,
     r2SecretAccessKey: string,
-    r2BucketName: string
+    r2BucketName: string,
   ) {
     this.firecrawl = new FirecrawlClient(firecrawlApiKey);
     // Use service role key for admin operations
@@ -35,7 +35,7 @@ export class ScraperService {
       supabaseServiceKey,
       {
         auth: { persistSession: false },
-      }
+      },
     );
 
     // Configure R2 Client (using AWS SDK v3 pattern)
@@ -61,7 +61,7 @@ export class ScraperService {
     try {
       await this.r2Client.send(command);
       console.log(
-        `Successfully uploaded ${key} to R2 bucket ${this.r2BucketName}`
+        `Successfully uploaded ${key} to R2 bucket ${this.r2BucketName}`,
       );
       return key;
     } catch (error) {
@@ -89,12 +89,12 @@ export class ScraperService {
           typeof config.selectors === "string"
             ? JSON.parse(config.selectors)
             : config.selectors,
-      })
+      }),
     );
   }
 
   async getScrapeConfigById(
-    configId: string
+    configId: string,
   ): Promise<CountryConfigType | null> {
     console.log(`Fetching scrape configuration by ID: ${configId}`);
     const { data, error } = await this.supabaseAdmin
@@ -112,16 +112,16 @@ export class ScraperService {
       console.error(
         `Error fetching scrape configuration ${configId}: Code ${error.code}`,
         error.message,
-        error.details
+        error.details,
       );
       throw new Error(
-        `Failed to fetch scrape config ${configId}: ${error.message}`
+        `Failed to fetch scrape config ${configId}: ${error.message}`,
       );
     }
 
     if (!data) {
       console.warn(
-        `No data returned for scrape configuration ID: ${configId}, though no specific error was thrown.`
+        `No data returned for scrape configuration ID: ${configId}, though no specific error was thrown.`,
       );
       return null;
     }
@@ -142,10 +142,10 @@ export class ScraperService {
           : String(validationError);
       console.error(
         `Validation error for scrape configuration ${configId}:`,
-        errorMessage
+        errorMessage,
       );
       throw new Error(
-        `Invalid scrape configuration data for ${configId}: ${errorMessage}`
+        `Invalid scrape configuration data for ${configId}: ${errorMessage}`,
       );
     }
   }
@@ -206,7 +206,7 @@ export class ScraperService {
                 content_hash: contentHash,
                 metadata: scrapeResult.metadata, // Store original Firecrawl metadata
               },
-              { onConflict: "url" }
+              { onConflict: "url" },
             );
 
           if (upsertError) {
@@ -214,30 +214,30 @@ export class ScraperService {
             // Decide if we should continue or throw
           } else {
             console.log(
-              `Successfully processed and stored metadata for ${url}`
+              `Successfully processed and stored metadata for ${url}`,
             );
             successCount++;
           }
         } else {
           console.error(
-            `Failed to scrape ${url}: ${scrapeResult.error || "No markdown content"}`
+            `Failed to scrape ${url}: ${scrapeResult.error || "No markdown content"}`,
           );
           // Optionally log failed scrapes to a separate table or monitoring system
         }
       } catch (error) {
         console.error(
           `Error processing URL ${url} for config ${config.name}:`,
-          error
+          error,
         );
       }
 
       // Add delay between requests to be respectful
       await new Promise((resolve) =>
-        setTimeout(resolve, config.rateLimit || 1000)
+        setTimeout(resolve, config.rateLimit || 1000),
       );
     }
     console.log(
-      `Finished processing config ${config.name}. Successes: ${successCount}/${urlsToScrape.length}`
+      `Finished processing config ${config.name}. Successes: ${successCount}/${urlsToScrape.length}`,
     );
   }
 
@@ -267,7 +267,7 @@ export class ScraperService {
     options?: {
       modes?: ("git-diff" | "json")[];
       jsonSchema?: Record<string, any>;
-    }
+    },
   ) {
     console.log(`Tracking changes for URL: ${url}`);
 
@@ -306,7 +306,7 @@ export class ScraperService {
       // Check if change tracking data is available
       if (!result.changeTracking) {
         console.log(
-          `No change tracking data available for ${url}. This might be the first scrape.`
+          `No change tracking data available for ${url}. This might be the first scrape.`,
         );
         return {
           url,
@@ -323,7 +323,7 @@ export class ScraperService {
 
       // Return result with change tracking information
       console.log(
-        `Successfully tracked changes for ${url}. Status: ${result.changeTracking.changeStatus}`
+        `Successfully tracked changes for ${url}. Status: ${result.changeTracking.changeStatus}`,
       );
       return {
         url,
@@ -345,7 +345,7 @@ export class ScraperService {
     console.log("Starting change tracking for all active configurations...");
     const activeConfigs = await this.getActiveScrapeConfigs();
     console.log(
-      `Found ${activeConfigs.length} active configurations to track.`
+      `Found ${activeConfigs.length} active configurations to track.`,
     );
 
     const results: Record<string, any> = {};
@@ -354,7 +354,7 @@ export class ScraperService {
       // Skip if trackChanges is not explicitly set to true
       if (config.trackChanges !== true) {
         console.log(
-          `Skipping change tracking for ${config.name} (not enabled)`
+          `Skipping change tracking for ${config.name} (not enabled)`,
         );
         continue;
       }
@@ -384,7 +384,7 @@ export class ScraperService {
 
         // Add delay between requests to be respectful
         await new Promise((resolve) =>
-          setTimeout(resolve, config.rateLimit || 1000)
+          setTimeout(resolve, config.rateLimit || 1000),
         );
       }
 

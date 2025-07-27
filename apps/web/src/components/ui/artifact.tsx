@@ -40,7 +40,6 @@ import {
   CodeContent,
 } from "@/types/artifact";
 
-
 // Temporarily define a simple markdown viewer component while the actual component is being created
 interface SimpleMarkdownViewerProps {
   content: string;
@@ -153,7 +152,7 @@ export function Artifact({
       <Card
         className={cn(
           "w-full h-full min-h-[300px] flex items-center justify-center",
-          className
+          className,
         )}
       >
         <div className="animate-pulse text-muted-foreground">
@@ -214,7 +213,7 @@ export function Artifact({
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     {getVisibilityIcon(
-                      currentArtifact.visibility as ArtifactVisibility
+                      currentArtifact.visibility as ArtifactVisibility,
                     )}
                   </Button>
                 </DropdownMenuTrigger>
@@ -388,7 +387,7 @@ export function Artifact({
                     "p-3 rounded-lg",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground ml-12"
-                      : "bg-muted mr-12"
+                      : "bg-muted mr-12",
                   )}
                 >
                   <div className="text-xs font-medium mb-1">

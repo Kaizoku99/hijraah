@@ -1,12 +1,12 @@
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act } from "@testing-library/react";
 
-import { useAuth } from '@/contexts/auth';
-import { ChatProvider, useChat } from '@/contexts/chat';
-import { createClient } from '@/lib/supabase/client';
+import { useAuth } from "@/contexts/auth";
+import { ChatProvider, useChat } from "@/contexts/chat";
+import { createClient } from "@/lib/supabase/client";
 
 // Mock dependencies
-jest.mock('@/lib/supabase/client');
-jest.mock('@/contexts/auth');
+jest.mock("@/lib/supabase/client");
+jest.mock("@/contexts/auth");
 
 const mockSupabase = {
   from: jest.fn(() => ({
@@ -21,7 +21,7 @@ const mockSupabase = {
     insert: jest.fn(() => ({
       select: jest.fn(() => ({
         single: jest.fn(() => ({
-          data: { id: 'session-1', user_id: 'user-1', status: 'active' },
+          data: { id: "session-1", user_id: "user-1", status: "active" },
           error: null,
         })),
       })),
@@ -36,17 +36,17 @@ const mockSupabase = {
 };
 
 const mockUser = {
-  id: 'user-1',
-  email: 'test@example.com',
+  id: "user-1",
+  email: "test@example.com",
 };
 
-describe('ChatContext', () => {
+describe("ChatContext", () => {
   beforeEach(() => {
     (createClient as jest.Mock).mockReturnValue(mockSupabase);
     (useAuth as jest.Mock).mockReturnValue({ user: mockUser });
   });
 
-  it('provides initial state', () => {
+  it("provides initial state", () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ChatProvider>{children}</ChatProvider>
     );
@@ -59,7 +59,7 @@ describe('ChatContext', () => {
     expect(result.current.error).toBeNull();
   });
 
-  it('starts a new session', async () => {
+  it("starts a new session", async () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ChatProvider>{children}</ChatProvider>
     );
@@ -71,21 +71,22 @@ describe('ChatContext', () => {
     });
 
     expect(result.current.session).toEqual({
-      id: 'session-1',
-      user_id: 'user-1',
-      status: 'active',
+      id: "session-1",
+      user_id: "user-1",
+      status: "active",
     });
     expect(result.current.messages).toEqual([]);
   });
 
-  it('sends a message', async () => {
+  it("sends a message", async () => {
     const mockResponse = {
       ok: true,
-      json: () => Promise.resolve({
-        content: 'AI response',
-        model: 'gpt-4',
-        tokens: 10,
-      }),
+      json: () =>
+        Promise.resolve({
+          content: "AI response",
+          model: "gpt-4",
+          tokens: 10,
+        }),
     };
     global.fetch = jest.fn().mockResolvedValue(mockResponse);
 
@@ -102,21 +103,21 @@ describe('ChatContext', () => {
 
     // Send a message
     await act(async () => {
-      await result.current.sendMessage('Hello');
+      await result.current.sendMessage("Hello");
     });
 
     expect(result.current.messages).toHaveLength(2); // User message + AI response
-    expect(result.current.messages[0].content).toBe('Hello');
-    expect(result.current.messages[1].content).toBe('AI response');
+    expect(result.current.messages[0].content).toBe("Hello");
+    expect(result.current.messages[1].content).toBe("AI response");
   });
 
-  it('handles errors gracefully', async () => {
+  it("handles errors gracefully", async () => {
     mockSupabase.from.mockImplementationOnce(() => ({
       insert: jest.fn(() => ({
         select: jest.fn(() => ({
           single: jest.fn(() => ({
             data: null,
-            error: new Error('Database error'),
+            error: new Error("Database error"),
           })),
         })),
       })),
@@ -133,18 +134,18 @@ describe('ChatContext', () => {
     });
 
     expect(result.current.error).toBeTruthy();
-    expect(result.current.error?.message).toBe('Database error');
+    expect(result.current.error?.message).toBe("Database error");
   });
 
-  it('loads an existing session', async () => {
+  it("loads an existing session", async () => {
     mockSupabase.from.mockImplementationOnce(() => ({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           single: jest.fn(() => ({
             data: {
-              id: 'session-1',
-              user_id: 'user-1',
-              status: 'active',
+              id: "session-1",
+              user_id: "user-1",
+              status: "active",
             },
             error: null,
           })),
@@ -159,14 +160,14 @@ describe('ChatContext', () => {
     const { result } = renderHook(() => useChat(), { wrapper });
 
     await act(async () => {
-      await result.current.loadSession('session-1');
+      await result.current.loadSession("session-1");
     });
 
     expect(result.current.session).toBeTruthy();
-    expect(result.current.session?.id).toBe('session-1');
+    expect(result.current.session?.id).toBe("session-1");
   });
 
-  it('clears the session', async () => {
+  it("clears the session", async () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ChatProvider>{children}</ChatProvider>
     );
@@ -188,4 +189,4 @@ describe('ChatContext', () => {
     expect(result.current.session).toBeNull();
     expect(result.current.messages).toEqual([]);
   });
-}); 
+});

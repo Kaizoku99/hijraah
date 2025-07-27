@@ -14,21 +14,20 @@ export {
 } from "./providers.js";
 export type { ProviderConfig } from "./providers.js";
 
-export {
-  cacheMiddleware,
-  rateLimitMiddleware,
-  monitoringMiddleware,
-  errorHandlingMiddleware,
-  createStandardMiddleware,
-} from "./middleware.js";
+// TODO: Fix middleware exports for AI SDK v5
+// export {
+//   cacheMiddleware,
+//   rateLimitMiddleware,
+//   monitoringMiddleware,
+//   errorHandlingMiddleware,
+//   createStandardMiddleware,
+// } from "./middleware.js";
 
 // Re-export commonly used AI SDK types
-export type {
-  CoreMessage,
-  GenerateTextResult,
-  StreamTextResult,
-  LanguageModelV1Middleware,
-} from "ai";
+export type { ModelMessage, GenerateTextResult, StreamTextResult } from "ai";
+
+// Import the class at the top
+import { EnhancedModelMultiplexer as MultiplexerClass } from "./multiplexer.js";
 
 // Utility function to create a configured multiplexer instance
 export function createHijraahAI(options: {
@@ -44,7 +43,7 @@ export function createHijraahAI(options: {
     enableMonitoring = true,
   } = options;
 
-  return new EnhancedModelMultiplexer({
+  return new MultiplexerClass({
     redis,
     fallbackStrategy,
     maxRetries: 3,

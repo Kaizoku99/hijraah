@@ -1,7 +1,7 @@
 /**
  * List of supported locales
  */
-export const locales = ['en', 'ar', 'es', 'fr'] as const;
+export const locales = ["en", "ar", "es", "fr"] as const;
 
 /**
  * Type representing the supported locales
@@ -11,7 +11,7 @@ export type Locale = (typeof locales)[number];
 /**
  * Default locale when no preference is detected
  */
-export const defaultLocale: Locale = 'en';
+export const defaultLocale: Locale = "en";
 
 /**
  * Configuration for each locale
@@ -22,7 +22,7 @@ export interface LocaleConfig {
   /** English name of the language */
   englishName: string;
   /** Text direction (ltr or rtl) */
-  direction: 'ltr' | 'rtl';
+  direction: "ltr" | "rtl";
   /** Date format pattern */
   dateFormat: string;
   /** Flag emoji or code for the language */
@@ -37,7 +37,7 @@ export interface LocaleConfig {
     thousands: string;
   };
   /** Calendar system */
-  calendar?: 'gregory' | 'islamic';
+  calendar?: "gregory" | "islamic";
   /** Font class for language-specific typography */
   fontClass?: string;
 }
@@ -47,57 +47,57 @@ export interface LocaleConfig {
  */
 export const localeConfigs: Record<Locale, LocaleConfig> = {
   en: {
-    nativeName: 'English',
-    englishName: 'English',
-    direction: 'ltr',
-    dateFormat: 'MM/DD/YYYY',
-    flag: '🇺🇸',
-    htmlLang: 'en',
-    calendar: 'gregory',
+    nativeName: "English",
+    englishName: "English",
+    direction: "ltr",
+    dateFormat: "MM/DD/YYYY",
+    flag: "🇺🇸",
+    htmlLang: "en",
+    calendar: "gregory",
     number: {
-      decimal: '.',
-      thousands: ',',
-    }
+      decimal: ".",
+      thousands: ",",
+    },
   },
   ar: {
-    nativeName: 'العربية',
-    englishName: 'Arabic',
-    direction: 'rtl',
-    dateFormat: 'DD/MM/YYYY',
-    flag: '🇸🇦',
-    htmlLang: 'ar',
-    calendar: 'islamic',
-    fontClass: 'font-arabic',
+    nativeName: "العربية",
+    englishName: "Arabic",
+    direction: "rtl",
+    dateFormat: "DD/MM/YYYY",
+    flag: "🇸🇦",
+    htmlLang: "ar",
+    calendar: "islamic",
+    fontClass: "font-arabic",
     number: {
-      decimal: '٫',
-      thousands: '٬',
-    }
+      decimal: "٫",
+      thousands: "٬",
+    },
   },
   fr: {
-    nativeName: 'Français',
-    englishName: 'French',
-    direction: 'ltr',
-    dateFormat: 'DD/MM/YYYY',
-    flag: '🇫🇷',
-    htmlLang: 'fr',
-    calendar: 'gregory',
+    nativeName: "Français",
+    englishName: "French",
+    direction: "ltr",
+    dateFormat: "DD/MM/YYYY",
+    flag: "🇫🇷",
+    htmlLang: "fr",
+    calendar: "gregory",
     number: {
-      decimal: ',',
-      thousands: ' ',
-    }
+      decimal: ",",
+      thousands: " ",
+    },
   },
   es: {
-    nativeName: 'Español',
-    englishName: 'Spanish',
-    direction: 'ltr',
-    dateFormat: 'DD/MM/YYYY',
-    flag: '🇪🇸',
-    htmlLang: 'es',
-    calendar: 'gregory',
+    nativeName: "Español",
+    englishName: "Spanish",
+    direction: "ltr",
+    dateFormat: "DD/MM/YYYY",
+    flag: "🇪🇸",
+    htmlLang: "es",
+    calendar: "gregory",
     number: {
-      decimal: ',',
-      thousands: '.',
-    }
+      decimal: ",",
+      thousands: ".",
+    },
   },
 };
 
@@ -112,7 +112,7 @@ export function getLocaleConfig(locale: Locale | string): LocaleConfig {
  * Check if a locale is RTL
  */
 export function isRTL(locale: Locale | string): boolean {
-  return getLocaleConfig(locale).direction === 'rtl';
+  return getLocaleConfig(locale).direction === "rtl";
 }
 
 /**
@@ -125,8 +125,10 @@ export function getLocaleFont(locale: Locale | string): string | undefined {
 /**
  * Get calendar system for a locale
  */
-export function getCalendarSystem(locale: Locale | string): 'gregory' | 'islamic' {
-  return getLocaleConfig(locale).calendar || 'gregory';
+export function getCalendarSystem(
+  locale: Locale | string,
+): "gregory" | "islamic" {
+  return getLocaleConfig(locale).calendar || "gregory";
 }
 
 /**

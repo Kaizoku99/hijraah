@@ -97,7 +97,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders]
+    [toast, authHeaders],
   );
 
   // Get user's chats
@@ -107,7 +107,7 @@ export function useChat() {
         limit?: number;
         offset?: number;
         caseId?: string;
-      } = {}
+      } = {},
     ): Promise<Chat[]> => {
       try {
         setIsLoading(true);
@@ -146,7 +146,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders]
+    [toast, authHeaders],
   );
 
   // Get a specific chat
@@ -180,7 +180,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders]
+    [toast, authHeaders],
   );
 
   // Send a message to a chat
@@ -188,7 +188,7 @@ export function useChat() {
     async (
       chatId: string,
       content: string,
-      attachments: Omit<Attachment, "id">[] = []
+      attachments: Omit<Attachment, "id">[] = [],
     ): Promise<{
       userMessageId: string;
       assistantMessageId: string | null;
@@ -232,7 +232,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders, getChat]
+    [toast, authHeaders, getChat],
   );
 
   // Update chat details
@@ -248,7 +248,7 @@ export function useChat() {
           shared?: boolean;
           [key: string]: any;
         };
-      }
+      },
     ): Promise<Chat | null> => {
       try {
         setIsLoading(true);
@@ -270,7 +270,7 @@ export function useChat() {
 
         setCurrentChat(data.chat);
         setChats((prevChats) =>
-          prevChats.map((chat) => (chat.id === chatId ? data.chat : chat))
+          prevChats.map((chat) => (chat.id === chatId ? data.chat : chat)),
         );
 
         return data.chat;
@@ -285,7 +285,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders]
+    [toast, authHeaders],
   );
 
   // Delete a chat
@@ -322,7 +322,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders, currentChat]
+    [toast, authHeaders, currentChat],
   );
 
   // Generate a title for a chat
@@ -347,14 +347,14 @@ export function useChat() {
         // Update chat with new title
         if (currentChat?.id === chatId) {
           setCurrentChat((prev) =>
-            prev ? { ...prev, title: data.title } : null
+            prev ? { ...prev, title: data.title } : null,
           );
         }
 
         setChats((prevChats) =>
           prevChats.map((chat) =>
-            chat.id === chatId ? { ...chat, title: data.title } : chat
-          )
+            chat.id === chatId ? { ...chat, title: data.title } : chat,
+          ),
         );
 
         return data.title;
@@ -369,7 +369,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders, currentChat]
+    [toast, authHeaders, currentChat],
   );
 
   return {

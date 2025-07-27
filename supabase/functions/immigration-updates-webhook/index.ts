@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
         message: "Update processed successfully",
         affectedUsers: affectedUsers.length,
       }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } },
     );
   } catch (error: unknown) {
     const apiError: ApiError = {

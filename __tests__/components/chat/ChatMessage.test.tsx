@@ -49,7 +49,7 @@ describe("ChatMessage", () => {
     const error = new Error("Failed to send message");
 
     render(
-      <ChatMessage message={mockMessage} error={error} onRetry={onRetry} />
+      <ChatMessage message={mockMessage} error={error} onRetry={onRetry} />,
     );
 
     expect(screen.getByText("Failed to send message")).toBeInTheDocument();

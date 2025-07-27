@@ -91,7 +91,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.home &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -110,7 +110,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.compare &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -129,7 +129,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.countries &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -148,7 +148,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.explore &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -167,7 +167,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.documents &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -186,7 +186,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.chat &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -208,7 +208,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.profile &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">
@@ -227,7 +227,7 @@ function NavigationMenu() {
           className={cn(
             "mb-1 transition-all hover:bg-accent/50",
             pathname === routes.settings &&
-              "bg-accent text-accent-foreground font-medium"
+              "bg-accent text-accent-foreground font-medium",
           )}
         >
           <SidebarMenuButton asChild className="py-2">

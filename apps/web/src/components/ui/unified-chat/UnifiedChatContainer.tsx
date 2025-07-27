@@ -98,14 +98,14 @@ export function UnifiedChatContainer({
     "[UnifiedChatContainer] Initial auth state - User:",
     user,
     "Session:",
-    session
+    session,
   );
   useEffect(() => {
     console.log(
       "[UnifiedChatContainer] Auth state update - User:",
       user,
       "Session:",
-      session
+      session,
     );
   }, [user, session]);
 
@@ -134,21 +134,21 @@ export function UnifiedChatContainer({
     async (chatId: string) => {
       if (!supabase) {
         console.error(
-          "[UnifiedChatContainer] Supabase client not available in fetchSessionInfo."
+          "[UnifiedChatContainer] Supabase client not available in fetchSessionInfo.",
         );
         setCurrentTitle("New Conversation"); // Fallback
         return;
       }
       if (!chatId) {
         console.warn(
-          "[UnifiedChatContainer] fetchSessionInfo called with no chatId."
+          "[UnifiedChatContainer] fetchSessionInfo called with no chatId.",
         );
         // Don't try to fetch if no chatId, could be a new chat not yet saved.
         setCurrentTitle("New Conversation"); // Set to default for new/unsaved chat
         return;
       }
       console.log(
-        `[UnifiedChatContainer] Attempting to fetch info for chat ID: '${chatId}'`
+        `[UnifiedChatContainer] Attempting to fetch info for chat ID: '${chatId}'`,
       );
       try {
         // Log current Supabase auth session state again just before the critical fetch
@@ -158,18 +158,18 @@ export function UnifiedChatContainer({
           "[UnifiedChatContainer] Supabase Auth Session right before fetching chat_sessions:",
           currentAuthSession,
           "Auth Error (if any):",
-          currentAuthError
+          currentAuthError,
         );
         if (currentAuthError) {
           console.error(
             "[UnifiedChatContainer] Supabase auth error before fetching chat_sessions:",
-            currentAuthError
+            currentAuthError,
           );
           // Potentially stop here if auth is the issue
         }
         if (!currentAuthSession?.session) {
           console.warn(
-            "[UnifiedChatContainer] No active Supabase session before fetching chat_sessions. This might lead to RLS issues."
+            "[UnifiedChatContainer] No active Supabase session before fetching chat_sessions. This might lead to RLS issues.",
           );
         }
 
@@ -197,7 +197,7 @@ export function UnifiedChatContainer({
             "[UnifiedChatContainer] Error fetching session info from 'chat_sessions' table. Chat ID:",
             chatId,
             "Supabase Error:",
-            error || "No data returned"
+            error || "No data returned",
           );
           setCurrentTitle("New Conversation");
           return;
@@ -205,13 +205,13 @@ export function UnifiedChatContainer({
 
         if (data.title) {
           console.log(
-            `[UnifiedChatContainer] Successfully fetched and set title: ${data.title} for chat ID: ${chatId}`
+            `[UnifiedChatContainer] Successfully fetched and set title: ${data.title} for chat ID: ${chatId}`,
           );
           setCurrentTitle(data.title);
         } else {
           console.log(
             `[UnifiedChatContainer] No session title found for chat ID: ${chatId}, using default. Data received:`,
-            data
+            data,
           );
           setCurrentTitle("New Conversation");
         }
@@ -224,18 +224,18 @@ export function UnifiedChatContainer({
           "Error message:",
           err?.message,
           "Error stack:",
-          err?.stack
+          err?.stack,
         );
         setCurrentTitle("New Conversation");
       }
     },
-    [supabase] // supabase client is the key dependency here
+    [supabase], // supabase client is the key dependency here
   );
 
   // === useChat Hook ===
   const apiEndpointForChat = "/api/chat";
   console.log(
-    `[UnifiedChatContainer] useChat API endpoint: ${apiEndpointForChat}`
+    `[UnifiedChatContainer] useChat API endpoint: ${apiEndpointForChat}`,
   );
   const {
     messages,
@@ -278,7 +278,7 @@ export function UnifiedChatContainer({
         "[UnifiedChatContainer] useChat hook error:",
         err,
         "Stringified:",
-        JSON.stringify(err)
+        JSON.stringify(err),
       );
       const errorMessage =
         (err as any)?.message || "An error occurred in chat. Please try again.";
@@ -312,7 +312,7 @@ export function UnifiedChatContainer({
 
     document.addEventListener(
       "toggle-document-processor",
-      handleToggleDocumentProcessor
+      handleToggleDocumentProcessor,
     );
     document.addEventListener("toggle-research", handleToggleResearch);
     document.addEventListener("toggle-web-scraper", handleToggleWebScraper);
@@ -321,12 +321,12 @@ export function UnifiedChatContainer({
     return () => {
       document.removeEventListener(
         "toggle-document-processor",
-        handleToggleDocumentProcessor
+        handleToggleDocumentProcessor,
       );
       document.removeEventListener("toggle-research", handleToggleResearch);
       document.removeEventListener(
         "toggle-web-scraper",
-        handleToggleWebScraper
+        handleToggleWebScraper,
       );
       document.removeEventListener("toggle-analytics", handleToggleAnalytics);
     };
@@ -336,7 +336,7 @@ export function UnifiedChatContainer({
   useEffect(() => {
     if (id && id !== currentChatId) {
       console.log(
-        `[UnifiedChatContainer] ID prop changed. Updating currentChatId from ${currentChatId} to ${id}`
+        `[UnifiedChatContainer] ID prop changed. Updating currentChatId from ${currentChatId} to ${id}`,
       );
       setCurrentChatId(id);
       // Reset artifact and potentially other state when chat ID changes
@@ -348,7 +348,7 @@ export function UnifiedChatContainer({
       if (!currentChatId) {
         const newId = uuidv4();
         console.log(
-          `[UnifiedChatContainer] No ID prop found, generating new local ID: ${newId}`
+          `[UnifiedChatContainer] No ID prop found, generating new local ID: ${newId}`,
         );
         setCurrentChatId(newId);
       }
@@ -363,7 +363,7 @@ export function UnifiedChatContainer({
     } else {
       console.log(
         "[UnifiedChatContainer] Skipping fetchSessionInfo in useEffect because currentChatId is invalid or empty:",
-        currentChatId
+        currentChatId,
       );
       // Reset title if chat ID becomes invalid (e.g. navigating from existing chat to new chat directly)
       setCurrentTitle("New Conversation");
@@ -375,13 +375,13 @@ export function UnifiedChatContainer({
     if (!data?.length || data.length === lastProcessedDataIndex.current + 1)
       return;
     const newDataPoints = data.slice(
-      lastProcessedDataIndex.current + 1
+      lastProcessedDataIndex.current + 1,
     ) as StreamDataPoint[];
     lastProcessedDataIndex.current = data.length - 1;
     console.log("Processing data stream points:", newDataPoints);
     newDataPoints.forEach((delta: StreamDataPoint) => {
       const definition = artifactDefinitions.find(
-        (def: any) => def.kind === artifactState.kind
+        (def: any) => def.kind === artifactState.kind,
       );
       if (definition?.onStreamPart) {
         definition.onStreamPart({
@@ -450,7 +450,7 @@ export function UnifiedChatContainer({
       setAttachments([]);
       return Promise.resolve();
     },
-    [input, attachments, handleSubmit, setInput]
+    [input, attachments, handleSubmit, setInput],
   );
 
   const handleAppend = useCallback(
@@ -471,7 +471,7 @@ export function UnifiedChatContainer({
       }
       return Promise.resolve();
     },
-    [append]
+    [append],
   );
 
   const handleNewSession = useCallback(async () => {
@@ -498,7 +498,7 @@ export function UnifiedChatContainer({
       setAttachments([]);
       setInput("");
     },
-    [currentChatId, setInput]
+    [currentChatId, setInput],
   );
 
   const toggleArtifact = useCallback(() => {
@@ -507,24 +507,24 @@ export function UnifiedChatContainer({
   const toggleResearch = useCallback(() => setIsResearchVisible((v) => !v), []);
   const toggleDocumentProcessor = useCallback(
     () => setIsDocumentProcessorVisible((v) => !v),
-    []
+    [],
   );
   const toggleWebScraper = useCallback(
     () => setIsWebScraperVisible((v) => !v),
-    []
+    [],
   );
   const toggleAnalytics = useCallback(
     () => setIsAnalyticsVisible((v) => !v),
-    []
+    [],
   );
 
   const handleModelChange = useCallback(
     (model: string) => setCurrentModel(model),
-    []
+    [],
   );
   const handleVisibilityChange = useCallback(
     (vis: string) => setCurrentVisibility(vis),
-    []
+    [],
   );
 
   const handleTitleChangeFromHeader = useCallback((newTitle: string) => {
@@ -574,7 +574,7 @@ export function UnifiedChatContainer({
               isDocumentProcessorVisible ||
               isAnalyticsVisible
               ? "max-w-[calc(100%-350px)]"
-              : ""
+              : "",
           )}
         >
           <UnifiedMessageList

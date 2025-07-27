@@ -1,12 +1,17 @@
-import { captureMessage } from '@/lib/sentry';
+import { captureMessage } from "@/lib/sentry";
 
-import { getPerformanceMetrics } from '../middleware/performance';
+import { getPerformanceMetrics } from "../middleware/performance";
 
 // Auto-scaling configuration
 interface ScalingRule {
-  metric: 'avgResponseTime' | 'requestRate' | 'errorRate' | 'memoryUsage' | 'cpuUsage';
+  metric:
+    | "avgResponseTime"
+    | "requestRate"
+    | "errorRate"
+    | "memoryUsage"
+    | "cpuUsage";
   threshold: number;
-  scaleDirection: 'up' | 'down';
+  scaleDirection: "up" | "down";
   cooldownPeriod: number; // in milliseconds
   minInstances: number;
   maxInstances: number;
@@ -14,36 +19,36 @@ interface ScalingRule {
 
 interface ScalingConfig {
   enabled: boolean;
-  provider: 'aws' | 'azure' | 'gcp' | 'vercel';
+  provider: "aws" | "azure" | "gcp" | "vercel";
   rules: ScalingRule[];
   checkInterval: number; // in milliseconds
 }
 
 // Default scaling configuration
 const DEFAULT_SCALING_CONFIG: ScalingConfig = {
-  enabled: process.env.AUTO_SCALING_ENABLED === 'true',
-  provider: (process.env.AUTO_SCALING_PROVIDER as any) || 'vercel',
+  enabled: process.env.AUTO_SCALING_ENABLED === "true",
+  provider: (process.env.AUTO_SCALING_PROVIDER as any) || "vercel",
   rules: [
     {
-      metric: 'avgResponseTime',
+      metric: "avgResponseTime",
       threshold: 200, // ms
-      scaleDirection: 'up',
+      scaleDirection: "up",
       cooldownPeriod: 300000, // 5 minutes
       minInstances: 1,
       maxInstances: 10,
     },
     {
-      metric: 'avgResponseTime',
+      metric: "avgResponseTime",
       threshold: 50, // ms
-      scaleDirection: 'down',
+      scaleDirection: "down",
       cooldownPeriod: 600000, // 10 minutes
       minInstances: 1,
       maxInstances: 10,
     },
     {
-      metric: 'requestRate',
+      metric: "requestRate",
       threshold: 100, // requests per minute
-      scaleDirection: 'up',
+      scaleDirection: "up",
       cooldownPeriod: 300000, // 5 minutes
       minInstances: 1,
       maxInstances: 10,
@@ -56,7 +61,7 @@ const DEFAULT_SCALING_CONFIG: ScalingConfig = {
 interface ScalingState {
   lastScalingAction: {
     timestamp: number;
-    direction: 'up' | 'down' | null;
+    direction: "up" | "down" | null;
     reason: string;
   };
   currentInstances: number;
@@ -74,7 +79,7 @@ let scalingState: ScalingState = {
   lastScalingAction: {
     timestamp: 0,
     direction: null,
-    reason: 'Initialized',
+    reason: "Initialized",
   },
   currentInstances: 1,
   metrics: {
@@ -102,7 +107,7 @@ export function initializeAutoScaling(config?: Partial<ScalingConfig>): void {
 
   // If scaling is disabled, don't proceed
   if (!scalingConfig.enabled) {
-    console.log('Auto-scaling is disabled');
+    console.log("Auto-scaling is disabled");
     return;
   }
 
@@ -134,7 +139,8 @@ async function checkScalingRules(config: ScalingConfig): Promise<void> {
       // Skip if in cooldown period
       const now = Date.now();
       if (
-        now - scalingState.lastScalingAction.timestamp < rule.cooldownPeriod
+        now - scalingState.lastScalingAction.timestamp <
+        rule.cooldownPeriod
       ) {
         continue;
       }
@@ -144,14 +150,14 @@ async function checkScalingRules(config: ScalingConfig): Promise<void> {
 
       // Check threshold for scaling
       if (
-        (rule.scaleDirection === 'up' && metricValue > rule.threshold) ||
-        (rule.scaleDirection === 'down' && metricValue < rule.threshold)
+        (rule.scaleDirection === "up" && metricValue > rule.threshold) ||
+        (rule.scaleDirection === "down" && metricValue < rule.threshold)
       ) {
         // Check min/max instances
         if (
-          (rule.scaleDirection === 'up' &&
+          (rule.scaleDirection === "up" &&
             scalingState.currentInstances < rule.maxInstances) ||
-          (rule.scaleDirection === 'down' &&
+          (rule.scaleDirection === "down" &&
             scalingState.currentInstances > rule.minInstances)
         ) {
           // Trigger scaling
@@ -159,8 +165,8 @@ async function checkScalingRules(config: ScalingConfig): Promise<void> {
             config.provider,
             rule.scaleDirection,
             `${rule.metric} (${metricValue}) ${
-              rule.scaleDirection === 'up' ? 'exceeded' : 'fell below'
-            } threshold (${rule.threshold})`
+              rule.scaleDirection === "up" ? "exceeded" : "fell below"
+            } threshold (${rule.threshold})`,
           );
 
           // Update state
@@ -168,12 +174,12 @@ async function checkScalingRules(config: ScalingConfig): Promise<void> {
             timestamp: now,
             direction: rule.scaleDirection,
             reason: `${rule.metric} ${
-              rule.scaleDirection === 'up' ? 'high' : 'low'
+              rule.scaleDirection === "up" ? "high" : "low"
             }`,
           };
 
           // Update instance count
-          if (rule.scaleDirection === 'up') {
+          if (rule.scaleDirection === "up") {
             scalingState.currentInstances++;
           } else {
             scalingState.currentInstances--;
@@ -185,7 +191,7 @@ async function checkScalingRules(config: ScalingConfig): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('Error checking scaling rules:', error);
+    console.error("Error checking scaling rules:", error);
   }
 }
 
@@ -229,7 +235,7 @@ async function updateMetrics(): Promise<void> {
       cpuUsage,
     };
   } catch (error) {
-    console.error('Error updating metrics:', error);
+    console.error("Error updating metrics:", error);
   }
 }
 
@@ -238,39 +244,35 @@ async function updateMetrics(): Promise<void> {
  */
 async function triggerScaling(
   provider: string,
-  direction: 'up' | 'down',
-  reason: string
+  direction: "up" | "down",
+  reason: string,
 ): Promise<void> {
   console.log(`Scaling ${direction} due to: ${reason}`);
 
   // Log to monitoring system
-  captureMessage(
-    `Auto-scaling triggered: ${direction}`,
-    'info',
-    {
-      reason,
-      provider,
-      currentInstances: scalingState.currentInstances,
-      newInstances:
-        direction === 'up'
-          ? scalingState.currentInstances + 1
-          : scalingState.currentInstances - 1,
-      metrics: scalingState.metrics,
-    }
-  );
+  captureMessage(`Auto-scaling triggered: ${direction}`, "info", {
+    reason,
+    provider,
+    currentInstances: scalingState.currentInstances,
+    newInstances:
+      direction === "up"
+        ? scalingState.currentInstances + 1
+        : scalingState.currentInstances - 1,
+    metrics: scalingState.metrics,
+  });
 
   try {
     switch (provider) {
-      case 'aws':
+      case "aws":
         await scaleAWS(direction);
         break;
-      case 'azure':
+      case "azure":
         await scaleAzure(direction);
         break;
-      case 'gcp':
+      case "gcp":
         await scaleGCP(direction);
         break;
-      case 'vercel':
+      case "vercel":
         await scaleVercel(direction);
         break;
       default:
@@ -286,10 +288,10 @@ async function triggerScaling(
  * Scale AWS instances
  * Placeholder implementation - would need AWS SDK
  */
-async function scaleAWS(direction: 'up' | 'down'): Promise<void> {
+async function scaleAWS(direction: "up" | "down"): Promise<void> {
   // Placeholder - in production, implement with AWS SDK
   console.log(`AWS scaling ${direction} - placeholder implementation`);
-  
+
   /*
   // Example AWS implementation:
   import { AutoScalingClient, SetDesiredCapacityCommand } from "@aws-sdk/client-auto-scaling";
@@ -310,7 +312,7 @@ async function scaleAWS(direction: 'up' | 'down'): Promise<void> {
  * Scale Azure instances
  * Placeholder implementation - would need Azure SDK
  */
-async function scaleAzure(direction: 'up' | 'down'): Promise<void> {
+async function scaleAzure(direction: "up" | "down"): Promise<void> {
   // Placeholder - in production, implement with Azure SDK
   console.log(`Azure scaling ${direction} - placeholder implementation`);
 }
@@ -319,7 +321,7 @@ async function scaleAzure(direction: 'up' | 'down'): Promise<void> {
  * Scale GCP instances
  * Placeholder implementation - would need GCP SDK
  */
-async function scaleGCP(direction: 'up' | 'down'): Promise<void> {
+async function scaleGCP(direction: "up" | "down"): Promise<void> {
   // Placeholder - in production, implement with GCP SDK
   console.log(`GCP scaling ${direction} - placeholder implementation`);
 }
@@ -328,10 +330,10 @@ async function scaleGCP(direction: 'up' | 'down'): Promise<void> {
  * Scale Vercel instances
  * Placeholder implementation - would need Vercel API
  */
-async function scaleVercel(direction: 'up' | 'down'): Promise<void> {
+async function scaleVercel(direction: "up" | "down"): Promise<void> {
   // Placeholder - in production, implement with Vercel API
   console.log(`Vercel scaling ${direction} - placeholder implementation`);
-  
+
   /*
   // Example Vercel implementation using fetch:
   const response = await fetch(
@@ -370,4 +372,4 @@ export function shutdownAutoScaling(): void {
     clearInterval(scalingInterval);
     scalingInterval = null;
   }
-} 
+}

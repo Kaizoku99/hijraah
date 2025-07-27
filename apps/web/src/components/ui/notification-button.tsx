@@ -52,7 +52,7 @@ export function NotificationButton() {
 
         setNotifications(data || []);
         const unread = (data || []).filter(
-          (n: Notification) => !n.is_read
+          (n: Notification) => !n.is_read,
         ).length;
         setUnreadCount(unread);
       } catch (err: any) {
@@ -60,7 +60,7 @@ export function NotificationButton() {
           "Error fetching notifications (raw):",
           err,
           "Error fetching notifications (JSON):",
-          JSON.stringify(err, Object.getOwnPropertyNames(err))
+          JSON.stringify(err, Object.getOwnPropertyNames(err)),
         );
         setError("Failed to load notifications");
         setNotifications([]);
@@ -85,10 +85,10 @@ export function NotificationButton() {
         (payload: RealtimePostgresChangesPayload<Notification>) => {
           console.log("New notification received:", payload);
           setNotifications((prev) =>
-            [payload.new as Notification, ...prev].slice(0, 10)
+            [payload.new as Notification, ...prev].slice(0, 10),
           );
           setUnreadCount((prev) => prev + 1);
-        }
+        },
       )
       .on<Notification>(
         "postgres_changes",
@@ -103,11 +103,11 @@ export function NotificationButton() {
           const updatedNotification = payload.new as Notification;
           setNotifications((prev) =>
             prev.map((n) =>
-              n.id === updatedNotification.id ? updatedNotification : n
-            )
+              n.id === updatedNotification.id ? updatedNotification : n,
+            ),
           );
           fetchNotifications();
-        }
+        },
       )
       .subscribe();
 
@@ -140,7 +140,7 @@ export function NotificationButton() {
             return { ...n, is_read: true };
           }
           return n;
-        })
+        }),
       );
     } catch (err) {
       console.error("Error marking notification as read:", err);

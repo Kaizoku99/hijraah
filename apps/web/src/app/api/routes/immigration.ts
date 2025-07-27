@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { createServiceClient } from "@/lib/supabase/client";
 
-
 /**
  * Immigration routes for immigration-related operations
  */
@@ -62,7 +61,7 @@ export function setupImmigrationRoutes(app: Hono) {
           message: "Failed to fetch immigration data",
         });
       }
-    }
+    },
   );
 
   // Compare immigration policies between countries
@@ -101,7 +100,7 @@ export function setupImmigrationRoutes(app: Hono) {
           message: "Failed to compare immigration data",
         });
       }
-    }
+    },
   );
 
   // Get all available countries for immigration
@@ -132,7 +131,7 @@ export function setupImmigrationRoutes(app: Hono) {
         console.error("Countries fetch error:", error);
         throw new HTTPException(500, { message: "Failed to fetch countries" });
       }
-    }
+    },
   );
 
   return app;

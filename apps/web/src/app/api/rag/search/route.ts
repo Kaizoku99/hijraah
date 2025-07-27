@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
     const openaiClient = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return generator.generate(
       query,
       retrievalResult,
-      retrievalResult.userContext
+      retrievalResult.userContext,
     );
   } catch (error) {
     console.error("Error in RAG search API:", error);
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       { error: "An internal error occurred." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

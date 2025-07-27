@@ -94,7 +94,7 @@ export function setupAdminRoutes(app: Hono) {
         })
         .refine((data) => Object.keys(data).length > 0, {
           message: "At least one field must be provided",
-        })
+        }),
     ),
     async (c) => {
       const id = c.req.param("id");
@@ -143,7 +143,7 @@ export function setupAdminRoutes(app: Hono) {
         if (error instanceof HTTPException) throw error;
         throw new HTTPException(500, { message: "Failed to update user" });
       }
-    }
+    },
   );
 
   // Delete a specific user (consider soft vs hard delete)
@@ -273,7 +273,7 @@ export function setupAdminRoutes(app: Hono) {
           message: "Failed to perform bulk action",
         });
       }
-    }
+    },
   );
 
   // Get system stats

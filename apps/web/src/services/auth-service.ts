@@ -123,7 +123,7 @@ export class AuthService {
     } catch (error: any) {
       console.error(
         `AuthService.isAdmin: Error calling verifyUserIsAdmin for user ${user.id}:`,
-        error.message
+        error.message,
       );
       return false;
     }

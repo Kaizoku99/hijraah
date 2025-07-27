@@ -56,7 +56,7 @@ app.post("/", zValidator("json", DocumentAnalysisRequestSchema), async (c) => {
 
   try {
     console.log(
-      `[Doc Analysis API] Analyzing doc type: ${documentType}, URL: ${fileUrl}`
+      `[Doc Analysis API] Analyzing doc type: ${documentType}, URL: ${fileUrl}`,
     );
     const analysisResult = await analyzeDocument(fileUrl, documentType);
 
@@ -69,7 +69,7 @@ app.post("/", zValidator("json", DocumentAnalysisRequestSchema), async (c) => {
     });
 
     console.info(
-      `[Doc Analysis API] Analysis saved for doc: ${documentId}, user: ${userId}`
+      `[Doc Analysis API] Analysis saved for doc: ${documentId}, user: ${userId}`,
     );
 
     return c.json({
@@ -102,12 +102,12 @@ app.put(
 
     try {
       console.log(
-        `[Doc Analysis API] Validating data for type: ${documentType}`
+        `[Doc Analysis API] Validating data for type: ${documentType}`,
       );
       const validationResult = await validateAgainstTemplate(
         documentType,
         extractedData,
-        targetCountry
+        targetCountry,
       );
 
       return c.json({
@@ -123,7 +123,7 @@ app.put(
       }
       return c.json({ success: false, error: message }, { status });
     }
-  }
+  },
 );
 
 // --- Export Hono App --- //

@@ -147,7 +147,7 @@ export class AnalyticsService extends EventEmitter {
 
   // Context7 Pattern: Factory method for analytics aggregation
   async getRAGMetrics(
-    timeRange: "1h" | "24h" | "7d" | "30d" = "24h"
+    timeRange: "1h" | "24h" | "7d" | "30d" = "24h",
   ): Promise<RAGMetrics> {
     const cacheKey = `rag_metrics_${timeRange}`;
     const cached = this.metricsCache.get(cacheKey);
@@ -202,7 +202,7 @@ export class AnalyticsService extends EventEmitter {
   // Context7 Pattern: Time series data with aggregation
   async getUsageTimeSeries(
     timeRange: "1h" | "24h" | "7d" | "30d" = "24h",
-    granularity: "minute" | "hour" | "day" = "hour"
+    granularity: "minute" | "hour" | "day" = "hour",
   ): Promise<UsageTimeSeries[]> {
     const cacheKey = `usage_timeseries_${timeRange}_${granularity}`;
 
@@ -226,7 +226,7 @@ export class AnalyticsService extends EventEmitter {
   // Context7 Pattern: User analytics with personalization
   async getUserAnalytics(
     userId?: string,
-    limit = 100
+    limit = 100,
   ): Promise<UserAnalytics[]> {
     try {
       let query = this.supabase
@@ -239,7 +239,7 @@ export class AnalyticsService extends EventEmitter {
           feedback_score,
           query_metadata,
           response
-        `
+        `,
         )
         .order("created_at", { ascending: false })
         .limit(limit * 10); // Get more data for aggregation
@@ -316,7 +316,7 @@ export class AnalyticsService extends EventEmitter {
         "get_document_analytics",
         {
           p_limit: limit,
-        }
+        },
       );
 
       if (error) throw error;
@@ -329,7 +329,7 @@ export class AnalyticsService extends EventEmitter {
 
   // Context7 Pattern: Real-time event tracking
   async trackQueryEvent(
-    event: Omit<QueryEvent, "id" | "timestamp">
+    event: Omit<QueryEvent, "id" | "timestamp">,
   ): Promise<void> {
     const queryEvent: QueryEvent = {
       ...event,
@@ -483,7 +483,7 @@ export class AnalyticsService extends EventEmitter {
       {
         p_start_time: timeFilter.start,
         p_end_time: timeFilter.end,
-      }
+      },
     );
 
     if (error) throw error;
@@ -505,7 +505,7 @@ export class AnalyticsService extends EventEmitter {
       {
         p_start_time: timeFilter.start,
         p_end_time: timeFilter.end,
-      }
+      },
     );
 
     if (error) throw error;
@@ -563,7 +563,7 @@ export class AnalyticsService extends EventEmitter {
   // Context7 Pattern: Export functionality
   async exportAnalyticsData(
     format: "json" | "csv" = "json",
-    timeRange = "30d"
+    timeRange = "30d",
   ) {
     const metrics = await this.getRAGMetrics(timeRange);
     const timeSeries = await this.getUsageTimeSeries(timeRange);

@@ -60,7 +60,7 @@ const sampleBillingInfo: BillingInformation = {
   plan: "Pro",
   status: "active",
   currentPeriodEnd: new Date(
-    Date.now() + 30 * 24 * 60 * 60 * 1000
+    Date.now() + 30 * 24 * 60 * 60 * 1000,
   ).toISOString(),
   paymentMethod: {
     brand: "visa",
@@ -94,7 +94,7 @@ export default function BillingPage() {
   const planId = searchParams.get("plan");
 
   const [billingInfo, setBillingInfo] = useState<BillingInformation | null>(
-    null
+    null,
   );
   const [isLoading, setIsLoading] = useState(true);
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -246,7 +246,7 @@ export default function BillingPage() {
                       <p className="text-sm text-muted-foreground">
                         {billingInfo?.status === "active"
                           ? `Renews on ${formatDate(
-                              billingInfo.currentPeriodEnd
+                              billingInfo.currentPeriodEnd,
                             )}`
                           : "No active subscription"}
                       </p>

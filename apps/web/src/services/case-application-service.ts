@@ -9,7 +9,7 @@ import { CaseService } from "@/core/immigration/services/case-service";
 import {
   caseRepository,
   documentRepository,
-} from "@/infrastructure/repositories";
+} from "@/_infrastructure/repositories";
 
 /**
  * Case Application Service
@@ -54,7 +54,7 @@ export class CaseApplicationService {
       status?: string[];
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<Case[]> {
     const casesData = await caseRepository.getByUserId(userId, options);
 
@@ -132,7 +132,7 @@ export class CaseApplicationService {
       dueDate?: Date | null;
       tags?: string[];
       metadata?: Record<string, any>;
-    }
+    },
   ): Promise<Case> {
     // Get the case and check access
     const caseInstance = await this.getCaseById(caseId, userId);
@@ -175,7 +175,7 @@ export class CaseApplicationService {
     caseId: string,
     userId: string,
     newStatus: CaseStatus,
-    reason?: string
+    reason?: string,
   ): Promise<Case> {
     // Get the case and check access
     const caseInstance = await this.getCaseById(caseId, userId);
@@ -189,7 +189,7 @@ export class CaseApplicationService {
 
     if (!this.caseService.canPerformAction(userRole, "change_status")) {
       throw new Error(
-        "Permission denied: User cannot change the status of this case"
+        "Permission denied: User cannot change the status of this case",
       );
     }
 
@@ -198,7 +198,7 @@ export class CaseApplicationService {
       !this.caseService.isValidStatusTransition(caseInstance.status, newStatus)
     ) {
       throw new Error(
-        `Invalid status transition from ${caseInstance.status} to ${newStatus}`
+        `Invalid status transition from ${caseInstance.status} to ${newStatus}`,
       );
     }
 
@@ -224,7 +224,7 @@ export class CaseApplicationService {
     caseId: string,
     assignedUserId: string,
     role: "owner" | "collaborator" | "reviewer" | "client",
-    assignedByUserId: string
+    assignedByUserId: string,
   ): Promise<Case> {
     // Get the case and check access
     const caseInstance = await this.getCaseById(caseId, assignedByUserId);
@@ -238,7 +238,7 @@ export class CaseApplicationService {
 
     if (!this.caseService.canPerformAction(userRole, "assign")) {
       throw new Error(
-        "Permission denied: User cannot assign others to this case"
+        "Permission denied: User cannot assign others to this case",
       );
     }
 
@@ -246,7 +246,7 @@ export class CaseApplicationService {
     const updatedCase = caseInstance.assignUser(
       assignedUserId,
       role,
-      assignedByUserId
+      assignedByUserId,
     );
 
     // Save the updated case
@@ -263,7 +263,7 @@ export class CaseApplicationService {
     caseId: string,
     targetUserId: string,
     removedByUserId: string,
-    reason?: string
+    reason?: string,
   ): Promise<Case> {
     // Get the case and check access
     const caseInstance = await this.getCaseById(caseId, removedByUserId);
@@ -277,7 +277,7 @@ export class CaseApplicationService {
 
     if (!this.caseService.canPerformAction(userRole, "assign")) {
       throw new Error(
-        "Permission denied: User cannot remove assignments from this case"
+        "Permission denied: User cannot remove assignments from this case",
       );
     }
 
@@ -285,7 +285,7 @@ export class CaseApplicationService {
     const updatedCase = caseInstance.removeAssignment(
       targetUserId,
       removedByUserId,
-      reason
+      reason,
     );
 
     // Save the updated case
@@ -297,7 +297,7 @@ export class CaseApplicationService {
       updatedCase.timeline.map((event) => ({
         ...event,
         timestamp: event.timestamp.toISOString(),
-      }))
+      })),
     );
 
     // Refresh the case data
@@ -310,7 +310,7 @@ export class CaseApplicationService {
   async addDocument(
     caseId: string,
     documentId: string,
-    userId: string
+    userId: string,
   ): Promise<Case> {
     // Get the case and document
     const [caseInstance, document] = await Promise.all([
@@ -331,7 +331,7 @@ export class CaseApplicationService {
 
     if (!this.caseService.canPerformAction(userRole, "add_document")) {
       throw new Error(
-        "Permission denied: User cannot add documents to this case"
+        "Permission denied: User cannot add documents to this case",
       );
     }
 
@@ -339,7 +339,7 @@ export class CaseApplicationService {
     const documentEvent = this.caseService.createDocumentEvent(
       documentId,
       document.name,
-      userId
+      userId,
     );
 
     // Add the event to the case timeline
@@ -354,7 +354,7 @@ export class CaseApplicationService {
       updatedCase.timeline.map((event) => ({
         ...event,
         timestamp: event.timestamp.toISOString(),
-      }))
+      })),
     );
 
     // Refresh the case data
@@ -366,7 +366,7 @@ export class CaseApplicationService {
    */
   async getCaseWithDetails(
     caseId: string,
-    userId?: string
+    userId?: string,
   ): Promise<{
     case: Case;
     documents: Document[];
@@ -392,7 +392,7 @@ export class CaseApplicationService {
 
     // Convert documents to domain entities
     const documents = details.documents.map((doc) =>
-      Document.fromDatabase(doc)
+      Document.fromDatabase(doc),
     );
 
     return {
@@ -422,7 +422,7 @@ export class CaseApplicationService {
     // Calculate completion percentage
     return this.caseService.calculateCompletionPercentage(
       caseEntity,
-      documentNames
+      documentNames,
     );
   }
 

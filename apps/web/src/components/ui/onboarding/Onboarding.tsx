@@ -9,22 +9,21 @@ import { OnboardingDebug } from "./OnboardingDebug";
 import { OnboardingProgress } from "./OnboardingProgress";
 import { OnboardingProvider, useOnboarding } from "./OnboardingProvider";
 
-
 // Lazy load step components
 const WelcomeModal = lazy(() =>
-  import("./WelcomeModal").then((module) => ({ default: module.WelcomeModal }))
+  import("./WelcomeModal").then((module) => ({ default: module.WelcomeModal })),
 );
 const ProfileSetup = lazy(() =>
-  import("./ProfileSetup").then((module) => ({ default: module.ProfileSetup }))
+  import("./ProfileSetup").then((module) => ({ default: module.ProfileSetup })),
 );
 const FeatureTour = lazy(() =>
-  import("./FeatureTour").then((module) => ({ default: module.FeatureTour }))
+  import("./FeatureTour").then((module) => ({ default: module.FeatureTour })),
 );
 const FirstTask = lazy(() =>
-  import("./FirstTask").then((module) => ({ default: module.FirstTask }))
+  import("./FirstTask").then((module) => ({ default: module.FirstTask })),
 );
 const Resources = lazy(() =>
-  import("./Resources").then((module) => ({ default: module.Resources }))
+  import("./Resources").then((module) => ({ default: module.Resources })),
 );
 
 // Map step IDs to components
@@ -70,14 +69,14 @@ const ActiveOnboardingStep: React.FC = () => {
 
   if (!ActiveComponent) {
     console.warn(
-      `[Onboarding] No component mapped for step ID: ${currentStepId}`
+      `[Onboarding] No component mapped for step ID: ${currentStepId}`,
     );
     return null; // Or render a fallback/error state
   }
 
   // Find the config for the current step to pass props if needed (optional for now)
   const currentStepConfig = ONBOARDING_STEPS_CONFIG.find(
-    (step) => step.id === currentStepId
+    (step) => step.id === currentStepId,
   );
 
   return (

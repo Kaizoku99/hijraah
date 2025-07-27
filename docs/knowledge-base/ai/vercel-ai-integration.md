@@ -461,7 +461,7 @@ export async function POST(req: Request) {
       // Detect if significant changes occurred using AI
       const { hasChanged, changes } = await detectContentChanges(
         text,
-        previousVersion.text
+        previousVersion.text,
       );
 
       if (hasChanged) {
@@ -496,7 +496,7 @@ export async function POST(req: Request) {
     console.error("Scheduled scraping error:", error);
     return Response.json(
       { error: "Failed to complete scheduled scraping" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

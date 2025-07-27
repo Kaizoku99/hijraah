@@ -61,7 +61,7 @@ export class AgentManager {
    */
   async sendMessage(
     agentId: string,
-    message: string
+    message: string,
   ): Promise<string | ReadableStream> {
     const agent = await this.getAgent(agentId);
 
@@ -92,7 +92,7 @@ export class AgentManager {
 
     // Try to find an existing agent of the appropriate type
     const matchingAgent = existingAgents.find(
-      (agent) => agent.type === agentType
+      (agent) => agent.type === agentType,
     );
 
     if (matchingAgent) {
@@ -151,7 +151,7 @@ export class AgentManager {
       rating: number;
       comments?: string;
       wasHelpful: boolean;
-    }
+    },
   ): Promise<void> {
     if (!this.userId) {
       throw new Error("User ID is required to save feedback");

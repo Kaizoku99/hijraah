@@ -79,7 +79,7 @@ export function ResetPasswordForm({
         {
           redirectTo:
             redirectTo || `${window.location.origin}/auth/reset-password`,
-        }
+        },
       );
 
       if (error) {

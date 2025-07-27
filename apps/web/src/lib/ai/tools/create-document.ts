@@ -1,8 +1,8 @@
-import { Session } from '@supabase/supabase-js';
-import { nanoid } from 'nanoid';
-import { z } from 'zod';
+import { Session } from "@supabase/supabase-js";
+import { nanoid } from "nanoid";
+import { z } from "zod";
 
-import { getSupabaseClient } from '@/lib/supabase/client';
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 // Define a DataStream interface to match the expected structure
 interface DataStream {
@@ -13,30 +13,35 @@ interface DataStream {
  * Factory function that creates a document creation tool
  * This enables the AI to create documents with session context
  */
-export function createDocumentTool({ session, dataStream }: { 
-  session: Session | null; 
+export function createDocumentTool({
+  session,
+  dataStream,
+}: {
+  session: Session | null;
   dataStream?: DataStream;
 }) {
   return {
-    description: 'Create a new document or note with the provided content.',
+    description: "Create a new document or note with the provided content.",
     parameters: z.object({
-      title: z.string().describe('Title of the document'),
-      content: z.string().describe('Content of the document'),
-      kind: z.enum(['text', 'code', 'formula', 'diagram', 'note']).default('text')
-        .describe('Type of document to create'),
+      title: z.string().describe("Title of the document"),
+      content: z.string().describe("Content of the document"),
+      kind: z
+        .enum(["text", "code", "formula", "diagram", "note"])
+        .default("text")
+        .describe("Type of document to create"),
     }),
-    execute: async ({ 
-      title, 
-      content, 
-      kind = 'text' 
-    }: { 
-      title: string; 
-      content: string; 
-      kind?: 'text' | 'code' | 'formula' | 'diagram' | 'note';
+    execute: async ({
+      title,
+      content,
+      kind = "text",
+    }: {
+      title: string;
+      content: string;
+      kind?: "text" | "code" | "formula" | "diagram" | "note";
     }) => {
       try {
         if (!session?.user?.id) {
-          throw new Error('User is not authenticated');
+          throw new Error("User is not authenticated");
         }
 
         // Generate a unique document ID
@@ -45,12 +50,12 @@ export function createDocumentTool({ session, dataStream }: {
         // Emit a notification event through the data stream if available
         if (dataStream) {
           dataStream.writeData({
-            type: 'document-creation',
+            type: "document-creation",
             content: {
               id: documentId,
               title,
               kind,
-              status: 'pending',
+              status: "pending",
             },
           });
         }
@@ -58,7 +63,7 @@ export function createDocumentTool({ session, dataStream }: {
         // Save the document to the database
         const supabase = getSupabaseClient();
         const { data, error } = await supabase
-          .from('documents')
+          .from("documents")
           .insert({
             id: documentId,
             title,
@@ -78,12 +83,12 @@ export function createDocumentTool({ session, dataStream }: {
         // Emit a notification event through the data stream if available
         if (dataStream) {
           dataStream.writeData({
-            type: 'document-creation',
+            type: "document-creation",
             content: {
               id: documentId,
               title,
               kind,
-              status: 'completed',
+              status: "completed",
             },
           });
         }
@@ -94,26 +99,32 @@ export function createDocumentTool({ session, dataStream }: {
           document: data,
         };
       } catch (error) {
-        console.error('Document creation error:', error);
-        
+        console.error("Document creation error:", error);
+
         // Emit error notification through the data stream if available
         if (dataStream) {
           dataStream.writeData({
-            type: 'document-creation',
+            type: "document-creation",
             content: {
               title,
               kind,
-              status: 'error',
-              error: error instanceof Error ? error.message : 'Failed to create document',
+              status: "error",
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "Failed to create document",
             },
           });
         }
-        
+
         return {
           success: false,
-          error: error instanceof Error ? error.message : 'Failed to create document',
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to create document",
         };
       }
     },
   };
-} 
+}

@@ -35,7 +35,7 @@ import { createSupabaseClient } from "../src/lib/utils/supabase-client";
         .select("image_url");
       const existingSet = new Set(existing?.map((r: any) => r.image_url) || []);
       const toInsert = Array.from(candidates).filter(
-        (url) => !existingSet.has(url)
+        (url) => !existingSet.has(url),
       );
       if (toInsert.length) {
         await supabase
@@ -76,7 +76,7 @@ import { createSupabaseClient } from "../src/lib/utils/supabase-client";
       } catch (err) {
         console.warn(
           `✗ failed to embed ${row.image_url}:`,
-          (err as Error).message
+          (err as Error).message,
         );
       }
     }

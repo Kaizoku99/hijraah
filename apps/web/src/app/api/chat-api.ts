@@ -113,7 +113,7 @@ export class ChatAPI {
       description?: string | null;
       modelType?: ChatModelType;
       caseId?: string | null;
-    }
+    },
   ): Promise<any> {
     try {
       const response = await fetch(`${this.baseUrl}/chats/${chatId}`, {
@@ -175,7 +175,7 @@ export class ChatAPI {
       name: string;
       contentType?: string;
       size?: number;
-    }> = []
+    }> = [],
   ): Promise<{ userMessageId: string; assistantMessageId: string | null }> {
     try {
       const response = await fetch(`${this.baseUrl}/chats/${chatId}/messages`, {
@@ -215,12 +215,12 @@ export class ChatAPI {
             "Content-Type": "application/json",
           },
           credentials: "include",
-        }
+        },
       );
 
       if (!response.ok) {
         throw new Error(
-          `Failed to generate chat title: ${response.statusText}`
+          `Failed to generate chat title: ${response.statusText}`,
         );
       }
 

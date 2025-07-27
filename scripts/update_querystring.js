@@ -1,1 +1,1 @@
-const params = new URLSearchParams(query); 
+const params = new URLSearchParams(query);

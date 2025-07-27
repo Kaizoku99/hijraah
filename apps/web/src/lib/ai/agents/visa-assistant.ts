@@ -1,10 +1,10 @@
-import { streamText } from 'ai';
+import { streamText } from "ai";
 
-import { customModel } from '@/lib/ai/models';
-import { generatePersonalizationContext } from '@/lib/ai/personalization/user-history';
-import { ChatMessage } from '@/types/chat';
+import { customModel } from "@/lib/ai/models";
+import { generatePersonalizationContext } from "@/lib/ai/personalization/user-history";
+import { ChatMessage } from "@/types/chat";
 
-import { Agent, AgentState, AgentType, StepResult } from './agent-framework';
+import { Agent, AgentState, AgentType, StepResult } from "./agent-framework";
 
 /**
  * VisaAssistantAgent specializes in helping users navigate visa application processes,
@@ -21,32 +21,34 @@ export class VisaAssistantAgent extends Agent {
    */
   async processMessage(message: string): Promise<string | ReadableStream> {
     // Update agent status
-    await this.setStatus('thinking');
+    await this.setStatus("thinking");
 
     // Create a message object and add it to the agent's history
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: message,
     };
     await this.addMessage(userMessage);
 
     try {
       // If personalization is enabled and we have a user ID
-      let personalizationContext = '';
+      let personalizationContext = "";
       if (this.userId) {
-        personalizationContext = await generatePersonalizationContext(this.userId);
+        personalizationContext = await generatePersonalizationContext(
+          this.userId,
+        );
       }
 
       // Prepare the context for the model
       const context = await this.getContext();
-      
+
       // Get the AI model
-      const model = customModel('immigration-fine-tuned');
-      
+      const model = customModel("immigration-fine-tuned");
+
       // Generate a streaming response using the AI model
-      await this.setStatus('executing');
-      
+      await this.setStatus("executing");
+
       const systemMessage = `You are an expert visa assistant AI for the Hijraah immigration platform. Your goal is to help users navigate visa application processes for different countries.
 ${personalizationContext}
 ${context}
@@ -60,56 +62,58 @@ Guidelines:
 
       // Create system message for the conversation
       const chatMessages: ChatMessage[] = [
-        { id: 'system', role: 'system', content: systemMessage },
+        { id: "system", role: "system", content: systemMessage },
         ...this.messages,
       ];
-      
+
       // Stream the response
       const stream = await model.chat({
         messages: chatMessages,
         temperature: 0.7,
       });
-      
+
       // Save the assistant's message once streaming is complete
       streamText(stream, async (chunk) => {
-        if (chunk === 'DONE') {
-          const assistantMessageContent = this.metadata.currentResponse || '';
+        if (chunk === "DONE") {
+          const assistantMessageContent = this.metadata.currentResponse || "";
           const assistantMessage: ChatMessage = {
             id: Date.now().toString(),
-            role: 'assistant',
+            role: "assistant",
             content: assistantMessageContent,
           };
-          
+
           // Clear the current response from metadata
-          this.metadata.currentResponse = '';
-          
+          this.metadata.currentResponse = "";
+
           // Add the message to history
           await this.addMessage(assistantMessage);
-          
+
           // Update status to complete
-          await this.setStatus('complete');
+          await this.setStatus("complete");
         } else {
           // Append the chunk to the current response
-          this.metadata.currentResponse = (this.metadata.currentResponse || '') + chunk;
+          this.metadata.currentResponse =
+            (this.metadata.currentResponse || "") + chunk;
         }
       });
-      
+
       return stream;
     } catch (error) {
-      console.error('Error in VisaAssistantAgent:', error);
-      
+      console.error("Error in VisaAssistantAgent:", error);
+
       // Update status to error
-      await this.setStatus('error');
-      
+      await this.setStatus("error");
+
       // Add error message
       const errorMessage: ChatMessage = {
         id: Date.now().toString(),
-        role: 'assistant',
-        content: 'I encountered an error while processing your request. Please try again.',
+        role: "assistant",
+        content:
+          "I encountered an error while processing your request. Please try again.",
       };
       await this.addMessage(errorMessage);
-      
-      return 'I encountered an error while processing your request. Please try again.';
+
+      return "I encountered an error while processing your request. Please try again.";
     }
   }
 
@@ -120,8 +124,8 @@ Guidelines:
     // No complex workflow for this agent yet
     // In the future, this could handle multi-step visa application guidance
     return {
-      output: 'Step completed successfully',
-      nextAction: 'wait_for_user',
+      output: "Step completed successfully",
+      nextAction: "wait_for_user",
     };
   }
 
@@ -151,4 +155,4 @@ For each visa application, you should help users understand:
 Your responses should be tailored to the specific needs of the user and the country they are applying to.
     `;
   }
-} 
+}

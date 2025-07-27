@@ -1539,8 +1539,8 @@ ALTER TABLE public.scraping_sources ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin users can manage scraping_sources" ON public.scraping_sources;
 CREATE POLICY "Admin users can manage scraping_sources"
     ON public.scraping_sources FOR ALL
-    USING (auth.role() = 'service_role' OR auth.is_admin()) 
-    WITH CHECK (auth.role() = 'service_role' OR auth.is_admin()); 
+    USING (auth.role() = 'service_role' OR (select public.is_admin()))
+    WITH CHECK (auth.role() = 'service_role' OR (select public.is_admin())); 
 
 DROP POLICY IF EXISTS "Authenticated users can view scraping_sources" ON public.scraping_sources;
 CREATE POLICY "Authenticated users can view scraping_sources"
@@ -1576,8 +1576,8 @@ ALTER TABLE public.source_validations ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin and service_role can manage source_validations" ON public.source_validations;
 CREATE POLICY "Admin and service_role can manage source_validations"
     ON public.source_validations FOR ALL
-    USING (auth.role() = 'service_role' OR auth.is_admin())
-    WITH CHECK (auth.role() = 'service_role' OR auth.is_admin());
+    USING (auth.role() = 'service_role' OR (select public.is_admin()))
+    WITH CHECK (auth.role() = 'service_role' OR (select public.is_admin()));
 
 -- Create table for scraping configurations
 CREATE TABLE IF NOT EXISTS public."scrape_configurations" (
@@ -1600,8 +1600,8 @@ ALTER TABLE public."scrape_configurations" ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin and service_role can manage scrape_configurations" ON public."scrape_configurations";
 CREATE POLICY "Admin and service_role can manage scrape_configurations"
     ON public."scrape_configurations" FOR ALL
-    USING (auth.role() = 'service_role' OR auth.is_admin()) 
-    WITH CHECK (auth.role() = 'service_role' OR auth.is_admin()); 
+    USING (auth.role() = 'service_role' OR (select public.is_admin())) 
+    WITH CHECK (auth.role() = 'service_role' OR (select public.is_admin())); 
 
 -- Create table for scraped sources
 CREATE TABLE IF NOT EXISTS public."scraped_sources" (
@@ -1665,8 +1665,8 @@ ALTER TABLE public.scraping_logs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin and service_role can access scraping_logs" ON public.scraping_logs;
 CREATE POLICY "Admin and service_role can access scraping_logs"
     ON public.scraping_logs FOR ALL
-    USING (auth.role() = 'service_role' OR auth.is_admin()) 
-    WITH CHECK (auth.role() = 'service_role' OR auth.is_admin()); 
+    USING (auth.role() = 'service_role' OR (select public.is_admin())) 
+    WITH CHECK (auth.role() = 'service_role' OR (select public.is_admin())); 
 
 -- Create table for scrape_history
 CREATE TABLE IF NOT EXISTS public.scrape_history (
@@ -1695,8 +1695,8 @@ ALTER TABLE public.scrape_history ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admin and service_role can manage scrape_history" ON public.scrape_history;
 CREATE POLICY "Admin and service_role can manage scrape_history"
     ON public.scrape_history FOR ALL
-    USING (auth.role() = 'service_role' OR auth.is_admin())
-    WITH CHECK (auth.role() = 'service_role' OR auth.is_admin());
+    USING (auth.role() = 'service_role' OR (select public.is_admin()))
+    WITH CHECK (auth.role() = 'service_role' OR (select public.is_admin()));
 
 -- ===================================================
 -- SECTION 12: Feedback and Notifications

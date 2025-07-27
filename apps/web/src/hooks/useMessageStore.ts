@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist , createJSONStorage } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 
 import type { ChatMessage } from "@/types/chat";
 
@@ -30,7 +30,7 @@ export const useMessageStore = create<MessageStore>()(
       updateMessage: (id, updates) =>
         set((state) => ({
           messages: state.messages.map((msg) =>
-            msg.id === id ? { ...msg, ...updates } : msg
+            msg.id === id ? { ...msg, ...updates } : msg,
           ),
         })),
       setMessages: (messages) => set({ messages }),
@@ -40,6 +40,6 @@ export const useMessageStore = create<MessageStore>()(
     {
       name: "chat-store",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

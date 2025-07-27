@@ -58,7 +58,7 @@ export async function sendEmail(
     | MagicLinkEmailParams
     | EmailChangeParams
     | UserInvitationParams,
-  options: { captchaToken?: string } = {}
+  options: { captchaToken?: string } = {},
 ) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -92,7 +92,7 @@ export async function sendEmail(
         // For signups, you would typically create the user first
         // This is just a placeholder - you would need to implement actual user creation
         throw new Error(
-          "Signup email sending should be handled during user creation"
+          "Signup email sending should be handled during user creation",
         );
 
       case "magiclink":
@@ -117,7 +117,7 @@ export async function sendEmail(
         // User invitations would typically be handled through your own API
         // This is just a placeholder - you would need to implement the actual invitation process
         throw new Error(
-          "User invitations should be handled through custom API"
+          "User invitations should be handled through custom API",
         );
 
       default:
@@ -134,7 +134,7 @@ export async function sendEmail(
  */
 export async function sendPasswordResetEmail(
   params: PasswordResetEmailParams,
-  captchaToken?: string
+  captchaToken?: string,
 ) {
   return sendEmail("recovery", params, { captchaToken });
 }
@@ -144,7 +144,7 @@ export async function sendPasswordResetEmail(
  */
 export async function sendMagicLinkEmail(
   params: MagicLinkEmailParams,
-  captchaToken?: string
+  captchaToken?: string,
 ) {
   return sendEmail("magiclink", params, { captchaToken });
 }

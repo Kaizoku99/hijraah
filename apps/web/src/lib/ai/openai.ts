@@ -10,17 +10,17 @@ if (process.env.OPENAI_API_KEY) {
   });
 } else {
   console.warn(
-    "OPENAI_API_KEY environment variable is not set. AI-related features will be disabled."
+    "OPENAI_API_KEY environment variable is not set. AI-related features will be disabled.",
   );
 }
 
 export async function generateEmbedding(
   text: string,
-  model = "text-embedding-3-small"
+  model = "text-embedding-3-small",
 ): Promise<number[]> {
   if (!openai) {
     throw new Error(
-      "OpenAI client is not initialized. Please set OPENAI_API_KEY."
+      "OpenAI client is not initialized. Please set OPENAI_API_KEY.",
     );
   }
 

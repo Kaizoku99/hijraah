@@ -26,10 +26,10 @@ export default function VerifyEmailPage() {
   const router = useRouter();
   const [isResending, setIsResending] = React.useState(false);
   const [pageRefreshCountdown, setPageRefreshCountdown] = React.useState(
-    VERIFICATION_PAGE_REFRESH_INTERVAL_SECONDS
+    VERIFICATION_PAGE_REFRESH_INTERVAL_SECONDS,
   );
   const [resendCooldown, setResendCooldown] = React.useState(
-    RESEND_EMAIL_COOLDOWN_SECONDS
+    RESEND_EMAIL_COOLDOWN_SECONDS,
   ); // Cooldown for the resend button
   const resendButtonRef = React.useRef<HTMLButtonElement>(null);
 
@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
     if (pageRefreshCountdown > 0) {
       const timer = setTimeout(
         () => setPageRefreshCountdown(pageRefreshCountdown - 1),
-        1000
+        1000,
       );
       return () => clearTimeout(timer);
     }
@@ -49,7 +49,7 @@ export default function VerifyEmailPage() {
     if (resendCooldown > 0) {
       const timer = setTimeout(
         () => setResendCooldown(resendCooldown - 1),
-        1000
+        1000,
       );
       return () => clearTimeout(timer);
     }
@@ -81,7 +81,7 @@ export default function VerifyEmailPage() {
       } catch (error) {
         console.error("Error checking verification:", error);
         toast.error(
-          "Failed to check email verification status. Please check your internet connection."
+          "Failed to check email verification status. Please check your internet connection.",
         );
       }
     };

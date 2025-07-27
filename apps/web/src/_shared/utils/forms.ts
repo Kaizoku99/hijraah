@@ -5,9 +5,11 @@
 /**
  * Extracts form data from a FormData object
  */
-export function extractFormData(formData: FormData): Record<string, string | File | string[]> {
+export function extractFormData(
+  formData: FormData,
+): Record<string, string | File | string[]> {
   const data: Record<string, string | File | string[]> = {};
-  
+
   for (const [key, value] of formData.entries()) {
     // Handle arrays (fields with same name)
     if (data[key] !== undefined) {
@@ -20,20 +22,22 @@ export function extractFormData(formData: FormData): Record<string, string | Fil
       data[key] = value;
     }
   }
-  
+
   return data;
 }
 
 /**
  * Formats form errors for display
  */
-export function formatFormErrors(errors: Record<string, string[]>): Record<string, string> {
+export function formatFormErrors(
+  errors: Record<string, string[]>,
+): Record<string, string> {
   const formatted: Record<string, string> = {};
-  
+
   Object.entries(errors).forEach(([field, messages]) => {
-    formatted[field] = messages.join('. ');
+    formatted[field] = messages.join(". ");
   });
-  
+
   return formatted;
 }
 
@@ -42,13 +46,13 @@ export function formatFormErrors(errors: Record<string, string[]>): Record<strin
  */
 export function serializeFormData(formData: FormData): string {
   const params = new URLSearchParams();
-  
+
   for (const [key, value] of formData.entries()) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       params.append(key, value);
     }
   }
-  
+
   return params.toString();
 }
 
@@ -58,10 +62,10 @@ export function serializeFormData(formData: FormData): string {
 export function deserializeQueryString(query: string): Record<string, string> {
   const params = new URLSearchParams(query);
   const result: Record<string, string> = {};
-  
+
   for (const [key, value] of params.entries()) {
     result[key] = value;
   }
-  
+
   return result;
 }

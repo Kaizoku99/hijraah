@@ -1,15 +1,14 @@
-import { DataStreamWriter } from 'ai';
-import { Session } from 'next-auth';
+import { DataStreamWriter } from "ai";
+import { Session } from "next-auth";
 
-import { codeDocumentHandler } from '@/artifacts/code/server';
-import { imageDocumentHandler } from '@/artifacts/image/server';
-import { sheetDocumentHandler } from '@/artifacts/sheet/server';
-import { textDocumentHandler } from '@/artifacts/text/server';
-import { ArtifactKind } from '@/shared/ui/artifact';
+import { codeDocumentHandler } from "@/artifacts/code/server";
+import { imageDocumentHandler } from "@/artifacts/image/server";
+import { sheetDocumentHandler } from "@/artifacts/sheet/server";
+import { textDocumentHandler } from "@/artifacts/text/server";
+import { ArtifactKind } from "@/shared/ui/artifact";
 
-import { saveDocument } from '../db/queries';
-import { Document } from '../db/schema';
-
+import { saveDocument } from "../db/queries";
+import { Document } from "../db/schema";
 
 export interface SaveDocumentProps {
   id: string;
@@ -99,4 +98,4 @@ export const documentHandlersByArtifactKind: Array<DocumentHandler> = [
   sheetDocumentHandler,
 ];
 
-export const artifactKinds = ['text', 'code', 'image', 'sheet'] as const;
+export const artifactKinds = ["text", "code", "image", "sheet"] as const;

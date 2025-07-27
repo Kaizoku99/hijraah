@@ -201,7 +201,7 @@ export interface MonitoringEvents {
   "performance:anomaly": (
     metric: string,
     value: number,
-    expected: number
+    expected: number,
   ) => void;
   "error:spike": (service: string, errorRate: number) => void;
 }
@@ -276,7 +276,7 @@ export class AdvancedMonitoringService extends EventEmitter {
     value: number,
     type: MonitoringMetric["type"] = "gauge",
     labels: Record<string, string> = {},
-    unit?: string
+    unit?: string,
   ): void {
     const metric: MonitoringMetric = {
       id: crypto.randomUUID(),
@@ -302,7 +302,7 @@ export class AdvancedMonitoringService extends EventEmitter {
   // Context7 Pattern: Distributed tracing with span management
   startTrace(
     operationName: string,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): string {
     const trace: PerformanceTrace = {
       id: crypto.randomUUID(),
@@ -322,7 +322,7 @@ export class AdvancedMonitoringService extends EventEmitter {
     traceId: string,
     spanName: string,
     parentSpanId?: string,
-    tags: Record<string, any> = {}
+    tags: Record<string, any> = {},
   ): string {
     const trace = this.activeTraces.get(traceId);
     if (!trace) {
@@ -387,7 +387,7 @@ export class AdvancedMonitoringService extends EventEmitter {
     spanId: string,
     level: TraceLog["level"],
     message: string,
-    fields?: Record<string, any>
+    fields?: Record<string, any>,
   ): void {
     const trace = this.activeTraces.get(traceId);
     if (!trace) return;
@@ -405,7 +405,7 @@ export class AdvancedMonitoringService extends EventEmitter {
 
   // Context7 Pattern: Alert management with conditions
   async createAlert(
-    alertConfig: Omit<Alert, "id" | "status" | "createdAt">
+    alertConfig: Omit<Alert, "id" | "status" | "createdAt">,
   ): Promise<string> {
     const alert: Alert = {
       ...alertConfig,
@@ -433,7 +433,7 @@ export class AdvancedMonitoringService extends EventEmitter {
   async acknowledgeAlert(
     alertId: string,
     userId: string,
-    reason?: string
+    reason?: string,
   ): Promise<void> {
     const alert = this.alerts.get(alertId);
     if (!alert) return;
@@ -460,7 +460,7 @@ export class AdvancedMonitoringService extends EventEmitter {
       const overallScore = this.calculateHealthScore(
         services,
         dependencies,
-        checks
+        checks,
       );
       const status = this.determineSystemStatus(overallScore);
 
@@ -487,7 +487,7 @@ export class AdvancedMonitoringService extends EventEmitter {
 
   // Context7 Pattern: Performance dashboard management
   async createDashboard(
-    dashboard: Omit<PerformanceDashboard, "id">
+    dashboard: Omit<PerformanceDashboard, "id">,
   ): Promise<string> {
     const dashboardId = crypto.randomUUID();
     const fullDashboard: PerformanceDashboard = {
@@ -568,7 +568,7 @@ export class AdvancedMonitoringService extends EventEmitter {
           timestamp: m.timestamp,
           source: m.source,
           unit: m.unit,
-        }))
+        })),
       );
 
       // Store in Redis for real-time queries
@@ -652,7 +652,7 @@ export class AdvancedMonitoringService extends EventEmitter {
   }
 
   private async evaluateAlertCondition(
-    condition: AlertCondition
+    condition: AlertCondition,
   ): Promise<boolean> {
     try {
       const { data } = await this.supabase.rpc("evaluate_alert_condition", {
@@ -801,7 +801,7 @@ export class AdvancedMonitoringService extends EventEmitter {
   private calculateHealthScore(
     services: ServiceHealth[],
     dependencies: DependencyHealth[],
-    checks: HealthCheck[]
+    checks: HealthCheck[],
   ): number {
     const serviceScore =
       services.reduce((sum, s) => {

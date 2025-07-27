@@ -25,7 +25,7 @@ export function cn(...inputs: ClassValue[]) {
 export function generateId(length: number = 16) {
   return customAlphabet(
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-    length
+    length,
   )();
 }
 
@@ -98,7 +98,7 @@ export const fetcher = async (url: string) => {
 
   if (!res.ok) {
     const error = new Error(
-      "An error occurred while fetching the data."
+      "An error occurred while fetching the data.",
     ) as ApplicationError;
     // Attempt to parse error info, but don't fail if it's not JSON
     try {
@@ -125,7 +125,7 @@ export function getLocalStorage(key: string): any[] | Record<string, any> {
     } catch (error) {
       console.error(
         `Error parsing localStorage item with key "${key}":`,
-        error
+        error,
       );
       return []; // Return empty array on parsing error
     }
@@ -151,7 +151,7 @@ export function sanitizeText(text: string): string {
  * @returns The sanitized messages array
  */
 export function sanitizeUIMessages<T extends { content: string }>(
-  messages: T[]
+  messages: T[],
 ): T[] {
   return messages.map((message) => ({
     ...message,

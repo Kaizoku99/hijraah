@@ -139,7 +139,7 @@ export class ProductApplicationService {
 
   async getProductsWithTax(
     categoryId: string,
-    taxRate: number
+    taxRate: number,
   ): Promise<
     Array<{
       product: Product;
@@ -189,7 +189,7 @@ productRouter.get("/:id", async (c) => {
         success: false,
         error: "Failed to retrieve product",
       },
-      500
+      500,
     );
   }
 });

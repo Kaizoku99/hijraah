@@ -2,23 +2,23 @@ const config = {
   plugins: {
     "@tailwindcss/postcss": {},
     autoprefixer: {},
-    ...(process.env.NODE_ENV === 'production'
+    ...(process.env.NODE_ENV === "production"
       ? {
-          'postcss-preset-env': {
+          "postcss-preset-env": {
             autoprefixer: {
-              flexbox: 'no-2009',
+              flexbox: "no-2009",
             },
             stage: 3,
             features: {
-              'custom-properties': false,
-              'nesting-rules': true,
+              "custom-properties": false,
+              "nesting-rules": true,
             },
           },
-          'postcss-discard-duplicates': {},
-          'postcss-merge-rules': {},
+          "postcss-discard-duplicates": {},
+          "postcss-merge-rules": {},
           cssnano: {
             preset: [
-              'default',
+              "default",
               {
                 discardComments: {
                   removeAll: true,

@@ -65,7 +65,7 @@ function createRedisClient(): Redis | null {
 
   if (!UPSTASH_REDIS_REST_URL || !UPSTASH_REDIS_REST_TOKEN) {
     console.warn(
-      "[Redis Client] Missing Redis URL or Token in environment variables. Redis client will not be initialized."
+      "[Redis Client] Missing Redis URL or Token in environment variables. Redis client will not be initialized.",
     );
     return null;
   }
@@ -82,7 +82,7 @@ function createRedisClient(): Redis | null {
   } catch (error) {
     console.error(
       "[Redis Client] Error during Redis client instantiation:",
-      error
+      error,
     );
     return null;
   }
@@ -98,7 +98,7 @@ export function getRedisClient(): Redis | null {
       console.log("Upstash Redis client initialized successfully.");
     } else {
       console.warn(
-        "Upstash Redis client could not be initialized. Features requiring Redis may not work."
+        "Upstash Redis client could not be initialized. Features requiring Redis may not work.",
       );
     }
     redisInitializationAttempted = true;
@@ -137,7 +137,7 @@ export const redis: Redis | null = getRedisClient();
 export async function isRedisHealthy(): Promise<boolean> {
   if (!redis) {
     console.warn(
-      "[isRedisHealthy] Redis client not initialized. Health check returning false."
+      "[isRedisHealthy] Redis client not initialized. Health check returning false.",
     );
     return false;
   }
@@ -171,7 +171,7 @@ export const translationCache = {
   async set(
     locale: string,
     translations: Record<string, any>,
-    ttl: number = 3600
+    ttl: number = 3600,
   ): Promise<void> {
     if (!redis) {
       console.warn("[translationCache.set] Redis client not available.");
@@ -199,7 +199,7 @@ export const translationCache = {
   async invalidateAll(): Promise<void> {
     if (!redis) {
       console.warn(
-        "[translationCache.invalidateAll] Redis client not available."
+        "[translationCache.invalidateAll] Redis client not available.",
       );
       return;
     }
@@ -238,7 +238,7 @@ function defaultKeyGenerator(c: Context<any>): string {
  * @returns Hono middleware
  */
 export function redisCacheMiddleware(
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): MiddlewareHandler<any> {
   // Set default values for options to avoid Hono warnings
   options.caches = options.caches || []; // Always provide a caches array to avoid Hono built-in middleware warnings
@@ -246,7 +246,7 @@ export function redisCacheMiddleware(
   return async (c: Context<any>, next: Next) => {
     if (!redis) {
       console.warn(
-        "[redisCacheMiddleware] Redis client not available. Skipping cache."
+        "[redisCacheMiddleware] Redis client not available. Skipping cache.",
       );
       return next();
     }
@@ -258,7 +258,7 @@ export function redisCacheMiddleware(
     // Log incoming Cache-Control header
     const requestCacheControl = c.req.header("Cache-Control");
     console.log(
-      `[redisCacheMiddleware] Incoming Cache-Control: ${requestCacheControl}`
+      `[redisCacheMiddleware] Incoming Cache-Control: ${requestCacheControl}`,
     );
 
     // If caches is not defined, continue with caching
@@ -334,12 +334,12 @@ export function redisCacheMiddleware(
  * @returns Hono middleware
  */
 export function redisApiCacheMiddleware(
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): MiddlewareHandler<any> {
   return async (c: Context<any>, next: Next) => {
     if (!redis) {
       console.warn(
-        "[redisApiCacheMiddleware] Redis client not available. Skipping cache."
+        "[redisApiCacheMiddleware] Redis client not available. Skipping cache.",
       );
       return next();
     }
@@ -351,7 +351,7 @@ export function redisApiCacheMiddleware(
     // Log incoming Cache-Control header
     const requestCacheControl = c.req.header("Cache-Control");
     console.log(
-      `[redisApiCacheMiddleware] Incoming Cache-Control: ${requestCacheControl}`
+      `[redisApiCacheMiddleware] Incoming Cache-Control: ${requestCacheControl}`,
     );
 
     // Generate cache key
@@ -448,7 +448,7 @@ export async function invalidateRedisCache(pattern: string): Promise<number> {
     await Promise.all(matchingKeys.map((key) => redis.del(key)));
 
     console.log(
-      `Invalidated ${matchingKeys.length} cache entries matching "${pattern}"`
+      `Invalidated ${matchingKeys.length} cache entries matching "${pattern}"`,
     );
     return matchingKeys.length;
   } catch (error) {
@@ -554,7 +554,7 @@ class CacheManager {
     this.redisClientInternal = getRedisClient();
     if (!this.redisClientInternal) {
       console.warn(
-        "[CacheManager] Redis client is not available. CacheManager will operate in LRU-only mode."
+        "[CacheManager] Redis client is not available. CacheManager will operate in LRU-only mode.",
       );
     }
 
@@ -581,7 +581,7 @@ class CacheManager {
       } catch (error) {
         console.error(
           `CacheManager: Redis get error for key ${prefixedKey}:`,
-          error
+          error,
         );
       }
     }
@@ -598,7 +598,7 @@ class CacheManager {
       } catch (error) {
         console.error(
           `CacheManager: Redis set error for key ${prefixedKey}:`,
-          error
+          error,
         );
       }
     }
@@ -615,7 +615,7 @@ class CacheManager {
       } catch (error) {
         console.error(
           `CacheManager: Redis delete error for key ${prefixedKey}:`,
-          error
+          error,
         );
       }
     }
@@ -626,7 +626,7 @@ class CacheManager {
     // Clear Redis keys matching the prefix
     if (this.redisClientInternal) {
       console.log(
-        `CacheManager: Attempting to clear Redis keys with prefix "${this.redisKeyPrefix}"...`
+        `CacheManager: Attempting to clear Redis keys with prefix "${this.redisKeyPrefix}"...`,
       );
       let cursor = 0;
       let keysDeletedCount = 0;
@@ -646,12 +646,12 @@ class CacheManager {
           cursor = nextCursor;
         } while (cursor !== 0);
         console.log(
-          `CacheManager: Cleared ${keysDeletedCount} keys from Redis with prefix "${this.redisKeyPrefix}".`
+          `CacheManager: Cleared ${keysDeletedCount} keys from Redis with prefix "${this.redisKeyPrefix}".`,
         );
       } catch (error) {
         console.error(
           `CacheManager: Error clearing Redis keys with prefix "${this.redisKeyPrefix}":`,
-          error
+          error,
         );
       }
     }

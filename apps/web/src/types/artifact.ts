@@ -1,6 +1,11 @@
-export type ArtifactType = 'document' | 'spreadsheet' | 'code' | 'image' | 'mindmap';
+export type ArtifactType =
+  | "document"
+  | "spreadsheet"
+  | "code"
+  | "image"
+  | "mindmap";
 
-export type ArtifactVisibility = 'private' | 'public' | 'team';
+export type ArtifactVisibility = "private" | "public" | "team";
 
 export interface Artifact {
   id: string;
@@ -18,13 +23,13 @@ export interface ArtifactMessage {
   id: string;
   artifact_id: string;
   message: string;
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   created_at: string;
 }
 
 export interface DocumentContent {
   text: string;
-  format?: 'markdown' | 'plain';
+  format?: "markdown" | "plain";
 }
 
 export interface CodeContent {
@@ -37,7 +42,7 @@ export interface SpreadsheetContent {
   columns: Array<{
     id: string;
     name: string;
-    type: 'text' | 'number' | 'date' | 'boolean';
+    type: "text" | "number" | "date" | "boolean";
   }>;
   rows: Record<string, any>[];
 }
@@ -57,9 +62,9 @@ export interface MindMapContent {
   }>;
 }
 
-export type ArtifactContent = 
-  | { type: 'document'; content: DocumentContent }
-  | { type: 'code'; content: CodeContent }
-  | { type: 'spreadsheet'; content: SpreadsheetContent }
-  | { type: 'image'; content: ImageContent }
-  | { type: 'mindmap'; content: MindMapContent }; 
+export type ArtifactContent =
+  | { type: "document"; content: DocumentContent }
+  | { type: "code"; content: CodeContent }
+  | { type: "spreadsheet"; content: SpreadsheetContent }
+  | { type: "image"; content: ImageContent }
+  | { type: "mindmap"; content: MindMapContent };

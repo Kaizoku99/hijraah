@@ -33,11 +33,11 @@ export const OnboardingProgress: React.FC = () => {
   // Generate the steps array using helper functions
   const allSteps: (OnboardingStepConfig | undefined)[] = Array.from(
     { length: totalSteps },
-    (_, i) => getStepByIndex(i)
+    (_, i) => getStepByIndex(i),
   );
   // Filter out undefined steps just in case getStepByIndex returns undefined for some index
   const validSteps = allSteps.filter(
-    (step): step is OnboardingStepConfig => step !== undefined
+    (step): step is OnboardingStepConfig => step !== undefined,
   );
 
   if (!currentStep) return null;
@@ -87,8 +87,8 @@ export const OnboardingProgress: React.FC = () => {
                                   index < currentStepIndex
                                     ? "bg-primary/20 border-primary/30 text-primary-foreground"
                                     : index === currentStepIndex
-                                    ? "bg-primary text-primary-foreground"
-                                    : "bg-muted text-muted-foreground"
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-muted text-muted-foreground"
                                 }
                             `}
             >

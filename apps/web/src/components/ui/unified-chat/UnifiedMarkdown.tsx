@@ -19,7 +19,7 @@ export const UnifiedMarkdown = memo(function UnifiedMarkdown({
 }: UnifiedMarkdownProps) {
   console.log(
     "Rendering markdown content:",
-    content ? content.substring(0, 50) + "..." : "undefined or empty"
+    content ? content.substring(0, 50) + "..." : "undefined or empty",
   );
 
   if (!content) {
@@ -44,7 +44,7 @@ export const UnifiedMarkdown = memo(function UnifiedMarkdown({
               <code
                 className={cn(
                   "rounded-md bg-muted px-1 py-0.5 font-mono text-sm",
-                  className
+                  className,
                 )}
                 {...props}
               >

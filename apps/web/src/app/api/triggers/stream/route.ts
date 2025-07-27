@@ -95,7 +95,7 @@ class TaskEventStore {
     recentEvents.reverse().forEach(async (event) => {
       try {
         await writer.write(
-          new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`)
+          new TextEncoder().encode(`data: ${JSON.stringify(event)}\n\n`),
         );
       } catch (error) {
         console.error("Failed to send history:", error);
@@ -116,7 +116,7 @@ class TaskEventStore {
     }
     return Array.from(this.subscribers.values()).reduce(
       (total, set) => total + set.size,
-      0
+      0,
     );
   }
 }
@@ -147,7 +147,7 @@ export async function GET(request: NextRequest) {
       };
 
       writer.enqueue(
-        new TextEncoder().encode(`data: ${JSON.stringify(connectEvent)}\n\n`)
+        new TextEncoder().encode(`data: ${JSON.stringify(connectEvent)}\n\n`),
       );
 
       // Subscribe to events
@@ -158,8 +158,8 @@ export async function GET(request: NextRequest) {
         try {
           writer.enqueue(
             new TextEncoder().encode(
-              `data: {"type":"heartbeat","timestamp":"${new Date().toISOString()}"}\n\n`
-            )
+              `data: {"type":"heartbeat","timestamp":"${new Date().toISOString()}"}\n\n`,
+            ),
           );
         } catch (error) {
           console.error("Heartbeat failed:", error);
@@ -222,7 +222,7 @@ export async function POST(request: NextRequest) {
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }
@@ -269,6 +269,6 @@ if (process.env.NODE_ENV === "development") {
 
       eventStore.publishEvent(mockEvent);
     },
-    5000 + Math.random() * 10000
+    5000 + Math.random() * 10000,
   ); // Random interval between 5-15 seconds
 }

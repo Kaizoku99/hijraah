@@ -1,14 +1,14 @@
 "use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Mail, Phone, MapPin } from 'lucide-react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
-import { useToast } from '@/components/ui/use-toast';
-import { Button } from '@/ui/button';
-import { Card } from '@/ui/card';
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/ui/button";
+import { Card } from "@/ui/card";
 import {
   Form,
   FormControl,
@@ -16,15 +16,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/ui/form';
-import { Input } from '@/ui/input';
-import { Textarea } from '@/ui/textarea';
+} from "@/ui/form";
+import { Input } from "@/ui/input";
+import { Textarea } from "@/ui/textarea";
 
 const formSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  subject: z.string().min(5, 'Subject must be at least 5 characters'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  subject: z.string().min(5, "Subject must be at least 5 characters"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
 export default function ContactPage() {
@@ -34,10 +34,10 @@ export default function ContactPage() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
+      name: "",
+      email: "",
+      subject: "",
+      message: "",
     },
   });
 
@@ -45,7 +45,7 @@ export default function ContactPage() {
     try {
       setLoading(true);
       // Here you would typically send the form data to your API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulated API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulated API call
 
       toast({
         title: "Message sent!",
@@ -70,8 +70,8 @@ export default function ContactPage() {
         <div>
           <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
           <p className="text-muted-foreground mb-8">
-            Have questions about immigration? We&apos;re here to help. Fill out the form
-            below and we&apos;ll get back to you as soon as possible.
+            Have questions about immigration? We&apos;re here to help. Fill out
+            the form below and we&apos;ll get back to you as soon as possible.
           </p>
 
           <div className="space-y-6">
@@ -100,7 +100,8 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-medium">Address</h3>
                 <p className="text-sm text-muted-foreground">
-                  123 Immigration Street<br />
+                  123 Immigration Street
+                  <br />
                   New York, NY 10001
                 </p>
               </div>
@@ -109,7 +110,11 @@ export default function ContactPage() {
         </div>
 
         <Card className="p-6">
-          <Form form={form} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Form
+            form={form}
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -131,7 +136,11 @@ export default function ContactPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="your@email.com" type="email" {...field} />
+                    <Input
+                      placeholder="your@email.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -171,7 +180,7 @@ export default function ContactPage() {
             />
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Sending...' : 'Send Message'}
+              {loading ? "Sending..." : "Send Message"}
             </Button>
           </Form>
         </Card>

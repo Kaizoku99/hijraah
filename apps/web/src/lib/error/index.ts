@@ -1,12 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
-import { toast } from 'sonner';
+import { createClient } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 // Error severity levels
 export enum ErrorSeverity {
-  LOW = 'warning',
-  MEDIUM = 'error',
-  HIGH = 'error',
-  CRITICAL = 'fatal',
+  LOW = "warning",
+  MEDIUM = "error",
+  HIGH = "error",
+  CRITICAL = "fatal",
 }
 
 // Base error class with enhanced features
@@ -21,7 +21,7 @@ export class AppError extends Error {
     public userMessage?: string,
   ) {
     super(message);
-    this.name = 'AppError';
+    this.name = "AppError";
   }
 
   toJSON() {
@@ -43,14 +43,14 @@ export class ValidationError extends AppError {
   constructor(message: string, details?: Record<string, any>) {
     super(
       message,
-      'VALIDATION_ERROR',
+      "VALIDATION_ERROR",
       400,
       ErrorSeverity.LOW,
       details,
       true,
-      'Please check your input and try again.',
+      "Please check your input and try again.",
     );
-    this.name = 'ValidationError';
+    this.name = "ValidationError";
   }
 }
 
@@ -58,14 +58,14 @@ export class AuthError extends AppError {
   constructor(message: string, details?: Record<string, any>) {
     super(
       message,
-      'AUTH_ERROR',
+      "AUTH_ERROR",
       401,
       ErrorSeverity.HIGH,
       details,
       true,
-      'Authentication failed. Please sign in again.',
+      "Authentication failed. Please sign in again.",
     );
-    this.name = 'AuthError';
+    this.name = "AuthError";
   }
 }
 
@@ -73,14 +73,14 @@ export class NotFoundError extends AppError {
   constructor(message: string, details?: Record<string, any>) {
     super(
       message,
-      'NOT_FOUND',
+      "NOT_FOUND",
       404,
       ErrorSeverity.LOW,
       details,
       false,
-      'The requested resource was not found.',
+      "The requested resource was not found.",
     );
-    this.name = 'NotFoundError';
+    this.name = "NotFoundError";
   }
 }
 
@@ -88,25 +88,25 @@ export class NetworkError extends AppError {
   constructor(message: string, details?: Record<string, any>) {
     super(
       message,
-      'NETWORK_ERROR',
+      "NETWORK_ERROR",
       503,
       ErrorSeverity.HIGH,
       details,
       true,
-      'Network connection issue. Please check your connection and try again.',
+      "Network connection issue. Please check your connection and try again.",
     );
-    this.name = 'NetworkError';
+    this.name = "NetworkError";
   }
 }
 
 // Enhanced error handling with logging
 export function handleError(error: unknown, context?: Record<string, any>) {
-  console.error('Error:', error);
+  console.error("Error:", error);
 
   // Log error details
   if (error instanceof AppError) {
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.error({
         error: error.toJSON(),
         context,
@@ -116,7 +116,7 @@ export function handleError(error: unknown, context?: Record<string, any>) {
     toast.error(`${error.name}: ${error.userMessage || error.message}`);
   } else if (error instanceof Error) {
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.error({
         name: error.name,
         message: error.message,
@@ -128,14 +128,14 @@ export function handleError(error: unknown, context?: Record<string, any>) {
     toast.error(`Error: ${error.message}`);
   } else {
     // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       console.error({
         error,
         context,
       });
     }
 
-    toast.error('An unexpected error occurred');
+    toast.error("An unexpected error occurred");
   }
 }
 
@@ -199,7 +199,7 @@ export function createErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return 'An unexpected error occurred';
+  return "An unexpected error occurred";
 }
 
 // Error boundary context
@@ -208,7 +208,7 @@ export const ErrorContext = {
     if (error instanceof AppError) {
       return error.userMessage || error.message;
     }
-    return 'An unexpected error occurred. Please try again later.';
+    return "An unexpected error occurred. Please try again later.";
   },
 
   shouldRetry(error: unknown): boolean {

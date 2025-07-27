@@ -68,7 +68,7 @@ export abstract class BaseRepository<
    * Retrieve all records of this entity
    */
   async getAll(
-    options: { limit?: number; offset?: number } = {}
+    options: { limit?: number; offset?: number } = {},
   ): Promise<T[]> {
     const client = await this.getClient();
     const { data, error } = await client
@@ -76,7 +76,7 @@ export abstract class BaseRepository<
       .select("*")
       .range(
         options.offset || 0,
-        (options.offset || 0) + (options.limit || 100) - 1
+        (options.offset || 0) + (options.limit || 100) - 1,
       );
 
     if (error) throw error;
@@ -110,7 +110,7 @@ export abstract class BaseRepository<
     // Log the data being sent to help debug the createdAt issue
     console.log(
       `[BaseRepository.create] Inserting into ${this.tableName}:`,
-      JSON.stringify(data, null, 2)
+      JSON.stringify(data, null, 2),
     );
 
     const { data: createdData, error } = await client

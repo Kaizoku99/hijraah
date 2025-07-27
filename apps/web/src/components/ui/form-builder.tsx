@@ -95,8 +95,8 @@ export function FormBuilder({
         }
         return { ...acc, [field.name]: validator };
       },
-      {} as Record<string, z.ZodTypeAny>
-    )
+      {} as Record<string, z.ZodTypeAny>,
+    ),
   );
 
   type FormData = z.infer<typeof schema>;
@@ -107,7 +107,7 @@ export function FormBuilder({
       const value = defaultValues[field.name] ?? field.defaultValue ?? "";
       return { ...acc, [field.name]: value };
     },
-    {} as Record<string, any>
+    {} as Record<string, any>,
   );
 
   const form = useForm<FormData>({
@@ -198,16 +198,16 @@ export function FormBuilder({
                     !form.watch(field.name as keyof FormData) &&
                       "text-muted-foreground",
                     error && "border-red-500",
-                    field.className
+                    field.className,
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {form.watch(field.name as keyof FormData) ? (
                     format(
                       new Date(
-                        form.watch(field.name as keyof FormData) as string
+                        form.watch(field.name as keyof FormData) as string,
                       ),
-                      "PPP"
+                      "PPP",
                     )
                   ) : (
                     <span>{field.placeholder || t("form.selectDate")}</span>
@@ -220,7 +220,7 @@ export function FormBuilder({
                   selected={
                     form.watch(field.name as keyof FormData)
                       ? new Date(
-                          form.watch(field.name as keyof FormData) as string
+                          form.watch(field.name as keyof FormData) as string,
                         )
                       : undefined
                   }
@@ -278,7 +278,7 @@ export function FormBuilder({
               placeholder={field.placeholder}
               {...form.register(
                 field.name as keyof FormData,
-                field.type === "number" ? { valueAsNumber: true } : {}
+                field.type === "number" ? { valueAsNumber: true } : {},
               )}
               className={cn(error && "border-red-500", field.className)}
             />

@@ -6,7 +6,6 @@ import * as React from "react";
 
 import { useAuth } from "@/lib/auth/hooks";
 
-
 interface ProtectedRouteProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;

@@ -25,7 +25,7 @@ export const supabase = createClient(
     global: {
       fetch: fetch,
     },
-  }
+  },
 );
 
 // In-memory KV store for functions that don't have access to Deno.openKv
@@ -52,7 +52,7 @@ export const cacheKey = (namespace: string, key: string): string => {
 export const getFromCache = async <T>(
   namespace: string,
   key: string,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): Promise<T | null> => {
   const fullKey = cacheKey(namespace, key);
   const now = Date.now();
@@ -115,7 +115,7 @@ export const setInCache = async <T>(
   namespace: string,
   key: string,
   value: T,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): Promise<void> => {
   const fullKey = cacheKey(namespace, key);
   const now = Date.now();
@@ -155,7 +155,7 @@ export const setInCache = async <T>(
 export const invalidateCache = async (
   namespace: string,
   key?: string,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): Promise<void> => {
   // If key is provided, delete specific item
   if (key) {
@@ -231,7 +231,7 @@ export const cachedFunction = async <T, A extends any[]>(
   key: string,
   fn: (...args: A) => Promise<T>,
   args: A,
-  options: CacheOptions = {}
+  options: CacheOptions = {},
 ): Promise<T> => {
   // Try to get from cache first
   const cachedResult = await getFromCache<T>(namespace, key, options);
@@ -257,7 +257,7 @@ export const logEvent = async (
   traceId?: string,
   userId?: string,
   sessionId?: string,
-  requestId?: string
+  requestId?: string,
 ): Promise<void> => {
   try {
     await supabase.rpc("observability.log", {
@@ -278,7 +278,7 @@ export const logEvent = async (
 export const recordMetric = async (
   name: string,
   value: number,
-  labels?: Record<string, any>
+  labels?: Record<string, any>,
 ): Promise<void> => {
   try {
     await supabase.rpc("observability.record_metric", {
@@ -299,7 +299,7 @@ export const recordPerformance = async (
   userId?: string,
   sessionId?: string,
   requestId?: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, any>,
 ): Promise<void> => {
   try {
     await supabase.rpc("observability.record_performance", {
@@ -323,7 +323,7 @@ export const measurePerformance = async <T>(
   resourceType: string,
   fn: () => Promise<T>,
   metadata?: Record<string, any>,
-  userId?: string
+  userId?: string,
 ): Promise<T> => {
   const startTime = performance.now();
   try {
@@ -340,7 +340,7 @@ export const measurePerformance = async <T>(
       userId,
       undefined,
       undefined,
-      metadata
+      metadata,
     ).catch(console.error);
 
     return result;
@@ -360,7 +360,7 @@ export const measurePerformance = async <T>(
       {
         ...metadata,
         error: error instanceof Error ? error.message : "Unknown error",
-      }
+      },
     ).catch(console.error);
 
     throw error;
@@ -370,7 +370,7 @@ export const measurePerformance = async <T>(
 // Enhanced Rate limiting utilities using database-backed rate limiting
 export const getRateLimit = async (
   userId: string,
-  resourceType: string
+  resourceType: string,
 ): Promise<RateLimitResult> => {
   try {
     // Check rate limits in the database
@@ -379,7 +379,7 @@ export const getRateLimit = async (
       {
         p_user_id: userId,
         p_resource_type: resourceType,
-      }
+      },
     );
 
     if (error) {
@@ -425,14 +425,14 @@ export const getRateLimit = async (
 // Queue management utilities
 export const addToQueue = async (
   userId: string,
-  priority: number = 1
+  priority: number = 1,
 ): Promise<number> => {
   const key = "request_queue";
   const queue = (kvStore.get(key) || []) as QueueEntry[];
 
   // Check if user is already in queue
   const userIndex = queue.findIndex(
-    (entry: QueueEntry) => entry.userId === userId
+    (entry: QueueEntry) => entry.userId === userId,
   );
 
   if (userIndex >= 0) {
@@ -460,7 +460,7 @@ export const addToQueue = async (
 
   // Return position in queue (0 means user is at the front of the queue)
   const newPosition = queue.findIndex(
-    (entry: QueueEntry) => entry.userId === userId
+    (entry: QueueEntry) => entry.userId === userId,
   );
   return newPosition;
 };
@@ -561,26 +561,26 @@ export const analyzeQuery = (query: string): QueryAnalysis => {
   // Calculate scores
   const legalScore = legalPatterns.reduce(
     (score, pattern) => score + (lowerQuery.includes(pattern) ? 1 : 0),
-    0
+    0,
   );
 
   const documentScore = documentPatterns.reduce(
     (score, pattern) => score + (lowerQuery.includes(pattern) ? 1 : 0),
-    0
+    0,
   );
 
   const complexityScore = {
     high: complexityIndicators.high.reduce(
       (score, word) => score + (lowerQuery.includes(word) ? 2 : 0),
-      0
+      0,
     ),
     medium: complexityIndicators.medium.reduce(
       (score, word) => score + (lowerQuery.includes(word) ? 1 : 0),
-      0
+      0,
     ),
     low: complexityIndicators.low.reduce(
       (score, word) => score + (lowerQuery.includes(word) ? 0.5 : 0),
-      0
+      0,
     ),
   };
 
@@ -604,7 +604,7 @@ export const analyzeQuery = (query: string): QueryAnalysis => {
 
 // For webhook signature validation
 export const validateWebhookSignature = async (
-  req: Request
+  req: Request,
 ): Promise<boolean> => {
   const signature = req.headers.get("x-webhook-signature");
   const secret = Deno.env.get("WEBHOOK_SECRET");
@@ -637,7 +637,7 @@ export const validateWebhookSignature = async (
 
   const hashBuffer = await crypto.subtle.digest(
     "SHA-256",
-    new TextEncoder().encode(payload + timestamp + secret)
+    new TextEncoder().encode(payload + timestamp + secret),
   );
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const expectedSignature = hashArray
@@ -649,7 +649,7 @@ export const validateWebhookSignature = async (
 
 // Enhanced immigration update processing with validation and enrichment
 export const processImmigrationUpdate = (
-  update: ImmigrationUpdate
+  update: ImmigrationUpdate,
 ): ImmigrationUpdate => {
   // Normalize and validate visa types
   const normalizedVisaTypes = update.affectedVisaTypes.map((type) => {
@@ -689,7 +689,7 @@ export const processImmigrationUpdate = (
 
 // Enhanced affected users search with advanced filtering
 export const findAffectedUsers = async (
-  update: ImmigrationUpdate
+  update: ImmigrationUpdate,
 ): Promise<UserProfile[]> => {
   // Query users with current or intended visa types
   const { data: directlyAffected } = await supabase
@@ -697,7 +697,7 @@ export const findAffectedUsers = async (
     .select("*")
     .or(
       `currentVisaType.in.(${update.affectedVisaTypes.join(",")}),` +
-        `intendedVisaType.in.(${update.affectedVisaTypes.join(",")})`
+        `intendedVisaType.in.(${update.affectedVisaTypes.join(",")})`,
     )
     .eq("country", update.country);
 
@@ -712,7 +712,7 @@ export const findAffectedUsers = async (
     .select("*")
     .or(
       `currentVisaType.in.(${relatedVisaTypes.join(",")}),` +
-        `intendedVisaType.in.(${relatedVisaTypes.join(",")})`
+        `intendedVisaType.in.(${relatedVisaTypes.join(",")})`,
     )
     .eq("country", update.country);
 
@@ -722,7 +722,7 @@ export const findAffectedUsers = async (
     ...(indirectlyAffected || []),
   ];
   const uniqueUsers = Array.from(
-    new Map(allAffected.map((user) => [user.id, user])).values()
+    new Map(allAffected.map((user) => [user.id, user])).values(),
   );
 
   return uniqueUsers as UserProfile[];
@@ -731,15 +731,15 @@ export const findAffectedUsers = async (
 // Enhanced user notification with prioritization and batching
 export const notifyUsers = async (
   users: UserProfile[],
-  update: ImmigrationUpdate
+  update: ImmigrationUpdate,
 ): Promise<boolean> => {
   // Prioritize users based on visa type match
   const prioritizedUsers = users.sort((a, b) => {
     const aDirectMatch = update.affectedVisaTypes.includes(
-      a.currentVisaType || ""
+      a.currentVisaType || "",
     );
     const bDirectMatch = update.affectedVisaTypes.includes(
-      b.currentVisaType || ""
+      b.currentVisaType || "",
     );
     return (bDirectMatch ? 1 : 0) - (aDirectMatch ? 1 : 0);
   });
@@ -747,7 +747,7 @@ export const notifyUsers = async (
   // Prepare notifications with personalized content
   const notifications = prioritizedUsers.map((user) => {
     const isDirectlyAffected = update.affectedVisaTypes.includes(
-      user.currentVisaType || ""
+      user.currentVisaType || "",
     );
     const content = isDirectlyAffected
       ? `Important immigration update affecting your ${user.currentVisaType} visa: ${update.content}`

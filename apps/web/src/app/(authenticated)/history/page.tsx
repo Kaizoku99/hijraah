@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import { createBrowserClient } from '@supabase/ssr';
-import { format } from 'date-fns';
-import { useState, useEffect } from 'react';
+import { createBrowserClient } from "@supabase/ssr";
+import { format } from "date-fns";
+import { useState, useEffect } from "react";
 
-import { MainLayout } from '@/components/ui/layouts/main-layout';
-import { useAuth } from '@/lib/auth/hooks';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/card';
-import { ScrollArea } from '@/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/tabs';
+import { MainLayout } from "@/components/ui/layouts/main-layout";
+import { useAuth } from "@/lib/auth/hooks";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/ui/card";
+import { ScrollArea } from "@/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/tabs";
 
 interface HistoryItem {
   id: string;
@@ -20,7 +26,7 @@ interface HistoryItem {
 
 // Helper function for date formatting
 const formatDateTime = (dateString: string): string => {
-  return format(new Date(dateString), 'PPp');
+  return format(new Date(dateString), "PPp");
 };
 
 export default function HistoryPage() {
@@ -30,7 +36,7 @@ export default function HistoryPage() {
   const { user } = useAuth();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
   useEffect(() => {
@@ -40,36 +46,36 @@ export default function HistoryPage() {
       try {
         // Load chat history
         const { data: chatData, error: chatError } = await supabase
-          .from('chat_messages')
-          .select('*')
-          .eq('user_id', user!.id)
-          .order('created_at', { ascending: false });
+          .from("chat_messages")
+          .select("*")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
 
         if (chatError) throw chatError;
 
         // Load document history
         const { data: docs, error: docError } = await supabase
-          .from('documents')
-          .select('*')
-          .eq('user_id', user!.id)
-          .order('created_at', { ascending: false });
+          .from("documents")
+          .select("*")
+          .eq("user_id", user!.id)
+          .order("created_at", { ascending: false });
 
         if (docError) throw docError;
 
         setChatHistory(
           (chatData || []).map((chat: any) => ({
             id: chat.id,
-            type: 'chat',
-            title: 'Chat Session',
+            type: "chat",
+            title: "Chat Session",
             description: chat.content,
             created_at: chat.created_at,
-          }))
+          })),
         );
 
         setDocumentHistory(
           (docs || []).map((doc: any) => ({
             id: doc.id,
-            type: 'document',
+            type: "document",
             title: doc.name,
             description: `${doc.file_type.toUpperCase()} - ${(
               doc.file_size /
@@ -77,10 +83,10 @@ export default function HistoryPage() {
               1024
             ).toFixed(2)}MB`,
             created_at: doc.created_at,
-          }))
+          })),
         );
       } catch (error) {
-        console.error('Error loading history:', error);
+        console.error("Error loading history:", error);
       } finally {
         setIsLoading(false);
       }
@@ -117,10 +123,7 @@ export default function HistoryPage() {
                 <ScrollArea className="h-[500px]">
                   <div className="space-y-4">
                     {chatHistory.map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-lg border p-4"
-                      >
+                      <div key={item.id} className="rounded-lg border p-4">
                         <div className="flex items-center justify-between">
                           <h3 className="font-medium">{item.title}</h3>
                           <span className="text-sm text-muted-foreground">
@@ -140,10 +143,7 @@ export default function HistoryPage() {
                 <ScrollArea className="h-[500px]">
                   <div className="space-y-4">
                     {documentHistory.map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-lg border p-4"
-                      >
+                      <div key={item.id} className="rounded-lg border p-4">
                         <div className="flex items-center justify-between">
                           <h3 className="font-medium">{item.title}</h3>
                           <span className="text-sm text-muted-foreground">
@@ -164,4 +164,4 @@ export default function HistoryPage() {
       </div>
     </MainLayout>
   );
-} 
+}

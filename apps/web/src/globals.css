@@ -38,7 +38,9 @@
 
   /* Enhanced sidebar colors matching brand colors from screenshot */
   --sidebar-width: 280px;
-  --sidebar-background: oklch(0.13 0.02 240); /* Dark navy background to match the screenshot */
+  --sidebar-background: oklch(
+    0.13 0.02 240
+  ); /* Dark navy background to match the screenshot */
   --sidebar-foreground: oklch(0.95 0.02 240);
   --sidebar-muted: oklch(0.5 0.02 240);
   --sidebar-muted-foreground: oklch(0.7 0.02 240);
@@ -138,7 +140,9 @@
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 
   /* Fluid typography using Tailwind v4 syntax */
@@ -163,13 +167,18 @@
     color: oklch(var(--foreground));
   }
 
-  h4, h5, h6 {
+  h4,
+  h5,
+  h6 {
     color: oklch(var(--foreground));
     font-weight: 600;
     line-height: 1.25;
   }
 
-  button, input, select, textarea {
+  button,
+  input,
+  select,
+  textarea {
     font-family: inherit;
   }
 
@@ -272,7 +281,7 @@
 }
 
 .hover-trigger::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -290,18 +299,33 @@
 
 /* Animation classes using Tailwind v4's @keyframes */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .animate-fade-in {
@@ -396,7 +420,7 @@
   [dir="rtl"] .md\:rtl\:pl-0 {
     padding-left: 0 !important;
   }
-  
+
   [dir="rtl"] .md\:rtl\:pr-4 {
     padding-right: 1rem !important;
   }

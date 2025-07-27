@@ -19,6 +19,7 @@ The API uses Supabase for authentication. Protected routes require a valid sessi
 ## Rate Limiting
 
 All endpoints are protected by rate limiting:
+
 - 100 requests per minute per IP by default
 - Headers included in response:
   - `X-RateLimit-Limit`: Maximum requests allowed per window
@@ -40,6 +41,7 @@ All protected routes require authentication.
 #### Users
 
 - `GET /api/users`
+
   - List users (paginated)
   - Query Parameters:
     - `page` (optional): Page number (default: 1)
@@ -47,19 +49,22 @@ All protected routes require authentication.
     - `search` (optional): Search users by name
 
 - `POST /api/users`
+
   - Create a new user
   - Body:
     ```typescript
     {
-      name: string;  // min 2 characters
+      name: string; // min 2 characters
       email: string; // valid email
     }
     ```
 
 - `GET /api/users/:id`
+
   - Get user details by ID
 
 - `PATCH /api/users/:id`
+
   - Update user details
   - Body (at least one field required):
     ```typescript
@@ -103,6 +108,7 @@ The API uses standard HTTP status codes:
 - 500: Internal Server Error
 
 Common error scenarios:
+
 - User not found: 404
 - Email already exists: 409
 - Invalid input: 400
@@ -131,7 +137,8 @@ To test the API endpoints:
 ## Environment Variables
 
 Required environment variables:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=your-project-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-``` 
+```

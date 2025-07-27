@@ -6,8 +6,8 @@ import {
   DocumentVersion,
 } from "@/core/documents/entities/document";
 import { DocumentService as DomainDocumentService } from "@/core/documents/entities/document-service";
-import { RepositoryFactory } from "@/infrastructure/repositories";
-import { DocumentRepository } from "@/infrastructure/repositories/document-repository";
+import { RepositoryFactory } from "@/_infrastructure/repositories";
+import { DocumentRepository } from "@/_infrastructure/repositories/document-repository";
 import { StorageService } from "@/infrastructure/services/storage-service";
 import { generateId } from "@/shared/utils/id-generator";
 
@@ -22,7 +22,7 @@ export class DocumentApplicationService {
   constructor(
     repositoryFactory: RepositoryFactory,
     domainService: DomainDocumentService,
-    storageService: StorageService
+    storageService: StorageService,
   ) {
     this.repository = repositoryFactory.getDocumentRepository();
     this.domainService = domainService;
@@ -49,7 +49,7 @@ export class DocumentApplicationService {
       filename: string;
       contentType: string;
       size: number;
-    }
+    },
   ): Promise<Document> {
     // Validate document data
     const validation = this.domainService.validateDocument(data);
@@ -100,12 +100,12 @@ export class DocumentApplicationService {
       contentType: string;
       size: number;
     },
-    uploadedBy: string
+    uploadedBy: string,
   ): Promise<DocumentVersion> {
     // Validate the file
     if (!this.domainService.isValidMimeType(file.contentType)) {
       throw new Error(
-        "Invalid file type. Only documents, images, and PDFs are allowed."
+        "Invalid file type. Only documents, images, and PDFs are allowed.",
       );
     }
 
@@ -124,11 +124,11 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         uploadedBy,
-        "edit"
+        "edit",
       );
       if (!hasAccess) {
         throw new Error(
-          "You do not have permission to upload files to this document."
+          "You do not have permission to upload files to this document.",
         );
       }
     }
@@ -138,12 +138,12 @@ export class DocumentApplicationService {
     const storagePath = this.domainService.generateStoragePath(
       document.ownerId,
       document.type,
-      filename
+      filename,
     );
 
     // Calculate file hash for duplicate detection
     const contentHash = await this.domainService.calculateFileHash(
-      file.content
+      file.content,
     );
 
     // Check for duplicates
@@ -205,7 +205,7 @@ export class DocumentApplicationService {
     const timelineEvent = this.domainService.createDocumentEvent(
       documentId,
       file.filename,
-      uploadedBy
+      uploadedBy,
     );
 
     // Add version to the repository
@@ -284,7 +284,7 @@ export class DocumentApplicationService {
       offset?: number;
       orderBy?: string;
       searchQuery?: string;
-    }
+    },
   ): Promise<Document[]> {
     try {
       const records = await this.repository.getByUserId(userId, {
@@ -319,7 +319,7 @@ export class DocumentApplicationService {
       documentNumber?: string | null;
       tags?: string[];
       status?: DocumentStatus;
-    }
+    },
   ): Promise<Document | null> {
     // Get the document
     const document = await this.getDocumentById(documentId);
@@ -332,7 +332,7 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         userId,
-        "edit"
+        "edit",
       );
       if (!hasAccess) {
         throw new Error("You do not have permission to update this document.");
@@ -357,11 +357,11 @@ export class DocumentApplicationService {
       if (
         !this.domainService.isValidStatusTransition(
           document.status,
-          updates.status
+          updates.status,
         )
       ) {
         throw new Error(
-          `Invalid status transition from ${document.status} to ${updates.status}`
+          `Invalid status transition from ${document.status} to ${updates.status}`,
         );
       }
       document.changeStatus(updates.status);
@@ -382,7 +382,7 @@ export class DocumentApplicationService {
       userId: string;
       permission: "view" | "edit" | "delete" | "admin";
       expiresAt?: Date;
-    }
+    },
   ): Promise<void> {
     // Get the document
     const document = await this.getDocumentById(documentId);
@@ -395,7 +395,7 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         granterId,
-        "admin"
+        "admin",
       );
       if (!hasAccess) {
         throw new Error("You do not have permission to share this document.");
@@ -405,7 +405,7 @@ export class DocumentApplicationService {
     // Check if document can be shared with user
     if (!this.domainService.canShareWith(document, access.userId)) {
       throw new Error(
-        "This document cannot be shared with the specified user."
+        "This document cannot be shared with the specified user.",
       );
     }
 
@@ -435,7 +435,7 @@ export class DocumentApplicationService {
   async revokeAccess(
     documentId: string,
     revokerId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     // Get the document
     const document = await this.getDocumentById(documentId);
@@ -448,11 +448,11 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         revokerId,
-        "admin"
+        "admin",
       );
       if (!hasAccess) {
         throw new Error(
-          "You do not have permission to revoke access to this document."
+          "You do not have permission to revoke access to this document.",
         );
       }
     }
@@ -494,7 +494,7 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         userId,
-        "delete"
+        "delete",
       );
       if (!hasAccess) {
         throw new Error("You do not have permission to delete this document.");
@@ -518,7 +518,7 @@ export class DocumentApplicationService {
   async addDocumentToCase(
     documentId: string,
     caseId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     // Get the document
     const document = await this.getDocumentById(documentId);
@@ -531,11 +531,11 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         userId,
-        "edit"
+        "edit",
       );
       if (!hasAccess) {
         throw new Error(
-          "You do not have permission to link this document to a case."
+          "You do not have permission to link this document to a case.",
         );
       }
     }
@@ -553,7 +553,7 @@ export class DocumentApplicationService {
   async removeDocumentFromCase(
     documentId: string,
     caseId: string,
-    userId: string
+    userId: string,
   ): Promise<void> {
     // Get the document
     const document = await this.getDocumentById(documentId);
@@ -566,11 +566,11 @@ export class DocumentApplicationService {
       const hasAccess = await this.repository.userHasAccess(
         documentId,
         userId,
-        "edit"
+        "edit",
       );
       if (!hasAccess) {
         throw new Error(
-          "You do not have permission to remove this document from a case."
+          "You do not have permission to remove this document from a case.",
         );
       }
     }

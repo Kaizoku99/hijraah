@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from "@tanstack/react-query";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
 export async function prefetchQuery(
   queryKey: string[],
   queryFn: () => Promise<any>,
-  options = {}
+  options = {},
 ) {
   await queryClient.prefetchQuery({
     queryKey,
@@ -32,7 +32,7 @@ export async function prefetchQuery(
 // Optimistic update helper
 export function optimisticUpdate<T>(
   queryKey: string[],
-  updateFn: (oldData: T) => T
+  updateFn: (oldData: T) => T,
 ) {
   queryClient.setQueryData(queryKey, (oldData: T) => updateFn(oldData));
 }

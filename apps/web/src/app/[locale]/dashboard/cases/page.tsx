@@ -101,7 +101,7 @@ export default function CasesPage() {
           ? fetchedCases.filter(
               (c) =>
                 c.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                c.description?.toLowerCase().includes(searchTerm.toLowerCase())
+                c.description?.toLowerCase().includes(searchTerm.toLowerCase()),
             )
           : fetchedCases;
         setCases(filteredCases);
@@ -161,7 +161,7 @@ export default function CasesPage() {
             <Search
               className={cn(
                 "absolute h-4 w-4 text-muted-foreground top-1/2 -translate-y-1/2",
-                rtl ? "right-3" : "left-3"
+                rtl ? "right-3" : "left-3",
               )}
             />
             <Input

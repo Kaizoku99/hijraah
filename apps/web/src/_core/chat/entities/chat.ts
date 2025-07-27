@@ -50,7 +50,7 @@ export class ChatMessage {
 
   static fromDatabase(
     record: DBChatMessageRow,
-    attachments: ChatAttachment[] = []
+    attachments: ChatAttachment[] = [],
   ): ChatMessage {
     return new ChatMessage({
       id: record.id,
@@ -192,7 +192,7 @@ export class Chat {
 
     // Sort messages by creation date (newest first)
     const sortedMessages = [...this.messages].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     );
 
     return sortedMessages[0];
@@ -265,7 +265,7 @@ export class Chat {
   static fromDatabase(
     record: DBChatSessionRow,
     messages: DBChatMessageRow[] = [],
-    attachments: DBChatAttachmentRow[] = []
+    attachments: DBChatAttachmentRow[] = [],
   ): Chat {
     const metadata =
       typeof record.metadata === "object" &&
@@ -285,7 +285,7 @@ export class Chat {
       visibility: (record.visibility as ChatVisibility) || "private",
       systemPrompt: record.system_prompt || null,
       messages: messages.map((m) =>
-        ChatMessage.fromDatabase(m, chatAttachments)
+        ChatMessage.fromDatabase(m, chatAttachments),
       ),
       case_id: record.case_id || null,
       rawMetadata: metadata,

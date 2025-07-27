@@ -20,7 +20,6 @@ import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/lib/auth/hooks";
 import { cn } from "@/lib/utils";
 
-
 // Define a simple type for the roadmap list item
 interface RoadmapListItem {
   id: string;
@@ -33,7 +32,7 @@ interface RoadmapListItem {
 
 // Mock function to fetch user roadmaps (Replace with actual API call)
 const fetchUserRoadmaps = async (
-  userId: string
+  userId: string,
 ): Promise<RoadmapListItem[]> => {
   console.log(`Fetching roadmaps for user: ${userId}`);
   await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay

@@ -70,7 +70,7 @@ Deno.serve(async (req: Request) => {
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
           },
-        }
+        },
       );
     }
 
@@ -80,7 +80,7 @@ Deno.serve(async (req: Request) => {
         ? sources
             .map(
               (source, index) =>
-                `${index + 1}. "${source.title}" - ${source.url} (Relevance: ${source.relevance}/1.0)`
+                `${index + 1}. "${source.title}" - ${source.url} (Relevance: ${source.relevance}/1.0)`,
             )
             .join("\n")
         : "No sources provided";
@@ -187,7 +187,7 @@ FORMAT YOUR RESPONSE IN JSON:
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-      }
+      },
     );
   } catch (error: any) {
     console.error("Error in synthesize function:", error);
@@ -203,7 +203,7 @@ FORMAT YOUR RESPONSE IN JSON:
           "Content-Type": "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-      }
+      },
     );
   }
 });

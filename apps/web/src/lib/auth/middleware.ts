@@ -50,7 +50,7 @@ export const authMiddleware = (): MiddlewareHandler => {
       if (userError) {
         console.error(
           "Auth middleware: Error fetching user:",
-          userError.message
+          userError.message,
         );
       }
       // Proceed with null user/session if getUser failed or returned no user
@@ -82,7 +82,7 @@ export const requireAuth = (): MiddlewareHandler => {
           message: "Unauthorized: Authentication required",
           status: 401,
         },
-        401
+        401,
       );
     }
 
@@ -104,7 +104,7 @@ export const requireRole = (role: string): MiddlewareHandler => {
           message: "Unauthorized: Authentication required",
           status: 401,
         },
-        401
+        401,
       );
     }
 
@@ -114,7 +114,7 @@ export const requireRole = (role: string): MiddlewareHandler => {
           message: `Forbidden: Role '${role}' required`,
           status: 403,
         },
-        403
+        403,
       );
     }
 
@@ -136,7 +136,7 @@ export const requireAdmin = (): MiddlewareHandler => {
           message: "Unauthorized: Authentication required",
           status: 401,
         },
-        401
+        401,
       );
     }
 
@@ -146,7 +146,7 @@ export const requireAdmin = (): MiddlewareHandler => {
           message: "Forbidden: Admin privileges required",
           status: 403,
         },
-        403
+        403,
       );
     }
 

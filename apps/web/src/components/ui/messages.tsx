@@ -44,7 +44,7 @@ function PureMessages({
       {messages.map((message, index) => {
         const currentUserVote = votes?.find(
           (vote) =>
-            vote.messageId === message.id && vote.userId === currentUserId
+            vote.messageId === message.id && vote.userId === currentUserId,
         );
 
         return (

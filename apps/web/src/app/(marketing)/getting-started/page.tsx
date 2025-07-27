@@ -1,42 +1,52 @@
-'use client'
+"use client";
 
-import { ArrowRight, CheckCircle2, MessageSquare, FileText, Users } from 'lucide-react'
-import Link from 'next/link'
+import {
+  ArrowRight,
+  CheckCircle2,
+  MessageSquare,
+  FileText,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
 
-import { Button } from '@/ui/button'
-import { Card } from '@/ui/card'
+import { Button } from "@/ui/button";
+import { Card } from "@/ui/card";
 
 export default function GettingStartedPage() {
   const steps = [
     {
-      title: 'Start a Chat',
-      description: 'Begin by chatting with our AI assistant to understand your immigration options.',
+      title: "Start a Chat",
+      description:
+        "Begin by chatting with our AI assistant to understand your immigration options.",
       icon: MessageSquare,
-      href: '/chat',
-      buttonText: 'Start Chat',
+      href: "/chat",
+      buttonText: "Start Chat",
     },
     {
-      title: 'Check Eligibility',
-      description: 'Use our assessment tool to check your eligibility for different immigration programs.',
+      title: "Check Eligibility",
+      description:
+        "Use our assessment tool to check your eligibility for different immigration programs.",
       icon: CheckCircle2,
-      href: '/assessment',
-      buttonText: 'Check Now',
+      href: "/assessment",
+      buttonText: "Check Now",
     },
     {
-      title: 'Prepare Documents',
-      description: 'Get a personalized checklist of required documents for your immigration process.',
+      title: "Prepare Documents",
+      description:
+        "Get a personalized checklist of required documents for your immigration process.",
       icon: FileText,
-      href: '/documents',
-      buttonText: 'View Checklist',
+      href: "/documents",
+      buttonText: "View Checklist",
     },
     {
-      title: 'Join Community',
-      description: 'Connect with others who are also going through the immigration process.',
+      title: "Join Community",
+      description:
+        "Connect with others who are also going through the immigration process.",
       icon: Users,
-      href: '/community',
-      buttonText: 'Join Now',
+      href: "/community",
+      buttonText: "Join Now",
     },
-  ]
+  ];
 
   return (
     <div className="container max-w-4xl py-8">
@@ -69,4 +79,4 @@ export default function GettingStartedPage() {
       </div>
     </div>
   );
-} 
+}

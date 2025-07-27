@@ -44,7 +44,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
       status?: string[];
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<CaseRecord[]> {
     const client = await this.getClient();
 
@@ -53,7 +53,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
     if (options.includeAssigned) {
       // Include cases where user is client or is assigned to the case
       query = query.or(
-        `client_id.eq.${userId},assignments->contain->${userId}`
+        `client_id.eq.${userId},assignments->contain->${userId}`,
       );
     } else {
       // Only include cases where user is the client
@@ -68,7 +68,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
     // Add pagination
     query = query.range(
       options.offset || 0,
-      (options.offset || 0) + (options.limit || 10) - 1
+      (options.offset || 0) + (options.limit || 10) - 1,
     );
 
     // Order by updated_at descending (most recent first)
@@ -208,7 +208,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
   async assignUser(
     caseId: string,
     userId: string,
-    role: string
+    role: string,
   ): Promise<void> {
     const client = await this.getClient();
 
@@ -226,7 +226,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
 
     // Check if user is already assigned with this role
     const existingAssignmentIndex = currentAssignments.findIndex(
-      (a: any) => a.userId === userId && a.role === role
+      (a: any) => a.userId === userId && a.role === role,
     );
 
     if (existingAssignmentIndex >= 0) {
@@ -236,7 +236,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
 
     // Remove any existing assignment for this user (to prevent duplicates)
     const filteredAssignments = currentAssignments.filter(
-      (a: any) => a.userId !== userId
+      (a: any) => a.userId !== userId,
     );
 
     // Add the new assignment
@@ -279,7 +279,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
 
     // Remove assignment for this user
     const newAssignments = currentAssignments.filter(
-      (a: any) => a.userId !== userId
+      (a: any) => a.userId !== userId,
     );
 
     // If no change, return early
@@ -302,7 +302,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
   async userHasAccess(
     caseId: string,
     userId: string,
-    roles?: string[]
+    roles?: string[],
   ): Promise<boolean> {
     const client = await this.getClient();
 
@@ -351,7 +351,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
     options: {
       limit?: number;
       offset?: number;
-    } = {}
+    } = {},
   ): Promise<CaseRecord[]> {
     const client = await this.getClient();
 
@@ -367,7 +367,7 @@ export class CaseRepository extends BaseRepository<CaseRecord, string> {
     // Add pagination
     query = query.range(
       options.offset || 0,
-      (options.offset || 0) + (options.limit || 10) - 1
+      (options.offset || 0) + (options.limit || 10) - 1,
     );
 
     // Order by updated_at descending

@@ -94,7 +94,7 @@ export function PureMessageActions({
                         const existingVoteIndex = currentVotesData.findIndex(
                           (v) =>
                             v.messageId === message.id &&
-                            v.userId === currentUserId
+                            v.userId === currentUserId,
                         );
                         if (existingVoteIndex !== -1) {
                           const updatedVotes = [...currentVotesData];
@@ -107,7 +107,7 @@ export function PureMessageActions({
                         }
                         return [...currentVotesData, newVote];
                       },
-                      { revalidate: false }
+                      { revalidate: false },
                     );
                     return "Upvoted Response!";
                   },
@@ -158,7 +158,7 @@ export function PureMessageActions({
                         const existingVoteIndex = currentVotesData.findIndex(
                           (v) =>
                             v.messageId === message.id &&
-                            v.userId === currentUserId
+                            v.userId === currentUserId,
                         );
 
                         if (existingVoteIndex !== -1) {
@@ -172,7 +172,7 @@ export function PureMessageActions({
                         }
                         return [...currentVotesData, newVote];
                       },
-                      { revalidate: false }
+                      { revalidate: false },
                     );
                     return "Downvoted Response!";
                   },
@@ -198,5 +198,5 @@ export const MessageActions = memo(
     if (prevProps.isLoading !== nextProps.isLoading) return false;
 
     return true;
-  }
+  },
 );

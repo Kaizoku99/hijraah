@@ -1,13 +1,9 @@
-'use client'
+"use client";
 
-import React from 'react'
+import React from "react";
 
 export const DocumentList = () => {
-  return (
-    <div>
-      {/* Add DocumentList implementation */}
-    </div>
-  )
-}
+  return <div>{/* Add DocumentList implementation */}</div>;
+};
 
-export default DocumentList
+export default DocumentList;

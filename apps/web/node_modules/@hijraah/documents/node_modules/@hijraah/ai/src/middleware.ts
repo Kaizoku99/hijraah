@@ -225,7 +225,7 @@ export function monitoringMiddleware(options?: {
             latency: endTime - startTime,
             model: params.model,
           },
-          "generate"
+          "generate",
         );
 
         return result;
@@ -238,7 +238,7 @@ export function monitoringMiddleware(options?: {
             latency: endTime - startTime,
             model: params.model,
           },
-          "generate"
+          "generate",
         );
 
         throw error;
@@ -270,7 +270,7 @@ export function monitoringMiddleware(options?: {
                 latency: endTime - startTime,
                 model: params.model,
               },
-              "stream"
+              "stream",
             );
           },
         });
@@ -288,7 +288,7 @@ export function monitoringMiddleware(options?: {
             latency: endTime - startTime,
             model: params.model,
           },
-          "stream"
+          "stream",
         );
 
         throw error;
@@ -315,7 +315,7 @@ export function errorHandlingMiddleware(options?: {
   const isRetryable = (error: any): boolean => {
     const errorMessage = error.message?.toLowerCase() || "";
     return retryableErrors.some((retryableError) =>
-      errorMessage.includes(retryableError)
+      errorMessage.includes(retryableError),
     );
   };
 
@@ -338,7 +338,7 @@ export function errorHandlingMiddleware(options?: {
 
           console.warn(
             `Attempt ${attempt + 1} failed, retrying in ${retryDelay}ms:`,
-            error.message
+            error.message,
           );
           await delay(retryDelay * Math.pow(2, attempt)); // Exponential backoff
         }
@@ -362,7 +362,7 @@ export function errorHandlingMiddleware(options?: {
 
           console.warn(
             `Stream attempt ${attempt + 1} failed, retrying in ${retryDelay}ms:`,
-            error.message
+            error.message,
           );
           await delay(retryDelay * Math.pow(2, attempt));
         }
@@ -394,7 +394,7 @@ export function createStandardMiddleware(options?: {
       rateLimitMiddleware({
         redis: options.redis,
         requestsPerMinute: options.rateLimitRequests || 100,
-      })
+      }),
     );
   }
 
@@ -403,7 +403,7 @@ export function createStandardMiddleware(options?: {
       cacheMiddleware({
         redis: options.redis,
         ttl: options.cacheTTL,
-      })
+      }),
     );
   }
 
@@ -411,7 +411,7 @@ export function createStandardMiddleware(options?: {
     middlewares.push(
       monitoringMiddleware({
         redis: options.redis,
-      })
+      }),
     );
   }
 

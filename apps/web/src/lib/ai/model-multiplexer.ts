@@ -127,7 +127,7 @@ export class ModelMultiplexer {
       }
 
       const model = [...this.primaryModels, ...this.fallbackModels].find(
-        (m) => m.name === modelName
+        (m) => m.name === modelName,
       );
 
       if (!model) return false;
@@ -146,7 +146,7 @@ export class ModelMultiplexer {
 
   private async tryModelCompletion(
     model: ModelConfig,
-    request: CompletionRequest
+    request: CompletionRequest,
   ): Promise<any> {
     try {
       // Check rate limit

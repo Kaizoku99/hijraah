@@ -1,4 +1,4 @@
-export type Severity = 'low' | 'medium' | 'high' | 'critical';
+export type Severity = "low" | "medium" | "high" | "critical";
 
 export interface MonitoringConfig {
   sentryDsn?: string;
@@ -33,4 +33,4 @@ export interface Transaction {
   startTime: number;
   endTime?: number;
   metadata?: Record<string, unknown>;
-} 
+}

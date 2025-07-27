@@ -126,11 +126,11 @@ describe("HybridRetriever", () => {
     expect(result).toHaveProperty("kgContext");
     expect(result.chunks.length).toBe(1);
     expect(result.chunks[0].content).toBe(
-      "The first step for a Canadian work visa is to..."
+      "The first step for a Canadian work visa is to...",
     );
     expect(result.kgContext.relationships.length).toBe(1);
     expect(result.kgContext.relationships[0].source_entity_name).toBe(
-      "work visa"
+      "work visa",
     );
   });
 
@@ -161,7 +161,7 @@ describe("HybridRetriever", () => {
 
     // Act & Assert
     await expect(retriever.search(mockQuery)).rejects.toThrow(
-      "Search error: Database connection failed"
+      "Search error: Database connection failed",
     );
   });
 });

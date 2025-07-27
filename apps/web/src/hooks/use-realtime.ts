@@ -13,7 +13,6 @@ import type { ChatMessage } from "@/types/chat";
 
 import { useMessageStore, type MessageStore } from "./useMessageStore"; // REVERTED: REMOVED .ts EXTENSION -> CORRECTED CASING
 
-
 // ADDED: Define a type for the presence state payload
 interface CustomPresenceState {
   user_id: string;
@@ -26,10 +25,10 @@ interface UseRealtimeOptions {
   sessionId?: string;
   onPresenceSync?: () => void;
   onPresenceJoin?: (
-    payload: RealtimePresenceJoinPayload<CustomPresenceState>
+    payload: RealtimePresenceJoinPayload<CustomPresenceState>,
   ) => void;
   onPresenceLeave?: (
-    payload: RealtimePresenceLeavePayload<CustomPresenceState>
+    payload: RealtimePresenceLeavePayload<CustomPresenceState>,
   ) => void;
   onMessage?: (payload: any) => void;
 }
@@ -45,7 +44,7 @@ export function useRealtime({
   const { user } = useAuth();
   const supabase = useSupabaseBrowser(); // ADDED: Get Supabase client via hook
   const [mainChannel, setMainChannel] = React.useState<RealtimeChannel | null>(
-    null
+    null,
   ); // RENAMED for clarity
   const [chatMessageChannelState, setChatMessageChannelState] =
     React.useState<RealtimeChannel | null>(null); // ADDED for chat messages
@@ -59,7 +58,7 @@ export function useRealtime({
   // Message store integration
   const addMessage = useMessageStore((state: MessageStore) => state.addMessage);
   const updateMessage = useMessageStore(
-    (state: MessageStore) => state.updateMessage
+    (state: MessageStore) => state.updateMessage,
   );
 
   // Subscribe to presence channel
@@ -80,23 +79,23 @@ export function useRealtime({
       .on("presence", { event: "sync" }, () => {
         onPresenceSync?.();
         setPresenceState(
-          presenceChannel.presenceState() as RealtimePresenceState<CustomPresenceState>
+          presenceChannel.presenceState() as RealtimePresenceState<CustomPresenceState>,
         );
       })
       .on("presence", { event: "join" }, (payload) => {
         onPresenceJoin?.(
-          payload as RealtimePresenceJoinPayload<CustomPresenceState>
+          payload as RealtimePresenceJoinPayload<CustomPresenceState>,
         );
         setPresenceState(
-          presenceChannel.presenceState() as RealtimePresenceState<CustomPresenceState>
+          presenceChannel.presenceState() as RealtimePresenceState<CustomPresenceState>,
         );
       })
       .on("presence", { event: "leave" }, (payload) => {
         onPresenceLeave?.(
-          payload as RealtimePresenceLeavePayload<CustomPresenceState>
+          payload as RealtimePresenceLeavePayload<CustomPresenceState>,
         );
         setPresenceState(
-          presenceChannel.presenceState() as RealtimePresenceState<CustomPresenceState>
+          presenceChannel.presenceState() as RealtimePresenceState<CustomPresenceState>,
         );
       })
       .subscribe(async (status) => {
@@ -189,7 +188,7 @@ export function useRealtime({
             } else {
               addMessage(message);
             }
-          }
+          },
         )
         .subscribe((status, err) => {
           if (
@@ -199,7 +198,7 @@ export function useRealtime({
           ) {
             console.error(
               `Chat message channel (${chatChannelName}) error/closed: ${status}`,
-              err
+              err,
             );
             setError(err || new Error(`Chat message channel issue: ${status}`));
           }
@@ -243,7 +242,7 @@ export function useRealtime({
         setError(err as Error);
       }
     },
-    [mainChannel, user]
+    [mainChannel, user],
   );
 
   const broadcast = React.useCallback(
@@ -262,7 +261,7 @@ export function useRealtime({
         setError(err as Error);
       }
     },
-    [mainChannel, user]
+    [mainChannel, user],
   );
 
   return {

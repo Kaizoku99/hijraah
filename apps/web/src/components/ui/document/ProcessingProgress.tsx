@@ -39,7 +39,7 @@ export function ProcessingProgress({
 
       if (!response.ok) {
         throw new Error(
-          `Error fetching processing status: ${response.statusText}`
+          `Error fetching processing status: ${response.statusText}`,
         );
       }
 
@@ -109,7 +109,7 @@ export function ProcessingProgress({
       return `${Math.floor(seconds / 60)}m ${seconds % 60}s ago`;
     } else {
       return `${Math.floor(seconds / 3600)}h ${Math.floor(
-        (seconds % 3600) / 60
+        (seconds % 3600) / 60,
       )}m ago`;
     }
   };

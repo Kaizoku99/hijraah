@@ -170,7 +170,7 @@ export interface AuthOptions {
 
 export type AuthChangeCallback = (
   session: Session | null,
-  user: User | null // Should this be ExtendedUser?
+  user: User | null, // Should this be ExtendedUser?
 ) => void | Promise<void>;
 
 export interface InitOptions {

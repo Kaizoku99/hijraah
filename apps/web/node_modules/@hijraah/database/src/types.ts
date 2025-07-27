@@ -259,7 +259,7 @@ export class DatabaseError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
     this.name = "DatabaseError";
@@ -269,7 +269,7 @@ export class DatabaseError extends Error {
 export class ValidationError extends Error {
   constructor(
     message: string,
-    public errors: z.ZodError
+    public errors: z.ZodError,
   ) {
     super(message);
     this.name = "ValidationError";

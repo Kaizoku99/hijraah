@@ -99,7 +99,7 @@ describe("RAG Pipeline Integration Test", () => {
 
     // Act & Assert
     await expect(
-      processDocumentRun(jobPayload, jobContext as any)
+      processDocumentRun(jobPayload, jobContext as any),
     ).rejects.toThrow(errorMessage);
 
     // Ensure subsequent steps were not called

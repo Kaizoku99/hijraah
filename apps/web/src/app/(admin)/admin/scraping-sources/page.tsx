@@ -131,7 +131,7 @@ export default function ScrapingSourcesPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [currentSource, setCurrentSource] = useState<ScrapingSource | null>(
-    null
+    null,
   );
   const [validationLoading, setValidationLoading] = useState(false);
 
@@ -221,7 +221,7 @@ export default function ScrapingSourcesPage() {
 
       if (!response.ok) {
         throw new Error(
-          `Failed to ${currentSource ? "update" : "create"} source`
+          `Failed to ${currentSource ? "update" : "create"} source`,
         );
       }
 
@@ -313,7 +313,7 @@ export default function ScrapingSourcesPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(values),
-        }
+        },
       );
 
       if (!response.ok) {

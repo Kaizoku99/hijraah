@@ -9,7 +9,7 @@ import { researchService } from "@/lib/services/research-service"; // Assuming t
 // Initialize Supabase client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ""
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
 );
 
 // Create a Hono app
@@ -71,7 +71,7 @@ const researchStatusResponseSchema = sessionSchema.extend({
 async function createResearchSession(
   query: string,
   maxDepth: number,
-  userId?: string
+  userId?: string,
 ) {
   const { data, error } = await supabase
     .from("research_sessions")
@@ -95,7 +95,7 @@ async function createResearchSession(
   }
 
   console.log(
-    `[Research API] Created session ${data.id} for query: "${query}"`
+    `[Research API] Created session ${data.id} for query: "${query}"`,
   );
   return data;
 }
@@ -113,7 +113,7 @@ async function getResearchSessionDetails(sessionId: string) {
   if (sessionError || !session) {
     console.error(
       `[Research API] Error fetching session ${sessionId}:`,
-      sessionError
+      sessionError,
     );
     // Throw specific error if not found
     if (sessionError?.code === "PGRST116") {
@@ -121,7 +121,7 @@ async function getResearchSessionDetails(sessionId: string) {
       throw new Error(`Research session not found: ${sessionId}`);
     }
     throw new Error(
-      `Failed to fetch research session ${sessionId}: ${sessionError?.message || "Unknown error"}`
+      `Failed to fetch research session ${sessionId}: ${sessionError?.message || "Unknown error"}`,
     );
   }
 
@@ -134,7 +134,7 @@ async function getResearchSessionDetails(sessionId: string) {
   if (sourcesError) {
     console.warn(
       `[Research API] Error fetching sources for session ${sessionId}:`,
-      sourcesError
+      sourcesError,
     );
     // Continue but log warning
   }
@@ -149,13 +149,13 @@ async function getResearchSessionDetails(sessionId: string) {
   if (findingsError) {
     console.warn(
       `[Research API] Error fetching findings for session ${sessionId}:`,
-      findingsError
+      findingsError,
     );
     // Continue but log warning
   }
 
   console.log(
-    `[Research API] Successfully fetched details for session ${sessionId}`
+    `[Research API] Successfully fetched details for session ${sessionId}`,
   );
   return {
     ...session,
@@ -176,13 +176,13 @@ app.post("/", async (c) => {
     if (!validation.success) {
       return c.json(
         { error: "Invalid input", details: validation.error.errors },
-        400
+        400,
       );
     }
     const { query, userId, maxDepth = 3 } = validation.data;
 
     console.log(
-      `[Research API] Received request to start research on: "${query}"`
+      `[Research API] Received request to start research on: "${query}"`,
     );
 
     // Create the session record
@@ -202,19 +202,19 @@ app.post("/", async (c) => {
       try {
         await researchService.performResearch(query, maxDepth, session.id);
         console.log(
-          `[Research API] Background research process completed for session ${session.id}`
+          `[Research API] Background research process completed for session ${session.id}`,
         );
       } catch (err) {
         console.error(
           `[Research API] Background research process failed for session ${session.id}:`,
-          err
+          err,
         );
         // Optionally update session status to 'failed' here if the service doesn't handle it
       }
     })(); // Immediately invoke the async function
 
     console.log(
-      `[Research API] Background process triggered for session ${session.id}. Returning 202.`
+      `[Research API] Background process triggered for session ${session.id}. Returning 202.`,
     );
 
     // Return 202 Accepted with the session ID
@@ -224,14 +224,14 @@ app.post("/", async (c) => {
         message:
           "Research session started. Check status using GET /api/research/:sessionId",
       },
-      202
+      202,
     );
   } catch (error) {
     console.error("[Research API] Error starting research:", error);
     if (error instanceof z.ZodError) {
       return c.json(
         { error: "Invalid request body format", details: error.errors },
-        400
+        400,
       );
     }
     return c.json(
@@ -241,7 +241,7 @@ app.post("/", async (c) => {
             ? error.message
             : "Internal server error starting research",
       },
-      500
+      500,
     );
   }
 });
@@ -253,14 +253,14 @@ app.get("/:sessionId", async (c) => {
     // Basic validation for sessionId format (e.g., UUID)
     if (
       !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
-        sessionId
+        sessionId,
       )
     ) {
       return c.json({ error: "Invalid Session ID format" }, { status: 400 });
     }
 
     console.log(
-      `[Research API] Received request to get status for session: ${sessionId}`
+      `[Research API] Received request to get status for session: ${sessionId}`,
     );
 
     // Get the research session data including sources and findings
@@ -273,7 +273,7 @@ app.get("/:sessionId", async (c) => {
   } catch (error) {
     console.error(
       `[Research API] Error fetching research session ${c.req.param("sessionId")}:`,
-      error
+      error,
     );
     // Handle specific error for not found
     if (
@@ -289,7 +289,7 @@ app.get("/:sessionId", async (c) => {
             ? error.message
             : "Internal server error fetching research status",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });

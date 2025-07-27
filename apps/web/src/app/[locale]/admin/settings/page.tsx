@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams , redirect } from "next/navigation";
+import { useParams, redirect } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -24,9 +24,8 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
-import { locales, defaultLocale as appDefaultLocale , isRTL } from "@/i18n/i18n";
+import { locales, defaultLocale as appDefaultLocale, isRTL } from "@/i18n/i18n";
 import { cn } from "@/lib/utils";
-
 
 // Mock API (Replace with actual API calls)
 const fetchSettings = async () => {

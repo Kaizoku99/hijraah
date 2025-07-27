@@ -142,7 +142,7 @@ export const chatMessageVotes = pgTable(
     return {
       pk: primaryKey({ columns: [table.messageId, table.userId] }),
     };
-  }
+  },
 );
 
 export type ChatMessageVote = InferSelectModel<typeof chatMessageVotes>;
@@ -271,7 +271,7 @@ export const legacyVotes = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.chatId, table.messageId] }),
-  })
+  }),
 );
 
 export const legacyVotesV2 = pgTable(
@@ -287,7 +287,7 @@ export const legacyVotesV2 = pgTable(
   },
   (table) => ({
     pk: primaryKey({ columns: [table.chatId, table.messageId] }),
-  })
+  }),
 );
 
 // =========================================
@@ -311,7 +311,7 @@ export const chatMessageSchema = z.object({
         url: z.string().url(),
         name: z.string().min(1).max(2000),
         contentType: z.enum(["image/png", "image/jpg", "image/jpeg"]),
-      })
+      }),
     )
     .optional(),
 });

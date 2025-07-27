@@ -110,12 +110,12 @@ export function ModelSelector({
   const [chatModelOpen, setChatModelOpen] = React.useState(false);
   const [reasoningModelOpen, setReasoningModelOpen] = React.useState(false);
   const [selectedChatModel, setSelectedChatModel] = React.useState<ModelOption>(
-    chatModels.find((model) => model.id === defaultChatModel) || chatModels[0]
+    chatModels.find((model) => model.id === defaultChatModel) || chatModels[0],
   );
   const [selectedReasoningModel, setSelectedReasoningModel] =
     React.useState<ModelOption>(
       reasoningModels.find((model) => model.id === defaultReasoningModel) ||
-        reasoningModels[0]
+        reasoningModels[0],
     );
 
   // Handle chat model selection
@@ -208,7 +208,7 @@ export function ModelSelector({
                               "ml-auto h-4 w-4",
                               selectedChatModel.id === model.id
                                 ? "opacity-100"
-                                : "opacity-0"
+                                : "opacity-0",
                             )}
                           />
                         </div>
@@ -277,7 +277,7 @@ export function ModelSelector({
                               "ml-auto h-4 w-4",
                               selectedReasoningModel.id === model.id
                                 ? "opacity-100"
-                                : "opacity-0"
+                                : "opacity-0",
                             )}
                           />
                         </div>

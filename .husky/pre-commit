@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run linting to catch code quality issues
+pnpm run lint
+
+# Check code formatting
+pnpm run format:check
+
+# Run type checking to catch TypeScript errors
+pnpm run type-check
