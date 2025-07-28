@@ -11,7 +11,14 @@
 
 # next.js
 /.next/
+**/.next/
 /out/
+
+# Next.js cache files (specific patterns)
+.next/cache/
+**/.next/cache/
+.next/cache/webpack/
+**/.next/cache/webpack/
 
 # production
 /build
