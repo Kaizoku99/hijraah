@@ -20,6 +20,12 @@
 .next/cache/webpack/
 **/.next/cache/webpack/
 
+# Turbo cache files
+.turbo/cache/
+**/.turbo/cache/
+.turbo/daemon/
+**/.turbo/daemon/
+
 # production
 /build
 
