@@ -8,6 +8,7 @@
 import { governmentScrapingTasks } from "./government-scraping";
 import { policyChangeDetectionTasks } from "./policy-change-detection";
 import { multiCountryOrchestrationTasks } from "./multi-country-orchestration";
+import { knowledgeGraphTasks } from "./knowledge-graph";
 
 // Export implemented tasks
 export const triggerTasks = {
@@ -20,14 +21,8 @@ export const triggerTasks = {
   // Multi-country orchestration tasks (Task 2.3) - IMPLEMENTED
   ...multiCountryOrchestrationTasks,
 
-  // Multi-country orchestration tasks (Task 2.3)
-  orchestrateMultiCountryScraping: null,
-
-  // Knowledge graph tasks (Task 3.1, 3.2, 3.3)
-  extractEntities: null,
-  mapRelationships: null,
-  scoreConfidence: null,
-  resolveEntities: null,
+  // Knowledge graph tasks (Task 3.1) - IMPLEMENTED
+  ...knowledgeGraphTasks,
   analyzeTemporalData: null,
   trackPolicyVersions: null,
   predictTrends: null,

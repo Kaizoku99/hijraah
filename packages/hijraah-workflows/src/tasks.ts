@@ -1,10 +1,10 @@
-import { task, logger, schedules } from "@trigger.dev/sdk/v3";
-import { z } from "zod";
 import { createAIMultiplexer } from "@hijraah/ai";
 import { createDocumentProcessor } from "@hijraah/documents";
-import OpenAI from "openai";
-import FirecrawlApp from "firecrawl-js";
+import { FirecrawlApp } from "@mendable/firecrawl-js";
 import { createClient } from "@supabase/supabase-js";
+import { task, logger, schedules } from "@trigger.dev/sdk/v3";
+import { OpenAI } from "openai";
+import { z } from "zod";
 
 // Task payload schemas
 const DocumentProcessingPayload = z.object({
@@ -84,7 +84,7 @@ export const documentProcessingTask = task({
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
     try {
@@ -233,7 +233,7 @@ export const webScrapingTask = task({
 
       if (!scrapeResult.success) {
         throw new Error(
-          `Scraping failed: ${scrapeResult.error || "Unknown error"}`,
+          `Scraping failed: ${scrapeResult.error || "Unknown error"}`
         );
       }
 
@@ -312,7 +312,7 @@ export const dailyReportsTask = schedules.task({
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
     try {
