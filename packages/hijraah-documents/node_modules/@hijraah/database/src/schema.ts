@@ -575,6 +575,152 @@ export const documentChunksEnhanced = pgTable(
   }),
 );
 
+// ===== COMMUNITY DATA =====
+export const communityExperiences = pgTable(
+  "community_experiences",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    pathway: varchar("pathway", { length: 100 }).notNull(),
+    targetCountry: varchar("target_country", { length: 3 }).notNull(), // ISO country code
+    milestone: varchar("milestone", { length: 100 }).notNull(),
+    actualTimeline: integer("actual_timeline").notNull(), // days
+    actualCost: numeric("actual_cost", { precision: 10, scale: 2 }).notNull(),
+    difficulty: integer("difficulty").notNull(), // 1-10 scale
+    success: boolean("success").notNull(),
+    feedback: text("feedback").notNull(),
+    verificationStatus: varchar("verification_status", { length: 20 })
+      .default("pending")
+      .notNull(), // pending, verified, disputed
+    qualityScore: numeric("quality_score", { precision: 3, scale: 2 }), // 0-1
+    metadata: jsonb("metadata").default({}),
+    submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+    verifiedAt: timestamp("verified_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIndex: index("community_experiences_user_id_idx").on(table.userId),
+    pathwayIndex: index("community_experiences_pathway_idx").on(table.pathway),
+    countryIndex: index("community_experiences_country_idx").on(table.targetCountry),
+    milestoneIndex: index("community_experiences_milestone_idx").on(table.milestone),
+    verificationStatusIndex: index("community_experiences_verification_status_idx").on(table.verificationStatus),
+    successIndex: index("community_experiences_success_idx").on(table.success),
+  }),
+);
+
+export const communityValidations = pgTable(
+  "community_validations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    experienceId: uuid("experience_id")
+      .notNull()
+      .references(() => communityExperiences.id, { onDelete: "cascade" }),
+    validatorUserId: uuid("validator_user_id").notNull(),
+    validationType: varchar("validation_type", { length: 20 }).notNull(), // peer_review, expert_review, automated
+    score: numeric("score", { precision: 3, scale: 2 }).notNull(), // 0-1
+    feedback: text("feedback"),
+    confidence: numeric("confidence", { precision: 3, scale: 2 }).notNull(), // 0-1
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    experienceIdIndex: index("community_validations_experience_id_idx").on(table.experienceId),
+    validatorIndex: index("community_validations_validator_idx").on(table.validatorUserId),
+    typeIndex: index("community_validations_type_idx").on(table.validationType),
+  }),
+);
+
+export const userReputations = pgTable(
+  "user_reputations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull().unique(),
+    overallScore: numeric("overall_score", { precision: 5, scale: 2 }).default("0").notNull(), // 0-100
+    level: varchar("level", { length: 20 }).default("novice").notNull(), // novice, contributor, expert, authority
+    accuracyScore: numeric("accuracy_score", { precision: 3, scale: 2 }).default("0").notNull(), // 0-1
+    completenessScore: numeric("completeness_score", { precision: 3, scale: 2 }).default("0").notNull(), // 0-1
+    consistencyScore: numeric("consistency_score", { precision: 3, scale: 2 }).default("0").notNull(), // 0-1
+    helpfulnessScore: numeric("helpfulness_score", { precision: 3, scale: 2 }).default("0").notNull(), // 0-1
+    contributionsCount: integer("contributions_count").default(0).notNull(),
+    validationsCount: integer("validations_count").default(0).notNull(),
+    lastCalculatedAt: timestamp("last_calculated_at").defaultNow().notNull(),
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIndex: index("user_reputations_user_id_idx").on(table.userId),
+    levelIndex: index("user_reputations_level_idx").on(table.level),
+    overallScoreIndex: index("user_reputations_overall_score_idx").on(table.overallScore),
+  }),
+);
+
+export const gamificationRewards = pgTable(
+  "gamification_rewards",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    rewardType: varchar("reward_type", { length: 50 }).notNull(), // badge, points, level_up, achievement
+    rewardName: varchar("reward_name", { length: 100 }).notNull(),
+    description: text("description"),
+    points: integer("points").default(0),
+    metadata: jsonb("metadata").default({}),
+    earnedAt: timestamp("earned_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdIndex: index("gamification_rewards_user_id_idx").on(table.userId),
+    typeIndex: index("gamification_rewards_type_idx").on(table.rewardType),
+    earnedAtIndex: index("gamification_rewards_earned_at_idx").on(table.earnedAt),
+  }),
+);
+
+export const peerReviewOrchestrations = pgTable(
+  "peer_review_orchestrations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    experienceId: uuid("experience_id")
+      .notNull()
+      .references(() => communityExperiences.id, { onDelete: "cascade" }),
+    reason: varchar("reason", { length: 100 }).notNull(),
+    priority: varchar("priority", { length: 10 }).notNull(), // low, medium, high
+    reviewersRequested: jsonb("reviewers_requested").notNull().default([]), // Array of user IDs
+    status: varchar("status", { length: 20 }).default("pending").notNull(), // pending, in_progress, completed, expired
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    experienceIdIndex: index("peer_review_orchestrations_experience_id_idx").on(table.experienceId),
+    statusIndex: index("peer_review_orchestrations_status_idx").on(table.status),
+    priorityIndex: index("peer_review_orchestrations_priority_idx").on(table.priority),
+  }),
+);
+
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").notNull(),
+    type: varchar("type", { length: 50 }).notNull(), // milestone_reminder, validation_request, reward_earned, peer_review_request
+    title: varchar("title", { length: 200 }).notNull(),
+    message: text("message").notNull(),
+    actionUrl: text("action_url"),
+    priority: varchar("priority", { length: 10 }).default("medium").notNull(), // low, medium, high
+    isRead: boolean("is_read").default(false).notNull(),
+    metadata: jsonb("metadata").default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    readAt: timestamp("read_at"),
+  },
+  (table) => ({
+    userIdIndex: index("notifications_user_id_idx").on(table.userId),
+    typeIndex: index("notifications_type_idx").on(table.type),
+    isReadIndex: index("notifications_is_read_idx").on(table.isRead),
+    priorityIndex: index("notifications_priority_idx").on(table.priority),
+    createdAtIndex: index("notifications_created_at_idx").on(table.createdAt),
+  }),
+);
+
 // ===== KNOWLEDGE GRAPH =====
 export const entities = pgTable(
   "entities",
@@ -785,6 +931,51 @@ export const documentChunksEnhancedRelations = relations(
   }),
 );
 
+export const communityExperiencesRelations = relations(
+  communityExperiences,
+  ({ many }) => ({
+    validations: many(communityValidations),
+  }),
+);
+
+export const communityValidationsRelations = relations(
+  communityValidations,
+  ({ one }) => ({
+    experience: one(communityExperiences, {
+      fields: [communityValidations.experienceId],
+      references: [communityExperiences.id],
+    }),
+  }),
+);
+
+export const userReputationsRelations = relations(userReputations, ({ many }) => ({
+  rewards: many(gamificationRewards),
+}));
+
+export const gamificationRewardsRelations = relations(
+  gamificationRewards,
+  ({ one }) => ({
+    userReputation: one(userReputations, {
+      fields: [gamificationRewards.userId],
+      references: [userReputations.userId],
+    }),
+  }),
+);
+
+export const peerReviewOrchestrationsRelations = relations(
+  peerReviewOrchestrations,
+  ({ one }) => ({
+    experience: one(communityExperiences, {
+      fields: [peerReviewOrchestrations.experienceId],
+      references: [communityExperiences.id],
+    }),
+  }),
+);
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  // No direct relations needed for notifications
+}));
+
 export const entitiesRelations = relations(entities, ({ many }) => ({
   sourceRelationships: many(relationships, { relationName: "source" }),
   targetRelationships: many(relationships, { relationName: "target" }),
@@ -822,6 +1013,14 @@ export type Relationship = typeof relationships.$inferSelect;
 export type UpstashCacheMeta = typeof upstashCacheMeta.$inferSelect;
 export type DataRetentionPolicy = typeof dataRetentionPolicies.$inferSelect;
 
+// Community data types
+export type CommunityExperience = typeof communityExperiences.$inferSelect;
+export type CommunityValidation = typeof communityValidations.$inferSelect;
+export type UserReputation = typeof userReputations.$inferSelect;
+export type GamificationReward = typeof gamificationRewards.$inferSelect;
+export type PeerReviewOrchestration = typeof peerReviewOrchestrations.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
+
 // Zod schemas for validation (Context7 best practice)
 export const profileSchema = createSelectSchema(profiles);
 export const webIndexSchema = createSelectSchema(webIndexes);
@@ -840,6 +1039,21 @@ export const insertDocumentSchema = createInsertSchema(documents);
 export const insertDocumentChunkSchema = createInsertSchema(
   documentChunksEnhanced,
 );
+
+// Community data schemas
+export const communityExperienceSchema = createSelectSchema(communityExperiences);
+export const communityValidationSchema = createSelectSchema(communityValidations);
+export const userReputationSchema = createSelectSchema(userReputations);
+export const gamificationRewardSchema = createSelectSchema(gamificationRewards);
+export const peerReviewOrchestrationSchema = createSelectSchema(peerReviewOrchestrations);
+export const notificationSchema = createSelectSchema(notifications);
+
+export const insertCommunityExperienceSchema = createInsertSchema(communityExperiences);
+export const insertCommunityValidationSchema = createInsertSchema(communityValidations);
+export const insertUserReputationSchema = createInsertSchema(userReputations);
+export const insertGamificationRewardSchema = createInsertSchema(gamificationRewards);
+export const insertPeerReviewOrchestrationSchema = createInsertSchema(peerReviewOrchestrations);
+export const insertNotificationSchema = createInsertSchema(notifications);
 
 // AI-Chatbot Zod schemas
 export const aiChatbotUserSchema = createSelectSchema(aiChatbotUser);

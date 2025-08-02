@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, main, develop, release/*]
   pull_request:
-    branches: [master]
+    branches: [master, main, develop]
 
 jobs:
   build:
@@ -19,10 +19,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Check Type Definition Locations
         if: github.event_name == 'pull_request' # Only run on PRs
@@ -88,18 +93,35 @@ jobs:
             echo "All checked files adhere to type location guidelines."
           fi
 
+      - name: Security Audit
+        run: pnpm run security:audit-ci
+        continue-on-error: false
+
       - name: Type check
-        run: npm run type-check || npm run tsc
+        run: pnpm run type-check
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
+
+      - name: Format check
+        run: pnpm run format:check
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
         env:
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Test
-        run: npm test || echo "No tests specified"
+        run: pnpm test --passWithNoTests
+
+      - name: Upload security audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: |
+            security-audit-report.json
+            security-audit-summary.md
+          retention-days: 30

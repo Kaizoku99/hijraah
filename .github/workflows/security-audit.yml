@@ -1,0 +1,138 @@
+name: Security Audit
+
+on:
+  schedule:
+    # Run security audit daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+  push:
+    branches: [main, master]
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'packages/*/package.json'
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run comprehensive security audit
+        run: pnpm run security:audit
+        continue-on-error: true
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-reports-${{ github.run_number }}
+          path: |
+            security-audit-report.json
+            security-audit-summary.md
+          retention-days: 90
+
+      - name: Create Issue on Critical Vulnerabilities
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const reportPath = 'security-audit-report.json';
+              if (fs.existsSync(reportPath)) {
+                const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                const { criticalVulnerabilities, highVulnerabilities } = report.summary;
+                
+                if (criticalVulnerabilities > 0 || highVulnerabilities > 0) {
+                  const title = `🚨 Security Alert: ${criticalVulnerabilities} Critical, ${highVulnerabilities} High Vulnerabilities Found`;
+                  const body = `
+            ## Security Audit Alert
+            
+            **Date:** ${new Date().toISOString()}
+            **Workflow:** ${context.workflow}
+            **Run:** ${context.runNumber}
+            
+            ### Vulnerability Summary
+            - **Critical:** ${criticalVulnerabilities} 🔴
+            - **High:** ${highVulnerabilities} 🟠
+            - **Moderate:** ${report.summary.moderateVulnerabilities} 🟡
+            - **Low:** ${report.summary.lowVulnerabilities} 🟢
+            
+            ### Immediate Actions Required
+            1. Review the security audit report in the workflow artifacts
+            2. Run \`pnpm audit fix\` to auto-resolve fixable vulnerabilities
+            3. Manually address vulnerabilities that cannot be auto-fixed
+            4. Update dependencies to secure versions
+            
+            ### Artifacts
+            - [Security Audit Report](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            
+            **This issue was created automatically by the security audit workflow.**
+                  `;
+                  
+                  // Check if similar issue already exists
+                  const existingIssues = await github.rest.issues.listForRepo({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    state: 'open',
+                    labels: 'security,automated'
+                  });
+                  
+                  const hasExistingSecurityIssue = existingIssues.data.some(issue => 
+                    issue.title.includes('Security Alert')
+                  );
+                  
+                  if (!hasExistingSecurityIssue) {
+                    await github.rest.issues.create({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      title: title,
+                      body: body,
+                      labels: ['security', 'automated', 'high-priority']
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Failed to create security issue:', error);
+            }
+
+      - name: Comment on PR if vulnerabilities found
+        if: github.event_name == 'pull_request' && failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const summaryPath = 'security-audit-summary.md';
+              if (fs.existsSync(summaryPath)) {
+                const summary = fs.readFileSync(summaryPath, 'utf8');
+                
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: `## 🔒 Security Audit Results\n\n${summary}\n\n**Please address these security issues before merging.**`
+                });
+              }
+            } catch (error) {
+              console.error('Failed to comment on PR:', error);
+            }

@@ -22,9 +22,10 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "clean": "rm -rf dist"
+    "build": "npx tsc",
+    "dev": "npx tsc --watch",
+    "clean": "rm -rf dist",
+    "type-check": "npx tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.3.22",
@@ -40,6 +41,6 @@
   },
   "devDependencies": {
     "@hijraah/typescript-config": "workspace:*",
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   }
 }

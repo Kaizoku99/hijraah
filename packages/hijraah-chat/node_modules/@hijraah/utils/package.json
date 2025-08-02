@@ -22,15 +22,15 @@
     }
   },
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc",
+    "dev": "npx tsc --watch",
+    "build": "npx tsc",
     "lint": "eslint .",
-    "type-check": "tsc --noEmit"
+    "type-check": "npx tsc --noEmit"
   },
   "devDependencies": {
     "@hijraah/typescript-config": "workspace:*",
     "@hijraah/eslint-config": "workspace:*",
-    "typescript": "latest",
+    "typescript": "^5.8.3",
     "eslint": "^8"
   }
 }

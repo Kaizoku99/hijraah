@@ -17,21 +17,7 @@ import {
   orchestrateEntityProcessing,
 } from "../trigger/knowledge-graph";
 
-// Mock AI SDK
-vi.mock("ai", () => ({
-  generateObject: vi.fn(),
-  generateText: vi.fn(),
-  openai: vi.fn(() => "gpt-4o"),
-}));
-
-// Mock Trigger.dev SDK
-vi.mock("@trigger.dev/sdk/v3", () => ({
-  task: vi.fn((config) => ({
-    id: config.id,
-    run: config.run,
-  })),
-  triggerAndWait: vi.fn(),
-}));
+// Mocks are handled in setup.ts
 
 describe("Knowledge Graph Tasks", () => {
   beforeEach(async () => {

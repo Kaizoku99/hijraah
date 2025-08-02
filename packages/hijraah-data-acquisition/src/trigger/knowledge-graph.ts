@@ -7,7 +7,7 @@
 
 import { task, triggerAndWait } from "@trigger.dev/sdk/v3";
 import { generateText, generateObject } from "ai";
-import { openai } from "ai/openai";
+import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import { db } from "../db/connection";
 import { entities, relationships } from "../db/schema";

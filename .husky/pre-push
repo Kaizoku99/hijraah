@@ -1,0 +1,60 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push checks..."
+
+# Get the current branch name
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+echo "📍 Current branch: $current_branch"
+
+# Skip checks for certain branches if needed
+if [[ "$current_branch" == "main" ]] || [[ "$current_branch" == "master" ]]; then
+  echo "🔒 Pushing to protected branch: $current_branch"
+  echo "⚠️  Extra validation required..."
+fi
+
+# Run comprehensive tests
+echo "🧪 Running comprehensive test suite..."
+pnpm test --passWithNoTests || {
+  echo "❌ Tests failed. Please fix failing tests before pushing."
+  exit 1
+}
+
+# Run security audit
+echo "🔒 Running security audit..."
+pnpm run security:audit || {
+  echo "⚠️  Security vulnerabilities detected. Please review and fix before pushing."
+  echo "Run 'pnpm run security:audit' for detailed report."
+  exit 1
+}
+
+# Check for large files
+echo "📦 Checking for large files..."
+large_files=$(git diff --cached --name-only | xargs ls -la 2>/dev/null | awk '$5 > 1048576 {print $9 " (" $5 " bytes)"}')
+if [ -n "$large_files" ]; then
+  echo "⚠️  Large files detected (>1MB):"
+  echo "$large_files"
+  echo "Consider using Git LFS for large files or ensure they should be committed."
+  read -p "Continue with push? (y/N): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+fi
+
+# Validate branch naming convention for feature branches
+if [[ "$current_branch" =~ ^(feature|fix|hotfix|chore|docs)/.+ ]]; then
+  echo "✅ Branch naming follows convention: $current_branch"
+elif [[ "$current_branch" == "main" ]] || [[ "$current_branch" == "master" ]] || [[ "$current_branch" == "develop" ]]; then
+  echo "✅ Pushing to main branch: $current_branch"
+else
+  echo "⚠️  Branch name '$current_branch' doesn't follow convention."
+  echo "Consider using: feature/*, fix/*, hotfix/*, chore/*, docs/*"
+  read -p "Continue with push? (y/N): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+fi
+
+echo "✅ All pre-push checks passed! Pushing to $current_branch..."

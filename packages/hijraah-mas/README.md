@@ -1,224 +1,255 @@
-# Hijraah Multi-Agent System (MAS)
+# @hijraah/mas
 
-A sophisticated multi-agent system built with [Agno](https://docs.agno.com) for providing comprehensive immigration analysis and advisory services.
+Multi-Agent System using AI SDK v5 for immigration processing workflows.
 
 ## Overview
 
-The Hijraah MAS leverages specialized AI agents working collaboratively to analyze complex immigration scenarios from multiple perspectives. Each agent brings domain expertise in areas such as policy research, document analysis, success prediction, and community validation.
-
-## Features
-
-- **Specialized Agents**: Immigration specialists, policy researchers, document analysts, prediction experts, and community validators
-- **Team Coordination**: Agents work together using Agno's Team framework for comprehensive analysis
-- **Real-time Monitoring**: AgentOps integration for performance tracking and analytics
-- **Multi-modal Processing**: Support for text, image, and document analysis
-- **Context Sharing**: Shared access to Hijraah's knowledge base and vector storage
-- **Scalable Architecture**: Each agent can be scaled independently
+This package provides a comprehensive multi-agent system built with Vercel AI SDK v5, specifically designed for immigration case processing. It follows the orchestrator-worker, parallel processing, and evaluator-optimizer patterns established in the Hijraah platform's steering documents.
 
 ## Architecture
 
-The MAS integrates seamlessly with Hijraah's existing TypeScript Turborepo through a hybrid approach:
+### Core Components
 
-```
-Hijraah Turborepo (TypeScript) ←→ Python MAS Package ←→ Shared Resources
-```
+- **Orchestrators**: High-level coordinators that manage complex workflows
+- **Teams**: Specialized agent groups for specific domains (documents, policy, decisions)
+- **Tools**: Immigration-specific tools with built-in logging and error handling
+- **Types**: Comprehensive TypeScript types for all immigration entities
+- **Utils**: Integration utilities for Supabase, Redis, Trigger.dev, and monitoring
 
-### Agent Types
+### Agent Patterns
 
-1. **Immigration Agent**: Expert immigration advice and policy analysis
-2. **Policy Research Agent**: Real-time policy monitoring and change detection
-3. **Document Analysis Agent**: OCR and structured document extraction
-4. **Prediction Agent**: Success probability and timeline modeling
-5. **Community Validation Agent**: User experience verification and validation
+1. **Orchestrator-Worker Pattern**: Complex workflows with specialized task execution
+2. **Parallel Processing Pattern**: Independent tasks running concurrently
+3. **Evaluator-Optimizer Pattern**: Quality assurance and iterative improvement
 
 ## Quick Start
 
-### Installation
+```typescript
+import { ImmigrationOrchestrator } from '@hijraah/mas'
+
+const orchestrator = new ImmigrationOrchestrator()
+
+const result = await orchestrator.processCase({
+  id: 'case-123',
+  applicantId: 'applicant-456',
+  caseType: 'visa',
+  country: 'US',
+  documents: [
+    { id: 'doc-1', type: 'passport', url: 'https://...' }
+  ],
+  timeline: {
+    submitted: new Date(),
+    deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+  }
+})
+```
+
+## Agent Teams
+
+### Document Processing Team
+
+Handles document analysis, authentication, and compliance checking:
+
+```typescript
+import { DocumentProcessingTeam } from '@hijraah/mas'
+
+const team = new DocumentProcessingTeam()
+const result = await team.processDocuments(documents, caseContext)
+```
+
+### Policy Compliance Team
+
+Checks applications against current immigration policies:
+
+```typescript
+import { PolicyComplianceTeam } from '@hijraah/mas'
+
+const team = new PolicyComplianceTeam()
+const result = await team.checkCompliance(application, policies)
+```
+
+### Case Decision Team
+
+Makes immigration case decisions with precedent analysis:
+
+```typescript
+import { CaseDecisionTeam } from '@hijraah/mas'
+
+const team = new CaseDecisionTeam()
+const result = await team.makeDecision(processedCaseData)
+```
+
+## Tools
+
+All tools are built with the immigration tool factory for consistent logging and error handling:
+
+```typescript
+import { createImmigrationTool } from '@hijraah/mas'
+import { z } from 'zod'
+
+const myTool = createImmigrationTool(
+  'toolName',
+  'Tool description',
+  z.object({ param: z.string() }),
+  async ({ param }) => {
+    // Tool implementation
+    return { result: 'success' }
+  }
+)
+```
+
+### Available Tools
+
+- `documentAnalysisTool`: Analyze document completeness and authenticity
+- `policyQueryTool`: Query immigration policy database
+- `textExtractionTool`: Extract text from documents using OCR
+- `authenticationTool`: Verify document authenticity
+- `complianceTool`: Check regulatory compliance
+- `precedentTool`: Consult case precedents
+- `riskAssessmentTool`: Calculate risk scores
+- `recommendationTool`: Generate actionable recommendations
+- `requirementCheckTool`: Check specific requirements
+- `eligibilityTool`: Validate eligibility criteria
+
+## Integration
+
+### Supabase Integration
+
+Automatic logging of agent executions and tool usage:
+
+```typescript
+import { logAgentExecution, getCaseProcessingHistory } from '@hijraah/mas'
+
+// Executions are automatically logged
+const history = await getCaseProcessingHistory('case-123')
+```
+
+### Redis Caching
+
+Built-in caching for improved performance:
+
+```typescript
+import { cacheAgentResult, getCachedAgentResult } from '@hijraah/mas'
+
+// Results are automatically cached
+const cached = await getCachedAgentResult('cache-key')
+```
+
+### Trigger.dev Background Jobs
+
+Predefined jobs for background processing:
+
+```typescript
+import { 
+  processImmigrationCaseJob,
+  processDocumentsJob,
+  checkPolicyComplianceJob 
+} from '@hijraah/mas'
+
+// Jobs are automatically registered with Trigger.dev
+```
+
+### Monitoring
+
+Comprehensive monitoring and error tracking:
+
+```typescript
+import { trackAgentExecution, trackError } from '@hijraah/mas'
+
+// Metrics are automatically tracked
+```
+
+## Configuration
+
+### Environment Variables
 
 ```bash
-# Install in development mode
-pip install -e .
+# AI SDK Configuration
+AI_SDK_TELEMETRY_DISABLED=false
+AI_SDK_LOG_LEVEL=info
 
-# Install with development dependencies
-pip install -e ".[dev]"
+# AI Providers
+OPENAI_API_KEY=your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Infrastructure
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+UPSTASH_REDIS_REST_URL=your_redis_url
+UPSTASH_REDIS_REST_TOKEN=your_redis_token
+TRIGGER_SECRET_KEY=your_trigger_key
 ```
 
-### Environment Setup
+## Error Handling
 
-Create a `.env` file in the package root:
+All agents and tools include comprehensive error handling:
 
-```env
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
+```typescript
+import { withAgentErrorHandling } from '@hijraah/mas'
 
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key
-
-# Anthropic Configuration (for Claude)
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-# AgentOps Configuration
-AGENTOPS_API_KEY=your_agentops_api_key
-
-# FastAPI Configuration
-MAS_HOST=0.0.0.0
-MAS_PORT=8000
-MAS_DEBUG=false
-
-# Redis Configuration (for caching)
-REDIS_URL=redis://localhost:6379
-
-# Logging Configuration
-LOG_LEVEL=INFO
+const safeFunction = withAgentErrorHandling(
+  async () => {
+    // Your agent logic
+  },
+  async () => {
+    // Optional fallback function
+  }
+)
 ```
 
-### Running the MAS API
+## Testing
 
 ```bash
-# Start the FastAPI server
-uvicorn hijraah_mas.api.main:app --reload --host 0.0.0.0 --port 8000
+# Run tests
+pnpm test
 
-# Or use the CLI
-hijraah-mas serve --host 0.0.0.0 --port 8000
-```
+# Run tests with coverage
+pnpm test:coverage
 
-### Basic Usage
-
-```python
-from hijraah_mas.teams.immigration_team import ImmigrationTeam
-
-# Initialize the team
-team = ImmigrationTeam(
-    supabase_url="your_supabase_url",
-    supabase_key="your_supabase_key"
-)
-
-# Process an immigration query
-result = await team.process_immigration_query(
-    user_data={"country": "India", "education": "Masters"},
-    query="What are the requirements for a US work visa?"
-)
-
-print(result["analysis"])
-```
-
-## API Endpoints
-
-### Health Check
-
-```
-GET /health
-```
-
-### Immigration Analysis
-
-```
-POST /analyze
-Content-Type: application/json
-
-{
-  "user_id": "string",
-  "query": "string",
-  "user_profile": {},
-  "context": {}
-}
-```
-
-### Agent Status
-
-```
-GET /agents/status
-```
-
-### Metrics
-
-```
-GET /metrics
+# Type checking
+pnpm type-check
 ```
 
 ## Development
 
-### Setup Development Environment
-
 ```bash
-# Clone and install dependencies
-git clone <repository>
-cd packages/hijraah-mas
-pip install -e ".[dev]"
+# Build the package
+pnpm build
 
-# Install pre-commit hooks
-pre-commit install
+# Watch mode for development
+pnpm dev
+
+# Lint code
+pnpm lint
 ```
 
-### Running Tests
+## Best Practices
 
-```bash
-# Run all tests
-pytest
+1. **Always use structured outputs** with Zod schemas for predictable results
+2. **Implement proper error handling** with fallback strategies
+3. **Log all agent executions** for audit trails and debugging
+4. **Use appropriate model sizes** - GPT-4o for complex reasoning, GPT-4o-mini for simple tasks
+5. **Cache results** for similar cases to improve performance
+6. **Monitor token usage** and implement cost controls
+7. **Test agent behavior** with comprehensive unit and integration tests
 
-# Run with coverage
-pytest --cov=hijraah_mas --cov-report=html
+## Migration from Agno
 
-# Run specific test types
-pytest -m unit
-pytest -m integration
-```
+This package replaces the previous Agno-based multi-agent system with AI SDK v5. Key differences:
 
-### Code Quality
-
-```bash
-# Format code
-black src/ tests/
-ruff check src/ tests/ --fix
-
-# Type checking
-mypy src/
-```
-
-### Docker Development
-
-```bash
-# Build the Docker image
-docker build -t hijraah-mas .
-
-# Run the container
-docker run -p 8000:8000 --env-file .env hijraah-mas
-```
-
-## Integration with Hijraah Turborepo
-
-The MAS integrates with the main Hijraah application through:
-
-1. **TypeScript Client**: `packages/hijraah-ai/src/mas-client.ts`
-2. **API Routes**: `apps/web/src/app/api/mas/route.ts`
-3. **Trigger.dev Tasks**: Scheduled operations and event-driven workflows
-4. **Shared Database**: Supabase for data storage and retrieval
-
-## Monitoring and Observability
-
-- **AgentOps**: Comprehensive agent monitoring and analytics
-- **Prometheus Metrics**: Performance and usage metrics
-- **Structured Logging**: JSON-formatted logs with correlation IDs
-- **Health Checks**: Readiness and liveness probes
+- **TypeScript-first** instead of Python
+- **Native Next.js integration** instead of FastAPI gateway
+- **Built-in monitoring** instead of AgentOps
+- **Flexible patterns** instead of rigid team structures
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Run the test suite
-6. Submit a pull request
+1. Follow the established patterns in the steering documents
+2. Use the immigration tool factory for all new tools
+3. Include comprehensive error handling and logging
+4. Add tests for all new functionality
+5. Update documentation for any API changes
 
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Support
-
-For support and questions:
-
-- Documentation: [https://docs.hijraah.com](https://docs.hijraah.com)
-- Issues: [GitHub Issues](https://github.com/hijraah/hijraah/issues)
-- Community: [Discord](https://discord.gg/hijraah)
+Private - Hijraah Immigration Platform

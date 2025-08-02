@@ -1,0 +1,58 @@
+{
+  "name": "@hijraah/mas",
+  "version": "0.1.0",
+  "description": "Multi-Agent System using AI SDK v5 for immigration processing workflows",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./orchestrators": {
+      "types": "./dist/orchestrators/index.d.ts",
+      "import": "./dist/orchestrators/index.js"
+    },
+    "./teams": {
+      "types": "./dist/teams/index.d.ts",
+      "import": "./dist/teams/index.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "npx tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage"
+  },
+  "dependencies": {
+    "ai": "^5.0.0-beta.25",
+    "@ai-sdk/openai": "^1.0.0",
+    "@ai-sdk/anthropic": "^1.0.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "zod": "^3.22.4",
+    "drizzle-orm": "^0.29.0",
+    "@trigger.dev/sdk": "^4.0.0-beta.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.8.3",
+    "tsup": "^8.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0"
+  },
+  "peerDependencies": {
+    "@hijraah/types": "workspace:*",
+    "@hijraah/utils": "workspace:*"
+  }
+}

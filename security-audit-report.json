@@ -1,0 +1,829 @@
+{
+  "timestamp": "2025-08-02T08:45:56.689Z",
+  "pnpmAudit": {
+    "actions": [
+      {
+        "action": "review",
+        "module": "highlight.js",
+        "resolves": [
+          {
+            "id": 1086450,
+            "path": ".>react-syntax-highlighter>highlight.js",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          },
+          {
+            "id": 1090060,
+            "path": ".>react-syntax-highlighter>highlight.js",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      },
+      {
+        "action": "review",
+        "module": "esbuild",
+        "resolves": [
+          {
+            "id": 1102341,
+            "path": ".>drizzle-kit>@esbuild-kit/esm-loader>@esbuild-kit/core-utils>esbuild",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          },
+          {
+            "id": 1102341,
+            "path": "apps__web>drizzle-kit>esbuild",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          },
+          {
+            "id": 1102341,
+            "path": "packages__hijraah-data-acquisition>vitest>vite>esbuild",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      },
+      {
+        "action": "review",
+        "module": "cookie",
+        "resolves": [
+          {
+            "id": 1103907,
+            "path": "packages__hijraah-data-acquisition>@trigger.dev/sdk>@trigger.dev/core>socket.io>engine.io>cookie",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      },
+      {
+        "action": "review",
+        "module": "prismjs",
+        "resolves": [
+          {
+            "id": 1105770,
+            "path": "packages__hijraah-ui>react-syntax-highlighter>refractor>prismjs",
+            "dev": false,
+            "optional": false,
+            "bundled": false
+          }
+        ]
+      }
+    ],
+    "advisories": {
+      "1086450": {
+        "findings": [
+          {
+            "version": "9.12.0",
+            "paths": [
+              ".>react-syntax-highlighter>highlight.js"
+            ]
+          }
+        ],
+        "found_by": null,
+        "deleted": null,
+        "references": "- https://github.com/highlightjs/highlight.js/security/advisories/GHSA-7wwv-vh3v-89cq\n- https://github.com/highlightjs/highlight.js/commit/373b9d862401162e832ce77305e49b859e110f9c\n- https://www.npmjs.com/package/@highlightjs/cdn-assets\n- https://www.npmjs.com/package/highlight.js\n- https://github.com/advisories/GHSA-7wwv-vh3v-89cq",
+        "created": "2020-12-04T16:47:20.000Z",
+        "id": 1086450,
+        "npm_advisory_id": null,
+        "overview": "### Impact: Potential ReDOS vulnerabilities (exponential and polynomial RegEx backtracking)\n\n[oswasp](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS): \n\n> The Regular expression Denial of Service (ReDoS) is a Denial of Service attack, that exploits the fact that most Regular Expression implementations may reach extreme situations that cause them to work very slowly (exponentially related to input size). An attacker can then cause a program using a Regular Expression to enter these extreme situations and then hang for a very long time.\n\nIf are you are using Highlight.js to highlight user-provided data you are possibly vulnerable.  On the client-side (in a browser or Electron environment) risks could include lengthy freezes or crashes... On the server-side infinite freezes could occur... effectively preventing users from accessing your app or service (ie, Denial of Service).\n\nThis is an issue with grammars shipped with the parser (and potentially 3rd party grammars also), not the parser itself. If you are using Highlight.js with any of the following grammars you are vulnerable.  If you are using `highlightAuto` to detect the language (and have any of these grammars registered) you are vulnerable. Exponential grammars (C, Perl, JavaScript) are auto-registered when using the common grammar subset/library `require('highlight.js/lib/common')` as of 10.4.0 - see https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@10.4.0/build/highlight.js\n\nAll versions prior to 10.4.1 are vulnerable, including version 9.18.5. \n\n**Grammars with exponential backtracking issues:**\n\n  - c-like (c, cpp, arduino)\n  - handlebars (htmlbars)\n  - gams\n  - perl\n  - jboss-cli\n  - r\n  - erlang-repl\n  - powershell\n  - routeros\n  - livescript (10.4.0 and 9.18.5 included this fix)\n  - javascript & typescript (10.4.0 included partial fixes)\n\nAnd of course any aliases of those languages have the same issue. ie: `hpp` is no safer than `cpp`.\n\n**Grammars with polynomial backtracking issues:**\n\n- kotlin\n- gcode\n- d\n- aspectj\n- moonscript\n- coffeescript/livescript\n- csharp\n- scilab\n- crystal\n- elixir\n- basic\n- ebnf\n- ruby\n- fortran/irpf90\n- livecodeserver\n- yaml\n- x86asm\n- dsconfig\n- markdown\n- ruleslanguage\n- xquery\n- sqf\n\nAnd again: any aliases of those languages have the same issue. ie: `ruby` and `rb` share the same ruby issues.\n\n\n### Patches\n\n- Version 10.4.1 resolves these vulnerabilities.  Please upgrade.\n\n### Workarounds / Mitigations\n\n- Discontinue use the affected grammars. (or perhaps use only those with poly vs exponential issues)\n- Attempt cherry-picking the grammar fixes into older versions...\n- Attempt using newer CDN versions of any affected languages.  (ie using an older CDN version of the library with newer CDN grammars).  Your mileage may vary.\n\n### References\n\n- https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS\n\n### For more information\n\nIf you have any questions or comments about this advisory:\n* Open an issue: https://github.com/highlightjs/highlight.js/issues\n* Email us at [security@highlightjs.com](mailto:security@highlightjs.com)",
+        "reported_by": null,
+        "title": "ReDOS vulnerabities: multiple grammars",
+        "metadata": null,
+        "cves": [],
+        "access": "public",
+        "severity": "moderate",
+        "module_name": "highlight.js",
+        "vulnerable_versions": ">=9.0.0 <10.4.1",
+        "github_advisory_id": "GHSA-7wwv-vh3v-89cq",
+        "recommendation": "Upgrade to version 10.4.1 or later",
+        "patched_versions": ">=10.4.1",
+        "updated": "2023-01-09T05:04:08.000Z",
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "cwe": [
+          "CWE-20",
+          "CWE-400"
+        ],
+        "url": "https://github.com/advisories/GHSA-7wwv-vh3v-89cq"
+      },
+      "1090060": {
+        "findings": [
+          {
+            "version": "9.12.0",
+            "paths": [
+              ".>react-syntax-highlighter>highlight.js"
+            ]
+          }
+        ],
+        "found_by": null,
+        "deleted": null,
+        "references": "- https://github.com/highlightjs/highlight.js/security/advisories/GHSA-vfrc-7r7c-w9mx\n- https://github.com/highlightjs/highlight.js/pull/2636\n- https://github.com/highlightjs/highlight.js/commit/7241013ae011a585983e176ddc0489a7a52f6bb0\n- https://www.npmjs.com/package/highlight.js\n- https://nvd.nist.gov/vuln/detail/CVE-2020-26237\n- https://lists.debian.org/debian-lts-announce/2020/12/msg00041.html\n- https://www.oracle.com/security-alerts/cpujul2022.html\n- https://github.com/advisories/GHSA-vfrc-7r7c-w9mx",
+        "created": "2020-11-24T22:58:41.000Z",
+        "id": 1090060,
+        "npm_advisory_id": null,
+        "overview": "### Impact\n\nAffected versions of this package are vulnerable to Prototype Pollution.  A malicious HTML code block can be crafted that will result in prototype pollution of the base object's prototype during highlighting.  If you allow users to insert custom HTML code blocks into your page/app via parsing Markdown code blocks (or similar) and do not filter the language names the user can provide you may be vulnerable. \n\nThe pollution should just be harmless data but this can cause problems for applications not expecting these properties to exist and can result in strange behavior or application crashes, i.e. a potential DOS vector. \n\n_If your website or application does not render user provided data it should be unaffected._\n\n### Patches\n\nVersions 9.18.2 and 10.1.2 and newer include fixes for this vulnerability.  If you are using version 7 or 8 you are encouraged to upgrade to a newer release.\n\n### Workarounds\n\n#### Patch your library\n\nManually patch your library to create null objects for both `languages` and `aliases`:\n\n```js\nconst HLJS = function(hljs) {\n  // ...\n  var languages = Object.create(null);\n  var aliases = Object.create(null);\n```\n\n#### Filter out bad data from end users:\n\nFilter the language names that users are allowed to inject into your HTML to guarantee they are valid.\n\n### References\n\n* [What is Prototype Pollution?](https://codeburst.io/what-is-prototype-pollution-49482fc4b638)\n* https://github.com/highlightjs/highlight.js/pull/2636\n\n### For more information\n\nIf you have any questions or comments about this advisory:\n\n* Please file an issue against [highlight.js](https://github.com/highlightjs/highlight.js/issues/)",
+        "reported_by": null,
+        "title": "Prototype Pollution in highlight.js",
+        "metadata": null,
+        "cves": [
+          "CVE-2020-26237"
+        ],
+        "access": "public",
+        "severity": "moderate",
+        "module_name": "highlight.js",
+        "vulnerable_versions": "<9.18.2",
+        "github_advisory_id": "GHSA-vfrc-7r7c-w9mx",
+        "recommendation": "Upgrade to version 9.18.2 or later",
+        "patched_versions": ">=9.18.2",
+        "updated": "2023-02-01T05:05:03.000Z",
+        "cvss": {
+          "score": 5.8,
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:R/S:C/C:N/I:H/A:N"
+        },
+        "cwe": [
+          "CWE-471"
+        ],
+        "url": "https://github.com/advisories/GHSA-vfrc-7r7c-w9mx"
+      },
+      "1102341": {
+        "findings": [
+          {
+            "version": "0.18.20",
+            "paths": [
+              ".>drizzle-kit>@esbuild-kit/esm-loader>@esbuild-kit/core-utils>esbuild"
+            ]
+          },
+          {
+            "version": "0.19.12",
+            "paths": [
+              "apps__web>drizzle-kit>esbuild"
+            ]
+          },
+          {
+            "version": "0.21.5",
+            "paths": [
+              "packages__hijraah-data-acquisition>vitest>vite>esbuild"
+            ]
+          }
+        ],
+        "found_by": null,
+        "deleted": null,
+        "references": "- https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99\n- https://github.com/evanw/esbuild/commit/de85afd65edec9ebc44a11e245fd9e9a2e99760d\n- https://github.com/advisories/GHSA-67mh-4wv8-2f99",
+        "created": "2025-02-10T17:48:07.000Z",
+        "id": 1102341,
+        "npm_advisory_id": null,
+        "overview": "### Summary\n\nesbuild allows any websites to send any request to the development server and read the response due to default CORS settings.\n\n### Details\n\nesbuild sets `Access-Control-Allow-Origin: *` header to all requests, including the SSE connection, which allows any websites to send any request to the development server and read the response.\n\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L121\nhttps://github.com/evanw/esbuild/blob/df815ac27b84f8b34374c9182a93c94718f8a630/pkg/api/serve_other.go#L363\n\n**Attack scenario**:\n\n1. The attacker serves a malicious web page (`http://malicious.example.com`).\n1. The user accesses the malicious web page.\n1. The attacker sends a `fetch('http://127.0.0.1:8000/main.js')` request by JS in that malicious web page. This request is normally blocked by same-origin policy, but that's not the case for the reasons above.\n1. The attacker gets the content of `http://127.0.0.1:8000/main.js`.\n\nIn this scenario, I assumed that the attacker knows the URL of the bundle output file name. But the attacker can also get that information by\n\n- Fetching `/index.html`: normally you have a script tag here\n- Fetching `/assets`: it's common to have a `assets` directory when you have JS files and CSS files in a different directory and the directory listing feature tells the attacker the list of files\n- Connecting `/esbuild` SSE endpoint: the SSE endpoint sends the URL path of the changed files when the file is changed (`new EventSource('/esbuild').addEventListener('change', e => console.log(e.type, e.data))`)\n- Fetching URLs in the known file: once the attacker knows one file, the attacker can know the URLs imported from that file\n\nThe scenario above fetches the compiled content, but if the victim has the source map option enabled, the attacker can also get the non-compiled content by fetching the source map file.\n\n### PoC\n\n1. Download [reproduction.zip](https://github.com/user-attachments/files/18561484/reproduction.zip)\n2. Extract it and move to that directory\n1. Run `npm i`\n1. Run `npm run watch`\n1. Run `fetch('http://127.0.0.1:8000/app.js').then(r => r.text()).then(content => console.log(content))` in a different website's dev tools.\n\n![image](https://github.com/user-attachments/assets/08fc2e4d-e1ec-44ca-b0ea-78a73c3c40e9)\n\n### Impact\n\nUsers using the serve feature may get the source code stolen by malicious websites.",
+        "reported_by": null,
+        "title": "esbuild enables any website to send any requests to the development server and read the response",
+        "metadata": null,
+        "cves": [],
+        "access": "public",
+        "severity": "moderate",
+        "module_name": "esbuild",
+        "vulnerable_versions": "<=0.24.2",
+        "github_advisory_id": "GHSA-67mh-4wv8-2f99",
+        "recommendation": "Upgrade to version 0.25.0 or later",
+        "patched_versions": ">=0.25.0",
+        "updated": "2025-02-10T17:48:08.000Z",
+        "cvss": {
+          "score": 5.3,
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:N/A:N"
+        },
+        "cwe": [
+          "CWE-346"
+        ],
+        "url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99"
+      },
+      "1103907": {
+        "findings": [
+          {
+            "version": "0.4.2",
+            "paths": [
+              "packages__hijraah-data-acquisition>@trigger.dev/sdk>@trigger.dev/core>socket.io>engine.io>cookie"
+            ]
+          }
+        ],
+        "found_by": null,
+        "deleted": null,
+        "references": "- https://github.com/jshttp/cookie/security/advisories/GHSA-pxg6-pf52-xh8x\n- https://github.com/jshttp/cookie/pull/167\n- https://github.com/jshttp/cookie/commit/e10042845354fea83bd8f34af72475eed1dadf5c\n- https://github.com/advisories/GHSA-pxg6-pf52-xh8x",
+        "created": "2024-10-04T20:31:00.000Z",
+        "id": 1103907,
+        "npm_advisory_id": null,
+        "overview": "### Impact\n\nThe cookie name could be used to set other fields of the cookie, resulting in an unexpected cookie value. For example, `serialize(\"userName=<script>alert('XSS3')</script>; Max-Age=2592000; a\", value)` would result in `\"userName=<script>alert('XSS3')</script>; Max-Age=2592000; a=test\"`, setting `userName` cookie to `<script>` and ignoring `value`.\n\nA similar escape can be used for `path` and `domain`, which could be abused to alter other fields of the cookie.\n\n### Patches\n\nUpgrade to 0.7.0, which updates the validation for `name`, `path`, and `domain`.\n\n### Workarounds\n\nAvoid passing untrusted or arbitrary values for these fields, ensure they are set by the application instead of user input.\n\n### References\n\n* https://github.com/jshttp/cookie/pull/167",
+        "reported_by": null,
+        "title": "cookie accepts cookie name, path, and domain with out of bounds characters",
+        "metadata": null,
+        "cves": [
+          "CVE-2024-47764"
+        ],
+        "access": "public",
+        "severity": "low",
+        "module_name": "cookie",
+        "vulnerable_versions": "<0.7.0",
+        "github_advisory_id": "GHSA-pxg6-pf52-xh8x",
+        "recommendation": "Upgrade to version 0.7.0 or later",
+        "patched_versions": ">=0.7.0",
+        "updated": "2025-04-15T13:56:44.000Z",
+        "cvss": {
+          "score": 0,
+          "vectorString": null
+        },
+        "cwe": [
+          "CWE-74"
+        ],
+        "url": "https://github.com/advisories/GHSA-pxg6-pf52-xh8x"
+      },
+      "1105770": {
+        "findings": [
+          {
+            "version": "1.27.0",
+            "paths": [
+              "packages__hijraah-ui>react-syntax-highlighter>refractor>prismjs"
+            ]
+          }
+        ],
+        "found_by": null,
+        "deleted": null,
+        "references": "- https://nvd.nist.gov/vuln/detail/CVE-2024-53382\n- https://gist.github.com/jackfromeast/aeb128e44f05f95828a1a824708df660\n- https://github.com/PrismJS/prism/blob/59e5a3471377057de1f401ba38337aca27b80e03/prism.js#L226-L259\n- https://github.com/PrismJS/prism/pull/3863\n- https://github.com/PrismJS/prism/commit/8e8b9352dac64457194dd9e51096b4772532e53d\n- https://github.com/advisories/GHSA-x7hr-w5r2-h6wg",
+        "created": "2025-03-03T09:30:34.000Z",
+        "id": 1105770,
+        "npm_advisory_id": null,
+        "overview": "Prism (aka PrismJS) through 1.29.0 allows DOM Clobbering (with resultant XSS for untrusted input that contains HTML but does not directly contain JavaScript), because document.currentScript lookup can be shadowed by attacker-injected HTML elements.",
+        "reported_by": null,
+        "title": "PrismJS DOM Clobbering vulnerability",
+        "metadata": null,
+        "cves": [
+          "CVE-2024-53382"
+        ],
+        "access": "public",
+        "severity": "moderate",
+        "module_name": "prismjs",
+        "vulnerable_versions": "<1.30.0",
+        "github_advisory_id": "GHSA-x7hr-w5r2-h6wg",
+        "recommendation": "Upgrade to version 1.30.0 or later",
+        "patched_versions": ">=1.30.0",
+        "updated": "2025-06-30T12:51:20.000Z",
+        "cvss": {
+          "score": 4.9,
+          "vectorString": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:C/C:L/I:L/A:N"
+        },
+        "cwe": [
+          "CWE-79",
+          "CWE-94"
+        ],
+        "url": "https://github.com/advisories/GHSA-x7hr-w5r2-h6wg"
+      }
+    },
+    "muted": [],
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 1,
+        "moderate": 6,
+        "high": 0,
+        "critical": 0
+      },
+      "dependencies": 2858,
+      "devDependencies": 0,
+      "optionalDependencies": 0,
+      "totalDependencies": 2858
+    }
+  },
+  "outdatedPackages": {
+    "@types/node-cache": {
+      "current": "4.2.5",
+      "latest": "4.2.5",
+      "wanted": "4.2.5",
+      "isDeprecated": true,
+      "dependencyType": "dependencies"
+    },
+    "eslint-config-next": {
+      "current": "15.0.4",
+      "latest": "15.4.5",
+      "wanted": "15.0.4",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@ai-sdk/anthropic": {
+      "current": "1.2.12",
+      "latest": "2.0.0",
+      "wanted": "1.2.12",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@ai-sdk/google": {
+      "current": "1.2.22",
+      "latest": "2.0.0",
+      "wanted": "1.2.22",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@ai-sdk/mistral": {
+      "current": "1.2.8",
+      "latest": "2.0.0",
+      "wanted": "1.2.8",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@ai-sdk/openai": {
+      "current": "1.3.23",
+      "latest": "2.0.0",
+      "wanted": "1.3.23",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@ai-sdk/react": {
+      "current": "1.2.12",
+      "latest": "2.0.0",
+      "wanted": "1.2.12",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@as-integrations/next": {
+      "current": "3.2.0",
+      "latest": "4.0.0",
+      "wanted": "3.2.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@datadog/browser-rum": {
+      "current": "5.35.1",
+      "latest": "6.16.0",
+      "wanted": "5.35.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@hookform/resolvers": {
+      "current": "3.10.0",
+      "latest": "5.2.1",
+      "wanted": "3.10.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@npmcli/package-json": {
+      "current": "5.2.1",
+      "latest": "6.2.0",
+      "wanted": "5.2.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@pinecone-database/pinecone": {
+      "current": "2.2.2",
+      "latest": "6.1.2",
+      "wanted": "2.2.2",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@sentry/nextjs": {
+      "current": "9.44.0",
+      "latest": "10.0.0",
+      "wanted": "9.44.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@sentry/profiling-node": {
+      "current": "9.44.0",
+      "latest": "10.0.0",
+      "wanted": "9.44.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@sparticuz/chromium-min": {
+      "current": "126.0.0",
+      "latest": "138.0.2",
+      "wanted": "126.0.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@testing-library/react": {
+      "current": "14.3.1",
+      "latest": "16.3.0",
+      "wanted": "14.3.1",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/express": {
+      "current": "4.17.23",
+      "latest": "5.0.3",
+      "wanted": "4.17.23",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/express-serve-static-core": {
+      "current": "4.19.6",
+      "latest": "5.0.7",
+      "wanted": "4.19.6",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/jest": {
+      "current": "29.5.14",
+      "latest": "30.0.0",
+      "wanted": "29.5.14",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/mime": {
+      "current": "3.0.4",
+      "latest": "4.0.0",
+      "wanted": "3.0.4",
+      "isDeprecated": true,
+      "dependencyType": "devDependencies"
+    },
+    "@types/node": {
+      "current": "20.19.9",
+      "latest": "24.1.0",
+      "wanted": "20.19.9",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/react": {
+      "current": "18.3.1",
+      "latest": "19.1.9",
+      "wanted": "18.3.1",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/react-dom": {
+      "current": "18.3.1",
+      "latest": "19.1.7",
+      "wanted": "18.3.1",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@types/uuid": {
+      "current": "9.0.8",
+      "latest": "10.0.0",
+      "wanted": "9.0.8",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "ai": {
+      "current": "4.3.19",
+      "latest": "5.0.0",
+      "wanted": "4.3.19",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "bcrypt-ts": {
+      "current": "6.0.0",
+      "latest": "7.1.0",
+      "wanted": "6.0.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "commander": {
+      "current": "11.1.0",
+      "latest": "14.0.0",
+      "wanted": "11.1.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "cookies-next": {
+      "current": "5.1.0",
+      "latest": "6.1.0",
+      "wanted": "5.1.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "cross-env": {
+      "current": "7.0.3",
+      "latest": "10.0.0",
+      "wanted": "7.0.3",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "dotenv": {
+      "current": "16.6.1",
+      "latest": "17.2.1",
+      "wanted": "16.6.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "eslint": {
+      "current": "8.57.1",
+      "latest": "9.32.0",
+      "wanted": "8.57.1",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "faker": {
+      "current": "5.5.3",
+      "latest": "6.6.6",
+      "wanted": "5.5.3",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "glob": {
+      "current": "10.4.5",
+      "latest": "11.0.3",
+      "wanted": "10.4.5",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "jest": {
+      "current": "29.7.0",
+      "latest": "30.0.5",
+      "wanted": "29.7.0",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "jest-environment-jsdom": {
+      "current": "29.7.0",
+      "latest": "30.0.5",
+      "wanted": "29.7.0",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "jose": {
+      "current": "5.10.0",
+      "latest": "6.0.12",
+      "wanted": "5.10.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "lru-cache": {
+      "current": "10.4.3",
+      "latest": "11.1.0",
+      "wanted": "10.4.3",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "next-intl": {
+      "current": "3.26.5",
+      "latest": "4.3.4",
+      "wanted": "3.26.5",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "openai": {
+      "current": "4.104.0",
+      "latest": "5.11.0",
+      "wanted": "4.104.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "rate-limiter-flexible": {
+      "current": "5.0.5",
+      "latest": "7.2.0",
+      "wanted": "5.0.5",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "react": {
+      "current": "18.3.1",
+      "latest": "19.1.1",
+      "wanted": "18.3.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "react-dom": {
+      "current": "18.3.1",
+      "latest": "19.1.1",
+      "wanted": "18.3.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "react-error-boundary": {
+      "current": "5.0.0",
+      "latest": "6.0.0",
+      "wanted": "5.0.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "react-markdown": {
+      "current": "9.1.0",
+      "latest": "10.1.0",
+      "wanted": "9.1.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "react-resizable-panels": {
+      "current": "2.1.9",
+      "latest": "3.0.4",
+      "wanted": "2.1.9",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "react-syntax-highlighter": {
+      "current": "5.8.0",
+      "latest": "15.6.1",
+      "wanted": "5.8.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "recharts": {
+      "current": "2.15.4",
+      "latest": "3.1.0",
+      "wanted": "2.15.4",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "rimraf": {
+      "current": "5.0.10",
+      "latest": "6.0.1",
+      "wanted": "5.0.10",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "sonner": {
+      "current": "1.7.4",
+      "latest": "2.0.6",
+      "wanted": "1.7.4",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "stripe": {
+      "current": "17.7.0",
+      "latest": "18.4.0",
+      "wanted": "17.7.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "tailwind-merge": {
+      "current": "2.6.0",
+      "latest": "3.3.1",
+      "wanted": "2.6.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "tesseract.js": {
+      "current": "5.1.1",
+      "latest": "6.0.1",
+      "wanted": "5.1.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "zod": {
+      "current": "3.25.76",
+      "latest": "4.0.14",
+      "wanted": "3.25.76",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "zustand": {
+      "current": "4.5.7",
+      "latest": "5.0.7",
+      "wanted": "4.5.7",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@ai-sdk/deepseek": {
+      "current": "0.1.17",
+      "latest": "1.0.0",
+      "wanted": "0.1.17",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@ai-sdk/fireworks": {
+      "current": "0.1.18",
+      "latest": "1.0.0",
+      "wanted": "0.1.18",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@cloudflare/puppeteer": {
+      "current": "0.0.11",
+      "latest": "1.0.4",
+      "wanted": "0.0.11",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@floating-ui/react": {
+      "current": "0.26.28",
+      "latest": "0.27.15",
+      "wanted": "0.26.28",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@hono/zod-openapi": {
+      "current": "0.19.10",
+      "latest": "1.0.2",
+      "wanted": "0.19.10",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@hono/zod-validator": {
+      "current": "0.4.3",
+      "latest": "0.7.2",
+      "wanted": "0.4.3",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@langchain/community": {
+      "current": "0.3.22",
+      "latest": "0.3.49",
+      "wanted": "0.3.22",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@langchain/openai": {
+      "current": "0.3.16",
+      "latest": "0.6.3",
+      "wanted": "0.3.16",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@langchain/pinecone": {
+      "current": "0.1.3",
+      "latest": "0.2.0",
+      "wanted": "0.1.3",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@react-email/components": {
+      "current": "0.0.38",
+      "latest": "0.4.0",
+      "wanted": "0.0.38",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@stagewise/toolbar-next": {
+      "current": "0.1.2",
+      "latest": "0.6.2",
+      "wanted": "0.1.2",
+      "isDeprecated": false,
+      "dependencyType": "devDependencies"
+    },
+    "@supabase/ssr": {
+      "current": "0.5.2",
+      "latest": "0.6.1",
+      "wanted": "0.5.2",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "@vercel/blob": {
+      "current": "0.27.3",
+      "latest": "1.1.1",
+      "wanted": "0.27.3",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "critters": {
+      "current": "0.0.23",
+      "latest": "0.0.25",
+      "wanted": "0.0.23",
+      "isDeprecated": true,
+      "dependencyType": "devDependencies"
+    },
+    "drizzle-orm": {
+      "current": "0.43.1",
+      "latest": "0.44.4",
+      "wanted": "0.43.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "groq-sdk": {
+      "current": "0.3.3",
+      "latest": "0.29.0",
+      "wanted": "0.3.3",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "lucide-react": {
+      "current": "0.344.0",
+      "latest": "0.536.0",
+      "wanted": "0.344.0",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "next-themes": {
+      "current": "0.2.1",
+      "latest": "0.4.6",
+      "wanted": "0.2.1",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "pgvector": {
+      "current": "0.1.8",
+      "latest": "0.2.1",
+      "wanted": "0.1.8",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    },
+    "sharp": {
+      "current": "0.33.5",
+      "latest": "0.34.3",
+      "wanted": "0.33.5",
+      "isDeprecated": false,
+      "dependencyType": "dependencies"
+    }
+  },
+  "summary": {
+    "totalVulnerabilities": 5,
+    "criticalVulnerabilities": 0,
+    "highVulnerabilities": 0,
+    "moderateVulnerabilities": 4,
+    "lowVulnerabilities": 1,
+    "outdatedPackages": 74
+  }
+}

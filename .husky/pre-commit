@@ -1,11 +1,49 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+echo "🔍 Running pre-commit checks..."
+
 # Run linting to catch code quality issues
+echo "📝 Checking code quality with ESLint..."
 pnpm run lint
 
 # Check code formatting
+echo "🎨 Checking code formatting..."
 pnpm run format:check
 
 # Run type checking to catch TypeScript errors
+echo "🔧 Running TypeScript type checking..."
 pnpm run type-check
+
+# Run security audit for dependencies
+echo "🔒 Running security audit..."
+pnpm audit --audit-level moderate || {
+  echo "⚠️  Security vulnerabilities found. Please run 'pnpm audit fix' to resolve them."
+  echo "If vulnerabilities cannot be auto-fixed, please review and address manually."
+  exit 1
+}
+
+# Check for sensitive information in staged files
+echo "🕵️  Checking for sensitive information..."
+if git diff --cached --name-only | xargs grep -l -i -E "(password|secret|key|token|api_key)" 2>/dev/null; then
+  echo "⚠️  Potential sensitive information detected in staged files:"
+  git diff --cached --name-only | xargs grep -n -i -E "(password|secret|key|token|api_key)" 2>/dev/null || true
+  echo "Please review and ensure no actual secrets are being committed."
+  echo "Use environment variables or .env files for sensitive data."
+  read -p "Continue with commit? (y/N): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    exit 1
+  fi
+fi
+
+# Run tests if they exist and are not too slow
+echo "🧪 Running quick tests..."
+if [ -f "jest.config.cjs" ] || [ -f "jest.config.js" ]; then
+  pnpm test --passWithNoTests --bail --findRelatedTests $(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(js|jsx|ts|tsx)$' | tr '\n' ' ') 2>/dev/null || {
+    echo "⚠️  Some tests failed. Please fix them before committing."
+    exit 1
+  }
+fi
+
+echo "✅ All pre-commit checks passed!"
