@@ -702,9 +702,3 @@ async function generatePreferenceOptimizationSuggestions(
 }
 
 // Export all tasks
-export {
-  initializeUserPreferencesTask,
-  updateUserPreferencesTask,
-  optimizeUserPreferencesTask,
-  implementOptimizationRecommendationsTask,
-};

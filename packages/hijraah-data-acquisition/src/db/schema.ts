@@ -1545,29 +1545,6 @@ export const documents = pgTable(
     processedIdx: index("documents_processed_idx").on(table.isProcessed),
     createdAtIdx: index("documents_created_at_idx").on(table.createdAt),
   }),
-);d("id").primaryKey().defaultRandom(),
-    webhookId: uuid("webhook_id")
-      .notNull()
-      .references(() => webhooks.id),
-    eventId: uuid("event_id")
-      .notNull()
-      .references(() => webhookEvents.id),
-    status: varchar("status", { length: 20 }).notNull().default("pending"),
-    attempts: integer("attempts").notNull().default(0),
-    lastAttemptAt: timestamp("last_attempt_at"),
-    nextRetryAt: timestamp("next_retry_at"),
-    responseStatus: integer("response_status"),
-    responseBody: text("response_body"),
-    error: text("error"),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
-  },
-  (table) => ({
-    webhookIdx: index("webhook_deliveries_webhook_idx").on(table.webhookId),
-    eventIdx: index("webhook_deliveries_event_idx").on(table.eventId),
-    statusIdx: index("webhook_deliveries_status_idx").on(table.status),
-    createdAtIdx: index("webhook_deliveries_created_at_idx").on(table.createdAt),
-    nextRetryIdx: index("webhook_deliveries_next_retry_idx").on(table.nextRetryAt),
-  }),
 );
 
 // Firecrawl Jobs table
@@ -1618,17 +1595,6 @@ export const webhooksRelations = relations(webhooks, ({ many }) => ({
 
 export const webhookEventsRelations = relations(webhookEvents, ({ many }) => ({
   deliveries: many(webhookDeliveries),
-}));
-
-export const webhookDeliveriesRelations = relations(webhookDeliveries, ({ one }) => ({
-  webhook: one(webhooks, {
-    fields: [webhookDeliveries.webhookId],
-    references: [webhooks.id],
-  }),
-  event: one(webhookEvents, {
-    fields: [webhookDeliveries.eventId],
-    references: [webhookEvents.id],
-  }),
 }));
 
 export const firecrawlJobsRelations = relations(firecrawlJobs, ({ one }) => ({

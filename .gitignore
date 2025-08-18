@@ -25,6 +25,8 @@
 **/.turbo/cache/
 .turbo/daemon/
 **/.turbo/daemon/
+.turbo/cookies/
+**/.turbo/cookies/
 
 # production
 /build

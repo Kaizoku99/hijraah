@@ -828,12 +828,3 @@ function findPreferredDays(engagementHistory: any[]): string[] {
   // Mock implementation - would analyze actual engagement patterns
   return ["Monday", "Tuesday", "Wednesday"];
 }
-
-// Export all tasks
-export {
-  analyzeUserContextTask,
-  generatePersonalizedContentTask,
-  optimizeNotificationTimingTask,
-  trackPersonalizationPerformanceTask,
-  updatePersonalizationModelTask,
-};

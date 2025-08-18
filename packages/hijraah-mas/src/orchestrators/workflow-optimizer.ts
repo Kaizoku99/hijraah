@@ -20,4 +20,5 @@ const WorkflowStepSchema = z.object({
     memoryEstimate: z.number().optional()
   }),
   successCriteria: z.array(z.string()),
-  fallbackOptions: z.array(z.string()).optiona
+  fallbackOptions: z.array(z.string()).optional()
+});

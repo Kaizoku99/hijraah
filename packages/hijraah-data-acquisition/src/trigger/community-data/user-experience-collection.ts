@@ -613,11 +613,3 @@ export const sendNotificationTask = task({
 
 // Import the reputation task (will be defined in gamification.ts)
 import { updateUserReputationTask } from "./gamification.js";
-
-// Export all tasks
-export {
-  collectUserExperienceTask,
-  processDocumentUploadsTask,
-  validateExperienceDataTask,
-  sendNotificationTask,
-};

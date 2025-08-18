@@ -503,10 +503,3 @@ function calculateStats(values: number[]) {
 // Import required tasks from other modules
 import { sendNotificationTask } from "./user-experience-collection.js";
 
-// Export all tasks
-export {
-  validateCommunityDataTask,
-  detectOutliersTask,
-  orchestratePeerReviewTask,
-  calculateReputationScoresTask,
-};

@@ -107,7 +107,7 @@ export const monitorPolicyChangesTask = schedules.task({
                 affectedCategories: z.array(z.string()),
                 effectiveDate: z.string().optional(),
                 actionRequired: z.boolean(),
-                urgency: z.enum(["immediate", "within_week", "within_month", "no_urgency"),
+                urgency: z.enum(["immediate", "within_week", "within_month", "no_urgency"]),
                 confidence: z.number().min(0).max(1),
               }),
               messages: [
@@ -700,11 +700,3 @@ async function deliverWebhookNotification(userId: string, content: any) {
     metadata: { webhooksDelivered: 1 },
   };
 }
-
-// Export all tasks
-export {
-  monitorPolicyChangesTask,
-  processPolicyChangeNotificationsTask,
-  personalizeAndDeliverNotificationTask,
-  deliverMultiChannelNotificationTask,
-};

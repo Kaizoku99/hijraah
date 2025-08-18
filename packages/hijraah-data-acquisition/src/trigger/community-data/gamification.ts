@@ -532,9 +532,3 @@ export const updateLeaderboardsTask = task({
 // Import the notification task
 import { sendNotificationTask } from "./user-experience-collection.js";
 
-// Export all tasks
-export {
-  gamifyContributionsTask,
-  updateUserReputationTask,
-  updateLeaderboardsTask,
-};

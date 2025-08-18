@@ -59,7 +59,6 @@ import {
   validateCommunityDataTask,
   detectOutliersTask,
   orchestratePeerReviewTask,
-  checkPeerReviewCompletionTask,
   calculateReputationScoresTask,
 } from "./community-data/community-validation.js";
 
@@ -169,7 +168,6 @@ export const triggerTasks = {
   updateUserReputation: updateUserReputationTask,
   updateLeaderboards: updateLeaderboardsTask,
   sendNotification: sendNotificationTask,
-  checkPeerReviewCompletion: checkPeerReviewCompletionTask,
 
   // Document processing tasks (Task 7.1) - IMPLEMENTED
   processDocuments: processDocumentsTask,
