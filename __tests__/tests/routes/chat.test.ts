@@ -63,7 +63,7 @@ test.describe.serial("/api/chat", () => {
     const [chatId] = chatIdsCreatedByAda;
 
     const response = await babbageContext.request.delete(
-      `/api/chat?id=${chatId}`,
+      `/api/chat?id=${chatId}`
     );
     expect(response.status()).toBe(403);
 
@@ -85,7 +85,7 @@ test.describe.serial("/api/chat", () => {
     adaContext,
   }) => {
     const response = await adaContext.request.get(
-      `/api/chat?chatId=${generateUUID()}`,
+      `/api/chat?chatId=${generateUUID()}`
     );
     expect(response.status()).toBe(404);
   });
@@ -215,7 +215,7 @@ test.describe.serial("/api/chat", () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const secondRequest = babbageContext.request.get(
-      `/api/chat?chatId=${chatId}`,
+      `/api/chat?chatId=${chatId}`
     );
 
     const [firstResponse, secondResponse] = await Promise.all([
@@ -261,7 +261,7 @@ test.describe.serial("/api/chat", () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const secondRequest = babbageContext.request.get(
-      `/api/chat?chatId=${chatId}`,
+      `/api/chat?chatId=${chatId}`
     );
 
     const [firstResponse, secondResponse] = await Promise.all([
@@ -283,5 +283,77 @@ test.describe.serial("/api/chat", () => {
     ]);
 
     expect(firstResponseContent).toEqual(secondResponseContent);
+  });
+
+  // Context7: Test for initialMessage payload support following AI SDK validation patterns
+  test("Ada can invoke chat generation with initialMessage field", async ({
+    adaContext,
+  }) => {
+    const chatId = generateUUID();
+
+    const response = await adaContext.request.post("/api/chat", {
+      data: {
+        id: chatId,
+        title: "New Chat",
+        modelType: "gpt-4",
+        initialMessage: "Hello, I need help with immigration.",
+        visibility: "private",
+      },
+    });
+
+    expect(response.status()).toBe(200);
+
+    // Verify response is a streaming response
+    const contentType = response.headers()["content-type"];
+    expect(contentType).toContain("text/event-stream");
+
+    chatIdsCreatedByAda.push(chatId);
+  });
+
+  // Context7: Test consecutive chat calls to verify UIMessage validation fixes
+  test("Ada can make consecutive chat calls with persistent UIMessage validation", async ({
+    adaContext,
+  }) => {
+    const chatId = generateUUID();
+
+    // First call: Create chat with initialMessage
+    const firstResponse = await adaContext.request.post("/api/chat", {
+      data: {
+        id: chatId,
+        title: "Consecutive Chat Test",
+        modelType: "gpt-4",
+        initialMessage: "Hello, can you help me with immigration?",
+        visibility: "private",
+      },
+    });
+
+    expect(firstResponse.status()).toBe(200);
+
+    // Second call: Continue conversation (should load existing messages from DB)
+    const secondResponse = await adaContext.request.post("/api/chat", {
+      data: {
+        messages: [
+          {
+            id: generateUUID(),
+            role: "user",
+            content: "What documents do I need for a work visa?",
+            createdAt: new Date().toISOString(),
+          },
+        ],
+        selectedChatModel: "gpt-4",
+        visibility: "private",
+      },
+    });
+
+    expect(secondResponse.status()).toBe(200);
+
+    // Verify both responses are streaming
+    const firstContentType = firstResponse.headers()["content-type"];
+    expect(firstContentType).toContain("text/event-stream");
+
+    const secondContentType = secondResponse.headers()["content-type"];
+    expect(secondContentType).toContain("text/event-stream");
+
+    chatIdsCreatedByAda.push(chatId);
   });
 });

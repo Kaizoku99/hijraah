@@ -1,4 +1,4 @@
-import { UseChatHelpers } from "@ai-sdk/react";
+import { UseChatHelpers } from "@ai-sdk-tools/store";
 import { Message } from "ai";
 import equal from "fast-deep-equal";
 import { memo } from "react";

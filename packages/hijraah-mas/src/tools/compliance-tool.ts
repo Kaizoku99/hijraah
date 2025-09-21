@@ -27,7 +27,7 @@ export const complianceTool = createImmigrationTool(
       results: {
         overallCompliant: Math.random() > 0.2, // 80% compliance rate
         complianceScore: Math.floor(Math.random() * 40) + 60, // 60-100
-        documentCompliance: documents.map(doc => ({
+        documentCompliance: documents.map((doc: any) => ({
           documentId: doc.id,
           documentType: doc.type,
           compliant: Math.random() > 0.15, // 85% document compliance
@@ -68,7 +68,7 @@ export const complianceTool = createImmigrationTool(
     }
 
     // Add document-specific violations
-    mockCompliance.results.documentCompliance.forEach(docCompliance => {
+    mockCompliance.results.documentCompliance.forEach((docCompliance: any) => {
       if (!docCompliance.compliant) {
         docCompliance.violations.push('Document format does not meet standards')
         docCompliance.recommendations.push('Resubmit document in required format')

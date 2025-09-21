@@ -1,4 +1,4 @@
-import { generateObject } from 'ai'
+import { generateObject, generateText } from 'ai'
 import { openai } from '@ai-sdk/openai'
 import { z } from 'zod'
 import { TokenUsage } from '../types'
@@ -29,7 +29,13 @@ export class TokenUsageAnalytics {
     timestamp: Date = new Date()
   ): void {
     const cost = this.calculateCost(model, usage)
-    const enhancedUsage = { ...usage, cost, model, executionId, timestamp }
+    const enhancedUsage: TokenUsage = { 
+      ...usage, 
+      cost, 
+      model, 
+      executionId, 
+      timestamp 
+    }
 
     // Store in history
     if (!this.usageHistory.has(agentName)) {
@@ -43,8 +49,6 @@ export class TokenUsageAnalytics {
     // Send real-time metrics
     sendMetrics('token.usage', {
       agentName,
-      executionId,
-      model,
       ...enhancedUsage
     })
   }
@@ -144,7 +148,7 @@ export class TokenUsageAnalytics {
 
     // Calculate tokens per minute
     const recentUsage = this.getAllUsageInPeriod({ start: oneMinuteAgo, end: now })
-    const tokensPerMinute = recentUsage.reduce((sum, usage) => sum + usage.totalTokens, 0)
+    const tokensPerMinute = recentUsage.reduce((sum, usage) => sum + (usage.totalTokens || 0), 0)
 
     // Calculate cost per hour
     const hourlyUsage = this.getAllUsageInPeriod({ start: oneHourAgo, end: now })
@@ -156,7 +160,7 @@ export class TokenUsageAnalytics {
       const agentName = usage.agentName || 'unknown'
       const current = agentUsage.get(agentName) || { tokens: 0, cost: 0 }
       agentUsage.set(agentName, {
-        tokens: current.tokens + usage.totalTokens,
+        tokens: current.tokens + (usage.totalTokens || 0),
         cost: current.cost + (usage.cost || 0)
       })
     })
@@ -213,7 +217,7 @@ export class TokenUsageAnalytics {
       }
     }
 
-    const totalTokens = usage.reduce((sum, u) => sum + u.totalTokens, 0)
+    const totalTokens = usage.reduce((sum, u) => sum + (u.totalTokens || 0), 0)
     const totalCost = usage.reduce((sum, u) => sum + (u.cost || 0), 0)
     const executionCount = usage.length
 
@@ -221,7 +225,7 @@ export class TokenUsageAnalytics {
     const modelDistribution: Record<string, number> = {}
     usage.forEach(u => {
       const model = u.model || 'unknown'
-      modelDistribution[model] = (modelDistribution[model] || 0) + u.totalTokens
+      modelDistribution[model] = (modelDistribution[model] || 0) + (u.totalTokens || 0)
     })
 
     // Cost trend analysis
@@ -294,7 +298,10 @@ export class TokenUsageAnalytics {
 
   private calculateCost(model: string, usage: TokenUsage): number {
     const pricing = this.modelPricing.get(model) || { prompt: 0.00001, completion: 0.00002 }
-    return (usage.promptTokens * pricing.prompt) + (usage.completionTokens * pricing.completion)
+    // Support both AI SDK v5 and legacy token property names for compatibility
+    const inputTokens = usage.inputTokens || usage.promptTokens || 0
+    const outputTokens = usage.outputTokens || usage.completionTokens || 0
+    return (inputTokens * pricing.prompt) + (outputTokens * pricing.completion)
   }
 
   private checkCostThresholds(agentName: string, cost: number): void {
@@ -389,7 +396,7 @@ export class TokenUsageAnalytics {
     }
 
     const totalExecutions = usage.length
-    const totalTokens = usage.reduce((sum, u) => sum + u.totalTokens, 0)
+    const totalTokens = usage.reduce((sum, u) => sum + (u.totalTokens || 0), 0)
     const totalCost = usage.reduce((sum, u) => sum + (u.cost || 0), 0)
 
     return {

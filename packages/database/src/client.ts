@@ -1,32 +1,45 @@
+/**
+ * Database client configuration
+ */
+
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as schema from "./schema";
 
-// Environment variable setup
-const connectionString = process.env.DATABASE_URL;
+import * as schema from "./schema.js";
+import { DatabaseConfig } from "./types.js";
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL environment variable is required");
+// Create database client
+export function createDatabaseClient(config?: DatabaseConfig) {
+  const connectionString =
+    config?.connectionString ||
+    process.env.DATABASE_URL ||
+    process.env.SUPABASE_DB_URL ||
+    "postgresql://localhost:5432/hijraah";
+
+  const sql = postgres(connectionString, {
+    ssl:
+      config?.ssl || process.env.NODE_ENV === "production" ? "require" : false,
+    max: 20,
+  });
+
+  return drizzle(sql, { schema });
 }
 
-// Create the connection
-const client = postgres(connectionString, {
-  max: 10,
-  idle_timeout: 20,
-  connect_timeout: 10,
-});
+// Default client instance
+let _client: ReturnType<typeof createDatabaseClient> | null = null;
 
-// Create the Drizzle database instance
-export const db = drizzle(client, {
-  schema,
-  logger: process.env.NODE_ENV === "development",
-});
+export function getDatabaseClient(config?: DatabaseConfig) {
+  if (!_client) {
+    _client = createDatabaseClient(config);
+  }
+  return _client;
+}
 
-// Export types for use in applications
-export type Database = typeof db;
+// Client type for exports
+export type DatabaseClient = ReturnType<typeof createDatabaseClient>;
 
-// Export the client for manual queries if needed
-export { client as pgClient };
+// Export schema for convenience
+export { schema };
 
-// Export all schemas
-export * from "./schema";
+// Default database instance for convenience
+export const db = getDatabaseClient();

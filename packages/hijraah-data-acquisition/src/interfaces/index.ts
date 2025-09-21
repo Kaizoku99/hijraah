@@ -536,3 +536,6 @@ export interface ModelMetadata {
   updatedAt: Date;
   status: "training" | "ready" | "deprecated";
 }
+
+// Re-export the types from types/index.ts that are needed
+export type { TaskContext, ApiConfig } from "../types/index.js";

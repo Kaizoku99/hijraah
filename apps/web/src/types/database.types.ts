@@ -73,6 +73,12 @@ export type Database = {
           title: string;
           userId: string;
           visibility: string;
+          updatedAt: string | null;
+          lastMessageAt: string | null;
+          model: string | null;
+          systemPrompt: string | null;
+          caseId: string | null;
+          metadata: Json | null;
         };
         Insert: {
           createdAt: string;
@@ -80,6 +86,12 @@ export type Database = {
           title: string;
           userId: string;
           visibility?: string;
+          updatedAt?: string | null;
+          lastMessageAt?: string | null;
+          model?: string | null;
+          systemPrompt?: string | null;
+          caseId?: string | null;
+          metadata?: Json | null;
         };
         Update: {
           createdAt?: string;
@@ -87,8 +99,22 @@ export type Database = {
           title?: string;
           userId?: string;
           visibility?: string;
+          updatedAt?: string | null;
+          lastMessageAt?: string | null;
+          model?: string | null;
+          systemPrompt?: string | null;
+          caseId?: string | null;
+          metadata?: Json | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "Chat_caseId_fkey";
+            columns: ["caseId"];
+            isOneToOne: false;
+            referencedRelation: "cases";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       chat_attachments: {
         Row: {

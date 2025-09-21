@@ -79,7 +79,7 @@ export function ResetPasswordForm({
         {
           redirectTo:
             redirectTo || `${window.location.origin}/auth/reset-password`,
-        },
+        }
       );
 
       if (error) {
@@ -188,7 +188,7 @@ export function ResetPasswordForm({
       <CardFooter className="flex justify-center">
         <Button
           variant="link"
-          onClick={() => router.push("/login")}
+          onClick={() => router.push("/auth/login")}
           className="p-0"
         >
           Back to login

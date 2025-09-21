@@ -5,19 +5,22 @@ import { ChatRepository } from "@/_infrastructure/repositories/chat-repository";
 import { createClient } from "@/lib/supabase/server";
 
 interface ChatPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function ChatPage({ params }: ChatPageProps) {
+  // Next.js 15: params is now a Promise that needs to be awaited
+  const { id } = await params;
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const chatRepository = new ChatRepository();
-  const chat = await chatRepository.getById(params.id);
+  const chat = await chatRepository.getChatById(id);
 
   if (!chat) {
     notFound();
@@ -27,7 +30,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
 
   return (
     <div className="flex h-screen flex-col">
-      <UnifiedChatContainer id={params.id} isReadonly={isReadonly} />
+      <UnifiedChatContainer id={id} isReadonly={isReadonly} />
     </div>
   );
 }

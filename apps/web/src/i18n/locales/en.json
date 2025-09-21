@@ -226,6 +226,56 @@
     "updated": "Successfully updated",
     "deleted": "Successfully deleted"
   },
+  "chat": {
+    "input": {
+      "placeholder": "Ask me anything about immigration, visas, or your case...",
+      "recordingPlaceholder": "Listening... Speak now",
+      "speechUnavailable": "Speech recognition not available",
+      "sendButton": "Send message",
+      "attachButton": "Attach files",
+      "micButton": "Voice input",
+      "stopRecording": "Stop recording",
+      "startRecording": "Start voice input",
+      "selectModel": "Select AI model",
+      "contextualPlaceholders": {
+        "general": "How can I help you with your immigration journey today?",
+        "visa": "Ask me about visa requirements, processing times, or application steps...",
+        "documents": "Need help with document requirements or verification?",
+        "eligibility": "Let me help you check your eligibility for immigration programs...",
+        "timeline": "Want to know about processing times or create a timeline?",
+        "legal": "Have questions about immigration law or policy changes?",
+        "family": "Ask about family sponsorship or reunification...",
+        "work": "Need information about work permits or employment visas?",
+        "study": "Questions about student visas or study permits?",
+        "business": "Interested in business or investment immigration?"
+      }
+    },
+    "speechRecognition": {
+      "errors": {
+        "general": "Speech recognition error occurred",
+        "notAllowed": "Microphone access denied. Please allow microphone access.",
+        "noSpeech": "No speech detected. Please try again.",
+        "network": "Network error during speech recognition",
+        "notAvailable": "Speech recognition is not available in your browser"
+      }
+    },
+    "models": {
+      "gpt4o": "GPT-4o - Advanced reasoning",
+      "gpt35turbo": "GPT-3.5 Turbo - Fast responses",
+      "claude3opus": "Claude 3 Opus - Creative tasks",
+      "claude3sonnet": "Claude 3 Sonnet - Balanced performance",
+      "claude3haiku": "Claude 3 Haiku - Quick answers",
+      "defaultModel": "gpt-4o"
+    },
+    "attachments": {
+      "uploading": "Uploading files...",
+      "uploaded": "Files uploaded successfully",
+      "failed": "Upload failed",
+      "remove": "Remove attachment",
+      "dragDrop": "Drag and drop files here or click to browse",
+      "supportedFormats": "Supports images, PDFs, documents (max 10MB each)"
+    }
+  },
   "dates": {
     "today": "Today",
     "yesterday": "Yesterday",

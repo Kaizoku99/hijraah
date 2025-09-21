@@ -1,9 +1,10 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { createRequire } from "module";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-import { createRequire } from "module";
-import createNextIntlPlugin from "next-intl/plugin";
+
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -77,6 +78,21 @@ const nextConfig = {
       "date-fns",
       "lodash",
     ],
+  },
+  // Turbopack configuration for module resolution and aliases
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
+    resolveAlias: {
+      "@": resolve(__dirname, "./src"),
+      "@/components": resolve(__dirname, "./src/components"),
+      "@/lib": resolve(__dirname, "./src/lib"),
+      "@/utils": resolve(__dirname, "./src/lib/utils"),
+    },
   },
   typescript: {
     ignoreBuildErrors: process.env.CI !== "true",
@@ -232,7 +248,13 @@ const nextConfig = {
       },
       {
         source: "/signup",
-        destination: "/auth/signup",
+        destination: "/auth/register",
+        permanent: true,
+      },
+      // Locale-aware redirect to handle routes like /en/signup -> /en/auth/register
+      {
+        source: "/:locale/signup",
+        destination: "/:locale/auth/register",
         permanent: true,
       },
     ];

@@ -12,19 +12,19 @@
     "trigger:dev": "npx trigger.dev@latest dev"
   },
   "dependencies": {
-    "@trigger.dev/sdk": "^3.2.0",
+    "@trigger.dev/sdk": "catalog:",
     "@hijraah/ai": "workspace:*",
     "@hijraah/documents": "workspace:*",
     "@hijraah/types": "workspace:*",
-    "zod": "^3.23.8",
-    "openai": "^4.67.1",
-    "@mendable/firecrawl-js": "^1.29.1",
-    "@supabase/supabase-js": "^2.46.1"
+    "zod": "catalog:",
+    "openai": "catalog:",
+    "firecrawl": "catalog:",
+    "@supabase/supabase-js": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^22.7.4",
-    "typescript": "^5.8.3",
-    "eslint": "^8.57.0",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
     "@hijraah/eslint-config": "workspace:*",
     "@hijraah/typescript-config": "workspace:*"
   },

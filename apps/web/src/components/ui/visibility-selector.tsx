@@ -17,9 +17,10 @@ import {
   ChevronDownIcon,
   GlobeIcon,
   LockIcon,
+  UserIcon,
 } from "./icons";
 
-export type VisibilityType = "private" | "public";
+export type VisibilityType = "private" | "public" | "team";
 
 const visibilities: Array<{
   id: VisibilityType;
@@ -38,6 +39,12 @@ const visibilities: Array<{
     label: "Public",
     description: "Anyone with the link can access this chat",
     icon: <GlobeIcon />,
+  },
+  {
+    id: "team",
+    label: "Team",
+    description: "Team members can access this chat",
+    icon: <UserIcon />,
   },
 ];
 

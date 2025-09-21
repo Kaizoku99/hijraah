@@ -10,6 +10,9 @@ import {
   initialArtifactData,
 } from "@/artifacts";
 
+// Import new AI SDK Tools system for enhanced capabilities
+import { useAllArtifacts, useLegacyArtifact } from "@/artifacts/ai-sdk-tools";
+
 interface ArtifactStore {
   artifact: BaseArtifactData;
   metadata: Record<string, any>;
@@ -56,18 +59,27 @@ export function useArtifactSelector<Selected>(selector: Selector<Selected>) {
   return selectedValue;
 }
 
+/**
+ * Enhanced useArtifact with AI SDK Tools integration
+ * Now uses AI SDK Tools directly without migration helpers
+ */
 export function useArtifact() {
+  // Use the new AI SDK Tools system
+  const allArtifacts = useAllArtifacts();
+  const legacyCompat = useLegacyArtifact();
+  
+  // Keep the original SWR-based implementation as fallback for complete backward compatibility
   const { data: localArtifact, mutate: setLocalArtifact } =
     useSWR<BaseArtifactData>("artifact", null, {
       fallbackData: initialArtifactData,
     });
 
-  const artifact = useMemo(() => {
+  const legacyArtifact = useMemo(() => {
     if (!localArtifact) return initialArtifactData;
     return localArtifact;
   }, [localArtifact]);
 
-  const setArtifact = useCallback(
+  const legacySetArtifact = useCallback(
     (
       updaterFn:
         | BaseArtifactData
@@ -89,20 +101,47 @@ export function useArtifact() {
   const { data: localArtifactMetadata, mutate: setLocalArtifactMetadata } =
     useSWR<any>(
       () =>
-        artifact.documentId ? `artifact-metadata-${artifact.documentId}` : null,
+        legacyArtifact.documentId ? `artifact-metadata-${legacyArtifact.documentId}` : null,
       null,
       {
         fallbackData: null,
       },
     );
 
-  return useMemo(
-    () => ({
-      artifact,
-      setArtifact,
+  // Return enhanced version using AI SDK Tools directly
+  return useMemo(() => {
+    if (allArtifacts.current) {
+      return {
+        artifact: legacyCompat.artifact,
+        setArtifact: legacyCompat.setArtifact,
+        metadata: legacyCompat.metadata,
+        setMetadata: legacyCompat.setMetadata,
+        // Add enhanced AI SDK Tools features
+        aiSdkTools: {
+          allArtifacts,
+          current: allArtifacts.current,
+          byType: allArtifacts.byType,
+        },
+        migration: { isUsingNewSystem: true },
+      };
+    }
+    
+    // Fallback to legacy implementation
+    return {
+      artifact: legacyArtifact,
+      setArtifact: legacySetArtifact,
       metadata: localArtifactMetadata,
       setMetadata: setLocalArtifactMetadata,
-    }),
-    [artifact, setArtifact, localArtifactMetadata, setLocalArtifactMetadata],
-  );
+      // Provide empty AI SDK Tools for consistency
+      aiSdkTools: null,
+      migration: { isUsingNewSystem: false },
+    };
+  }, [
+    allArtifacts, 
+    legacyCompat,
+    legacyArtifact, 
+    legacySetArtifact, 
+    localArtifactMetadata, 
+    setLocalArtifactMetadata
+  ]);
 }

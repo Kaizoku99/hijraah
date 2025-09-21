@@ -1,13 +1,13 @@
-import { generateObject, tool } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
-import { 
-  TrendAnalysisSchema, 
+import { generateObject, tool } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
+import {
+  TrendAnalysisSchema,
   TrendAnalysisContext,
   TrendAnalysis,
-  PolicyChangeResult 
-} from './types';
+  PolicyChangeResult,
+} from "./types";
 
 /**
  * Trend Analysis Agent - Specialized agent for pattern recognition and prediction
@@ -36,7 +36,7 @@ export class TrendAnalysisAgent {
     context: TrendAnalysisContext
   ): Promise<TrendAnalysis> {
     const { object: analysis } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai("gpt-4o"),
       schema: z.object({
         analysis: TrendAnalysisSchema,
         insights: z.object({
@@ -60,7 +60,7 @@ export class TrendAnalysisAgent {
         assessTrendSignificance: this.createSignificanceTool(),
         correlateEvents: this.createCorrelationTool(),
       },
-      maxSteps: 15,
+
       system: `You are a specialized Trend Analysis Agent with expertise in policy pattern recognition and predictive analytics.
 
 Your responsibilities:
@@ -132,15 +132,17 @@ Please provide comprehensive trend analysis including:
     methodology: string;
   }> {
     const { object: predictions } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai("gpt-4o"),
       schema: z.object({
-        predictions: z.array(z.object({
-          prediction: z.string(),
-          probability: z.number().min(0).max(1),
-          timeframe: z.string(),
-          factors: z.array(z.string()),
-          confidence: z.number().min(0).max(1),
-        })),
+        predictions: z.array(
+          z.object({
+            prediction: z.string(),
+            probability: z.number().min(0).max(1),
+            timeframe: z.string(),
+            factors: z.array(z.string()),
+            confidence: z.number().min(0).max(1),
+          })
+        ),
         overallConfidence: z.number().min(0).max(1),
         methodology: z.string(),
         assumptions: z.array(z.string()),
@@ -152,7 +154,7 @@ Please provide comprehensive trend analysis including:
         modelPredictions: this.createPredictiveModelTool(),
         validatePredictions: this.createValidationTool(),
       },
-      maxSteps: 10,
+
       system: `Generate predictive insights based on historical trends and patterns. Focus on:
 - Statistical modeling of policy change patterns
 - Probability estimation with confidence intervals
@@ -185,36 +187,26 @@ Please provide comprehensive trend analysis including:
     recommendations: string[];
   }> {
     const { object: comparison } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai("gpt-4o"),
       schema: z.object({
-        comparisons: z.array(z.object({
-          jurisdiction: z.string(),
-          trendSummary: z.string(),
-          keyMetrics: z.record(z.number()),
-          uniquePatterns: z.array(z.string()),
-          relativePosition: z.enum(['leader', 'follower', 'outlier', 'average']),
-        })),
+        comparisons: z.array(
+          z.object({
+            jurisdiction: z.string(),
+            trendSummary: z.string(),
+            keyMetrics: z.record(z.string(), z.number()),
+            uniquePatterns: z.array(z.string()),
+          })
+        ),
         crossJurisdictionPatterns: z.array(z.string()),
         recommendations: z.array(z.string()),
-        insights: z.object({
-          mostActive: z.string(),
-          mostStable: z.string(),
-          mostPredictable: z.string(),
-          convergenceIndicators: z.array(z.string()),
-        }),
       }),
-      tools: {
-        queryMultiJurisdictionData: this.createMultiJurisdictionTool(),
-        comparePatterns: this.createPatternComparisonTool(),
-        identifyConvergence: this.createConvergenceTool(),
-      },
-      maxSteps: 12,
+
       system: `Compare policy change trends across multiple jurisdictions. Focus on:
 - Relative trend analysis and positioning
 - Cross-jurisdictional pattern identification
 - Convergence and divergence analysis
 - Best practice identification`,
-      prompt: `Compare policy change trends across ${jurisdictions.join(', ')} for the period ${timeframe.startDate} to ${timeframe.endDate}.`,
+      prompt: `Compare policy change trends across ${jurisdictions.join(", ")} for the period ${timeframe.startDate} to ${timeframe.endDate}.`,
     });
 
     return comparison;
@@ -223,36 +215,40 @@ Please provide comprehensive trend analysis including:
   // Tool implementations
   private createHistoricalDataTool() {
     return tool({
-      description: 'Query historical policy change data for trend analysis',
+      description: "Query historical policy change data for trend analysis",
       parameters: z.object({
         jurisdiction: z.string(),
         timeRange: z.object({
           start: z.string().datetime(),
           end: z.string().datetime(),
         }),
-        filters: z.object({
-          changeTypes: z.array(z.string()).optional(),
-          severityLevels: z.array(z.string()).optional(),
-          categories: z.array(z.string()).optional(),
-        }).optional(),
+        filters: z
+          .object({
+            changeTypes: z.array(z.string()).optional(),
+            severityLevels: z.array(z.string()).optional(),
+            categories: z.array(z.string()).optional(),
+          })
+          .optional(),
       }),
-      execute: async ({ jurisdiction, timeRange, filters }) => {
+      execute: async ({ jurisdiction, timeRange, filters }: { jurisdiction: string; timeRange: { start: string; end: string }; filters?: { changeTypes?: string[]; severityLevels?: string[]; categories?: string[] } }) => {
         try {
           let query = this.supabaseClient
-            .from('policy_changes')
-            .select('*')
-            .eq('jurisdiction', jurisdiction)
-            .gte('effective_date', timeRange.start)
-            .lte('effective_date', timeRange.end);
+            .from("policy_changes")
+            .select("*")
+            .eq("jurisdiction", jurisdiction)
+            .gte("effective_date", timeRange.start)
+            .lte("effective_date", timeRange.end);
 
           if (filters?.changeTypes?.length) {
-            query = query.in('change_type', filters.changeTypes);
+            query = query.in("change_type", filters.changeTypes);
           }
           if (filters?.severityLevels?.length) {
-            query = query.in('severity', filters.severityLevels);
+            query = query.in("severity", filters.severityLevels);
           }
 
-          const { data, error } = await query.order('effective_date', { ascending: true });
+          const { data, error } = await query.order("effective_date", {
+            ascending: true,
+          });
 
           if (error) throw error;
 
@@ -266,7 +262,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Historical data query failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Historical data query failed",
             data: [],
             count: 0,
           };
@@ -277,27 +276,29 @@ Please provide comprehensive trend analysis including:
 
   private createPatternIdentificationTool() {
     return tool({
-      description: 'Identify patterns in policy change data',
+      description: "Identify patterns in policy change data",
       parameters: z.object({
         data: z.array(z.any()),
-        patternTypes: z.array(z.enum(['temporal', 'categorical', 'severity', 'frequency'])),
+        patternTypes: z.array(
+          z.enum(["temporal", "categorical", "severity", "frequency"])
+        ),
       }),
       execute: async ({ data, patternTypes }) => {
         try {
-          const patterns = [];
+          const patterns: any[] = [];
 
           for (const patternType of patternTypes) {
             switch (patternType) {
-              case 'temporal':
+              case "temporal":
                 patterns.push(...this.identifyTemporalPatterns(data));
                 break;
-              case 'categorical':
+              case "categorical":
                 patterns.push(...this.identifyCategoricalPatterns(data));
                 break;
-              case 'severity':
+              case "severity":
                 patterns.push(...this.identifySeverityPatterns(data));
                 break;
-              case 'frequency':
+              case "frequency":
                 patterns.push(...this.identifyFrequencyPatterns(data));
                 break;
             }
@@ -305,7 +306,7 @@ Please provide comprehensive trend analysis including:
 
           return {
             success: true,
-            patterns: patterns.map(pattern => ({
+            patterns: patterns.map((pattern) => ({
               pattern: pattern.description,
               frequency: pattern.frequency,
               trend: pattern.trend,
@@ -314,13 +315,18 @@ Please provide comprehensive trend analysis including:
             })),
             summary: {
               totalPatterns: patterns.length,
-              significantPatterns: patterns.filter(p => p.significance === 'high').length,
+              significantPatterns: patterns.filter(
+                (p) => p.significance === "high"
+              ).length,
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Pattern identification failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Pattern identification failed",
             patterns: [],
           };
         }
@@ -330,7 +336,7 @@ Please provide comprehensive trend analysis including:
 
   private createPredictionTool() {
     return tool({
-      description: 'Generate predictions based on identified patterns',
+      description: "Generate predictions based on identified patterns",
       parameters: z.object({
         patterns: z.array(z.any()),
         predictionHorizon: z.number(),
@@ -339,13 +345,15 @@ Please provide comprehensive trend analysis including:
       execute: async ({ patterns, predictionHorizon, confidenceThreshold }) => {
         try {
           const predictions = patterns
-            .filter(pattern => pattern.confidence >= confidenceThreshold)
-            .map(pattern => this.generatePredictionFromPattern(pattern, predictionHorizon))
-            .filter(pred => pred.probability >= confidenceThreshold);
+            .filter((pattern) => pattern.confidence >= confidenceThreshold)
+            .map((pattern) =>
+              this.generatePredictionFromPattern(pattern, predictionHorizon)
+            )
+            .filter((pred) => pred.probability >= confidenceThreshold);
 
           return {
             success: true,
-            predictions: predictions.map(pred => ({
+            predictions: predictions.map((pred) => ({
               prediction: pred.description,
               probability: pred.probability,
               timeframe: pred.timeframe,
@@ -354,14 +362,19 @@ Please provide comprehensive trend analysis including:
             })),
             metadata: {
               totalPredictions: predictions.length,
-              averageProbability: predictions.reduce((sum, p) => sum + p.probability, 0) / predictions.length,
+              averageProbability:
+                predictions.reduce((sum, p) => sum + p.probability, 0) /
+                predictions.length,
               timeHorizon: `${predictionHorizon} months`,
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Prediction generation failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Prediction generation failed",
             predictions: [],
           };
         }
@@ -371,14 +384,17 @@ Please provide comprehensive trend analysis including:
 
   private createSeasonalityTool() {
     return tool({
-      description: 'Analyze seasonal patterns in policy changes',
+      description: "Analyze seasonal patterns in policy changes",
       parameters: z.object({
         data: z.array(z.any()),
-        seasonalityType: z.enum(['monthly', 'quarterly', 'yearly']),
+        seasonalityType: z.enum(["monthly", "quarterly", "yearly"]),
       }),
       execute: async ({ data, seasonalityType }) => {
         try {
-          const seasonalAnalysis = this.analyzeSeasonality(data, seasonalityType);
+          const seasonalAnalysis = this.analyzeSeasonality(
+            data,
+            seasonalityType
+          );
 
           return {
             success: true,
@@ -391,7 +407,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Seasonality analysis failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Seasonality analysis failed",
             seasonalPatterns: [],
           };
         }
@@ -401,16 +420,19 @@ Please provide comprehensive trend analysis including:
 
   private createSignificanceTool() {
     return tool({
-      description: 'Assess statistical significance of trends',
+      description: "Assess statistical significance of trends",
       parameters: z.object({
         patterns: z.array(z.any()),
         significanceLevel: z.number().min(0).max(1).default(0.05),
       }),
       execute: async ({ patterns, significanceLevel }) => {
         try {
-          const assessments = patterns.map(pattern => ({
+          const assessments = patterns.map((pattern) => ({
             pattern: pattern.pattern,
-            significance: this.assessStatisticalSignificance(pattern, significanceLevel),
+            significance: this.assessStatisticalSignificance(
+              pattern,
+              significanceLevel
+            ),
             pValue: this.calculatePValue(pattern),
             effectSize: this.calculateEffectSize(pattern),
             recommendation: this.getSignificanceRecommendation(pattern),
@@ -419,17 +441,25 @@ Please provide comprehensive trend analysis including:
           return {
             success: true,
             assessments,
-            significantPatterns: assessments.filter(a => a.significance === 'significant'),
+            significantPatterns: assessments.filter(
+              (a) => a.significance === "significant"
+            ),
             summary: {
               totalAssessed: assessments.length,
-              significant: assessments.filter(a => a.significance === 'significant').length,
-              marginal: assessments.filter(a => a.significance === 'marginal').length,
+              significant: assessments.filter(
+                (a) => a.significance === "significant"
+              ).length,
+              marginal: assessments.filter((a) => a.significance === "marginal")
+                .length,
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Significance assessment failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Significance assessment failed",
             assessments: [],
           };
         }
@@ -439,36 +469,52 @@ Please provide comprehensive trend analysis including:
 
   private createCorrelationTool() {
     return tool({
-      description: 'Analyze correlations between policy changes and external factors',
+      description:
+        "Analyze correlations between policy changes and external factors",
       parameters: z.object({
         policyData: z.array(z.any()),
-        externalFactors: z.array(z.object({
-          name: z.string(),
-          data: z.array(z.any()),
-          type: z.enum(['economic', 'political', 'social', 'environmental']),
-        })),
+        externalFactors: z.array(
+          z.object({
+            name: z.string(),
+            data: z.array(z.any()),
+            type: z.enum(["economic", "political", "social", "environmental"]),
+          })
+        ),
       }),
-      execute: async ({ policyData, externalFactors }) => {
+      execute: async ({ policyData, externalFactors }: { policyData: any[]; externalFactors: Array<{ name: string; data: any[]; type: "economic" | "political" | "social" | "environmental" }> }) => {
         try {
-          const correlations = externalFactors.map(factor => ({
+          const correlations = externalFactors.map((factor) => ({
             factor: factor.name,
             type: factor.type,
             correlation: this.calculateCorrelation(policyData, factor.data),
-            strength: this.assessCorrelationStrength(this.calculateCorrelation(policyData, factor.data)),
-            significance: this.assessCorrelationSignificance(policyData, factor.data),
-            insights: this.generateCorrelationInsights(factor.name, this.calculateCorrelation(policyData, factor.data)),
+            strength: this.assessCorrelationStrength(
+              this.calculateCorrelation(policyData, factor.data)
+            ),
+            significance: this.assessCorrelationSignificance(
+              policyData,
+              factor.data
+            ),
+            insights: this.generateCorrelationInsights(
+              factor.name,
+              this.calculateCorrelation(policyData, factor.data)
+            ),
           }));
 
           return {
             success: true,
             correlations,
-            strongCorrelations: correlations.filter(c => c.strength === 'strong'),
+            strongCorrelations: correlations.filter(
+              (c) => c.strength === "strong"
+            ),
             insights: this.generateOverallCorrelationInsights(correlations),
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Correlation analysis failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Correlation analysis failed",
             correlations: [],
           };
         }
@@ -479,14 +525,17 @@ Please provide comprehensive trend analysis including:
   // Additional tool implementations for predictions and comparisons
   private createPatternAnalysisTool() {
     return tool({
-      description: 'Analyze patterns for predictive modeling',
+      description: "Analyze patterns for predictive modeling",
       parameters: z.object({
         historicalData: z.array(z.any()),
-        analysisType: z.enum(['trend', 'cycle', 'seasonal', 'irregular']),
+        analysisType: z.enum(["trend", "cycle", "seasonal", "irregular"]),
       }),
       execute: async ({ historicalData, analysisType }) => {
         try {
-          const analysis = this.performPatternAnalysis(historicalData, analysisType);
+          const analysis = this.performPatternAnalysis(
+            historicalData,
+            analysisType
+          );
           return {
             success: true,
             analysis,
@@ -496,7 +545,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Pattern analysis failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Pattern analysis failed",
             analysis: null,
           };
         }
@@ -506,17 +558,17 @@ Please provide comprehensive trend analysis including:
 
   private createPredictiveModelTool() {
     return tool({
-      description: 'Apply predictive models to generate forecasts',
+      description: "Apply predictive models to generate forecasts",
       parameters: z.object({
         patterns: z.array(z.any()),
-        modelType: z.enum(['linear', 'exponential', 'cyclical', 'hybrid']),
+        modelType: z.enum(["linear", "exponential", "cyclical", "hybrid"]),
         horizon: z.number(),
       }),
       execute: async ({ patterns, modelType, horizon }) => {
         try {
           const model = this.buildPredictiveModel(patterns, modelType);
           const forecasts = this.generateForecasts(model, horizon);
-          
+
           return {
             success: true,
             forecasts,
@@ -526,7 +578,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Predictive modeling failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Predictive modeling failed",
             forecasts: [],
           };
         }
@@ -536,15 +591,18 @@ Please provide comprehensive trend analysis including:
 
   private createValidationTool() {
     return tool({
-      description: 'Validate predictions against historical data',
+      description: "Validate predictions against historical data",
       parameters: z.object({
         predictions: z.array(z.any()),
         validationData: z.array(z.any()),
       }),
       execute: async ({ predictions, validationData }) => {
         try {
-          const validation = this.validatePredictions(predictions, validationData);
-          
+          const validation = this.validatePredictions(
+            predictions,
+            validationData
+          );
+
           return {
             success: true,
             validationResults: validation,
@@ -554,7 +612,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Prediction validation failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Prediction validation failed",
             validationResults: null,
           };
         }
@@ -564,7 +625,7 @@ Please provide comprehensive trend analysis including:
 
   private createMultiJurisdictionTool() {
     return tool({
-      description: 'Query data across multiple jurisdictions for comparison',
+      description: "Query data across multiple jurisdictions for comparison",
       parameters: z.object({
         jurisdictions: z.array(z.string()),
         timeRange: z.object({
@@ -572,20 +633,20 @@ Please provide comprehensive trend analysis including:
           end: z.string().datetime(),
         }),
       }),
-      execute: async ({ jurisdictions, timeRange }) => {
+      execute: async ({ jurisdictions, timeRange }: { jurisdictions: string[]; timeRange: { start: string; end: string } }) => {
         try {
           const { data, error } = await this.supabaseClient
-            .from('policy_changes')
-            .select('*')
-            .in('jurisdiction', jurisdictions)
-            .gte('effective_date', timeRange.start)
-            .lte('effective_date', timeRange.end)
-            .order('effective_date', { ascending: true });
+            .from("policy_changes")
+            .select("*")
+            .in("jurisdiction", jurisdictions)
+            .gte("effective_date", timeRange.start)
+            .lte("effective_date", timeRange.end)
+            .order("effective_date", { ascending: true });
 
           if (error) throw error;
 
           const groupedData = this.groupDataByJurisdiction(data || []);
-          
+
           return {
             success: true,
             data: groupedData,
@@ -594,7 +655,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Multi-jurisdiction query failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Multi-jurisdiction query failed",
             data: {},
           };
         }
@@ -604,23 +668,25 @@ Please provide comprehensive trend analysis including:
 
   private createPatternComparisonTool() {
     return tool({
-      description: 'Compare patterns across jurisdictions',
+      description: "Compare patterns across jurisdictions",
       parameters: z.object({
-        jurisdictionData: z.record(z.array(z.any())),
+        jurisdictionData: z.record(z.string(), z.array(z.any())),
       }),
       execute: async ({ jurisdictionData }) => {
         try {
-          const comparisons = Object.entries(jurisdictionData).map(([jurisdiction, data]) => {
-            const patterns = this.identifyAllPatterns(data);
-            return {
-              jurisdiction,
-              patterns,
-              metrics: this.calculateJurisdictionMetrics(data),
-            };
-          });
+          const comparisons = Object.entries(jurisdictionData).map(
+            ([jurisdiction, data]) => {
+              const patterns = this.identifyAllPatterns(data);
+              return {
+                jurisdiction,
+                patterns,
+                metrics: this.calculateJurisdictionMetrics(data),
+              };
+            }
+          );
 
           const crossComparisons = this.performCrossComparisons(comparisons);
-          
+
           return {
             success: true,
             comparisons,
@@ -630,7 +696,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Pattern comparison failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Pattern comparison failed",
             comparisons: [],
           };
         }
@@ -640,14 +709,14 @@ Please provide comprehensive trend analysis including:
 
   private createConvergenceTool() {
     return tool({
-      description: 'Identify convergence patterns across jurisdictions',
+      description: "Identify convergence patterns across jurisdictions",
       parameters: z.object({
         comparisons: z.array(z.any()),
       }),
       execute: async ({ comparisons }) => {
         try {
           const convergenceAnalysis = this.analyzeConvergence(comparisons);
-          
+
           return {
             success: true,
             convergenceIndicators: convergenceAnalysis.indicators,
@@ -657,7 +726,10 @@ Please provide comprehensive trend analysis including:
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Convergence analysis failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Convergence analysis failed",
             convergenceIndicators: [],
           };
         }
@@ -669,7 +741,7 @@ Please provide comprehensive trend analysis including:
   private async storeTrendAnalysis(analysis: TrendAnalysis): Promise<void> {
     try {
       const { error } = await this.supabaseClient
-        .from('trend_analyses')
+        .from("trend_analyses")
         .insert({
           id: analysis.analysisId,
           jurisdiction: analysis.jurisdiction,
@@ -682,10 +754,10 @@ Please provide comprehensive trend analysis including:
         });
 
       if (error) {
-        console.error('Failed to store trend analysis:', error);
+        console.error("Failed to store trend analysis:", error);
       }
     } catch (error) {
-      console.error('Error storing trend analysis:', error);
+      console.error("Error storing trend analysis:", error);
     }
   }
 
@@ -697,27 +769,29 @@ Please provide comprehensive trend analysis including:
         earliest: data[0]?.effective_date,
         latest: data[data.length - 1]?.effective_date,
       },
-      changeTypes: [...new Set(data.map(d => d.change_type))],
-      severityDistribution: this.calculateDistribution(data, 'severity'),
+      changeTypes: [...new Set(data.map((d) => d.change_type))],
+      severityDistribution: this.calculateDistribution(data, "severity"),
     };
   }
 
   private identifyTemporalPatterns(data: any[]): any[] {
     // Simplified temporal pattern identification
     const monthlyDistribution = this.groupByMonth(data);
-    const patterns = [];
+    const patterns: any[] = [];
 
     // Identify peak months
-    const maxMonth = Object.entries(monthlyDistribution)
-      .reduce((max, [month, count]) => count > max.count ? { month, count } : max, { month: '', count: 0 });
+    const maxMonth = Object.entries(monthlyDistribution).reduce(
+      (max, [month, count]) => (count > max.count ? { month, count } : max),
+      { month: "", count: 0 }
+    );
 
     if (maxMonth.count > 0) {
       patterns.push({
         description: `Peak activity in ${maxMonth.month}`,
         frequency: maxMonth.count,
-        trend: 'seasonal',
+        trend: "seasonal",
         confidence: 0.8,
-        significance: maxMonth.count > data.length * 0.2 ? 'high' : 'medium',
+        significance: maxMonth.count > data.length * 0.2 ? "high" : "medium",
       });
     }
 
@@ -725,36 +799,43 @@ Please provide comprehensive trend analysis including:
   }
 
   private identifyCategoricalPatterns(data: any[]): any[] {
-    const categoryDistribution = this.calculateDistribution(data, 'change_type');
+    const categoryDistribution = this.calculateDistribution(
+      data,
+      "change_type"
+    );
     return Object.entries(categoryDistribution).map(([category, count]) => ({
       description: `Frequent ${category} changes`,
       frequency: count,
-      trend: 'stable',
+      trend: "stable",
       confidence: 0.7,
-      significance: count > data.length * 0.3 ? 'high' : 'medium',
+      significance: count > data.length * 0.3 ? "high" : "medium",
     }));
   }
 
   private identifySeverityPatterns(data: any[]): any[] {
     const severityTrend = this.analyzeSeverityTrend(data);
-    return [{
-      description: `Severity trend: ${severityTrend.direction}`,
-      frequency: data.length,
-      trend: severityTrend.direction,
-      confidence: severityTrend.confidence,
-      significance: 'medium',
-    }];
+    return [
+      {
+        description: `Severity trend: ${severityTrend.direction}`,
+        frequency: data.length,
+        trend: severityTrend.direction,
+        confidence: severityTrend.confidence,
+        significance: "medium",
+      },
+    ];
   }
 
   private identifyFrequencyPatterns(data: any[]): any[] {
     const frequencyAnalysis = this.analyzeFrequency(data);
-    return [{
-      description: `Change frequency: ${frequencyAnalysis.pattern}`,
-      frequency: frequencyAnalysis.averagePerMonth,
-      trend: frequencyAnalysis.trend,
-      confidence: 0.75,
-      significance: 'medium',
-    }];
+    return [
+      {
+        description: `Change frequency: ${frequencyAnalysis.pattern}`,
+        frequency: frequencyAnalysis.averagePerMonth,
+        trend: frequencyAnalysis.trend,
+        confidence: 0.75,
+        significance: "medium",
+      },
+    ];
   }
 
   private generatePredictionFromPattern(pattern: any, horizon: number): any {
@@ -771,16 +852,16 @@ Please provide comprehensive trend analysis including:
     // Simplified seasonality analysis
     return {
       patterns: [`${type} seasonality detected`],
-      peaks: ['Q4'],
-      lows: ['Q2'],
+      peaks: ["Q4"],
+      lows: ["Q2"],
       strength: 0.6,
-      recommendations: ['Monitor Q4 for increased activity'],
+      recommendations: ["Monitor Q4 for increased activity"],
     };
   }
 
   private assessStatisticalSignificance(pattern: any, level: number): string {
     // Simplified significance assessment
-    return pattern.confidence > (1 - level) ? 'significant' : 'not_significant';
+    return pattern.confidence > 1 - level ? "significant" : "not_significant";
   }
 
   private calculatePValue(pattern: any): number {
@@ -794,7 +875,7 @@ Please provide comprehensive trend analysis including:
   }
 
   private getSignificanceRecommendation(pattern: any): string {
-    return pattern.confidence > 0.8 ? 'Monitor closely' : 'Requires more data';
+    return pattern.confidence > 0.8 ? "Monitor closely" : "Requires more data";
   }
 
   private calculateCorrelation(policyData: any[], factorData: any[]): number {
@@ -804,27 +885,39 @@ Please provide comprehensive trend analysis including:
 
   private assessCorrelationStrength(correlation: number): string {
     const abs = Math.abs(correlation);
-    if (abs > 0.7) return 'strong';
-    if (abs > 0.4) return 'moderate';
-    return 'weak';
+    if (abs > 0.7) return "strong";
+    if (abs > 0.4) return "moderate";
+    return "weak";
   }
 
-  private assessCorrelationSignificance(policyData: any[], factorData: any[]): string {
+  private assessCorrelationSignificance(
+    policyData: any[],
+    factorData: any[]
+  ): string {
     // Simplified significance assessment
-    return policyData.length > 30 ? 'significant' : 'insufficient_data';
+    return policyData.length > 30 ? "significant" : "insufficient_data";
   }
 
-  private generateCorrelationInsights(factorName: string, correlation: number): string[] {
-    const insights = [];
+  private generateCorrelationInsights(
+    factorName: string,
+    correlation: number
+  ): string[] {
+    const insights: any[] = [];
     if (Math.abs(correlation) > 0.5) {
-      insights.push(`${factorName} shows ${correlation > 0 ? 'positive' : 'negative'} correlation with policy changes`);
+      insights.push(
+        `${factorName} shows ${correlation > 0 ? "positive" : "negative"} correlation with policy changes`
+      );
     }
     return insights;
   }
 
   private generateOverallCorrelationInsights(correlations: any[]): string[] {
-    const strongCorrelations = correlations.filter(c => c.strength === 'strong');
-    return strongCorrelations.map(c => `Strong correlation found with ${c.factor}`);
+    const strongCorrelations = correlations.filter(
+      (c) => c.strength === "strong"
+    );
+    return strongCorrelations.map(
+      (c) => `Strong correlation found with ${c.factor}`
+    );
   }
 
   // Additional helper methods for predictions and comparisons
@@ -855,7 +948,7 @@ Please provide comprehensive trend analysis including:
   private validatePredictions(predictions: any[], validationData: any[]): any {
     return {
       overallAccuracy: 0.8,
-      recommendations: ['Increase data collection', 'Refine model parameters'],
+      recommendations: ["Increase data collection", "Refine model parameters"],
     };
   }
 
@@ -867,11 +960,15 @@ Please provide comprehensive trend analysis including:
     }, {});
   }
 
-  private generateMultiJurisdictionSummary(groupedData: Record<string, any[]>): any {
+  private generateMultiJurisdictionSummary(
+    groupedData: Record<string, any[]>
+  ): any {
     return {
       jurisdictionCount: Object.keys(groupedData).length,
       totalChanges: Object.values(groupedData).flat().length,
-      averageChangesPerJurisdiction: Object.values(groupedData).reduce((sum, data) => sum + data.length, 0) / Object.keys(groupedData).length,
+      averageChangesPerJurisdiction:
+        Object.values(groupedData).reduce((sum, data) => sum + data.length, 0) /
+        Object.keys(groupedData).length,
     };
   }
 
@@ -896,7 +993,9 @@ Please provide comprehensive trend analysis including:
   private performCrossComparisons(comparisons: any[]): any[] {
     return comparisons.map((comp, i) => ({
       jurisdiction: comp.jurisdiction,
-      relativeTo: comparisons.filter((_, j) => j !== i).map(c => c.jurisdiction),
+      relativeTo: comparisons
+        .filter((_, j) => j !== i)
+        .map((c) => c.jurisdiction),
       ranking: i + 1,
       differentiators: [`Unique pattern in ${comp.jurisdiction}`],
     }));
@@ -905,21 +1004,27 @@ Please provide comprehensive trend analysis including:
   private generateComparisonInsights(comparisons: any[]): string[] {
     return [
       `${comparisons.length} jurisdictions analyzed`,
-      'Common patterns identified across jurisdictions',
-      'Unique approaches found in specific regions',
+      "Common patterns identified across jurisdictions",
+      "Unique approaches found in specific regions",
     ];
   }
 
   private analyzeConvergence(comparisons: any[]): any {
     return {
-      indicators: ['Similar timing patterns', 'Comparable severity distributions'],
-      divergences: ['Different change types', 'Varying frequencies'],
-      opportunities: ['Harmonize timing', 'Share best practices'],
+      indicators: [
+        "Similar timing patterns",
+        "Comparable severity distributions",
+      ],
+      divergences: ["Different change types", "Varying frequencies"],
+      opportunities: ["Harmonize timing", "Share best practices"],
     };
   }
 
   // Utility helpers
-  private calculateDistribution(data: any[], field: string): Record<string, number> {
+  private calculateDistribution(
+    data: any[],
+    field: string
+  ): Record<string, number> {
     return data.reduce((acc, item) => {
       acc[item[field]] = (acc[item[field]] || 0) + 1;
       return acc;
@@ -928,7 +1033,9 @@ Please provide comprehensive trend analysis including:
 
   private groupByMonth(data: any[]): Record<string, number> {
     return data.reduce((acc, item) => {
-      const month = new Date(item.effective_date).toLocaleString('default', { month: 'long' });
+      const month = new Date(item.effective_date).toLocaleString("default", {
+        month: "long",
+      });
       acc[month] = (acc[month] || 0) + 1;
       return acc;
     }, {});
@@ -937,12 +1044,22 @@ Please provide comprehensive trend analysis including:
   private analyzeSeverityTrend(data: any[]): any {
     // Simplified severity trend analysis
     const severityScores = { low: 1, medium: 2, high: 3, critical: 4 };
-    const scores = data.map(d => severityScores[d.severity] || 2);
-    const avgFirst = scores.slice(0, Math.floor(scores.length / 2)).reduce((a, b) => a + b, 0) / Math.floor(scores.length / 2);
-    const avgLast = scores.slice(Math.floor(scores.length / 2)).reduce((a, b) => a + b, 0) / Math.ceil(scores.length / 2);
-    
+    const scores = data.map((d) => severityScores[d.severity] || 2);
+    const avgFirst =
+      scores
+        .slice(0, Math.floor(scores.length / 2))
+        .reduce((a, b) => a + b, 0) / Math.floor(scores.length / 2);
+    const avgLast =
+      scores.slice(Math.floor(scores.length / 2)).reduce((a, b) => a + b, 0) /
+      Math.ceil(scores.length / 2);
+
     return {
-      direction: avgLast > avgFirst ? 'increasing' : avgLast < avgFirst ? 'decreasing' : 'stable',
+      direction:
+        avgLast > avgFirst
+          ? "increasing"
+          : avgLast < avgFirst
+            ? "decreasing"
+            : "stable",
       confidence: Math.abs(avgLast - avgFirst) > 0.5 ? 0.8 : 0.6,
     };
   }
@@ -950,20 +1067,21 @@ Please provide comprehensive trend analysis including:
   private analyzeFrequency(data: any[]): any {
     const monthlyCount = data.length / 12; // Assuming 1 year of data
     return {
-      pattern: monthlyCount > 2 ? 'high' : monthlyCount > 1 ? 'moderate' : 'low',
+      pattern:
+        monthlyCount > 2 ? "high" : monthlyCount > 1 ? "moderate" : "low",
       averagePerMonth: monthlyCount,
-      trend: 'stable', // Simplified
+      trend: "stable", // Simplified
     };
   }
 
   private calculateAverageSeverity(data: any[]): number {
     const severityScores = { low: 1, medium: 2, high: 3, critical: 4 };
-    const scores = data.map(d => severityScores[d.severity] || 2);
+    const scores = data.map((d) => severityScores[d.severity] || 2);
     return scores.reduce((a, b) => a + b, 0) / scores.length;
   }
 
   private calculateDiversityIndex(data: any[]): number {
-    const types = [...new Set(data.map(d => d.change_type))];
+    const types = [...new Set(data.map((d) => d.change_type))];
     return types.length / 10; // Normalize to 0-1 range
   }
 }

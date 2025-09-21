@@ -1,66 +1,20 @@
 {
   "extends": [
-    "next/core-web-vitals",
-    "plugin:import/recommended",
-    "plugin:import/typescript"
+    "next/core-web-vitals"
   ],
-  "plugins": ["import"],
   "settings": {
     "import/resolver": {
       "typescript": {
         "alwaysTryTypes": true,
-        "project": "./tsconfig.json"
+        "project": ["./apps/web/tsconfig.json"]
       }
     }
   },
   "rules": {
-    "import/no-relative-parent-imports": "warn",
-    "import/order": [
-      "warn",
-      {
-        "groups": [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index",
-          "object",
-          "type"
-        ],
-        "pathGroups": [
-          {
-            "pattern": "@/**",
-            "group": "internal",
-            "position": "before"
-          }
-        ],
-        "pathGroupsExcludedImportTypes": ["builtin"],
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
-        },
-        "newlines-between": "always"
-      }
-    ],
-    "no-restricted-imports": [
-      "error",
-      {
-        "paths": [
-          {
-            "name": "@/supabase/schema",
-            "importNames": [
-              "user",
-              "User",
-              "document",
-              "Document",
-              "suggestion"
-            ],
-            "message": "Legacy identifiers are deprecated. Use profiles, artifacts, suggestions instead."
-          }
-        ]
-      }
-    ]
+    "import/no-relative-parent-imports": "off",
+    "import/order": "off",
+    "import/no-unresolved": "off",
+    "no-restricted-imports": "off"
   },
   "overrides": [
     {

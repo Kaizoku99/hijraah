@@ -202,7 +202,7 @@ export class AgentDebuggingInterface {
     }>
     performanceMetrics: any
   }> {
-    const session = this.activeSessions.get(sessionId) || await this.loadDebuggingSession(sessionId)
+    const session = this.activeSessions.get(sessionId) || (await this.loadDebuggingSession(sessionId))
     if (!session) {
       throw new Error(`No debugging session found: ${sessionId}`)
     }
@@ -307,7 +307,7 @@ export class AgentDebuggingInterface {
 
     const recentSteps = session.steps.slice(-5)
     const totalDuration = session.steps.reduce((sum, step) => sum + step.performance.duration, 0)
-    const totalTokens = session.steps.reduce((sum, step) => sum + step.modelResponse.usage.totalTokens, 0)
+    const totalTokens = session.steps.reduce((sum, step) => sum + (step.modelResponse.usage.totalTokens || 0), 0)
 
     return {
       currentStep: session.steps.length,
@@ -413,10 +413,11 @@ export class AgentDebuggingInterface {
     }
 
     // Check for high token usage
-    if (usage.totalTokens > 2000) {
+    const totalTokens = usage.totalTokens || 0
+    if (totalTokens > 2000) {
       issues.push({
         type: 'performance',
-        message: `High token usage: ${usage.totalTokens} tokens`,
+        message: `High token usage: ${totalTokens} tokens`,
         suggestion: 'Consider prompt optimization or model selection'
       })
     }
@@ -444,7 +445,7 @@ export class AgentDebuggingInterface {
 
   private updateSessionSummary(session: DebuggingSession): void {
     session.summary.totalDuration = session.steps.reduce((sum, step) => sum + step.performance.duration, 0)
-    session.summary.totalTokenUsage = session.steps.reduce((sum, step) => sum + step.modelResponse.usage.totalTokens, 0)
+    session.summary.totalTokenUsage = session.steps.reduce((sum, step) => sum + (step.modelResponse.usage.totalTokens || 0), 0)
     session.summary.issueCount = session.steps.reduce((sum, step) => sum + (step.issues?.length || 0), 0)
     session.summary.successRate = this.calculateSuccessRate(session.steps)
   }
@@ -566,17 +567,20 @@ export class AgentDebuggingInterface {
     costlySteps: Array<{ stepNumber: number; tokens: number; cost: number }>
     optimizationOpportunities: string[]
   }> {
-    const totalTokens = steps.reduce((sum, step) => sum + step.modelResponse.usage.totalTokens, 0)
+    const totalTokens = steps.reduce((sum, step) => sum + (step.modelResponse.usage.totalTokens || 0), 0)
     
     // Find high token usage steps
     const avgTokens = totalTokens / steps.length
     const costlySteps = steps
-      .filter(step => step.modelResponse.usage.totalTokens > avgTokens * 2)
-      .map(step => ({
-        stepNumber: step.stepNumber,
-        tokens: step.modelResponse.usage.totalTokens,
-        cost: step.modelResponse.usage.totalTokens * 0.00003 // Estimated cost
-      }))
+      .filter(step => (step.modelResponse.usage.totalTokens || 0) > avgTokens * 2)
+      .map(step => {
+        const tokens = step.modelResponse.usage.totalTokens || 0
+        return {
+          stepNumber: step.stepNumber,
+          tokens,
+          cost: tokens * 0.00003 // Estimated cost
+        }
+      })
 
     const optimizationOpportunities = [
       'Consider using smaller models for simple tasks',

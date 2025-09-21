@@ -1,6 +1,5 @@
-import { createServerClient } from "@supabase/ssr";
 import { createClient } from "@supabase/supabase-js";
-import { cookies } from "next/headers";
+import { createClient as createServerClient } from "@/utils/supabase/server";
 import type { Database } from "@/types/database.types";
 import { ExtendedUser } from "@/types/auth";
 import {
@@ -31,6 +30,20 @@ export const authConfig: AuthConfig = {
 
 // Context7 - Provider Isolation: Supabase client factory
 export function createSupabaseClient() {
+  // Use fetch-ponyfill to avoid body.tee issues
+  let customFetch = globalThis.fetch;
+  
+  try {
+    if (typeof window === 'undefined') {
+      // Server-side: use fetch-ponyfill
+      const fetchPonyfill = require('fetch-ponyfill');
+      const { fetch } = fetchPonyfill();
+      customFetch = fetch;
+    }
+  } catch (error) {
+    console.warn('Could not load fetch-ponyfill, using default fetch');
+  }
+
   return createClient<Database>(
     authConfig.supabaseUrl,
     authConfig.supabaseAnonKey,
@@ -40,51 +53,36 @@ export function createSupabaseClient() {
         autoRefreshToken: true,
         detectSessionInUrl: true,
       },
+      global: {
+        fetch: customFetch,
+      },
     },
   );
 }
 
 // Context7 - Provider Isolation: Server-side Supabase client factory
-export function createSupabaseServerClient(cookieStore?: any) {
-  return createServerClient<Database>(
-    authConfig.supabaseUrl,
-    authConfig.supabaseAnonKey,
-    {
-      cookies: cookieStore
-        ? {
-            get(name: string) {
-              return cookieStore.get(name)?.value;
-            },
-            set(name: string, value: string, options: any) {
-              cookieStore.set(name, value, options);
-            },
-            remove(name: string, options: any) {
-              cookieStore.set(name, "", { ...options, maxAge: 0 });
-            },
-          }
-        : {
-            get(name: string) {
-              return cookies().get(name)?.value;
-            },
-            set(name: string, value: string, options: any) {
-              cookies().set(name, value, options);
-            },
-            remove(name: string, options: any) {
-              cookies().set(name, "", { ...options, maxAge: 0 });
-            },
-          },
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-      },
-    },
-  );
+export async function createSupabaseServerClient() {
+  return await createServerClient();
 }
 
 // Context7 - Provider Isolation: Admin client for server operations
 export function createSupabaseServiceClient() {
   if (!authConfig.supabaseServiceKey) {
     throw new Error("Supabase service key not configured");
+  }
+
+  // Use fetch-ponyfill to avoid body.tee issues
+  let customFetch = globalThis.fetch;
+  
+  try {
+    if (typeof window === 'undefined') {
+      // Server-side: use fetch-ponyfill
+      const fetchPonyfill = require('fetch-ponyfill');
+      const { fetch } = fetchPonyfill();
+      customFetch = fetch;
+    }
+  } catch (error) {
+    console.warn('Could not load fetch-ponyfill, using default fetch');
   }
 
   return createClient<Database>(
@@ -94,6 +92,9 @@ export function createSupabaseServiceClient() {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
+      },
+      global: {
+        fetch: customFetch,
       },
     },
   );
@@ -211,7 +212,7 @@ export async function getAuthenticatedUser(request?: any): Promise<{
           get: (name: string) => request.cookies.get(name),
           set: () => {}, // No-op for read operations
         }
-      : cookies();
+      : await import("next/headers").then(async m => await m.cookies());
 
     // Context7 - Provider Isolation: Check guest session first if enabled
     if (authConfig.guestSessionEnabled) {
@@ -228,7 +229,7 @@ export async function getAuthenticatedUser(request?: any): Promise<{
     }
 
     // Check regular Supabase authentication
-    const supabase = createSupabaseServerClient(cookieStore);
+    const supabase = await createSupabaseServerClient();
     const {
       data: { user },
       error,

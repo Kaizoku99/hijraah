@@ -3,17 +3,14 @@ import "@/globals.css";
 // import "@fontsource/noto-sans-arabic/500.css";
 // import "@fontsource/noto-sans-arabic/600.css";
 // import "@fontsource/noto-sans-arabic/700.css";
-import { StagewiseToolbar } from "@stagewise/toolbar-next";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-// Removed getMessages and font imports, as these are handled in [locale]/layout.tsx
-// Removed cn utility as it's not used here anymore
+import { Providers } from "@/app/providers";
 
 import type { Metadata, Viewport } from "next";
 
-// This is the root layout - middleware handles locale redirects
-// All the actual UI is in [locale]/layout.tsx
+// Root layout for the entire app. Locale-specific UI and providers are composed in [locale]/layout.tsx.
 
 export const metadata: Metadata = {
   title: {
@@ -86,17 +83,16 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // The getMessages() call and font classNames were incorrect here and have been removed.
-  // They are correctly handled in [locale]/layout.tsx.
-  const stagewiseConfig = { plugins: [] }; // Define config for StagewiseToolbar
-
   return (
-    <>
-      {children}
-      <Analytics />
-      <SpeedInsights />
-      {/* Render StagewiseToolbar conditionally if config exists */}
-      {stagewiseConfig && <StagewiseToolbar config={stagewiseConfig} />}
-    </>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
+      <body>
+        <Providers>{children}</Providers>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
   );
 }

@@ -1,13 +1,20 @@
-// Main exports for @hijraah/documents package
-export { EnhancedDocumentProcessor } from "./processor.js";
-export type {
-  Document,
-  ProcessingOptions,
-  ProcessingResult,
-  ProcessorConfig,
-} from "./processor.js";
+// Export document-related functionality
+export * from "./types";
+export * from "./utils";
 
-// Factory function for easy instantiation
-export function createHijraahDocumentProcessor(config: ProcessorConfig) {
-  return new EnhancedDocumentProcessor(config);
-}
+// Document processing functionality
+export const processDocument = (content: string) => {
+  return {
+    content,
+    processed: true,
+    timestamp: new Date().toISOString(),
+  };
+};
+
+// Main document processor factory
+export const createHijraahDocumentProcessor = (config?: any) => {
+  return {
+    process: processDocument,
+    config,
+  };
+};

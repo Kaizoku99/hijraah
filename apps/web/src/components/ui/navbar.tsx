@@ -19,12 +19,12 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import LanguageSwitcher from "@/components/ui/language-switcher";
 import { MobileNav } from "@/components/ui/mobile-nav";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle-client";
 
 // Define the navigationMenuTriggerStyle function
 const navigationMenuTriggerStyle = () => {
   return cn(
-    "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50",
+    "group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
   );
 };
 
@@ -36,7 +36,7 @@ export function Navbar({ session }: { session: Session | null }) {
   const router = useRouter();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   useEffect(() => {
@@ -65,17 +65,15 @@ export function Navbar({ session }: { session: Session | null }) {
         <div className="container flex h-14 items-center">
           <div className="mr-4 flex">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <>
-                <Image
-                  src="/Hijraah_logo.png"
-                  alt="Hijraah"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
-                  priority
-                />
-                <span className="font-bold text-xl">Hijraah</span>
-              </>
+              <Image
+                src="/Hijraah_logo.png"
+                alt="Hijraah"
+                width={32}
+                height={32}
+                className="h-8 w-8"
+                priority
+              />
+              <span className="font-bold text-xl">Hijraah</span>
             </Link>
           </div>
         </div>
@@ -88,62 +86,66 @@ export function Navbar({ session }: { session: Session | null }) {
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <>
-              <Image
-                src="/Hijraah_logo.png"
-                alt="Hijraah"
-                width={32}
-                height={32}
-                className="h-8 w-8"
-                priority
-              />
-              <span className="font-bold text-xl">Hijraah</span>
-            </>
+            <Image
+              src="/Hijraah_logo.png"
+              alt="Hijraah"
+              width={32}
+              height={32}
+              className="h-8 w-8"
+              priority
+            />
+            <span className="font-bold text-xl">Hijraah</span>
           </Link>
 
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList>
               <NavigationMenuItem>
-                <Link href="/" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink asChild>
+                  <Link href="/" className={navigationMenuTriggerStyle()}>
                     Home
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/about" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink asChild>
+                  <Link href="/about" className={navigationMenuTriggerStyle()}>
                     About
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/contact" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/contact"
+                    className={navigationMenuTriggerStyle()}
+                  >
                     Contact
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/tools" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink asChild>
+                  <Link href="/tools" className={navigationMenuTriggerStyle()}>
                     Tools
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/chat" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink asChild>
+                  <Link href="/chat" className={navigationMenuTriggerStyle()}>
                     Chat
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/ai-chat" passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/ai-chat"
+                    className={navigationMenuTriggerStyle()}
+                  >
                     AI Chat
-                  </NavigationMenuLink>
-                </Link>
+                  </Link>
+                </NavigationMenuLink>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>

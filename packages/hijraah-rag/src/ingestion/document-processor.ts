@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import FirecrawlApp from "@mendable/firecrawl-js";
+import FirecrawlApp from "firecrawl";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { createClient } from "@supabase/supabase-js";
 import { OpenAI } from "openai";
@@ -49,7 +49,7 @@ const ClassificationResponseSchema = z.object({
       z.object({
         category: z.enum(IMMIGRATION_CATEGORIES),
         confidence: z.number().min(0).max(1),
-      }),
+      })
     )
     .optional(),
   document_language: z.string().optional(),
@@ -67,7 +67,7 @@ export class DocumentProcessor {
   constructor() {
     if (!process.env.FIRECRAWL_API_KEY) {
       throw new IngestionError(
-        "FIRECRAWL_API_KEY environment variable is not set.",
+        "FIRECRAWL_API_KEY environment variable is not set."
       );
     }
     this.firecrawl = new FirecrawlApp({
@@ -95,6 +95,7 @@ export class DocumentProcessor {
   }
 
   async processDocument(document: Document): Promise<RAGProcessedDocument> {
+  const startTime = Date.now();
     const rawText = await this.extractText(document);
 
     // ---------- Classification Step (DP-2) ------------
@@ -103,12 +104,12 @@ export class DocumentProcessor {
       classification = await this.classifyText(rawText);
       console.log(
         `[DocumentProcessor] Classification complete for doc ${document.id}:`,
-        classification?.primary_category,
+        classification?.primary_category
       );
     } catch (err) {
       console.warn(
         `[DocumentProcessor] Classification failed for doc ${document.id}:`,
-        (err as Error).message,
+        (err as Error).message
       );
     }
 
@@ -118,7 +119,7 @@ export class DocumentProcessor {
       chunkContents.map(async (content, index) => {
         const embedding = await this.generateEmbedding(content);
         const confidence = evaluateSourceConfidence(
-          document.sourceUrl ?? document.storagePath ?? "",
+          document.sourceUrl ?? document.storagePath ?? ""
         );
         const src = document.sourceUrl ?? document.storagePath ?? "uploaded";
         return {
@@ -132,11 +133,11 @@ export class DocumentProcessor {
             confidence,
           },
         };
-      }),
+      })
     );
 
     console.log(
-      `Document ${document.id} processed. ${chunks.length} chunks created.`,
+      `Document ${document.id} processed. ${chunks.length} chunks created.`
     );
 
     return {
@@ -144,14 +145,13 @@ export class DocumentProcessor {
       sourceUrl: document.sourceUrl ?? document.storagePath ?? "",
       chunks: chunks,
       rawText: rawText,
-      metadata: classification
-        ? {
-            classification: classification.primary_category,
-            confidence: classification.confidence,
-            language: classification.document_language,
-            containsPersonalData: classification.contains_personal_data,
-          }
-        : undefined,
+      metadata: {
+        // Only include fields defined in types.ts metadata shape
+        language: classification?.document_language,
+        processingTime: Date.now() - startTime,
+        embeddingModel: "text-embedding-3-small",
+        chunksGenerated: chunks.length,
+      },
     };
   }
 
@@ -159,15 +159,18 @@ export class DocumentProcessor {
     // Case 1: URL-based document (web scrape)
     if (document.sourceUrl) {
       console.log(`[DocumentProcessor] Scraping URL: ${document.sourceUrl}`);
-      const scrapeResult = await this.firecrawl.scrapeUrl(document.sourceUrl, {
-        formats: ["markdown"],
-      });
+      const scrapeResult = await (this.firecrawl as any).scrapeUrl(
+        document.sourceUrl,
+        {
+          formats: ["markdown"],
+        },
+      );
 
       if (scrapeResult.success && scrapeResult.markdown !== undefined) {
         return scrapeResult.markdown;
       }
       throw new IngestionError(
-        `Failed to scrape URL: ${document.sourceUrl}, Error: ${scrapeResult.error}`,
+        `Failed to scrape URL: ${document.sourceUrl}, Error: ${scrapeResult.error}`
       );
     }
 
@@ -179,14 +182,14 @@ export class DocumentProcessor {
 
       if (error || !data) {
         throw new IngestionError(
-          `Failed to download file at ${document.storagePath}: ${error?.message}`,
+          `Failed to download file at ${document.storagePath}: ${error?.message}`
         );
       }
 
       const fileBuffer = Buffer.from(await data.arrayBuffer());
 
       console.log(
-        `[DocumentProcessor] Running Mistral OCR on storagePath: ${document.storagePath}`,
+        `[DocumentProcessor] Running Mistral OCR on storagePath: ${document.storagePath}`
       );
 
       const text = await this.runMistralOCR(fileBuffer, document.fileType);
@@ -209,7 +212,8 @@ export class DocumentProcessor {
     const textSample = text.slice(0, 15000);
 
     const { object: classificationResult } = await generateObject({
-      model: mistral("mistral-large-latest"),
+      // Cast to any to bridge AI SDK model type versions
+      model: mistral("mistral-large-latest") as any,
       schema: ClassificationResponseSchema,
       schemaName: "DocumentClassification",
       schemaDescription: "Classification of an immigration-related document.",
@@ -222,7 +226,7 @@ export class DocumentProcessor {
 
   private async runMistralOCR(
     fileBuffer: Buffer,
-    fileType?: string,
+    fileType?: string
   ): Promise<string> {
     // This is a simplified version - in production, you'd want to handle
     // different file types appropriately
@@ -243,7 +247,7 @@ export class DocumentProcessor {
     for (let i = 0; i < documents.length; i += batchSize) {
       const batch = documents.slice(i, i + batchSize);
       const batchResults = await Promise.all(
-        batch.map((doc) => this.processDocument(doc)),
+        batch.map((doc) => this.processDocument(doc))
       );
       results.push(...batchResults);
     }

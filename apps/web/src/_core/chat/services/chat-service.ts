@@ -1,4 +1,4 @@
-import { Chat, ChatModelType, ChatMessage } from "../entities/chat";
+import { Chat, ChatModelType, ChatMessage } from "@/core/chat/entities/chat";
 
 /**
  * Chat Service handles domain logic for chat operations
@@ -153,7 +153,7 @@ Since the user is interested in immigration to ${this.getCountryName(countryCode
 
     // Sort messages by creation date (newest first)
     const sortedMessages = [...chat.messages].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
 
     let totalTokens = 0;
@@ -182,7 +182,7 @@ Since the user is interested in immigration to ${this.getCountryName(countryCode
 
     // Resort messages by creation date (oldest first)
     messagesToKeep.sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     );
 
     // Create a truncated copy of the chat

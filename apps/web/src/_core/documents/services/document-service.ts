@@ -3,7 +3,7 @@ import {
   DocumentType,
   DocumentStatus,
   DocumentVersion,
-} from "../entities/document";
+} from "@/core/documents/entities/document";
 
 /**
  * Document Service handles domain logic for document operations
@@ -145,7 +145,7 @@ export class DocumentService {
   generateStoragePath(
     userId: string,
     documentType: DocumentType,
-    fileName: string,
+    fileName: string
   ): string {
     const timestamp = new Date().getTime();
     const sanitizedFileName = this.sanitizeFileName(fileName);
@@ -158,7 +158,7 @@ export class DocumentService {
    */
   async extractMetadata(
     file: File | Blob,
-    fileName: string,
+    fileName: string
   ): Promise<Record<string, any>> {
     const metadata: Record<string, any> = {
       originalName: fileName,
@@ -182,7 +182,7 @@ export class DocumentService {
     documentId: string,
     documentName: string,
     performedBy: string,
-    details?: Record<string, any>,
+    details?: Record<string, any>
   ): any {
     return {
       id: crypto.randomUUID(),
@@ -225,7 +225,7 @@ export class DocumentService {
    */
   isValidStatusTransition(
     currentStatus: DocumentStatus,
-    newStatus: DocumentStatus,
+    newStatus: DocumentStatus
   ): boolean {
     // Define allowed transitions
     const allowedTransitions: Record<DocumentStatus, DocumentStatus[]> = {

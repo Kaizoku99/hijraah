@@ -55,7 +55,7 @@ export function HomeClient({ locale }: { locale: string }) {
               <div
                 className={cn(
                   "flex flex-col sm:flex-row gap-4",
-                  isRTL && "sm:flex-row-reverse",
+                  isRTL && "sm:flex-row-reverse"
                 )}
               >
                 <Button
@@ -67,13 +67,15 @@ export function HomeClient({ locale }: { locale: string }) {
                     href={`${linkPrefix}/chat`}
                     className={cn(
                       "flex items-center",
-                      isRTL && "flex-row-reverse",
+                      isRTL && "flex-row-reverse"
                     )}
                   >
-                    {t("Home.startChat")}{" "}
-                    <MessageSquare
-                      className={cn(isRTL ? "mr-2 rtl:mr-0 rtl:ml-2" : "ml-2")}
-                    />
+                    <>
+                      {t("Home.startChat")}
+                      <MessageSquare
+                        className={cn("h-5 w-5", isRTL ? "mr-2" : "ml-2")}
+                      />
+                    </>
                   </Link>
                 </Button>
                 <Button
@@ -86,13 +88,15 @@ export function HomeClient({ locale }: { locale: string }) {
                     href={`${linkPrefix}/assessment`}
                     className={cn(
                       "flex items-center",
-                      isRTL && "flex-row-reverse",
+                      isRTL && "flex-row-reverse"
                     )}
                   >
-                    {t("Home.checkEligibility")}{" "}
-                    <ArrowRight
-                      className={cn(isRTL ? "mr-2 rtl:mr-0 rtl:ml-2" : "ml-2")}
-                    />
+                    <>
+                      {t("Home.checkEligibility")}
+                      <ArrowRight
+                        className={cn("h-5 w-5", isRTL ? "mr-2" : "ml-2")}
+                      />
+                    </>
                   </Link>
                 </Button>
               </div>
@@ -101,7 +105,7 @@ export function HomeClient({ locale }: { locale: string }) {
               <div
                 className={cn(
                   "mt-6 flex",
-                  isRTL ? "justify-end" : "justify-start",
+                  isRTL ? "justify-end" : "justify-start"
                 )}
               >
                 <Button
@@ -113,11 +117,15 @@ export function HomeClient({ locale }: { locale: string }) {
                     href={`${linkPrefix}/dashboard`}
                     className={cn(
                       "flex items-center",
-                      isRTL && "flex-row-reverse",
+                      isRTL && "flex-row-reverse"
                     )}
                   >
-                    <LineChart className={cn(isRTL ? "ml-2" : "mr-2")} />{" "}
-                    {t("Home.existingUsers")}
+                    <>
+                      <LineChart
+                        className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")}
+                      />
+                      {t("Home.existingUsers")}
+                    </>
                   </Link>
                 </Button>
               </div>
@@ -159,13 +167,13 @@ export function HomeClient({ locale }: { locale: string }) {
                     <div
                       className={cn(
                         "flex items-start mb-4",
-                        isRTL && "flex-row-reverse",
+                        isRTL && "flex-row-reverse"
                       )}
                     >
                       <div
                         className={cn(
                           "w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0",
-                          isRTL ? "ml-3" : "mr-3",
+                          isRTL ? "ml-3" : "mr-3"
                         )}
                       >
                         <MessageSquare className="h-4 w-4 text-white" />
@@ -173,13 +181,13 @@ export function HomeClient({ locale }: { locale: string }) {
                       <div
                         className={cn(
                           "bg-blue-800/40 p-3 rounded-lg",
-                          isRTL ? "rounded-tr-none" : "rounded-tl-none",
+                          isRTL ? "rounded-tr-none" : "rounded-tl-none"
                         )}
                       >
                         <p
                           className={cn(
                             "text-sm text-blue-100",
-                            isRTL && "text-right",
+                            isRTL && "text-right"
                           )}
                           dir={isRTL ? "rtl" : "ltr"}
                         >
@@ -191,13 +199,13 @@ export function HomeClient({ locale }: { locale: string }) {
                     <div
                       className={cn(
                         "flex items-start mb-4",
-                        isRTL && "flex-row-reverse",
+                        isRTL && "flex-row-reverse"
                       )}
                     >
                       <div
                         className={cn(
                           "w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0",
-                          isRTL ? "ml-3" : "mr-3",
+                          isRTL ? "ml-3" : "mr-3"
                         )}
                       >
                         <svg
@@ -211,13 +219,13 @@ export function HomeClient({ locale }: { locale: string }) {
                       <div
                         className={cn(
                           "bg-indigo-800/40 p-3 rounded-lg",
-                          isRTL ? "rounded-tr-none" : "rounded-tl-none",
+                          isRTL ? "rounded-tr-none" : "rounded-tl-none"
                         )}
                       >
                         <p
                           className={cn(
                             "text-sm text-blue-100",
-                            isRTL && "text-right",
+                            isRTL && "text-right"
                           )}
                           dir={isRTL ? "rtl" : "ltr"}
                         >
@@ -278,7 +286,7 @@ export function HomeClient({ locale }: { locale: string }) {
                 <h3
                   className={cn(
                     "text-xl font-semibold mb-2 md:mb-3 text-gray-900 dark:text-white",
-                    isRTL && "text-right",
+                    isRTL && "text-right"
                   )}
                 >
                   {t(`Home.features.${feature.titleKey}`)}
@@ -286,7 +294,7 @@ export function HomeClient({ locale }: { locale: string }) {
                 <p
                   className={cn(
                     "text-gray-600 dark:text-gray-300",
-                    isRTL && "text-right",
+                    isRTL && "text-right"
                   )}
                   dir={isRTL ? "rtl" : "ltr"}
                 >
@@ -377,7 +385,7 @@ export function HomeClient({ locale }: { locale: string }) {
           <div
             className={cn(
               "flex flex-col sm:flex-row gap-4 justify-center",
-              isRTL && "sm:flex-row-reverse",
+              isRTL && "sm:flex-row-reverse"
             )}
           >
             <Button
@@ -390,8 +398,12 @@ export function HomeClient({ locale }: { locale: string }) {
                 href={`${linkPrefix}/signup`}
                 className={cn("flex items-center", isRTL && "flex-row-reverse")}
               >
-                {t("Home.cta.getStarted")}{" "}
-                <ArrowRight className={cn(isRTL ? "mr-2" : "ml-2")} />
+                <>
+                  {t("Home.cta.getStarted")}
+                  <ArrowRight
+                    className={cn("h-5 w-5", isRTL ? "mr-2" : "ml-2")}
+                  />
+                </>
               </Link>
             </Button>
             <Button
@@ -417,11 +429,15 @@ export function HomeClient({ locale }: { locale: string }) {
                 href={`${linkPrefix}/dashboard`}
                 className={cn(
                   "flex items-center justify-center",
-                  isRTL && "flex-row-reverse",
+                  isRTL && "flex-row-reverse"
                 )}
               >
-                <LineChart className={cn(isRTL ? "ml-2" : "mr-2")} />{" "}
-                {t("Home.cta.existingAccount")}
+                <>
+                  <LineChart
+                    className={cn("h-4 w-4", isRTL ? "ml-2" : "mr-2")}
+                  />
+                  {t("Home.cta.existingAccount")}
+                </>
               </Link>
             </Button>
           </div>

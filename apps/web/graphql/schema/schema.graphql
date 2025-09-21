@@ -1,0 +1,21 @@
+# Base GraphQL schema for Hijraah application
+scalar DateTime
+
+type Query {
+  # Hello query from resolvers
+  hello: String
+  # Placeholder query - replace with actual queries
+  health: String
+}
+
+type Mutation {
+  # Echo mutation from resolvers
+  echo(text: String!): String
+  # Placeholder mutation - replace with actual mutations  
+  noop: String
+}
+
+type Subscription {
+  # Placeholder subscription - replace with actual subscriptions
+  ping: String
+}

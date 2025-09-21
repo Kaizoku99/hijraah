@@ -102,7 +102,7 @@ describe('Predictive Analytics Agents', () => {
       const customAgent = new TimelinePredictionAgent({
         model: 'gpt-4o-mini',
         temperature: 0.2,
-        maxSteps: 8
+
       })
       expect(customAgent).toBeInstanceOf(TimelinePredictionAgent)
     })
@@ -724,7 +724,6 @@ describe('Predictive Analytics Agents', () => {
       const config = {
         model: 'gpt-4o-mini',
         temperature: 0.2,
-        maxSteps: 8,
         timeout: 45000,
         confidenceThreshold: 0.8
       }

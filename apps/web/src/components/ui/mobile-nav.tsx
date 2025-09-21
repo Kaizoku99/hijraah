@@ -49,7 +49,7 @@ export function MobileNav({ session }: { session: Session | null }) {
   const [isOpen, setIsOpen] = React.useState(false);
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   const handleSignOut = async () => {
@@ -75,10 +75,10 @@ export function MobileNav({ session }: { session: Session | null }) {
               href={route.href}
               onClick={() => setIsOpen(false)}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
+                "text-sm font-medium transition-colors hover:text-primary block",
                 pathname === route.href
                   ? "text-primary"
-                  : "text-muted-foreground",
+                  : "text-muted-foreground"
               )}
             >
               {route.label}

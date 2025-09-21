@@ -1,3 +1,7 @@
+// Re-export all types from the consolidated @hijraah/rag package
+export * from "@hijraah/rag";
+
+// Legacy types for backward compatibility - will be removed
 export interface RAGProcessedDocumentChunk {
   content: string;
   embedding: number[];

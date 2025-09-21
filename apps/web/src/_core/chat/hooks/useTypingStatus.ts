@@ -1,17 +1,23 @@
 import { useEffect, useRef } from "react";
 
-import { chatService } from "@/lib/services/chat";
+import { PresenceManager } from "@/lib/presence";
 
 export function useTypingStatus(conversationId: string, userId: string) {
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const presenceManagerRef = useRef<PresenceManager>();
 
   useEffect(() => {
+    // Initialize presence manager
+    presenceManagerRef.current = new PresenceManager();
+    presenceManagerRef.current.join(conversationId, userId);
+
     return () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
+      presenceManagerRef.current?.leave();
     };
-  }, []);
+  }, [conversationId, userId]);
 
   const handleTyping = () => {
     // Clear any existing timeout
@@ -20,11 +26,11 @@ export function useTypingStatus(conversationId: string, userId: string) {
     }
 
     // Set typing status to true
-    chatService.updateTypingStatus(true);
+    presenceManagerRef.current?.updateTypingStatus(true);
 
     // Set a timeout to clear typing status after 2 seconds
     typingTimeoutRef.current = setTimeout(() => {
-      chatService.updateTypingStatus(false);
+      presenceManagerRef.current?.updateTypingStatus(false);
     }, 2000);
   };
 

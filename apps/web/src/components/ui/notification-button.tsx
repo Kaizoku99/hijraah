@@ -31,6 +31,13 @@ export function NotificationButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Context7 - Hydration Fix: Ensure consistent rendering between server and client
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     if (!user || !supabase) return;
@@ -166,6 +173,16 @@ export function NotificationButton() {
       console.error("Error marking all notifications as read:", err);
     }
   };
+
+  // Context7 - Hydration Fix: Show simple button during SSR, full component after hydration
+  if (!isClient) {
+    return (
+      <Button variant="ghost" size="icon" className="relative">
+        <Bell className="h-5 w-5" />
+        <span className="sr-only">Notifications</span>
+      </Button>
+    );
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>

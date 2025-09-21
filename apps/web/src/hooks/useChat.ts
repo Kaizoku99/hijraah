@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/auth/hooks";
 
 import { useToast } from "@/components/ui/use-toast";
-import { ChatModelType } from "@/_core/chat/entities/chat";
+import { ChatModelType } from "@/core/chat/entities/chat";
 import { generateId } from "@/shared/utils/id-generator";
 
 export type Chat = {
@@ -56,21 +56,31 @@ export function useChat() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
 
-  const authHeaders: Record<string, string> = session?.access_token
-    ? { Authorization: `Bearer ${session.access_token}` }
-    : {};
+  // Debug session structure
+  console.log("useChat session:", session);
+  console.log("useChat session.access_token:", session?.access_token);
 
-  // Create a new chat
+  // Stable auth token reference to prevent unnecessary re-renders
+  const authToken = session?.access_token;
+
+  const authHeaders = useMemo(() => {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (authToken) {
+      headers.Authorization = `Bearer ${authToken}`;
+    }
+    return headers;
+  }, [authToken]);
+
+  // Create a new chat - optimized to prevent duplicate calls
   const createChat = useCallback(
     async (options: ChatOptions = {}): Promise<Chat | null> => {
       try {
         setIsLoading(true);
         const response = await fetch("/api/chat", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...authHeaders,
-          },
+          headers: authHeaders,
           body: JSON.stringify(options),
         });
 
@@ -87,6 +97,7 @@ export function useChat() {
 
         return newChat;
       } catch (error: any) {
+        console.error("Create chat error:", error);
         toast({
           title: "Error",
           description: error.message || "Failed to create chat",
@@ -97,7 +108,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders],
+    [toast, authHeaders]
   );
 
   // Get user's chats
@@ -107,7 +118,7 @@ export function useChat() {
         limit?: number;
         offset?: number;
         caseId?: string;
-      } = {},
+      } = {}
     ): Promise<Chat[]> => {
       try {
         setIsLoading(true);
@@ -146,7 +157,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders],
+    [toast, authHeaders]
   );
 
   // Get a specific chat
@@ -180,7 +191,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders],
+    [toast, authHeaders]
   );
 
   // Send a message to a chat
@@ -188,7 +199,7 @@ export function useChat() {
     async (
       chatId: string,
       content: string,
-      attachments: Omit<Attachment, "id">[] = [],
+      attachments: Omit<Attachment, "id">[] = []
     ): Promise<{
       userMessageId: string;
       assistantMessageId: string | null;
@@ -232,7 +243,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders, getChat],
+    [toast, authHeaders, getChat]
   );
 
   // Update chat details
@@ -248,7 +259,7 @@ export function useChat() {
           shared?: boolean;
           [key: string]: any;
         };
-      },
+      }
     ): Promise<Chat | null> => {
       try {
         setIsLoading(true);
@@ -270,7 +281,7 @@ export function useChat() {
 
         setCurrentChat(data.chat);
         setChats((prevChats) =>
-          prevChats.map((chat) => (chat.id === chatId ? data.chat : chat)),
+          prevChats.map((chat) => (chat.id === chatId ? data.chat : chat))
         );
 
         return data.chat;
@@ -285,7 +296,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders],
+    [toast, authHeaders]
   );
 
   // Delete a chat
@@ -322,7 +333,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders, currentChat],
+    [toast, authHeaders, currentChat]
   );
 
   // Generate a title for a chat
@@ -347,14 +358,14 @@ export function useChat() {
         // Update chat with new title
         if (currentChat?.id === chatId) {
           setCurrentChat((prev) =>
-            prev ? { ...prev, title: data.title } : null,
+            prev ? { ...prev, title: data.title } : null
           );
         }
 
         setChats((prevChats) =>
           prevChats.map((chat) =>
-            chat.id === chatId ? { ...chat, title: data.title } : chat,
-          ),
+            chat.id === chatId ? { ...chat, title: data.title } : chat
+          )
         );
 
         return data.title;
@@ -369,7 +380,7 @@ export function useChat() {
         setIsLoading(false);
       }
     },
-    [toast, authHeaders, currentChat],
+    [toast, authHeaders, currentChat]
   );
 
   return {

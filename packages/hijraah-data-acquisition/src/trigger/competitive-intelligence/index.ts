@@ -41,7 +41,7 @@ export const competitiveIntelligenceOrchestratorTask = task({
     };
 
     // Get competitor list if not provided
-    const targetCompetitors = competitorIds || await getActiveCompetitors();
+    const targetCompetitors = competitorIds || (await getActiveCompetitors());
     
     // Stage 1: Competitor Monitoring
     if (orchestrationType === 'full_analysis' || orchestrationType === 'monitoring_only') {

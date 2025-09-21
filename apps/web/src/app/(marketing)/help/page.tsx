@@ -8,9 +8,9 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/ui/accordion";
-import { Button } from "@/ui/button";
-import { Card } from "@/ui/card";
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function HelpPage() {
   return (
@@ -26,11 +26,9 @@ export default function HelpPage() {
             Our AI assistant is available 24/7 to help answer your questions.
           </p>
           <Button asChild>
-            <Link href="/chat" legacyBehavior>
-              <a>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Start Chat
-              </a>
+            <Link href="/chat" className="inline-flex items-center" legacyBehavior>
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Start Chat
             </Link>
           </Button>
         </Card>

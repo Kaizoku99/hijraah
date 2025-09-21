@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import {
@@ -29,7 +29,7 @@ export interface SupabaseEmailMetadata {
  */
 export function generateEmailHtml(
   type: SupabaseEmailType,
-  metadata: SupabaseEmailMetadata,
+  metadata: SupabaseEmailMetadata
 ): string {
   const actionUrl = metadata.action_link;
   const email = metadata.email;
@@ -56,7 +56,7 @@ export function generateEmailHtml(
 
   switch (type) {
     case "signup":
-      emailElement = React.createElement(EmailConfirmation, {
+      emailElement = createElement(EmailConfirmation, {
         actionUrl,
         email,
         name,
@@ -66,7 +66,7 @@ export function generateEmailHtml(
     case "invite":
       // For invite emails, we need to extract information about the inviter
       // This is a simplified version - you may need to adapt based on your actual data structure
-      emailElement = React.createElement(UserInvitation, {
+      emailElement = createElement(UserInvitation, {
         actionUrl,
         inviterName: metadata.inviter_name || "A team member",
         inviterEmail: metadata.inviter_email || "",
@@ -76,7 +76,7 @@ export function generateEmailHtml(
       break;
 
     case "magiclink":
-      emailElement = React.createElement(MagicLink, {
+      emailElement = createElement(MagicLink, {
         actionUrl,
         email,
         name,
@@ -84,7 +84,7 @@ export function generateEmailHtml(
       break;
 
     case "recovery":
-      emailElement = React.createElement(PasswordReset, {
+      emailElement = createElement(PasswordReset, {
         actionUrl,
         email,
         name,
@@ -92,7 +92,7 @@ export function generateEmailHtml(
       break;
 
     case "email_change":
-      emailElement = React.createElement(EmailChange, {
+      emailElement = createElement(EmailChange, {
         actionUrl,
         oldEmail: metadata.old_email || email,
         newEmail: metadata.new_email || email,
@@ -113,7 +113,7 @@ export function generateEmailHtml(
  * This can be used in a Supabase Edge Function or other server context
  */
 export async function handleSupabaseEmails(
-  request: Request,
+  request: Request
 ): Promise<Response> {
   try {
     const { type, metadata } = await request.json();
@@ -123,7 +123,7 @@ export async function handleSupabaseEmails(
         JSON.stringify({
           error: "Missing required parameters: type or metadata",
         }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 

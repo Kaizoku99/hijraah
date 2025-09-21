@@ -91,9 +91,9 @@ export class AgentPerformanceMonitor {
 
       // Update execution metrics
       execution.metrics.stepCount = execution.steps.length
-      execution.metrics.tokenUsage!.promptTokens += usage.promptTokens
-      execution.metrics.tokenUsage!.completionTokens += usage.completionTokens
-      execution.metrics.tokenUsage!.totalTokens += usage.totalTokens
+      execution.metrics.tokenUsage!.promptTokens = (execution.metrics.tokenUsage!.promptTokens || 0) + (usage.promptTokens || 0)
+      execution.metrics.tokenUsage!.completionTokens = (execution.metrics.tokenUsage!.completionTokens || 0) + (usage.completionTokens || 0)
+      execution.metrics.tokenUsage!.totalTokens = (execution.metrics.tokenUsage!.totalTokens || 0) + (usage.totalTokens || 0)
 
       // Track unique tools used
       const toolsInStep = toolCalls.map(call => call.toolName || 'unknown')
@@ -204,7 +204,7 @@ export class AgentPerformanceMonitor {
       totalExecutions: metrics.length,
       successRate: metrics.filter(m => m.success).length / metrics.length,
       averageDuration: metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length,
-      averageTokenUsage: metrics.reduce((sum, m) => sum + m.tokenUsage.totalTokens, 0) / metrics.length,
+      averageTokenUsage: metrics.reduce((sum, m) => sum + (m.tokenUsage.totalTokens || 0), 0) / metrics.length,
       averageQualityScore: metrics.reduce((sum, m) => sum + (m.qualityScore || 0), 0) / metrics.length,
       costEfficiency: this.calculateCostEfficiency(metrics),
       trendAnalysis: await this.analyzeTrends(metrics)
@@ -348,8 +348,9 @@ export class AgentPerformanceMonitor {
   private calculateCost(tokenUsage: TokenUsage, model: string): number {
     // Cost calculation based on model and token usage
     const costPerToken = this.getModelCostPerToken(model)
-    return (tokenUsage.promptTokens * costPerToken.prompt) + 
-           (tokenUsage.completionTokens * costPerToken.completion)
+    const promptTokens = tokenUsage.promptTokens || tokenUsage.inputTokens || 0
+    const completionTokens = tokenUsage.completionTokens || tokenUsage.outputTokens || 0
+    return (promptTokens * costPerToken.prompt) + (completionTokens * costPerToken.completion)
   }
 
   private getModelCostPerToken(model: string): { prompt: number; completion: number } {
@@ -390,14 +391,15 @@ export class AgentPerformanceMonitor {
     const benchmark = this.benchmarks.get(key)
     
     if (benchmark) {
-      const alerts = []
+      const alerts: string[] = []
       
       if (metrics.duration > benchmark.expectedDuration * 1.5) {
         alerts.push(`Duration exceeded benchmark by ${((metrics.duration / benchmark.expectedDuration - 1) * 100).toFixed(1)}%`)
       }
       
-      if (metrics.tokenUsage.totalTokens > benchmark.expectedTokenUsage * 1.5) {
-        alerts.push(`Token usage exceeded benchmark by ${((metrics.tokenUsage.totalTokens / benchmark.expectedTokenUsage - 1) * 100).toFixed(1)}%`)
+      const totalTokens = metrics.tokenUsage.totalTokens || 0
+      if (totalTokens > benchmark.expectedTokenUsage * 1.5) {
+        alerts.push(`Token usage exceeded benchmark by ${((totalTokens / benchmark.expectedTokenUsage - 1) * 100).toFixed(1)}%`)
       }
       
       if ((metrics.qualityScore || 0) < benchmark.qualityThreshold) {

@@ -3,13 +3,13 @@
  */
 
 // Export all schema definitions and types
-export * from "./schema.js";
+export * from "./schema";
 
 // Export client utilities
-export * from "./client.js";
+export * from "./client";
 
 // Export types
-export * from "./types.js";
+export * from "./types";
 
 // Package metadata
 export const packageInfo = {

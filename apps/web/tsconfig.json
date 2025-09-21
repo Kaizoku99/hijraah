@@ -1,19 +1,54 @@
 {
   "extends": "@hijraah/typescript-config/nextjs",
   "compilerOptions": {
+    "target": "es2023",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "ES2023"
+    ],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "downlevelIteration": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/ui/*": ["./src/components/ui/*"],
-      "@/lib/*": ["./src/lib/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/app/*": ["./src/app/*"],
-      "@/supabase/*": ["../../supabase/*"],
-      "@/immigration/*": ["./src/_core/immigration/*"],
-      "@/core/*": ["./src/_core/*"],
-      "@/shared/*": ["./src/_shared/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@/components/*": [
+        "./src/components/*",
+        "../../components/*"
+      ],
+      "@/ui/*": [
+        "./src/components/ui/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/app/*": [
+        "./src/app/*"
+      ],
+      "@/supabase/*": [
+        "../../supabase/*"
+      ],
+      "@/immigration/*": [
+        "./src/_core/immigration/*"
+      ],
+      "@/core/*": [
+        "./src/_core/*"
+      ],
+      "@/infrastructure/*": [
+        "./src/_infrastructure/*"
+      ],
+      "@/shared/*": [
+        "./src/_shared/*"
+      ]
     },
     "plugins": [
       {
@@ -25,6 +60,13 @@
     "incremental": true,
     "jsx": "preserve"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

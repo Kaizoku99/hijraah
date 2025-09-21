@@ -1,5 +1,8 @@
 import { Analytics } from "@vercel/analytics/react";
-import { Inter } from "next/font/google";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { AbstractIntlMessages } from "next-intl";
@@ -7,6 +10,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ReactNode } from "react";
 import { Toaster } from "sonner";
 
+import { AIDevtoolsWrapper } from "@/components/ai/ai-devtools-wrapper";
 import { AppSidebar } from "@/components/ui/app-sidebar";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Footer } from "@/components/ui/footer";
@@ -19,15 +23,20 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle-client";
 import { locales, getLocaleConfig, getLocaleFont } from "@/i18n/i18n";
 import { cn } from "@/lib/utils";
 
 import { IntlClientProvider } from "../client-providers";
-import { Providers } from "../providers";
 
-// Define font
-const inter = Inter({ subsets: ["latin"] });
+// Define font with local Inter font
+const inter = {
+  className: "font-inter",
+  style: {
+    fontFamily:
+      '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  },
+};
 
 // Validate locale at build time
 export function generateStaticParams() {
@@ -101,76 +110,68 @@ export default async function LocaleLayout({
   const fontClass = getLocaleFont(locale);
 
   return (
-    <html
-      lang={locale}
-      suppressHydrationWarning
-      className="h-full"
-      dir={direction}
-    >
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-      </head>
-      <body
-        suppressHydrationWarning
-        className={cn(
-          inter.className,
-          fontClass,
-          "h-full m-0 p-0 overflow-x-hidden antialiased",
-        )}
-      >
-        <NuqsAdapter>
-          <IntlClientProvider
-            locale={locale}
-            messages={messages}
-            timeZone="UTC"
+    <NuqsAdapter>
+      <IntlClientProvider locale={locale} messages={messages} timeZone="UTC">
+        <ErrorBoundary>
+          <div
+            className={cn(
+              inter.className,
+              fontClass,
+              "h-full min-h-screen m-0 p-0 overflow-x-hidden antialiased"
+            )}
+            dir={direction}
           >
-            <ErrorBoundary>
-              <Providers>
-                <SidebarProvider defaultOpen={true}>
-                  <AppSidebar />
-                  <SidebarInset className="flex flex-col min-h-screen w-full">
-                    <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-blue-800/20 bg-gradient-to-r from-blue-950/95 to-indigo-950/95 dark:from-blue-950/95 dark:to-indigo-950/95 backdrop-blur-sm">
-                      <div className="flex items-center gap-2 px-4">
-                        <SidebarTrigger className="-ml-1 text-blue-100">
-                          <span className="sr-only">Toggle Sidebar</span>
-                        </SidebarTrigger>
-                        <Separator
-                          orientation="vertical"
-                          className="shrink-0 bg-blue-700/30 w-[1px] mr-2 h-4"
-                        />
-                        <Image
-                          src="/Hijraah_logo.png"
-                          alt="Hijraah"
-                          width={32}
-                          height={32}
-                          className="h-8 w-8 mr-2"
-                          priority
-                        />
-                        <span className="font-semibold text-lg hidden md:inline-block text-blue-100">
-                          Hijraah
-                        </span>
-                      </div>
+            <SidebarProvider defaultOpen={true}>
+              <AppSidebar />
+              <SidebarInset className="flex flex-col min-h-screen w-full">
+                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 border-b border-blue-800/20 bg-gradient-to-r from-blue-950/95 to-indigo-950/95 dark:from-blue-950/95 dark:to-indigo-950/95 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 px-4">
+                    <SidebarTrigger className="-ml-1 text-blue-100">
+                      <span className="sr-only">Toggle Sidebar</span>
+                    </SidebarTrigger>
+                    <Separator
+                      orientation="vertical"
+                      className="shrink-0 bg-blue-700/30 w-[1px] mr-2 h-4"
+                    />
+                    <Image
+                      src="/Hijraah_logo.png"
+                      alt="Hijraah"
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 mr-2"
+                      priority
+                    />
+                    <span className="font-semibold text-lg hidden md:inline-block text-blue-100">
+                      Hijraah
+                    </span>
+                  </div>
 
-                      <div className="ml-auto flex items-center gap-4 px-4">
-                        <SearchBar />
-                        <NotificationButton />
-                        {/* Import is safe since we\'re using the wrapper */}
-                        <LanguageSwitcherWrapper />
-                        <ThemeToggle />
-                      </div>
-                    </header>
-                    <main className="flex-1 flex flex-col">
-                      {children}
-                      <Footer />
-                    </main>
-                  </SidebarInset>
-                </SidebarProvider>
-              </Providers>
-            </ErrorBoundary>
-            <Analytics />
-          </IntlClientProvider>
-        </NuqsAdapter>
-      </body>
-    </html>
+                  <div className="ml-auto flex items-center gap-4 px-4">
+                    <SearchBar />
+                    <NotificationButton />
+                    <LanguageSwitcherWrapper />
+                    <ThemeToggle />
+                  </div>
+                </header>
+                <main className="flex-1 flex flex-col">
+                  {children}
+                  <Footer />
+                </main>
+              </SidebarInset>
+            </SidebarProvider>
+          </div>
+        </ErrorBoundary>
+        <Analytics />
+        {/* AI SDK DevTools - Context7 Integration */}
+        <AIDevtoolsWrapper 
+          position="bottom"
+          height={400}
+          maxEvents={1000}
+          modelId="gpt-4o"
+          streamEndpoint="/api/chat"
+          debug={process.env.NODE_ENV === "development"}
+        />
+      </IntlClientProvider>
+    </NuqsAdapter>
   );
 }

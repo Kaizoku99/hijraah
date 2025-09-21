@@ -1,24 +1,24 @@
-import { generateObject, generateText, tool } from 'ai'
-import { openai } from '@ai-sdk/openai'
-import { z } from 'zod'
-import { 
-  RiskAssessmentSchema, 
-  UserProfileSchema, 
+import { generateObject, generateText, tool } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+import {
+  RiskAssessmentSchema,
+  UserProfileSchema,
   PredictiveAnalyticsConfigSchema,
   type RiskAssessment,
   type UserProfile,
-  type PredictiveAnalyticsConfig
-} from './types.js'
+  type PredictiveAnalyticsConfig,
+} from "./types.js";
 
 /**
  * Risk Assessment Agent using AI SDK v5
  * Analyzes potential risks and generates mitigation strategies for immigration cases
  */
 export class RiskAssessmentAgent {
-  private config: PredictiveAnalyticsConfig
+  private config: PredictiveAnalyticsConfig;
 
   constructor(config: Partial<PredictiveAnalyticsConfig> = {}) {
-    this.config = PredictiveAnalyticsConfigSchema.parse(config)
+    this.config = PredictiveAnalyticsConfigSchema.parse(config);
   }
 
   /**
@@ -27,339 +27,374 @@ export class RiskAssessmentAgent {
   async assessRisks(
     userProfile: UserProfile,
     caseData: {
-      caseType: string
-      country: string
-      visaType: string
-      applicationStage?: string
-      timeline?: string
+      caseType: string;
+      country: string;
+      visaType: string;
+      applicationStage?: string;
+      timeline?: string;
     },
     contextData?: {
-      currentPolicies: string[]
-      recentChanges: string[]
-      processingBacklogs: boolean
-      seasonalFactors: string[]
+      currentPolicies: string[];
+      recentChanges: string[];
+      processingBacklogs: boolean;
+      seasonalFactors: string[];
     }
   ): Promise<RiskAssessment> {
-    const assessmentId = `risk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const assessmentId = `risk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Define tools for risk analysis
     const documentationRiskTool = tool({
-      description: 'Analyze documentation-related risks',
+      description: "Analyze documentation-related risks",
       parameters: z.object({
         documentsReady: z.number().min(0).max(1),
         translationsNeeded: z.boolean(),
         authenticationsNeeded: z.boolean(),
-        visaType: z.string()
+        visaType: z.string(),
       }),
-      execute: async ({ documentsReady, translationsNeeded, authenticationsNeeded, visaType }) => {
-        const risks = []
+      execute: async ({
+        documentsReady,
+        translationsNeeded,
+        authenticationsNeeded,
+        visaType,
+      }) => {
+        const risks: any[] = [];
 
         if (documentsReady < 0.7) {
           risks.push({
-            category: 'documentation',
-            factor: 'Incomplete Documentation',
-            severity: documentsReady < 0.5 ? 'critical' : 'high',
+            category: "documentation",
+            factor: "Incomplete Documentation",
+            severity: documentsReady < 0.5 ? "critical" : "high",
             probability: 0.8,
             impact: 0.7,
-            description: 'Missing or incomplete documents can lead to application delays or rejection',
+            description:
+              "Missing or incomplete documents can lead to application delays or rejection",
             mitigation: {
-              strategy: 'Complete all required documents and obtain certified copies',
+              strategy:
+                "Complete all required documents and obtain certified copies",
               effectiveness: 0.9,
-              timeRequired: '2-4 weeks',
-              cost: 'medium',
-              difficulty: 'easy'
-            }
-          })
+              timeRequired: "2-4 weeks",
+              cost: "medium",
+              difficulty: "easy",
+            },
+          });
         }
 
         if (translationsNeeded) {
           risks.push({
-            category: 'documentation',
-            factor: 'Translation Requirements',
-            severity: 'medium',
+            category: "documentation",
+            factor: "Translation Requirements",
+            severity: "medium",
             probability: 0.6,
             impact: 0.4,
-            description: 'Documents in foreign languages require certified translations',
+            description:
+              "Documents in foreign languages require certified translations",
             mitigation: {
-              strategy: 'Obtain certified translations from approved translators',
+              strategy:
+                "Obtain certified translations from approved translators",
               effectiveness: 0.95,
-              timeRequired: '1-2 weeks',
-              cost: 'medium',
-              difficulty: 'easy'
-            }
-          })
+              timeRequired: "1-2 weeks",
+              cost: "medium",
+              difficulty: "easy",
+            },
+          });
         }
 
         if (authenticationsNeeded) {
           risks.push({
-            category: 'documentation',
-            factor: 'Authentication Requirements',
-            severity: 'medium',
+            category: "documentation",
+            factor: "Authentication Requirements",
+            severity: "medium",
             probability: 0.7,
             impact: 0.5,
-            description: 'Documents may require apostille or embassy authentication',
+            description:
+              "Documents may require apostille or embassy authentication",
             mitigation: {
-              strategy: 'Obtain required authentications through proper channels',
+              strategy:
+                "Obtain required authentications through proper channels",
               effectiveness: 0.9,
-              timeRequired: '2-6 weeks',
-              cost: 'high',
-              difficulty: 'medium'
-            }
-          })
+              timeRequired: "2-6 weeks",
+              cost: "high",
+              difficulty: "medium",
+            },
+          });
         }
 
-        return risks
-      }
-    })
+        return risks;
+      },
+    });
 
     const eligibilityRiskTool = tool({
-      description: 'Analyze eligibility-related risks',
+      description: "Analyze eligibility-related risks",
       parameters: z.object({
         userProfile: z.any(),
         visaType: z.string(),
-        country: z.string()
+        country: z.string(),
       }),
       execute: async ({ userProfile, visaType, country }) => {
-        const risks = []
+        const risks: any[] = [];
 
         // Age-related risks
-        if (userProfile.demographics?.age && userProfile.demographics.age > 45 && visaType === 'skilled_worker') {
+        if (
+          userProfile.demographics?.age &&
+          userProfile.demographics.age > 45 &&
+          visaType === "skilled_worker"
+        ) {
           risks.push({
-            category: 'eligibility',
-            factor: 'Age Factor',
-            severity: 'medium',
+            category: "eligibility",
+            factor: "Age Factor",
+            severity: "medium",
             probability: 0.5,
             impact: 0.3,
-            description: 'Age may affect points-based immigration systems',
+            description: "Age may affect points-based immigration systems",
             mitigation: {
-              strategy: 'Emphasize experience and skills to offset age factor',
+              strategy: "Emphasize experience and skills to offset age factor",
               effectiveness: 0.6,
-              timeRequired: 'Ongoing',
-              cost: 'low',
-              difficulty: 'medium'
-            }
-          })
+              timeRequired: "Ongoing",
+              cost: "low",
+              difficulty: "medium",
+            },
+          });
         }
 
         // Education risks
-        if (!userProfile.education?.level || userProfile.education.level === 'high_school') {
+        if (
+          !userProfile.education?.level ||
+          userProfile.education.level === "high_school"
+        ) {
           risks.push({
-            category: 'eligibility',
-            factor: 'Limited Education Credentials',
-            severity: 'high',
+            category: "eligibility",
+            factor: "Limited Education Credentials",
+            severity: "high",
             probability: 0.7,
             impact: 0.6,
-            description: 'Insufficient education may not meet minimum requirements',
+            description:
+              "Insufficient education may not meet minimum requirements",
             mitigation: {
-              strategy: 'Pursue additional education or professional certifications',
+              strategy:
+                "Pursue additional education or professional certifications",
               effectiveness: 0.8,
-              timeRequired: '6-24 months',
-              cost: 'high',
-              difficulty: 'hard'
-            }
-          })
+              timeRequired: "6-24 months",
+              cost: "high",
+              difficulty: "hard",
+            },
+          });
         }
 
         // Language proficiency risks
-        const languageLevel = userProfile.language?.proficiency?.[country]
-        if (!languageLevel || languageLevel === 'basic') {
+        const languageLevel = userProfile.language?.proficiency?.[country];
+        if (!languageLevel || languageLevel === "basic") {
           risks.push({
-            category: 'eligibility',
-            factor: 'Language Proficiency',
-            severity: 'high',
+            category: "eligibility",
+            factor: "Language Proficiency",
+            severity: "high",
             probability: 0.8,
             impact: 0.7,
-            description: 'Insufficient language skills may not meet requirements',
+            description:
+              "Insufficient language skills may not meet requirements",
             mitigation: {
-              strategy: 'Take language courses and official proficiency tests',
+              strategy: "Take language courses and official proficiency tests",
               effectiveness: 0.85,
-              timeRequired: '3-12 months',
-              cost: 'medium',
-              difficulty: 'medium'
-            }
-          })
+              timeRequired: "3-12 months",
+              cost: "medium",
+              difficulty: "medium",
+            },
+          });
         }
 
         // Employment risks
-        if (userProfile.employment?.status === 'unemployed' && visaType === 'work_visa') {
+        if (
+          userProfile.employment?.status === "unemployed" &&
+          visaType === "work_visa"
+        ) {
           risks.push({
-            category: 'eligibility',
-            factor: 'Employment Status',
-            severity: 'critical',
+            category: "eligibility",
+            factor: "Employment Status",
+            severity: "critical",
             probability: 0.9,
             impact: 0.8,
-            description: 'Unemployment may disqualify work visa applications',
+            description: "Unemployment may disqualify work visa applications",
             mitigation: {
-              strategy: 'Secure job offer or demonstrate employability',
+              strategy: "Secure job offer or demonstrate employability",
               effectiveness: 0.9,
-              timeRequired: '1-6 months',
-              cost: 'low',
-              difficulty: 'hard'
-            }
-          })
+              timeRequired: "1-6 months",
+              cost: "low",
+              difficulty: "hard",
+            },
+          });
         }
 
-        return risks
-      }
-    })
+        return risks;
+      },
+    });
 
     const financialRiskTool = tool({
-      description: 'Analyze financial-related risks',
+      description: "Analyze financial-related risks",
       parameters: z.object({
         savings: z.number().optional(),
         income: z.number().optional(),
         debts: z.number().optional(),
         sponsorship: z.boolean().optional(),
-        visaType: z.string()
+        visaType: z.string(),
       }),
       execute: async ({ savings, income, debts, sponsorship, visaType }) => {
-        const risks = []
+        const risks: any[] = [];
 
         // Insufficient funds risk
-        const requiredFunds = this.getRequiredFunds(visaType)
+        const requiredFunds = this.getRequiredFunds(visaType);
         if (!savings || savings < requiredFunds) {
           risks.push({
-            category: 'financial',
-            factor: 'Insufficient Funds',
-            severity: 'high',
+            category: "financial",
+            factor: "Insufficient Funds",
+            severity: "high",
             probability: 0.8,
             impact: 0.7,
             description: `Insufficient funds to meet minimum requirements (${requiredFunds} required)`,
             mitigation: {
-              strategy: 'Build savings or secure financial sponsorship',
+              strategy: "Build savings or secure financial sponsorship",
               effectiveness: 0.9,
-              timeRequired: '3-12 months',
-              cost: 'none',
-              difficulty: 'medium'
-            }
-          })
+              timeRequired: "3-12 months",
+              cost: "none",
+              difficulty: "medium",
+            },
+          });
         }
 
         // High debt-to-income ratio
-        if (debts && income && (debts / income) > 0.4) {
+        if (debts && income && debts / income > 0.4) {
           risks.push({
-            category: 'financial',
-            factor: 'High Debt-to-Income Ratio',
-            severity: 'medium',
+            category: "financial",
+            factor: "High Debt-to-Income Ratio",
+            severity: "medium",
             probability: 0.6,
             impact: 0.5,
-            description: 'High debt levels may indicate financial instability',
+            description: "High debt levels may indicate financial instability",
             mitigation: {
-              strategy: 'Reduce debt or increase income before application',
+              strategy: "Reduce debt or increase income before application",
               effectiveness: 0.7,
-              timeRequired: '6-18 months',
-              cost: 'none',
-              difficulty: 'hard'
-            }
-          })
+              timeRequired: "6-18 months",
+              cost: "none",
+              difficulty: "hard",
+            },
+          });
         }
 
         // Lack of income documentation
         if (!income && !sponsorship) {
           risks.push({
-            category: 'financial',
-            factor: 'No Income Documentation',
-            severity: 'high',
+            category: "financial",
+            factor: "No Income Documentation",
+            severity: "high",
             probability: 0.7,
             impact: 0.6,
-            description: 'Unable to demonstrate financial stability',
+            description: "Unable to demonstrate financial stability",
             mitigation: {
-              strategy: 'Secure employment or financial sponsorship',
+              strategy: "Secure employment or financial sponsorship",
               effectiveness: 0.8,
-              timeRequired: '1-6 months',
-              cost: 'low',
-              difficulty: 'medium'
-            }
-          })
+              timeRequired: "1-6 months",
+              cost: "low",
+              difficulty: "medium",
+            },
+          });
         }
 
-        return risks
-      }
-    })
+        return risks;
+      },
+    });
 
     const policyRiskTool = tool({
-      description: 'Analyze policy and timing-related risks',
+      description: "Analyze policy and timing-related risks",
       parameters: z.object({
         currentPolicies: z.array(z.string()).optional(),
         recentChanges: z.array(z.string()).optional(),
         processingBacklogs: z.boolean().optional(),
         visaType: z.string(),
-        country: z.string()
+        country: z.string(),
       }),
-      execute: async ({ currentPolicies, recentChanges, processingBacklogs, visaType, country }) => {
-        const risks = []
+      execute: async ({
+        currentPolicies,
+        recentChanges,
+        processingBacklogs,
+        visaType,
+        country,
+      }) => {
+        const risks: any[] = [];
 
         // Policy change risks
         if (recentChanges && recentChanges.length > 0) {
           risks.push({
-            category: 'policy',
-            factor: 'Recent Policy Changes',
-            severity: 'medium',
+            category: "policy",
+            factor: "Recent Policy Changes",
+            severity: "medium",
             probability: 0.4,
             impact: 0.6,
-            description: 'Recent policy changes may affect application processing',
+            description:
+              "Recent policy changes may affect application processing",
             mitigation: {
-              strategy: 'Stay updated on policy changes and adjust application accordingly',
+              strategy:
+                "Stay updated on policy changes and adjust application accordingly",
               effectiveness: 0.7,
-              timeRequired: 'Ongoing',
-              cost: 'low',
-              difficulty: 'easy'
-            }
-          })
+              timeRequired: "Ongoing",
+              cost: "low",
+              difficulty: "easy",
+            },
+          });
         }
 
         // Processing backlog risks
         if (processingBacklogs) {
           risks.push({
-            category: 'timing',
-            factor: 'Processing Backlogs',
-            severity: 'medium',
+            category: "timing",
+            factor: "Processing Backlogs",
+            severity: "medium",
             probability: 0.8,
             impact: 0.4,
-            description: 'Current backlogs may significantly delay processing',
+            description: "Current backlogs may significantly delay processing",
             mitigation: {
-              strategy: 'Submit complete application early and consider expedited processing',
+              strategy:
+                "Submit complete application early and consider expedited processing",
               effectiveness: 0.5,
-              timeRequired: 'N/A',
-              cost: 'medium',
-              difficulty: 'easy'
-            }
-          })
+              timeRequired: "N/A",
+              cost: "medium",
+              difficulty: "easy",
+            },
+          });
         }
 
         // Quota limitations
-        if (visaType === 'work_visa' || visaType === 'skilled_worker') {
+        if (visaType === "work_visa" || visaType === "skilled_worker") {
           risks.push({
-            category: 'policy',
-            factor: 'Annual Quota Limitations',
-            severity: 'high',
+            category: "policy",
+            factor: "Annual Quota Limitations",
+            severity: "high",
             probability: 0.6,
             impact: 0.8,
-            description: 'Annual visa quotas may be reached before application processing',
+            description:
+              "Annual visa quotas may be reached before application processing",
             mitigation: {
-              strategy: 'Apply early in the fiscal year and have backup options',
+              strategy:
+                "Apply early in the fiscal year and have backup options",
               effectiveness: 0.6,
-              timeRequired: 'Timing dependent',
-              cost: 'low',
-              difficulty: 'medium'
-            }
-          })
+              timeRequired: "Timing dependent",
+              cost: "low",
+              difficulty: "medium",
+            },
+          });
         }
 
-        return risks
-      }
-    })
+        return risks;
+      },
+    });
 
     // Generate comprehensive risk assessment using AI SDK v5
     const { object: assessment } = await generateObject({
       model: openai(this.config.model),
       temperature: this.config.temperature,
-      maxSteps: this.config.maxSteps,
+
       tools: {
         analyzeDocumentationRisks: documentationRiskTool,
         analyzeEligibilityRisks: eligibilityRiskTool,
         analyzeFinancialRisks: financialRiskTool,
-        analyzePolicyRisks: policyRiskTool
+        analyzePolicyRisks: policyRiskTool,
       },
       schema: RiskAssessmentSchema,
       system: `You are an expert immigration risk assessment analyst with deep knowledge of application risks, policy impacts, and mitigation strategies.
@@ -391,8 +426,8 @@ ${JSON.stringify(userProfile, null, 2)}
 - Case Type: ${caseData.caseType}
 - Country: ${caseData.country}
 - Visa Type: ${caseData.visaType}
-- Application Stage: ${caseData.applicationStage || 'Preparation'}
-- Timeline: ${caseData.timeline || 'Not specified'}
+- Application Stage: ${caseData.applicationStage || "Preparation"}
+- Timeline: ${caseData.timeline || "Not specified"}
 
 **Context Data:**
 ${JSON.stringify(contextData, null, 2)}
@@ -409,8 +444,8 @@ ${JSON.stringify(contextData, null, 2)}
 
 **Assessment ID:** ${assessmentId}
 
-Focus on identifying actionable risks with practical mitigation strategies that can be implemented to improve application success chances.`
-    })
+Focus on identifying actionable risks with practical mitigation strategies that can be implemented to improve application success chances.`,
+    });
 
     return {
       ...assessment,
@@ -419,8 +454,8 @@ Focus on identifying actionable risks with practical mitigation strategies that 
       country: caseData.country,
       visaType: caseData.visaType,
       modelVersion: this.config.model,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -429,10 +464,10 @@ Focus on identifying actionable risks with practical mitigation strategies that 
   async updateRiskAssessment(
     existingAssessment: RiskAssessment,
     mitigationActions: Array<{
-      riskFactor: string
-      actionTaken: string
-      effectiveness: number
-      completionDate: string
+      riskFactor: string;
+      actionTaken: string;
+      effectiveness: number;
+      completionDate: string;
     }>
   ): Promise<RiskAssessment> {
     const { text: analysis } = await generateText({
@@ -450,28 +485,28 @@ Risk Level: ${existingAssessment.riskLevel}
 **Mitigation Actions Taken:**
 ${JSON.stringify(mitigationActions, null, 2)}
 
-Analyze how these actions affect the risk profile and provide updated assessments.`
-    })
+Analyze how these actions affect the risk profile and provide updated assessments.`,
+    });
 
     // For now, return the existing assessment with updated timestamp
     // In a full implementation, this would recalculate risks based on the analysis
     return {
       ...existingAssessment,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    };
   }
 
   private getRequiredFunds(visaType: string): number {
     // Estimated required funds based on visa type
     const fundRequirements: Record<string, number> = {
-      'tourist_visa': 5000,
-      'student_visa': 25000,
-      'work_visa': 15000,
-      'family_visa': 20000,
-      'permanent_residence': 50000,
-      'citizenship': 10000
-    }
-    
-    return fundRequirements[visaType] || 15000
+      tourist_visa: 5000,
+      student_visa: 25000,
+      work_visa: 15000,
+      family_visa: 20000,
+      permanent_residence: 50000,
+      citizenship: 10000,
+    };
+
+    return fundRequirements[visaType] || 15000;
   }
 }

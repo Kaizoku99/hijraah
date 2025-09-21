@@ -141,7 +141,7 @@ export default function DocumentsPage() {
       </div>
       {/* TODO: Add filtering/sorting options here if needed */}
       {isLoading ? (
-        <DashboardSkeleton section="documents" /> // Assuming skeleton handles a 'documents' variant
+        (<DashboardSkeleton section="documents" />) // Assuming skeleton handles a 'documents' variant
       ) : (
         <DocumentsList
           documents={documents}

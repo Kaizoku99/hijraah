@@ -1,6 +1,6 @@
 import { createAIMultiplexer } from "@hijraah/ai";
-import { createDocumentProcessor } from "@hijraah/documents";
-import { FirecrawlApp } from "@mendable/firecrawl-js";
+import { createHijraahDocumentProcessor } from "@hijraah/documents";
+import FirecrawlApp from "firecrawl";
 import { createClient } from "@supabase/supabase-js";
 import { task, logger, schedules } from "@trigger.dev/sdk/v3";
 import { OpenAI } from "openai";
@@ -75,7 +75,7 @@ export const documentProcessingTask = task({
     const validatedPayload = DocumentProcessingPayload.parse(payload);
 
     // Initialize services
-    const processor = createDocumentProcessor({
+    const processor = createHijraahDocumentProcessor({
       firecrawlApiKey: process.env.FIRECRAWL_API_KEY!,
       openaiApiKey: process.env.OPENAI_API_KEY!,
       redisUrl: process.env.UPSTASH_REDIS_REST_URL!,

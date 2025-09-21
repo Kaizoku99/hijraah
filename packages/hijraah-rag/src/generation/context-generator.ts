@@ -1,4 +1,10 @@
-import { CoreMessage, streamText } from "ai";
+import {
+  type CoreMessage,
+  generateText,
+  streamText,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+} from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import {
   RetrievalResult,
@@ -33,7 +39,7 @@ export class ContextAwareGenerator {
     query: string,
     retrievedContext: RetrievalResult,
     userContext?: UserContext | null,
-    options?: GenerationOptions,
+    options?: GenerationOptions
   ) {
     const context = this.buildContext(retrievedContext, userContext);
     const systemPrompt = this.createSystemPrompt(context, options);
@@ -48,7 +54,8 @@ export class ContextAwareGenerator {
     const startTime = Date.now();
 
     const result = streamText({
-      model: this.llm(model),
+      // Cast to any to bridge potential LanguageModel V1/V2 type mismatches across ai/@ai-sdk versions
+      model: this.llm(model) as any,
       messages,
       temperature,
       maxOutputTokens,
@@ -61,16 +68,18 @@ export class ContextAwareGenerator {
         const validatedText = await this.validateResponse(text, context);
         const sources = this.extractSourcesWithCitations(
           validatedText,
-          retrievedContext,
+          retrievedContext
         );
         const confidence = finishReason === "stop" ? 0.9 : 0.5;
+        // AI SDK v5 usage typically exposes inputTokens/outputTokens
+        const totalTokens = (usage?.inputTokens || 0) + (usage?.outputTokens || 0);
         const finalResponse: GeneratedResponse = {
           text: validatedText,
           sources: sources,
           confidence: confidence,
           metadata: {
             model,
-            tokensUsed: usage?.totalTokens || 0,
+            tokensUsed: totalTokens,
             processingTime: Date.now() - startTime,
             sourcesUsed: sources.length,
             citationsIncluded: options?.includeSourceCitations !== false,
@@ -78,7 +87,7 @@ export class ContextAwareGenerator {
         };
         console.log(
           `[ContextAwareGenerator] Final response metadata:`,
-          finalResponse.metadata,
+          finalResponse.metadata
         );
       },
       onError: ({ error }) => {
@@ -90,16 +99,87 @@ export class ContextAwareGenerator {
   }
 
   /**
+   * UI streaming variant that emits retrieval context and final response as UI stream events.
+   * Useful for Next.js App Router routes returning a Response.
+   */
+  async generateUI(
+    query: string,
+    retrievedContext: RetrievalResult,
+    userContext?: UserContext | null,
+    options?: GenerationOptions,
+  ) {
+    const context = this.buildContext(retrievedContext, userContext);
+    const systemPrompt = this.createSystemPrompt(context, options);
+    const messages: CoreMessage[] = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: query },
+    ];
+
+    const model = options?.model || "gpt-4o";
+    const temperature = options?.temperature || 0.7;
+    const maxOutputTokens = options?.maxTokens || 2048;
+
+    const stream = createUIMessageStream({
+      execute: ({ writer }) => {
+        // Emit retrieval context for client-side UI to render sources/graph
+        writer.write({
+          type: "data-retrieval-context",
+          id: "retrieval-context",
+          data: retrievedContext,
+        });
+
+        const result = streamText({
+          model: this.llm(model) as any,
+          messages,
+          temperature,
+          maxOutputTokens,
+          onFinish: async ({ text, finishReason }) => {
+            const validatedText = await this.validateResponse(text, context);
+            const sources = this.extractSourcesWithCitations(
+              validatedText,
+              retrievedContext,
+            );
+            const confidence = finishReason === "stop" ? 0.9 : 0.5;
+
+            const finalResponse: GeneratedResponse = {
+              text: validatedText,
+              sources,
+              confidence,
+              metadata: {
+                model,
+                tokensUsed: 0,
+                processingTime: 0,
+                sourcesUsed: sources.length,
+                citationsIncluded: options?.includeSourceCitations !== false,
+              },
+            } as any;
+
+            writer.write({
+              type: "data-final-response",
+              id: "final-response",
+              data: finalResponse,
+            });
+          },
+        });
+
+        writer.merge(result.toUIMessageStream());
+      },
+    });
+
+    return createUIMessageStreamResponse({ stream });
+  }
+
+  /**
    * Non-streaming version for simpler use cases
    */
   async generateSync(context: GenerationContext): Promise<GeneratedResponse> {
     const builtContext = this.buildContext(
       context.retrievalResult,
-      context.userContext,
+      context.userContext
     );
     const systemPrompt = this.createSystemPrompt(
       builtContext,
-      context.generationOptions,
+      context.generationOptions
     );
     const messages: CoreMessage[] = [{ role: "system", content: systemPrompt }];
 
@@ -109,7 +189,7 @@ export class ContextAwareGenerator {
         ...context.conversationHistory.map((msg) => ({
           role: msg.role,
           content: msg.content,
-        })),
+        }))
       );
     }
 
@@ -121,22 +201,23 @@ export class ContextAwareGenerator {
     const startTime = Date.now();
 
     try {
-      const response = await this.llm(model).doGenerate({
-        inputFormat: "messages",
-        mode: {
-          type: "regular",
-        },
-        prompt: messages,
+      const response = await generateText({
+        // Cast to any to bridge potential LanguageModel V1/V2 type mismatches across ai/@ai-sdk versions
+        model: this.llm(model) as any,
+        messages,
         temperature,
-        maxTokens,
+        maxOutputTokens: maxTokens,
       });
 
       const text = response.text || "";
       const validatedText = await this.validateResponse(text, builtContext);
       const sources = this.extractSourcesWithCitations(
         validatedText,
-        context.retrievalResult,
+        context.retrievalResult
       );
+
+      const totalTokens =
+        (response.usage?.inputTokens || 0) + (response.usage?.outputTokens || 0);
 
       return {
         text: validatedText,
@@ -144,7 +225,7 @@ export class ContextAwareGenerator {
         confidence: response.finishReason === "stop" ? 0.9 : 0.5,
         metadata: {
           model,
-          tokensUsed: response.usage?.totalTokens || 0,
+          tokensUsed: totalTokens,
           processingTime: Date.now() - startTime,
           sourcesUsed: sources.length,
           citationsIncluded:
@@ -161,14 +242,14 @@ export class ContextAwareGenerator {
    */
   public buildContext(
     retrievedContext: RetrievalResult,
-    userContext?: UserContext | null,
+    userContext?: UserContext | null
   ): BuiltContext {
     const chunkContext = retrievedContext.chunks
       .map(
         (chunk, index) =>
           `Source [${index + 1}] (${chunk.metadata.sourceUrl}):\n${
             chunk.content
-          }`,
+          }`
       )
       .join("\n\n---\n\n");
 
@@ -186,7 +267,7 @@ Relationships: ${
         ? retrievedContext.kgContext.relationships
             .map(
               (r) =>
-                `${r.sourceEntityName} -> ${r.type} -> ${r.targetEntityName}`,
+                `${r.sourceEntityName} -> ${r.type} -> ${r.targetEntityName}`
             )
             .join(", ")
         : "None"
@@ -228,7 +309,7 @@ User Profile:
    */
   public createSystemPrompt(
     context: BuiltContext,
-    options?: GenerationOptions,
+    options?: GenerationOptions
   ): string {
     const tone = options?.tone || "professional";
     const format = options?.format || "markdown";
@@ -264,7 +345,7 @@ User Profile:
    */
   private async validateResponse(
     response: string,
-    context: BuiltContext,
+    context: BuiltContext
   ): Promise<string> {
     if (!response || response.trim().length === 0) {
       return "I am sorry, but I could not generate a response based on the provided information.";
@@ -283,7 +364,7 @@ User Profile:
    */
   private extractSourcesWithCitations(
     responseText: string,
-    retrievedContext: RetrievalResult,
+    retrievedContext: RetrievalResult
   ): RAGProcessedDocumentChunk[] {
     const mentionedSources = new Set<number>();
     const regex = /\[(\d+)\]/g;

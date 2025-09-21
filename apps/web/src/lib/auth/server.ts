@@ -2,9 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import { createClient } from "@/lib/supabase/server";
-
 import { ExtendedUser, createExtendedUser } from "@/types/auth";
 
 /**
@@ -43,7 +41,7 @@ export async function isAuthenticated(): Promise<boolean> {
  * Protect a route - redirect to login if not authenticated
  */
 export async function protectRoute(
-  redirectTo: string = "/login",
+  redirectTo: string = "/login"
 ): Promise<ExtendedUser> {
   const user = await getUser();
 
@@ -59,7 +57,7 @@ export async function protectRoute(
  */
 export async function protectRoleRoute(
   role: string,
-  redirectTo: string = "/unauthorized",
+  redirectTo: string = "/unauthorized"
 ): Promise<ExtendedUser> {
   const user = await protectRoute();
 
@@ -74,7 +72,7 @@ export async function protectRoleRoute(
  * Protect a route requiring admin role
  */
 export async function protectAdminRoute(
-  redirectTo: string = "/unauthorized",
+  redirectTo: string = "/unauthorized"
 ): Promise<ExtendedUser> {
   const user = await protectRoute();
 

@@ -22,7 +22,7 @@ interface ArtifactContextType {
     title: string,
     type: ArtifactType,
     content: any,
-    chatId?: string,
+    chatId?: string
   ) => Promise<Artifact>;
   updateArtifact: (id: string, updates: Partial<Artifact>) => Promise<void>;
   deleteArtifact: (id: string) => Promise<void>;
@@ -30,23 +30,23 @@ interface ArtifactContextType {
   addArtifactMessage: (
     artifactId: string,
     message: string,
-    role: "user" | "assistant" | "system",
+    role: "user" | "assistant" | "system"
   ) => Promise<void>;
   updateArtifactVisibility: (
     id: string,
-    visibility: ArtifactVisibility,
+    visibility: ArtifactVisibility
   ) => Promise<void>;
 }
 
 const ArtifactContext = createContext<ArtifactContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export function ArtifactProvider({ children }: { children: React.ReactNode }) {
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [currentArtifact, setCurrentArtifact] = useState<Artifact | null>(null);
   const [artifactMessages, setArtifactMessages] = useState<ArtifactMessage[]>(
-    [],
+    []
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +77,6 @@ export function ArtifactProvider({ children }: { children: React.ReactNode }) {
     fetchArtifacts();
 
     // Set up subscription for real-time updates
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const subscription = supabase
       .channel("artifacts")
       .on(
@@ -95,28 +94,28 @@ export function ArtifactProvider({ children }: { children: React.ReactNode }) {
               prev.map((artifact) =>
                 artifact.id === payload.new.id
                   ? (payload.new as Artifact)
-                  : artifact,
-              ),
+                  : artifact
+              )
             );
             if (currentArtifact?.id === payload.new.id) {
               setCurrentArtifact(payload.new as Artifact);
             }
           } else if (payload.eventType === "DELETE") {
             setArtifacts((prev) =>
-              prev.filter((artifact) => artifact.id !== payload.old.id),
+              prev.filter((artifact) => artifact.id !== payload.old.id)
             );
             if (currentArtifact?.id === payload.old.id) {
               setCurrentArtifact(null);
             }
           }
-        },
+        }
       )
       .subscribe();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [supabase, currentArtifact?.id]);
 
   const getArtifact = async (id: string) => {
     try {
@@ -154,7 +153,7 @@ export function ArtifactProvider({ children }: { children: React.ReactNode }) {
     title: string,
     type: ArtifactType,
     content: any,
-    chatId?: string,
+    chatId?: string
   ): Promise<Artifact> => {
     try {
       setIsLoading(true);
@@ -275,7 +274,7 @@ export function ArtifactProvider({ children }: { children: React.ReactNode }) {
   const addArtifactMessage = async (
     artifactId: string,
     message: string,
-    role: "user" | "assistant" | "system",
+    role: "user" | "assistant" | "system"
   ) => {
     try {
       setIsLoading(true);
@@ -305,7 +304,7 @@ export function ArtifactProvider({ children }: { children: React.ReactNode }) {
 
   const updateArtifactVisibility = async (
     id: string,
-    visibility: ArtifactVisibility,
+    visibility: ArtifactVisibility
   ) => {
     try {
       setIsLoading(true);

@@ -55,7 +55,7 @@ export function NavUser({
             className="w-full border-blue-500 text-blue-600 hover:bg-blue-100 dark:border-blue-400 dark:text-blue-300 dark:hover:bg-blue-900/30"
             size="sm"
           >
-            <Link href="/auth/login">
+            <Link href="/auth/login" className="flex items-center">
               <LogIn className="mr-2 h-4 w-4" />
               Sign In
             </Link>
@@ -65,7 +65,7 @@ export function NavUser({
             className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800 shadow-sm"
             size="sm"
           >
-            <Link href="/auth/register">
+            <Link href="/auth/register" className="flex items-center">
               <UserPlus className="mr-2 h-4 w-4" />
               Sign Up
             </Link>
@@ -138,7 +138,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/subscription/plans">
+                <Link href="/subscription/plans" className="flex items-center">
                   <Sparkles className="mr-2 h-4 w-4" />
                   Upgrade to Pro
                 </Link>
@@ -147,19 +147,26 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/profile" data-tour="profile">
+                <Link
+                  href="/profile"
+                  data-tour="profile"
+                  className="flex items-center"
+                >
                   <BadgeCheck className="mr-2 h-4 w-4" />
                   Account
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings/billing">
+                <Link href="/settings/billing" className="flex items-center">
                   <CreditCard className="mr-2 h-4 w-4" />
                   Billing
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings?tab=notifications">
+                <Link
+                  href="/settings?tab=notifications"
+                  className="flex items-center"
+                >
                   <Bell className="mr-2 h-4 w-4" />
                   Notifications
                 </Link>

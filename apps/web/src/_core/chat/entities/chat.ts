@@ -5,10 +5,10 @@
  */
 
 import {
-  DBChatAttachmentRow,
-  DBChatMessageRow,
   DBChatSessionRow,
-} from "@/_infrastructure/repositories/chat-repository";
+  DBChatMessageRow,
+} from "@/types/domain-mappings";
+import { DBChatAttachmentRow } from "@/_infrastructure/repositories/chat-repository";
 
 export enum ChatModelType {
   GPT_3_5 = "gpt-3.5-turbo",
@@ -50,7 +50,7 @@ export class ChatMessage {
 
   static fromDatabase(
     record: DBChatMessageRow,
-    attachments: ChatAttachment[] = [],
+    attachments: ChatAttachment[] = []
   ): ChatMessage {
     return new ChatMessage({
       id: record.id,
@@ -59,7 +59,9 @@ export class ChatMessage {
       content: record.content || "",
       attachments: attachments.filter((a) => a.messageId === record.id),
       metadata:
-        typeof record.metadata === "object" && record.metadata
+        typeof record.metadata === "object" &&
+        record.metadata !== null &&
+        !Array.isArray(record.metadata)
           ? (record.metadata as Record<string, any>)
           : {},
       createdAt: new Date(record.created_at),
@@ -107,16 +109,13 @@ export class ChatAttachment {
     return new ChatAttachment({
       id: record.id,
       messageId: record.message_id,
-      type: record.type as "image" | "document" | "link",
-      fileId: record.file_id,
-      url: record.url,
-      name: record.name,
-      contentType: record.content_type,
-      size: record.size,
-      metadata:
-        typeof record.metadata === "object" && record.metadata
-          ? (record.metadata as Record<string, any>)
-          : {},
+      type: "document", // Default type since the DB schema doesn't have a type field
+      fileId: null, // Not available in current schema
+      url: null, // Not available in current schema  
+      name: record.file_name,
+      contentType: record.file_type,
+      size: record.file_size,
+      metadata: {},
       createdAt: new Date(record.created_at),
     });
   }
@@ -192,7 +191,7 @@ export class Chat {
 
     // Sort messages by creation date (newest first)
     const sortedMessages = [...this.messages].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     );
 
     return sortedMessages[0];
@@ -265,7 +264,7 @@ export class Chat {
   static fromDatabase(
     record: DBChatSessionRow,
     messages: DBChatMessageRow[] = [],
-    attachments: DBChatAttachmentRow[] = [],
+    attachments: DBChatAttachmentRow[] = []
   ): Chat {
     const metadata =
       typeof record.metadata === "object" &&
@@ -285,7 +284,7 @@ export class Chat {
       visibility: (record.visibility as ChatVisibility) || "private",
       systemPrompt: record.system_prompt || null,
       messages: messages.map((m) =>
-        ChatMessage.fromDatabase(m, chatAttachments),
+        ChatMessage.fromDatabase(m, chatAttachments)
       ),
       case_id: record.case_id || null,
       rawMetadata: metadata,

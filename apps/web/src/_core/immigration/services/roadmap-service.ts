@@ -1,5 +1,9 @@
-import { Case, CaseType } from "../entities/case";
-import { Roadmap, RoadmapPhase, RoadmapMilestone } from "../entities/roadmap";
+import { Case, CaseType } from "@/core/immigration/entities/case";
+import {
+  Roadmap,
+  RoadmapPhase,
+  RoadmapMilestone,
+} from "@/core/immigration/entities/roadmap";
 
 import { CaseService } from "./case-service";
 
@@ -26,7 +30,7 @@ export class RoadmapService {
       urgency?: "normal" | "expedited";
       complexity?: "simple" | "standard" | "complex";
       priorityDocuments?: string[];
-    },
+    }
   ): Roadmap {
     // Set defaults for customization parameters
     const params = {
@@ -124,7 +128,7 @@ export class RoadmapService {
       urgency: "normal" | "expedited";
       complexity: "simple" | "standard" | "complex";
       priorityDocuments: string[];
-    },
+    }
   ): RoadmapPhase[] {
     // Get phase configuration based on case type
     const phaseConfig = this.getPhaseConfiguration(caseType);
@@ -140,7 +144,7 @@ export class RoadmapService {
         phase.startDate,
         phase.endDate,
         caseType,
-        params,
+        params
       );
 
       return {
@@ -238,7 +242,7 @@ export class RoadmapService {
             startDate: this.addDays(today, 181),
             endDate: this.addDays(today, 365),
             metadata: { importance: "critical" },
-          },
+          }
         );
         break;
 
@@ -296,7 +300,7 @@ export class RoadmapService {
             startDate: this.addDays(today, 91),
             endDate: this.addDays(today, 120),
             metadata: { importance: "critical" },
-          },
+          }
         );
         break;
 
@@ -371,7 +375,7 @@ export class RoadmapService {
             startDate: this.addDays(today, 271),
             endDate: this.addDays(today, 300),
             metadata: { importance: "critical" },
-          },
+          }
         );
         break;
 
@@ -431,7 +435,7 @@ export class RoadmapService {
             startDate: this.addDays(today, 151),
             endDate: this.addDays(today, 180),
             metadata: { importance: "critical" },
-          },
+          }
         );
         break;
     }
@@ -455,7 +459,7 @@ export class RoadmapService {
     params: {
       urgency: "normal" | "expedited";
       complexity: "simple" | "standard" | "complex";
-    },
+    }
   ): Array<{
     id: string;
     title: string;
@@ -517,7 +521,7 @@ export class RoadmapService {
     caseType: CaseType,
     params: {
       priorityDocuments: string[];
-    },
+    }
   ): RoadmapMilestone[] {
     // Get required documents for the case type
     const requiredDocuments = this.caseService.getRequiredDocuments(caseType);
@@ -538,14 +542,14 @@ export class RoadmapService {
       // Get milestone details based on type
       const { title, description, isCritical } = this.getMilestoneDetails(
         type,
-        caseType,
+        caseType
       );
 
       // Determine which documents are required for this milestone
       const milestoneDocuments = this.getDocumentsForMilestone(
         type,
         requiredDocuments,
-        params.priorityDocuments,
+        params.priorityDocuments
       );
 
       // Determine dependencies
@@ -575,7 +579,7 @@ export class RoadmapService {
    */
   private getMilestoneDetails(
     milestoneType: string,
-    caseType: CaseType,
+    caseType: CaseType
   ): {
     title: string;
     description: string;
@@ -740,13 +744,11 @@ export class RoadmapService {
     };
 
     // Return the milestone details or a generic placeholder if not found
-    return (
-      milestoneDetails[milestoneType] || {
-        title: this.toTitleCase(milestoneType.replace(/_/g, " ")),
-        description: `Complete the ${milestoneType.replace(/_/g, " ")} step in your application process.`,
-        isCritical: false,
-      }
-    );
+    return (milestoneDetails[milestoneType] || {
+      title: this.toTitleCase(milestoneType.replace(/_/g, " ")),
+      description: `Complete the ${milestoneType.replace(/_/g, " ")} step in your application process.`,
+      isCritical: false,
+    });
   }
 
   /**
@@ -755,7 +757,7 @@ export class RoadmapService {
   private getDocumentsForMilestone(
     milestoneType: string,
     allRequiredDocuments: string[],
-    priorityDocuments: string[],
+    priorityDocuments: string[]
   ): string[] {
     // Define which document types are associated with which milestone types
     const milestoneDocumentMap: Record<string, string[]> = {
@@ -766,13 +768,13 @@ export class RoadmapService {
           doc.includes("Marriage") ||
           doc.includes("Certificate") ||
           doc.includes("Court") ||
-          doc.includes("Foreign"),
+          doc.includes("Foreign")
       ),
       document_verification: allRequiredDocuments.filter(
         (doc) =>
           doc.includes("Identity") ||
           doc.includes("Passport") ||
-          doc.includes("Certificate"),
+          doc.includes("Certificate")
       ),
       form_preparation: [],
       application_review: allRequiredDocuments,
@@ -794,7 +796,7 @@ export class RoadmapService {
     params: {
       urgency: "normal" | "expedited";
       complexity: "simple" | "standard" | "complex";
-    },
+    }
   ): {
     startDate: Date;
     targetEndDate: Date;
@@ -822,7 +824,7 @@ export class RoadmapService {
 
     // Calculate estimated processing time with factors applied
     const adjustedProcessingDays = Math.round(
-      processingTimeEstimate.averageDays * urgencyFactor * complexityFactor,
+      processingTimeEstimate.averageDays * urgencyFactor * complexityFactor
     );
 
     // Calculate estimated end date
@@ -858,7 +860,7 @@ export class RoadmapService {
   private toTitleCase(str: string): string {
     return str.replace(
       /\w\S*/g,
-      (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase(),
+      (txt) => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
     );
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Message } from "ai";
+import { UIMessage, type TextUIPart } from "ai";
 import { FileText, Upload, Search, File, AlertCircle, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 
@@ -49,7 +49,7 @@ interface ProcessedDocument {
 interface UnifiedDocumentProcessorProps {
   chatId: string;
   attachments: ExtendedAttachment[];
-  append: (message: Message | Message[]) => Promise<void>;
+  append: (message: UIMessage | UIMessage[]) => Promise<void>;
   isLoading: boolean;
   isVisible: boolean;
   className?: string;
@@ -89,7 +89,7 @@ export function UnifiedDocumentProcessor({
 
     sessionStorage.setItem(
       `documents-${chatId}`,
-      JSON.stringify(processedDocuments),
+      JSON.stringify(processedDocuments)
     );
   }, [chatId, processedDocuments]);
 
@@ -137,8 +137,8 @@ export function UnifiedDocumentProcessor({
             prev.map((doc) =>
               doc.id === fileId
                 ? { ...doc, ocrStatus: "processing", progress: 10 }
-                : doc,
-            ),
+                : doc
+            )
           );
 
           // Simulate processing delay
@@ -146,8 +146,8 @@ export function UnifiedDocumentProcessor({
 
           setProcessedDocuments((prev) =>
             prev.map((doc) =>
-              doc.id === fileId ? { ...doc, progress: 50 } : doc,
-            ),
+              doc.id === fileId ? { ...doc, progress: 50 } : doc
+            )
           );
 
           await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -162,8 +162,8 @@ export function UnifiedDocumentProcessor({
                     progress: 100,
                     ocrText: `This is example extracted text from ${file.name}.\n\nIn a real implementation, this would be the actual content extracted from the document using OCR technology.`,
                   }
-                : doc,
-            ),
+                : doc
+            )
           );
         } catch (err) {
           console.error("Error processing file:", err);
@@ -176,8 +176,8 @@ export function UnifiedDocumentProcessor({
                     progress: 0,
                     errorMessage: "Failed to process document",
                   }
-                : doc,
-            ),
+                : doc
+            )
           );
         } finally {
           setIsProcessing(false);
@@ -193,8 +193,8 @@ export function UnifiedDocumentProcessor({
                   ocrStatus: "error",
                   errorMessage: "Failed to read file",
                 }
-              : doc,
-          ),
+              : doc
+          )
         );
         setIsProcessing(false);
       };
@@ -213,8 +213,8 @@ export function UnifiedDocumentProcessor({
         prev.map((doc) =>
           doc.id === docId
             ? { ...doc, ocrStatus: "processing" as const, progress: 10 }
-            : doc,
-        ),
+            : doc
+        )
       );
 
       try {
@@ -252,9 +252,7 @@ export function UnifiedDocumentProcessor({
 
         // Update progress
         setProcessedDocuments((prev) =>
-          prev.map((doc) =>
-            doc.id === docId ? { ...doc, progress: 30 } : doc,
-          ),
+          prev.map((doc) => (doc.id === docId ? { ...doc, progress: 30 } : doc))
         );
 
         // Call the OCR API
@@ -280,9 +278,7 @@ export function UnifiedDocumentProcessor({
 
         // Update progress
         setProcessedDocuments((prev) =>
-          prev.map((doc) =>
-            doc.id === docId ? { ...doc, progress: 90 } : doc,
-          ),
+          prev.map((doc) => (doc.id === docId ? { ...doc, progress: 90 } : doc))
         );
 
         const ocrResult = await response.json();
@@ -297,8 +293,8 @@ export function UnifiedDocumentProcessor({
                   progress: 100,
                   ocrText: ocrResult.text,
                 }
-              : doc,
-          ),
+              : doc
+          )
         );
       } catch (error) {
         console.error("Error processing document:", error);
@@ -314,19 +310,19 @@ export function UnifiedDocumentProcessor({
                   errorMessage:
                     error instanceof Error ? error.message : "Unknown error",
                 }
-              : doc,
-          ),
+              : doc
+          )
         );
       }
     },
-    [attachments, chatId],
+    [attachments, chatId]
   );
 
   // Effect to process new attachments
   useEffect(() => {
     // Find attachments that haven't been processed yet
     const newAttachments = attachments.filter(
-      (att) => !processedDocuments.some((doc) => doc.id === att.id),
+      (att) => !processedDocuments.some((doc) => doc.id === att.id)
     );
 
     if (newAttachments.length === 0) return;
@@ -373,8 +369,8 @@ export function UnifiedDocumentProcessor({
                 },
               ],
             }
-          : doc,
-      ),
+          : doc
+      )
     );
 
     try {
@@ -412,18 +408,23 @@ export function UnifiedDocumentProcessor({
             return { ...doc, questions: updatedQuestions };
           }
           return doc;
-        }),
+        })
       );
 
       // Create a system message to add to chat
-      const systemMessage = {
+      const systemMessage: UIMessage = {
         id: Date.now().toString(),
         role: "system" as const,
-        content: `Document Q&A:
-      
+        parts: [
+          {
+            type: "text" as const,
+            text: `Document Q&A:
+
 Document: ${activeDocument.name}
 Question: ${question}
 Answer: ${result.answer}`,
+          } satisfies TextUIPart,
+        ],
       };
 
       // Append system message to chat
@@ -448,7 +449,7 @@ Answer: ${result.answer}`,
             return { ...doc, questions: updatedQuestions };
           }
           return doc;
-        }),
+        })
       );
     } finally {
       setIsAsking(false);

@@ -1,20 +1,22 @@
 import { Session } from "@supabase/supabase-js";
-import { Context, Next } from "hono";
-import { MiddlewareHandler } from "hono/types";
+import { NextRequest, NextResponse } from "next/server";
 
-import { createEdgeSupabaseClient } from "./client";
+import { createEdgeClient } from "@/lib/supabase/client";
 import { AuthMiddlewareContext, ExtendedUser } from "./types";
 
 /**
- * Authentication middleware for Hono API routes
- * Adds user, session, and supabase client to context
+ * Authentication utility for Next.js API routes
+ * Updated to follow latest Supabase SSR patterns
+ * Returns user, session, and supabase client from request
  */
-export const authMiddleware = (): MiddlewareHandler => {
-  return async (c: Context, next: Next) => {
-    const request = c.req;
-    const supabase = createEdgeSupabaseClient(request.raw);
+export const getAuthContext = async (
+  request: NextRequest,
+): Promise<AuthMiddlewareContext> => {
+  const supabase = createEdgeClient(request);
 
-    // First, verify the user with the server
+  try {
+    // IMPORTANT: Use getUser() instead of getSession() for better reliability
+    // getUser() revalidates the token, while getSession() trusts existing tokens
     const {
       data: { user },
       error: userError,
@@ -26,11 +28,12 @@ export const authMiddleware = (): MiddlewareHandler => {
 
     // If user is verified, get the session and prepare extended user info
     if (user && !userError) {
-      const { data: sessionData } = await supabase.auth.getUser();
-      session = sessionData.session;
-      isAuthenticated = !!session;
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionData.session && !sessionError) {
+        session = sessionData.session;
+        isAuthenticated = true;
 
-      if (session) {
         extendedUser = {
           ...user,
           fullName: user.user_metadata?.full_name || user.user_metadata?.name,
@@ -44,112 +47,135 @@ export const authMiddleware = (): MiddlewareHandler => {
           isAdmin: user.user_metadata?.role === "admin",
         };
       }
-    } else {
-      // Log if there was an error fetching the user, but don't block the request
-      // unless specific routes require authentication (handled by requireAuth middleware)
-      if (userError) {
-        console.error(
-          "Auth middleware: Error fetching user:",
-          userError.message,
-        );
-      }
-      // Proceed with null user/session if getUser failed or returned no user
+    } else if (userError) {
+      // Enhanced error logging for debugging
+      console.error(
+        "Auth middleware: Error fetching user:",
+        userError.message,
+        { 
+          status: userError.status,
+          code: userError.code 
+        }
+      );
     }
 
-    // Add auth info (potentially null) to context
-    c.set("auth", {
+    return {
       user: extendedUser,
       session,
       isAuthenticated,
       supabase,
-    } as AuthMiddlewareContext);
-
-    await next();
-  };
+    };
+  } catch (error) {
+    // Handle unexpected errors
+    console.error("Auth middleware: Unexpected error:", error);
+    
+    return {
+      user: null,
+      session: null,
+      isAuthenticated: false,
+      supabase,
+    };
+  }
 };
 
 /**
- * Require authentication middleware for Hono API routes
- * Requires user to be authenticated, otherwise returns 401
+ * Authentication wrapper for Next.js API routes
+ * Use this to wrap your API route handlers that need authentication
  */
-export const requireAuth = (): MiddlewareHandler => {
-  return async (c: Context, next: Next) => {
-    const auth = c.get("auth") as AuthMiddlewareContext | undefined;
+export const withAuth = (
+  handler: (
+    req: NextRequest,
+    context: { params?: any; auth: AuthMiddlewareContext },
+  ) => Promise<Response>,
+) => {
+  return async (req: NextRequest, context: { params?: any }) => {
+    const auth = await getAuthContext(req);
 
-    if (!auth?.isAuthenticated) {
-      return c.json(
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
         {
           message: "Unauthorized: Authentication required",
           status: 401,
         },
-        401,
+        { status: 401 },
       );
     }
 
-    await next();
+    return handler(req, { ...context, auth });
   };
 };
 
 /**
- * Require specific role middleware for Hono API routes
- * Requires user to have specific role, otherwise returns 403
+ * Role-based authentication wrapper for Next.js API routes
+ * Use this to wrap your API route handlers that need specific roles
  */
-export const requireRole = (role: string): MiddlewareHandler => {
-  return async (c: Context, next: Next) => {
-    const auth = c.get("auth") as AuthMiddlewareContext | undefined;
+export const withRole = (
+  role: string,
+  handler: (
+    req: NextRequest,
+    context: { params?: any; auth: AuthMiddlewareContext },
+  ) => Promise<Response>,
+) => {
+  return async (req: NextRequest, context: { params?: any }) => {
+    const auth = await getAuthContext(req);
 
-    if (!auth?.isAuthenticated) {
-      return c.json(
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
         {
           message: "Unauthorized: Authentication required",
           status: 401,
         },
-        401,
+        { status: 401 },
       );
     }
 
     if (auth.user?.role !== role) {
-      return c.json(
+      return NextResponse.json(
         {
           message: `Forbidden: Role '${role}' required`,
           status: 403,
         },
-        403,
+        { status: 403 },
       );
     }
 
-    await next();
+    return handler(req, { ...context, auth });
   };
 };
 
 /**
- * Require admin role middleware for Hono API routes
- * Requires user to be an admin, otherwise returns 403
+ * Admin authentication wrapper for Next.js API routes
+ * Use this to wrap your API route handlers that need admin privileges
  */
-export const requireAdmin = (): MiddlewareHandler => {
-  return async (c: Context, next: Next) => {
-    const auth = c.get("auth") as AuthMiddlewareContext | undefined;
+export const withAdmin = (
+  handler: (
+    req: NextRequest,
+    context: { params?: any; auth: AuthMiddlewareContext },
+  ) => Promise<Response>,
+) => {
+  return async (req: NextRequest, context: { params?: any }) => {
+    const auth = await getAuthContext(req);
 
-    if (!auth?.isAuthenticated) {
-      return c.json(
+    if (!auth.isAuthenticated) {
+      return NextResponse.json(
         {
           message: "Unauthorized: Authentication required",
           status: 401,
         },
-        401,
+        { status: 401 },
       );
     }
 
     if (!auth.user?.isAdmin) {
-      return c.json(
+      return NextResponse.json(
         {
           message: "Forbidden: Admin privileges required",
           status: 403,
         },
-        403,
+        { status: 403 },
       );
     }
 
-    await next();
+    return handler(req, { ...context, auth });
   };
 };

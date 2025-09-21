@@ -1,70 +1,68 @@
 /**
- * AI-Unified Chat API Route - AI SDK v5 Beta Compliant
- *
- * Features full AI SDK v5 beta compliance with Context7 principles:
- * - Tool call streaming with enhanced callbacks (onInputStart, onInputDelta, onInputAvailable)
- * - Modern UI message streams (.toUIMessageStreamResponse())
- * - Enhanced step callbacks (onStepFinish, onChunk)
- * - stopWhen conditions instead of maxSteps
- * - Reasoning content support
- * - Structured output capabilities
- * - Start/Delta/End streaming patterns
- * - Context7 observability & tracing
+ * AI-Unified Chat API Route - AI SDK v5 Compliant
+ * 
+ * Simplified version following Context7 best practices for error handling
  */
 
-import { geolocation } from "@vercel/functions";
-import {
-  streamText,
-  type Message as AIMessage,
-  convertToModelMessages,
+// Import polyfills first to ensure Web Streams API is available
+import "@/lib/polyfills";
+
+import { 
+  streamText, 
+  convertToModelMessages, 
+  tool,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  validateUIMessages,
   stepCountIs,
   hasToolCall,
-  tool,
+  generateId,
+  JsonToSseTransformStream
 } from "ai";
-import { after } from "next/server";
-import {
-  createResumableStreamContext,
-  type ResumableStreamContext,
-} from "resumable-stream";
-import { z } from "zod";
+import { openai } from "@ai-sdk/openai";
 import { v4 as uuidv4, validate as validateUuid } from "uuid";
+import { z } from "zod";
+import { geolocation } from "@vercel/functions";
+import { createClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
+import fetchPonyfill from "fetch-ponyfill";
+import { createResumableStreamContext, type ResumableStreamContext } from "resumable-stream";
+import { after } from "next/server";
+import { 
+  saveChat,
+  clearActiveStream,
+  setActiveStream,
+  loadStreams,
+  loadActiveStreamId 
+} from "@/lib/chat-store";
 
-// Core imports
-import { logger } from "@/lib/logger";
-import { trackEvent } from "@/lib/monitoring";
-import { ChatModelType } from "@/_core/chat/entities/chat";
+// Internal imports (alphabetized for import/order)
+import { ChatModelType } from "@/core/chat/entities/chat";
 import {
   Chat,
   type ChatVisibility as ChatVisibilityType,
-} from "@/_core/chat/entities/chat";
+} from "@/core/chat/entities/chat";
 import {
   ChatRepository,
   DBChatSessionInsert,
-} from "@/_infrastructure/repositories/chat-repository";
-import { RateLimitService } from "@/services/rate-limit-service";
-
-// AI & Tools
+} from "@/infrastructure/repositories/chat-repository";
+import {
+  AIConfig,
+  selectModelForTask,
+  getModelInstance,
+  trackModelUsage,
+} from "@/lib/ai/config";
 import {
   type RequestHints,
   systemPrompt as genericSystemPrompt,
 } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-
-// Database & Auth
-import { createSupabaseServiceClient } from "@/lib/supabase/client";
-import { createClient } from "@supabase/supabase-js";
-import { generateUUID } from "@/lib/utils";
-import { Json } from "@/types/database.types";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { dbMessageToAIMessage } from "@/lib/ai-sdk-adapter";
-
-// RAG
-import { HybridRetriever } from "@/lib/rag/retrieval/hybrid-retriever";
-import { ContextAwareGenerator } from "@/lib/rag/generation/context-generator";
-import OpenAI from "openai";
-import * as fetchPonyfill from "fetch-ponyfill";
-
-const { fetch: ponyfetch } = fetchPonyfill.default();
+import { logger } from "@/lib/logger";
+import { trackEvent } from "@/lib/monitoring";
+import { RAGPipelineFactory, type RAGDependencies } from "@hijraah/rag";
+import { RateLimitService } from "@/services/rate-limit-service";
+import { Json } from "@/types/database.types";
 
 // Configuration
 export const maxDuration = 60;
@@ -77,35 +75,15 @@ const getWeatherTool = tool({
     latitude: z.number().describe("Latitude coordinate"),
     longitude: z.number().describe("Longitude coordinate"),
   }),
-  outputSchema: z.object({
-    current: z.object({
-      temperature_2m: z.number(),
-      time: z.string(),
-    }),
-    daily: z.object({
-      sunrise: z.array(z.string()),
-      sunset: z.array(z.string()),
-    }),
-    hourly: z.object({
-      temperature_2m: z.array(z.number()),
-    }),
-  }),
-  // Enhanced tool callbacks for streaming
-  onInputStart: ({ toolCallId }) => {
-    logger.info("Weather tool input streaming started", { toolCallId });
-  },
-  onInputDelta: ({ inputTextDelta, toolCallId }) => {
-    logger.debug("Weather tool input delta", {
-      toolCallId,
-      delta: inputTextDelta,
-    });
-  },
-  onInputAvailable: ({ input, toolCallId }) => {
-    logger.info("Weather tool input ready", { toolCallId, input });
-  },
-  execute: async ({ latitude, longitude }) => {
+  execute: async ({
+    latitude,
+    longitude,
+  }: {
+    latitude: number;
+    longitude: number;
+  }) => {
     const response = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m&hourly=temperature_2m&daily=sunrise,sunset&timezone=auto`
     );
     const weatherData = await response.json();
     return weatherData;
@@ -119,35 +97,21 @@ const createDocumentTool = (session: any) =>
       title: z.string().describe("Document title"),
       content: z.string().describe("Document content"),
       type: z.enum(["text", "markdown", "code"]).describe("Document type"),
-      tags: z.array(z.string()).optional().describe("Document tags"),
+      tags: z.array(z.string()).nullable().describe("Document tags"),
     }),
-    outputSchema: z.object({
-      id: z.string(),
-      title: z.string(),
-      createdAt: z.string(),
-      success: z.boolean(),
-    }),
-    onInputStart: ({ toolCallId }) => {
-      logger.info("Document creation tool started", {
-        toolCallId,
-        userId: session?.id,
-      });
-    },
-    onInputDelta: ({ inputTextDelta, toolCallId }) => {
-      logger.debug("Document creation input delta", {
-        toolCallId,
-        delta: inputTextDelta,
-      });
-    },
-    onInputAvailable: ({ input, toolCallId }) => {
-      logger.info("Document creation input ready", {
-        toolCallId,
-        input: input.title,
-      });
-    },
-    execute: async ({ title, content, type, tags }) => {
+    execute: async ({
+      title,
+      content,
+      type,
+      tags,
+    }: {
+      title: string;
+      content: string;
+      type: "text" | "markdown" | "code";
+      tags: string[] | null;
+    }) => {
       // Simulate document creation
-      const documentId = generateUUID();
+      const documentId = uuidv4();
       return {
         id: documentId,
         title,
@@ -163,32 +127,17 @@ const updateDocumentTool = (session: any) =>
     inputSchema: z.object({
       documentId: z.string().describe("Document ID to update"),
       content: z.string().describe("New document content"),
-      title: z.string().optional().describe("New document title"),
+      title: z.string().nullable().describe("New document title"),
     }),
-    outputSchema: z.object({
-      id: z.string(),
-      updatedAt: z.string(),
-      success: z.boolean(),
-    }),
-    onInputStart: ({ toolCallId }) => {
-      logger.info("Document update tool started", {
-        toolCallId,
-        userId: session?.id,
-      });
-    },
-    onInputDelta: ({ inputTextDelta, toolCallId }) => {
-      logger.debug("Document update input delta", {
-        toolCallId,
-        delta: inputTextDelta,
-      });
-    },
-    onInputAvailable: ({ input, toolCallId }) => {
-      logger.info("Document update input ready", {
-        toolCallId,
-        documentId: input.documentId,
-      });
-    },
-    execute: async ({ documentId, content, title }) => {
+    execute: async ({
+      documentId,
+      content,
+      title,
+    }: {
+      documentId: string;
+      content: string;
+      title: string | null;
+    }) => {
       // Simulate document update
       return {
         id: documentId,
@@ -202,16 +151,30 @@ const updateDocumentTool = (session: any) =>
 const chatVisibilityEnumValues: [ChatVisibilityType, ...ChatVisibilityType[]] =
   ["private", "public", "team"];
 
+// Allow both legacy simple messages and AI SDK UIMessage format
+const simpleMessageSchema = z.object({
+  id: z.string(),
+  role: z.enum(["user", "assistant", "system"]),
+  content: z.string().min(1).max(10000),
+  createdAt: z.any().optional(),
+});
+
+const uiMessagePartSchema = z.object({
+  type: z.string(),
+  text: z.string().optional(),
+});
+
+const uiMessageSchema = z.object({
+  id: z.string(),
+  role: z.enum(["user", "assistant", "system"]),
+  parts: z.array(uiMessagePartSchema).optional(),
+  content: z.string().optional(),
+  createdAt: z.any().optional(),
+});
+
 const postRequestSchema = z.object({
   id: z.string().uuid().optional(),
-  messages: z.array(
-    z.object({
-      id: z.string(),
-      role: z.enum(["user", "assistant", "system"]),
-      content: z.string().min(1).max(10000),
-      createdAt: z.date().optional(),
-    }),
-  ),
+  messages: z.array(z.union([simpleMessageSchema, uiMessageSchema])).min(0), // Context7: Allow empty arrays for new chat creation per AI SDK v5 patterns
   selectedChatModel: z.nativeEnum(ChatModelType),
   visibility: z.enum(chatVisibilityEnumValues).optional(),
   description: z.string().max(1000).optional(),
@@ -254,6 +217,10 @@ function extractChatIdFromPath(pathname: string): string | null {
 }
 
 function extractTextFromMessage(message: any): string | undefined {
+  // Context7: Defensive coding - handle undefined/null messages gracefully
+  if (!message) return undefined;
+
+  // Support both simple message format (content) and UIMessage format (parts array)
   if (typeof message.content === "string") return message.content;
   const textPart = message.parts?.find((p: any) => p.type === "text");
   return textPart?.text;
@@ -270,37 +237,112 @@ import {
 
 async function enhanceWithRAGContext(
   userMessage: string,
-  userId: string,
+  userId: string
 ): Promise<string | null> {
   try {
     const supabaseClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+    const { fetch: ponyfetch } = fetchPonyfill();
     const openaiClient = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
       fetch: ponyfetch as unknown as typeof fetch,
     });
 
-    const retriever = new HybridRetriever(supabaseClient, openaiClient);
-    const generator = new ContextAwareGenerator();
+    // Skip RAG if Upstash config is missing to prevent runtime errors locally
+    const hasVector =
+      (!!process.env.UPSTASH_VECTOR_REST_URL &&
+        !!process.env.UPSTASH_VECTOR_REST_TOKEN) ||
+      (!!process.env.UPSTASH_VECTOR_URL && !!process.env.UPSTASH_VECTOR_TOKEN);
+    const hasRedis =
+      (!!process.env.UPSTASH_REDIS_REST_URL &&
+        !!process.env.UPSTASH_REDIS_REST_TOKEN) ||
+      (!!process.env.UPSTASH_REDIS_URL && !!process.env.UPSTASH_REDIS_TOKEN);
+    if (!hasVector || !hasRedis) {
+      logger.warn("RAG disabled: Upstash config missing");
+      return null;
+    }
 
-    const searchResults = await retriever.search(userMessage, { userId });
-    const context = generator.buildContext(
-      searchResults,
-      (searchResults as any).userContext,
+    // Context7 Pattern: Create RAG dependencies
+    const ragDependencies: RAGDependencies = {
+      supabase: supabaseClient as any,
+      openai: openaiClient as any,
+      firecrawlApiKey: process.env.FIRECRAWL_API_KEY,
+      mistralApiKey: process.env.MISTRAL_API_KEY,
+    };
+
+    // Context7 Pattern: Create RAG pipeline using the factory
+    const ragFactory = new RAGPipelineFactory(ragDependencies, {
+      retrieval: {
+        defaultLimit: 10,
+        defaultThreshold: 0.7,
+        maxConcurrentQueries: 5,
+        cacheEnabled: true,
+        cacheTTL: 3600,
+      },
+      generation: {
+        defaultModel: "gpt-4o",
+        defaultTemperature: 0.7,
+        maxTokens: 2048,
+        enableCaching: true,
+      },
+      personalization: {
+        enabled: true,
+        learningRate: 0.1,
+        historyLength: 50,
+      },
+    });
+
+    const pipeline = ragFactory.createPipeline();
+
+    // Context7 Pattern: Use the unified query method
+    const ragResult = await pipeline.query(userMessage, { userId });
+
+    // Context7 Pattern: Use the generator to create system prompt
+    const generator = ragFactory.createContextGenerator();
+    return generator.createSystemPrompt(
+      generator.buildContext(
+        ragResult.retrievalResult,
+        ragResult.retrievalResult.userContext
+      )
     );
-    return generator.createSystemPrompt(context);
   } catch (error) {
     logger.error(
       "RAG context enhancement failed",
-      error instanceof Error ? error : new Error(String(error)),
+      error instanceof Error ? error : new Error(String(error))
     );
     return null;
   }
 }
 
 // Main POST handler - AI SDK v5 Beta compliant
+/**
+ * Context7: Enhanced Chat API with Robust Input Handling
+ *
+ * This handler follows Context7 defensive programming patterns and AI SDK v5 best practices:
+ *
+ * 1. **Flexible Input Normalization**: Supports multiple payload formats including:
+ *    - Standard `messages` array for existing chats
+ *    - `initialMessage` string for new chat creation (converted to UIMessage format)
+ *    - Legacy `message` object for backwards compatibility
+ *
+ * 2. **Robust Validation**: Uses Zod schemas with Context7 validation patterns:
+ *    - Allows empty message arrays for new chat creation (`.min(0)`)
+ *    - Converts simple messages to UIMessage format with `parts` array
+ *    - Validates message structure following AI SDK UIMessage standards
+ *    - Graceful handling of optional fields with defensive coding
+ *
+ * 3. **AI SDK v5 Compliance**: Implements latest patterns for:
+ *    - Message validation with `validateUIMessages`
+ *    - Enhanced streaming with resumable stream support
+ *    - Proper error handling and type safety
+ *
+ * 4. **Defensive Programming**: Null guards and type safety throughout
+ *    - `extractTextFromMessage` handles undefined/null inputs
+ *    - Input normalization prevents runtime errors
+ *    - Comprehensive error handling for all edge cases
+ */
 export async function POST(request: Request) {
   const startTime = Date.now();
   const { pathname } = new URL(request.url);
@@ -333,7 +375,7 @@ export async function POST(request: Request) {
     const rateLimitResult = await RateLimitService.isAllowed(
       userId,
       "api",
-      "standard",
+      "standard"
     );
     if (!rateLimitResult.success) {
       return new Response("Rate limit exceeded", {
@@ -356,13 +398,34 @@ export async function POST(request: Request) {
     if (pathname === "/api/chat" || pathname === "/api/chat/") {
       const body = await request.json();
 
-      // Simple validation with normalization
+      // Context7: Enhanced normalization with initialMessage support following AI SDK UIMessage patterns
+      const initialMessageAsArray = body.initialMessage
+        ? [
+            {
+              id: uuidv4(),
+              role: "user" as const,
+              parts: [{ type: "text", text: body.initialMessage }], // UIMessage format with parts array
+              createdAt: new Date().toISOString(),
+            },
+          ]
+        : [];
+
       const normalizedBody = {
         ...body,
         id: body.id && validateUuid(body.id) ? body.id : uuidv4(),
-        messages: body.messages || (body.message ? [body.message] : []),
+        messages:
+          body.messages ||
+          (body.message ? [body.message] : initialMessageAsArray), // Support initialMessage field
         visibility: body.visibility || body.selectedVisibilityType || "private",
+        selectedChatModel: body.selectedChatModel || body.modelType || "gpt-4", // Map modelType to selectedChatModel
       };
+
+      // Debug logging to see what we're receiving
+      console.log("[Chat API Debug] Raw body:", JSON.stringify(body, null, 2));
+      console.log(
+        "[Chat API Debug] Normalized body:",
+        JSON.stringify(normalizedBody, null, 2)
+      );
 
       const validatedData = postRequestSchema.parse(normalizedBody);
       const {
@@ -378,17 +441,67 @@ export async function POST(request: Request) {
       // Ensure chatIdFromRequest is defined after normalization
       const chatId = chatIdFromRequest || uuidv4();
 
-      const userMessage = clientMessages[
-        clientMessages.length - 1
-      ] as AIMessage;
+      // Context7: Handle empty message arrays for new chat creation
+      if (clientMessages.length === 0) {
+        // Create empty chat session without AI processing
+        const chatRepository = new ChatRepository();
+
+        const chatData: DBChatSessionInsert = {
+          id: chatId,
+          user_id: userId,
+          title: "New Chat",
+          model: selectedChatModel,
+          visibility,
+          case_id: caseId || null,
+          metadata: {
+            createdAt: new Date().toISOString(),
+          },
+        };
+
+        await chatRepository.create(chatData);
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            chat: {
+              id: chatId,
+              title: "New Chat",
+              model: selectedChatModel,
+              visibility,
+              messages: [], // Empty messages array
+              createdAt: new Date().toISOString(),
+            },
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      const userMessage = clientMessages[clientMessages.length - 1] as any;
       const userMessageContent = extractTextFromMessage(userMessage) || "";
+
+      // Context7 - Intelligent model selection based on task requirements
+      const taskType =
+        userMessageContent.toLowerCase().includes("reason") ||
+        userMessageContent.toLowerCase().includes("analyze") ||
+        userMessageContent.toLowerCase().includes("explain")
+          ? "reasoning"
+          : "chat";
+
+      const requiresVision = clientMessages.some(
+        (msg: any) =>
+          msg.parts?.some((part: any) => part.type === "image") ||
+          msg.attachments?.length > 0
+      );
 
       // Get or create chat
       let chatEntity = await chatRepository.getChatById(chatId);
 
       if (!chatEntity) {
         const title = userMessageContent.substring(0, 100) || "New Chat";
-        const newChatData: DBChatSessionInsert = {
+        const newChatData = {
           id: chatId,
           user_id: userId,
           title,
@@ -400,9 +513,11 @@ export async function POST(request: Request) {
             ...(description && { description }),
             createdAt: new Date().toISOString(),
           },
-        };
+        } as any;
 
         const newChatRecord = await chatRepository.create(newChatData);
+        // eslint-disable-next-line import/no-relative-parent-imports
+        const { Chat } = await import("@/core/chat/entities/chat");
         chatEntity = Chat.fromDatabase(newChatRecord);
         logger.info("Created new chat", { chatId, userId });
       } else if (chatEntity.userId !== userId) {
@@ -418,7 +533,7 @@ export async function POST(request: Request) {
 
       // Enhanced context
       const { longitude, latitude, city, country } = geolocation(request);
-      const requestHints: RequestHints = { longitude, latitude, city, country };
+      const requestHints = { longitude, latitude, city, country } as any;
 
       let systemPrompt =
         chatEntity?.systemPrompt ||
@@ -428,7 +543,7 @@ export async function POST(request: Request) {
       try {
         const ragContext = await enhanceWithRAGContext(
           userMessageContent,
-          userId,
+          userId
         );
         if (ragContext) {
           systemPrompt = `${systemPrompt}\n\n${ragContext}`;
@@ -439,24 +554,98 @@ export async function POST(request: Request) {
         });
       }
 
-      // Save user message first
+      // Context7: Save user message in UIMessage format for AI SDK v5 compliance
+      const userMessageId = uuidv4();
       await chatRepository.addMessage(chatId, {
-        id: userMessage.id,
+        id: userMessageId,
         role: "user",
-        content: userMessageContent,
+        content: userMessageContent, // Keep for backward compatibility
         metadata: {
+          // Store UIMessage parts in metadata for AI SDK validation
+          uiMessageParts: [{ type: "text", text: userMessageContent }],
           requestHints,
           timestamp: new Date().toISOString(),
           userAgent: request.headers.get("User-Agent"),
-        } as unknown as Json,
+          clientMessageId: userMessage.id,
+        } as any,
         user_id: userId,
       });
 
-      // AI SDK v5 Beta - Enhanced streamText with all features
+      // Context7 - Clear any previous active stream before starting new one
+      await clearActiveStream(chatId);
+
+      // Build tools according to selected model (disable tools for models without tool support)
+      const tools =
+        selectedChatModel === ChatModelType.GPT_3_5
+          ? undefined
+          : ({
+              getWeather: getWeatherTool,
+              createDocument: createDocumentTool(userFromAuth),
+              updateDocument: updateDocumentTool(userFromAuth),
+            } as const);
+
+      // Context7: Validation guard - ensure all messages have UIMessage parts format
+      const messagesWithParts = allMessages.map((msg: any) => {
+        if (!msg.parts || !Array.isArray(msg.parts)) {
+          // Convert legacy message to UIMessage format
+          const textContent =
+            typeof msg.content === "string" ? msg.content : "";
+          return {
+            ...msg,
+            parts: [{ type: "text", text: textContent }],
+          };
+        }
+        return msg;
+      });
+
+      // Validate UI messages against current tool schemas (latest AI SDK guidance)
+      const validatedMessages = await validateUIMessages({
+        messages: messagesWithParts as any, // Guaranteed UIMessage format with parts
+        tools: tools as any,
+      });
+
+      // Context7 - Latest AI SDK v5 Model Validation Pattern
+      let selectedModel;
+      try {
+        selectedModel = myProvider.languageModel(selectedChatModel);
+        if (!selectedModel) {
+          throw new Error(`Model ${selectedChatModel} not available in provider`);
+        }
+      } catch (modelError) {
+        logger.error(
+          "Model selection failed",
+          modelError instanceof Error ? modelError : new Error(String(modelError)),
+          {
+            chatId,
+            selectedChatModel,
+            // Latest Context7 environment check pattern
+            hasGatewayKey: Boolean(process.env.AI_GATEWAY_API_KEY),
+            hasOpenAIKey: Boolean(process.env.OPENAI_API_KEY),
+            hasAnthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
+          }
+        );
+        
+        // Latest Context7 error response pattern
+        return new Response(
+          JSON.stringify({ 
+            error: "Model configuration error", 
+            message: `Selected model ${selectedChatModel} is not available. Please check your AI provider configuration.`,
+            ...(process.env.NODE_ENV === 'development' && {
+              details: modelError instanceof Error ? modelError.message : String(modelError)
+            })
+          }),
+          {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      // AI SDK v5+ - Enhanced streamText with all features
       const result = streamText({
-        model: myProvider.languageModel(selectedChatModel),
+        model: selectedModel,
         system: systemPrompt,
-        messages: convertToModelMessages(allMessages),
+        messages: convertToModelMessages(validatedMessages),
 
         // AI SDK v5 Beta - Modern stopping conditions
         stopWhen: [
@@ -470,18 +659,10 @@ export async function POST(request: Request) {
         ],
 
         // AI SDK v5 Beta - Enhanced tool definitions with streaming
-        tools:
-          selectedChatModel === ChatModelType.GPT_3_5
-            ? undefined
-            : {
-                getWeather: getWeatherTool,
-                createDocument: createDocumentTool(userFromAuth),
-                updateDocument: updateDocumentTool(userFromAuth),
-              },
+        tools,
 
         // AI SDK v5 Beta - Enhanced step callback
         onStepFinish: async ({
-          stepType,
           text,
           toolCalls,
           toolResults,
@@ -496,7 +677,6 @@ export async function POST(request: Request) {
           // Context7 - Observability: Log each step completion
           logger.info("AI step finished", {
             chatId,
-            stepType,
             finishReason,
             textLength: text.length,
             toolCallsCount: toolCalls?.length || 0,
@@ -515,7 +695,6 @@ export async function POST(request: Request) {
               properties: {
                 chatId,
                 toolNames: toolCalls.map((tc) => tc.toolName),
-                stepType,
                 userId,
               },
             });
@@ -525,19 +704,19 @@ export async function POST(request: Request) {
         // AI SDK v5 Beta - Enhanced chunk processing
         onChunk: async ({ chunk }) => {
           switch (chunk.type) {
-            case "text":
-              // Context7 - Observability: Log text streaming
-              logger.debug("Text chunk received", {
+            case "text-delta":
+              logger.debug("Text delta received", {
                 chatId,
-                textLength: chunk.text.length,
+                deltaLength: ((chunk as any).delta ?? (chunk as any).text ?? "")
+                  .length,
               });
               break;
 
-            case "reasoning":
-              // AI SDK v5 Beta - Reasoning content support
-              logger.info("Reasoning chunk received", {
+            case "reasoning-delta":
+              logger.info("Reasoning delta received", {
                 chatId,
-                reasoningLength: chunk.text.length,
+                deltaLength: ((chunk as any).delta ?? (chunk as any).text ?? "")
+                  .length,
               });
               break;
 
@@ -545,8 +724,8 @@ export async function POST(request: Request) {
               // AI SDK v5 Beta - Source information handling
               logger.info("Source chunk received", {
                 chatId,
-                sourceType: chunk.source.sourceType,
-                sourceId: chunk.source.id,
+                sourceType: (chunk as any).sourceType,
+                sourceId: (chunk as any).id,
               });
               break;
 
@@ -570,8 +749,13 @@ export async function POST(request: Request) {
             case "tool-input-delta":
               logger.debug("Tool input delta received", {
                 chatId,
-                toolCallId: chunk.id,
-                deltaLength: chunk.delta.length,
+                toolCallId: (chunk as any).id,
+                deltaLength: (
+                  (chunk as any).delta ??
+                  (chunk as any).text ??
+                  (chunk as any).inputTextDelta ??
+                  ""
+                ).length,
               });
               break;
 
@@ -600,29 +784,64 @@ export async function POST(request: Request) {
           const processingTime = Date.now() - startTime;
 
           try {
-            const assistantMessageId = generateUUID();
+            const assistantMessageId = uuidv4();
 
-            // Save assistant message with enhanced metadata
+            // Context7: Save assistant message in UIMessage format for AI SDK v5 compliance
+            const assistantParts = [];
+            if (reasoning) {
+              assistantParts.push({ type: "reasoning", text: reasoning });
+            }
+            if (text) {
+              assistantParts.push({ type: "text", text });
+            }
+
             await chatRepository.addMessage(chatId, {
               id: assistantMessageId,
               role: "assistant",
-              content: text,
+              content: text, // Keep for backward compatibility
               metadata: {
+                // Store UIMessage parts in metadata for AI SDK validation
+                uiMessageParts:
+                  assistantParts.length > 0
+                    ? assistantParts
+                    : [{ type: "text", text }],
                 model: selectedChatModel,
                 modelId: response.modelId,
                 processingTime,
                 tokensUsed: usage?.totalTokens || 0,
-                promptTokens: usage?.promptTokens || 0,
-                completionTokens: usage?.completionTokens || 0,
+                inputTokens: (usage as any)?.inputTokens || 0,
+                outputTokens: (usage as any)?.outputTokens || 0,
                 timestamp: new Date().toISOString(),
                 hasReasoning: !!reasoning,
                 reasoningLength: reasoning?.length || 0,
                 sourcesCount: sources?.length || 0,
                 filesCount: files?.length || 0,
                 responseId: response.id,
-              } as unknown as Json,
+                aiGateway: true, // Track AI Gateway usage
+              } as any,
               user_id: userId,
             });
+
+            // Context7 - Clear active stream when finished (as per guide)
+            await clearActiveStream(chatId);
+
+            // Context7 - Enhanced AI Gateway usage tracking
+            try {
+              trackModelUsage(
+                response.modelId || selectedChatModel.toString(),
+                {
+                  inputTokens: (usage as any)?.inputTokens || 0,
+                  outputTokens: (usage as any)?.outputTokens || 0,
+                  totalTokens: usage?.totalTokens || 0,
+                  processingTime,
+                  success: true,
+                }
+              );
+            } catch (trackingError) {
+              logger.warn("Failed to track AI Gateway usage", {
+                trackingError,
+              });
+            }
 
             // Enhanced metrics tracking
             trackEvent({
@@ -633,95 +852,283 @@ export async function POST(request: Request) {
                 modelId: response.modelId,
                 processingTime,
                 tokensUsed: usage?.totalTokens || 0,
-                promptTokens: usage?.promptTokens || 0,
-                completionTokens: usage?.completionTokens || 0,
+                inputTokens: (usage as any)?.inputTokens || 0,
+                outputTokens: (usage as any)?.outputTokens || 0,
                 hasReasoning: !!reasoning,
                 sourcesCount: sources?.length || 0,
                 filesCount: files?.length || 0,
                 userId,
                 isGuest,
+                aiGateway: true, // Track AI Gateway usage
+                taskType, // Track intelligent task detection
               },
             });
 
-            logger.info("Chat message processed", {
+            logger.info("Chat message processed via AI Gateway", {
               chatId,
               processingTime,
               tokensUsed: usage?.totalTokens || 0,
               modelId: response.modelId,
               hasReasoning: !!reasoning,
               sourcesCount: sources?.length || 0,
+              taskType,
             });
           } catch (error) {
             logger.error(
               "Failed to save assistant message",
-              error instanceof Error ? error : new Error(String(error)),
+              error instanceof Error ? error : new Error(String(error))
             );
           }
         },
 
+        // AI SDK v5 Beta - Enhanced error handling following Context7 patterns
         onError: ({ error }) => {
-          logger.error("Streaming error", new Error(String(error)), { chatId });
+          // Context7 - Structured error logging with proper context
+          const errorInstance = error instanceof Error ? error : new Error(String(error));
+          
+          logger.error("AI streaming error occurred", errorInstance, {
+            chatId,
+            userId,
+            selectedChatModel,
+            errorType: errorInstance.name,
+            errorMessage: errorInstance.message,
+            isGuest,
+            processingTime: Date.now() - startTime,
+            timestamp: new Date().toISOString(),
+          });
+
+          // Context7 - Track streaming errors for monitoring
+          trackEvent({
+            name: "streaming_error",
+            properties: {
+              chatId,
+              userId,
+              model: selectedChatModel,
+              errorType: errorInstance.name,
+              errorMessage: errorInstance.message.substring(0, 100), // Truncate for privacy
+              isGuest,
+            },
+          });
         },
       });
 
-      // Handle resumable streams if available
+      // Context7 - Enhanced resumable streams implementation following AI SDK v5 patterns
       const streamContext = getStreamContext();
       if (streamContext) {
         try {
-          const streamId = generateUUID();
-          const resumableStream = await streamContext.resumableStream(
-            streamId,
-            () =>
-              result.toUIMessageStreamResponse() as unknown as ReadableStream<string>,
-          );
-          await chatRepository.storeStreamId(chatId, streamId);
-          return resumableStream;
+          const streamId = uuidv4();
+
+          // Context7 - Set this as the active stream for resumption
+          await setActiveStream({ chatId, streamId });
+
+          // Context7 - Use createUIMessageStream for Node.js compatibility
+          const stream = createUIMessageStream({
+            originalMessages: allMessages as any,
+            execute: ({ writer }) => {
+              // Context7 - Merge the streamText result properly
+              result.consumeStream();
+              writer.merge(result.toUIMessageStream());
+            },
+            onFinish: ({ messages }) => {
+              // Context7 - Clear the active stream when finished (as per guide)
+              clearActiveStream(chatId);
+              saveChat({ chatId, messages });
+            },
+            onError: (error) => {
+              // Context7 - Enhanced error handling for resumable streams
+              const errorInstance = error instanceof Error ? error : new Error(String(error));
+              
+              logger.error("Resumable stream error", errorInstance, {
+                chatId,
+                userId,
+                streamId,
+                errorType: errorInstance.name,
+                errorMessage: errorInstance.message,
+                selectedChatModel,
+                isGuest,
+                timestamp: new Date().toISOString(),
+              });
+
+              // Context7 - Clear the active stream on error
+              clearActiveStream(chatId);
+
+              // Context7 - Return user-friendly error messages based on error type
+              if (errorInstance.message.includes("pipeThrough")) {
+                return "Stream processing error. Your browser or environment may not support the required streaming features. Please try again.";
+              }
+              
+              if (errorInstance.message.includes("Gateway")) {
+                return "AI Gateway connection failed. Please check your connection and try again.";
+              }
+              
+              if (errorInstance.message.includes("timeout")) {
+                return "Request timed out. Please try again.";
+              }
+
+              return "Streaming error occurred. Please try again.";
+            },
+          });
+
+          return createUIMessageStreamResponse({
+            stream,
+            headers: {
+              "X-Chat-Id": chatId,
+              "X-Stream-Id": streamId,
+            },
+          });
         } catch (error) {
+          // Context7 - Proper error handling with type safety
+          const safeError =
+            error instanceof Error ? error : new Error(String(error));
           logger.warn(
-            "Failed to create resumable stream, using regular stream",
-            { error },
+            "Failed to create resumable stream, falling back to regular stream",
+            {
+              error: safeError.message,
+              chatId,
+            }
           );
         }
       }
 
-      // AI SDK v5 Beta - Modern UI message stream response
+      // Context7 - Use createUIMessageStream for Node.js compatibility (fallback path)
       const headers: HeadersInit = {};
       if (chatId) {
         headers["X-Chat-Id"] = chatId;
       }
 
-      return result.toUIMessageStreamResponse({
-        headers,
-        // AI SDK v5 Beta - Enhanced response metadata
-        messageMetadata: ({ part }) => {
-          // Send model information on start
-          if (part.type === "start") {
-            return {
-              model: selectedChatModel,
+      try {
+        const stream = createUIMessageStream({
+          originalMessages: allMessages as any,
+          execute: ({ writer }) => {
+            // Context7 - Merge the streamText result properly
+            result.consumeStream();
+            writer.merge(result.toUIMessageStream());
+          },
+          onFinish: ({ messages }) => {
+            saveChat({ chatId, messages });
+          },
+          onError: (error) => {
+            // Context7 - Enhanced error logging for fallback stream
+            const errorInstance = error instanceof Error ? error : new Error(String(error));
+            
+            logger.error("Chat streaming error (fallback path)", errorInstance, {
               chatId,
-              startTime: Date.now(),
-            };
-          }
+              userId,
+              isGuest,
+              selectedChatModel,
+              errorType: errorInstance.name,
+              errorMessage: errorInstance.message,
+              streamType: "fallback",
+              processingTime: Date.now() - startTime,
+              timestamp: new Date().toISOString(),
+            });
 
-          // Send step information on finish-step
-          if (part.type === "finish-step") {
-            return {
-              model: part.response.modelId,
-              stepDuration: Date.now() - startTime,
-              tokensUsed: part.usage.totalTokens,
-            };
-          }
+            // Context7 - Track fallback streaming errors
+            trackEvent({
+              name: "streaming_error_fallback",
+              properties: {
+                chatId,
+                userId,
+                model: selectedChatModel,
+                errorType: errorInstance.name,
+                errorMessage: errorInstance.message.substring(0, 100),
+                isGuest,
+                streamType: "fallback",
+              },
+            });
 
-          // Send final information on finish
-          if (part.type === "finish") {
-            return {
-              totalTokens: part.totalUsage.totalTokens,
-              totalDuration: Date.now() - startTime,
-              chatId,
-            };
+            // Context7 - Return structured error messages based on error type
+            if (error == null) {
+              return "An unknown error occurred. Please try again.";
+            }
+
+            if (typeof error === "string") {
+              // Handle string errors from gateway
+              if (error.includes("Gateway request failed")) {
+                return "AI Gateway connection failed. Please check your connection and try again.";
+              }
+              if (error.includes("timeout")) {
+                return "Request timed out. Please try again.";
+              }
+              return error;
+            }
+
+            if (error instanceof Error) {
+              const errorMessage = error.message;
+
+              // Handle specific error types with user-friendly messages
+              if (
+                errorMessage.includes("Gateway request failed") ||
+                errorMessage.includes("gateway") ||
+                errorMessage.includes("pipeThrough")
+              ) {
+                return "AI Gateway connection failed. Please check your connection and try again.";
+              }
+              if (
+                errorMessage.includes("timeout") ||
+                errorMessage.includes("TIMEOUT")
+              ) {
+                return "Request timed out. Please try again.";
+              }
+              if (
+                errorMessage.includes("unauthorized") ||
+                errorMessage.includes("401")
+              ) {
+                return "Authentication failed. Please refresh the page and try again.";
+              }
+              if (
+                errorMessage.includes("rate limit") ||
+                errorMessage.includes("429")
+              ) {
+                return "Rate limit exceeded. Please wait a moment and try again.";
+              }
+              if (
+                errorMessage.includes("network") ||
+                errorMessage.includes("Failed to fetch")
+              ) {
+                return "Network connection failed. Please check your internet connection and try again.";
+              }
+
+              return errorMessage;
+            }
+
+            // Fallback for object errors
+            return JSON.stringify(error);
+          },
+        });
+
+        return createUIMessageStreamResponse({ 
+          stream, 
+          headers,
+        });
+      } catch (streamError) {
+        // Context7 - Fallback for stream creation errors
+        logger.error(
+          "Failed to create stream response, using fallback",
+          streamError instanceof Error
+            ? streamError
+            : new Error(String(streamError)),
+          {
+            chatId,
+            userId,
+            selectedChatModel,
           }
-        },
-      });
+        );
+
+        // Return a simple error response if streaming fails
+        return new Response(
+          JSON.stringify({
+            error: "Streaming temporarily unavailable. Please try again.",
+          }),
+          {
+            status: 503,
+            headers: {
+              "Content-Type": "application/json",
+              "X-Chat-Id": chatId,
+            },
+          }
+        );
+      }
     }
 
     return new Response("Not Found", { status: 404 });
@@ -732,12 +1139,12 @@ export async function POST(request: Request) {
       return new Response(
         JSON.stringify({
           error: "Validation failed",
-          details: error.errors,
+          details: error.issues,
         }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        },
+        }
       );
     }
 
@@ -752,7 +1159,7 @@ export async function POST(request: Request) {
 async function handleGenerateTitle(
   chatId: string,
   userId: string,
-  chatRepository: ChatRepository,
+  chatRepository: any
 ) {
   try {
     const chat = await chatRepository.getChatById(chatId);
@@ -761,7 +1168,7 @@ async function handleGenerateTitle(
     }
 
     const messages = await chatRepository.getMessages(chatId);
-    const firstUserMessage = messages.find((m) => m.role === "user");
+    const firstUserMessage = messages.find((m: any) => m.role === "user");
 
     if (!firstUserMessage) {
       return new Response("No user message found", { status: 400 });
@@ -775,13 +1182,13 @@ async function handleGenerateTitle(
   } catch (error) {
     logger.error(
       "Failed to generate title",
-      error instanceof Error ? error : new Error(String(error)),
+      error instanceof Error ? error : new Error(String(error))
     );
     return new Response("Failed to generate title", { status: 500 });
   }
 }
 
-// GET handler - simplified
+// GET handler - Enhanced for resumable streaming
 export async function GET(request: Request) {
   try {
     let authResult: AuthResult;
@@ -799,17 +1206,105 @@ export async function GET(request: Request) {
     const { pathname, searchParams } = new URL(request.url);
     const extractedChatId = extractChatIdFromPath(pathname);
 
-    // Handle stream resume
+    // Handle resumable stream requests
+    const chatId = searchParams.get("chatId");
+    if (chatId) {
+      const streamContext = getStreamContext();
+      if (!streamContext) {
+        return new Response("Resumable streaming not available", {
+          status: 503,
+        });
+      }
+
+      try {
+        // Get the most recent stream ID for this chat
+        const streamIds = await loadStreams(chatId);
+
+        if (!streamIds.length) {
+          // No content response when there is no active stream
+          return new Response(null, { status: 204 });
+        }
+
+        const recentStreamId = streamIds[streamIds.length - 1];
+
+        if (!recentStreamId) {
+          return new Response(null, { status: 204 });
+        }
+
+        // Attempt to resume the existing stream
+        const resumedStream =
+          await streamContext.resumeExistingStream(recentStreamId);
+
+        if (!resumedStream) {
+          return new Response(null, { status: 204 });
+        }
+
+        return new Response(resumedStream, {
+          headers: {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            Connection: "keep-alive",
+            "X-Chat-Id": chatId,
+            "X-Stream-Id": recentStreamId,
+          },
+        });
+      } catch (error) {
+        // Context7 - Proper error handling with type safety
+        const safeError =
+          error instanceof Error ? error : new Error(String(error));
+        logger.error("Failed to resume stream", safeError);
+        return new Response("Failed to resume stream", { status: 500 });
+      }
+    }
+
+    // Handle stream resume by streamId (legacy support)
     const streamId = searchParams.get("streamId");
     if (streamId) {
       const streamContext = getStreamContext();
       if (streamContext) {
         try {
+          // Context7 - Latest AI SDK v5 Web Streams API Validation
+          if (typeof ReadableStream === 'undefined' || !ReadableStream.prototype.pipeThrough) {
+            logger.error(
+              "Web Streams API not available for stream resumption",
+              new Error("Web Streams API not available - pipeThrough method missing"),
+              {
+                streamId,
+                hasReadableStream: typeof ReadableStream !== 'undefined',
+                hasPipeThrough: ReadableStream?.prototype?.pipeThrough !== undefined,
+                nodeVersion: process.version,
+                runtime: process.env.NEXT_RUNTIME,
+              }
+            );
+            
+            return new Response(
+              JSON.stringify({ 
+                error: "Stream API not supported", 
+                message: "Web Streams API is not available in this environment. Please check your Node.js version and polyfills.",
+              }),
+              {
+                status: 500,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
+
+          const emptyDataStream = createUIMessageStream({
+            execute: () => {},
+          });
+
           const resumedStream = await streamContext.resumableStream(
             streamId,
-            () => new ReadableStream<string>(),
+            () => emptyDataStream.pipeThrough(new JsonToSseTransformStream())
           );
-          return resumedStream;
+
+          return new Response(resumedStream, {
+            headers: {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              Connection: "keep-alive",
+            },
+          });
         } catch (error) {
           return new Response("Stream not found", { status: 404 });
         }
@@ -836,7 +1331,9 @@ export async function GET(request: Request) {
       offset,
       case_id: caseId,
     });
-    const chatEntities = chats.map((c) => Chat.fromDatabase(c));
+    // eslint-disable-next-line import/no-relative-parent-imports
+    const { Chat } = await import("@/core/chat/entities/chat");
+    const chatEntities = chats.map((c: any) => Chat.fromDatabase(c));
 
     return Response.json({
       chats: chatEntities.map((chat) => chat.toObject()),
@@ -845,7 +1342,7 @@ export async function GET(request: Request) {
   } catch (error) {
     logger.error(
       "GET error",
-      error instanceof Error ? error : new Error(String(error)),
+      error instanceof Error ? error : new Error(String(error))
     );
     return new Response("Internal server error", { status: 500 });
   }
@@ -869,6 +1366,10 @@ export async function PATCH(request: Request) {
     const chatId = extractChatIdFromPath(pathname);
     if (!chatId) return new Response("Chat ID required", { status: 400 });
 
+    // eslint-disable-next-line import/no-relative-parent-imports
+    const { ChatRepository } = await import(
+      "@/infrastructure/repositories/chat-repository"
+    );
     const chatRepository = new ChatRepository();
     const chat = await chatRepository.getChatById(chatId);
     if (!chat || chat.userId !== user.id) {
@@ -892,19 +1393,21 @@ export async function PATCH(request: Request) {
       },
     });
 
+    // eslint-disable-next-line import/no-relative-parent-imports
+    const { Chat } = await import("@/core/chat/entities/chat");
     return Response.json({ chat: Chat.fromDatabase(updatedChat).toObject() });
   } catch (error) {
     logger.error(
       "PATCH error",
-      error instanceof Error ? error : new Error(String(error)),
+      error instanceof Error ? error : new Error(String(error))
     );
     if (error instanceof z.ZodError) {
       return new Response(
-        JSON.stringify({ error: "Validation failed", details: error.errors }),
+        JSON.stringify({ error: "Validation failed", details: error.issues }),
         {
           status: 400,
           headers: { "Content-Type": "application/json" },
-        },
+        }
       );
     }
     return new Response("Internal server error", { status: 500 });
@@ -929,6 +1432,10 @@ export async function DELETE(request: Request) {
     const chatId = extractChatIdFromPath(pathname);
     if (!chatId) return new Response("Chat ID required", { status: 400 });
 
+    // eslint-disable-next-line import/no-relative-parent-imports
+    const { ChatRepository } = await import(
+      "@/infrastructure/repositories/chat-repository"
+    );
     const chatRepository = new ChatRepository();
     const chat = await chatRepository.getChatById(chatId);
     if (!chat || chat.userId !== user.id) {
@@ -940,7 +1447,7 @@ export async function DELETE(request: Request) {
   } catch (error) {
     logger.error(
       "DELETE error",
-      error instanceof Error ? error : new Error(String(error)),
+      error instanceof Error ? error : new Error(String(error))
     );
     return new Response("Internal server error", { status: 500 });
   }

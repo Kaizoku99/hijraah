@@ -3,6 +3,7 @@
  * This file exists to maintain backward compatibility with any code still using the old path.
  */
 import { createClient } from "@supabase/supabase-js";
+import { createExtendedUser } from "@/types/auth";
 
 import {
   getAuthUser,
@@ -23,7 +24,6 @@ import {
 
 import { AuthError } from "./auth/errors";
 import { useAuth, useUser, useIsAuthenticated, useHasRole } from "./auth/hooks";
-import { createExtendedUser } from "@/types/auth";
 
 /**
  * Get the current authenticated user on the server

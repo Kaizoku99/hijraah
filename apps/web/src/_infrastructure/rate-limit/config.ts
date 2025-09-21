@@ -18,7 +18,8 @@ export type RateLimitAction =
   | "batchProcessing"
   | "api"
   | "caseManagement"
-  | "documentUpload";
+  | "documentUpload"
+  | "suggestions";
 export type UserTier = "standard" | "premium" | "enterprise";
 
 // Rate limit configurations with consistent structure
@@ -63,6 +64,13 @@ export const rateLimitConfigs = {
     standard: { requests: 30, window: "1 m", tokens: 2 },
     premium: { requests: 100, window: "1 m", tokens: 1 },
     enterprise: { requests: 500, window: "1 m", tokens: 1 },
+  },
+
+  // Suggestions API limits
+  suggestions: {
+    standard: { requests: 200, window: "1 m", tokens: 1 },
+    premium: { requests: 1000, window: "1 m", tokens: 1 },
+    enterprise: { requests: 5000, window: "1 m", tokens: 1 },
   },
 } as const;
 
@@ -112,6 +120,11 @@ export const limiters: Record<RateLimitAction, Record<UserTier, Ratelimit>> = {
     standard: createRateLimiter("documentUpload", "standard"),
     premium: createRateLimiter("documentUpload", "premium"),
     enterprise: createRateLimiter("documentUpload", "enterprise"),
+  },
+  suggestions: {
+    standard: createRateLimiter("suggestions", "standard"),
+    premium: createRateLimiter("suggestions", "premium"),
+    enterprise: createRateLimiter("suggestions", "enterprise"),
   },
 };
 

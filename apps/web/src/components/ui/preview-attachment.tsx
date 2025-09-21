@@ -18,12 +18,12 @@ export const PreviewAttachment = ({
           contentType.startsWith("image") ? (
             // NOTE: it is recommended to use next/image for images
             // eslint-disable-next-line @next/next/no-img-element
-            <img
+            (<img
               key={url}
               src={url}
               alt={name ?? "An image attachment"}
               className="rounded-md size-full object-cover"
-            />
+            />)
           ) : (
             <div className="" />
           )

@@ -2,11 +2,10 @@
  * This file is a stub that re-exports the ChatRepository from its proper location.
  * This ensures backward compatibility with components that import it from this location.
  */
-
-import { Chat } from "@/_core/chat/entities/chat";
 import { SupabaseClient } from "@supabase/supabase-js";
+
 import { Database } from "@/types/database.types";
-import { BaseRepository, RepositoryOptions } from "./base-repository";
+import { Chat } from "@/core/chat/entities/chat";
 import { toSnakeCase } from "@/lib/utils/case-converter";
 import { createSupabaseServiceClient } from "@/lib/supabase/client";
 import {
@@ -16,6 +15,8 @@ import {
   ChatSessionDomain,
   ChatMessageDomain,
 } from "@/types/domain-mappings";
+
+import { BaseRepository, RepositoryOptions } from "./base-repository";
 
 // Use Supabase generated types for DB operations
 export type DBChatSessionInsert =
@@ -154,13 +155,19 @@ export class ChatRepository extends BaseRepository<
       .from("chat_sessions")
       .select("*")
       .eq("id", chatId)
-      .single();
+      .maybeSingle();
 
-    if (chatError || !chat) {
-      if (chatError && chatError.code === "PGRST116") return null; // Record not found
+    // No row yet is valid for a brand-new chat
+    if (!chatError && !chat) {
+      return null;
+    }
+    if (chatError) {
       console.error("Error fetching chat:", chatError);
       return null;
     }
+
+    // At this point, chat must be non-null. Narrow the type for TS.
+    const chatRow = chat as DBChatSessionRow;
 
     // Fetch messages
     const { data: messages, error: messagesError } = await client
@@ -198,7 +205,7 @@ export class ChatRepository extends BaseRepository<
     }
 
     return {
-      chat,
+      chat: chatRow,
       messages: messages || [],
       attachments,
     };
@@ -221,7 +228,7 @@ export class ChatRepository extends BaseRepository<
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await client
+  const { data, error } = await client
       .from("chat_messages")
       .insert(payload)
       .select()
@@ -287,10 +294,12 @@ export class ChatRepository extends BaseRepository<
       .from("chat_sessions")
       .select("context")
       .eq("id", chatId)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
-      console.error(`Chat not found for storing stream ID: ${chatId}`, error);
+      if (error) {
+        console.error(`Chat not found for storing stream ID: ${chatId}`, error);
+      }
       return;
     }
 
@@ -320,10 +329,12 @@ export class ChatRepository extends BaseRepository<
       .from("chat_sessions")
       .select("context")
       .eq("id", chatId)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
-      console.error(`Chat not found for getting stream IDs: ${chatId}`, error);
+      if (error) {
+        console.error(`Chat not found for getting stream IDs: ${chatId}`, error);
+      }
       return [];
     }
     const context =
@@ -339,10 +350,12 @@ export class ChatRepository extends BaseRepository<
       .from("chat_sessions")
       .select("context")
       .eq("id", chatId)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
-      console.error(`Chat not found for deleting stream IDs: ${chatId}`, error);
+      if (error) {
+        console.error(`Chat not found for deleting stream IDs: ${chatId}`, error);
+      }
       return;
     }
 

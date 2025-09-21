@@ -1,6 +1,6 @@
 "use client";
 
-import { UseChatHelpers, UseChatOptions } from "@ai-sdk/react";
+import { UseChatHelpers, UseChatOptions } from "@ai-sdk-tools/store";
 import cx from "classnames";
 import equal from "fast-deep-equal";
 import { nanoid } from "nanoid";

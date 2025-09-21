@@ -40,7 +40,7 @@
     "Follow monorepo structure with packages for shared functionality",
     "Use Drizzle ORM for database schema and migrations",
     "Implement RAG pipeline with vector embeddings for document processing",
-    "Use Hono for API routes and backend services",
+    "Use Next.js 15 App Router API routes for all backend functionality",
     "Follow internationalization patterns with next-intl",
     "Implement proper rate limiting and security measures",
     "Use proper Context7 observability and logging patterns"

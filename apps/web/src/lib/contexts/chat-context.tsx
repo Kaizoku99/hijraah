@@ -1,6 +1,6 @@
 "use client";
 
-import { Message } from "ai/react";
+import { Message } from "@ai-sdk-tools/store";
 import * as React from "react";
 import { toast } from "sonner";
 
@@ -79,7 +79,7 @@ interface ChatContextType {
   addMessage: (message: Message) => Promise<void>;
   updateMessage: (
     id: string,
-    updateFn: (message: Message) => Message,
+    updateFn: (message: Message) => Message
   ) => Promise<void>;
   removeMessage: (id: string) => Promise<void>;
   clearMessages: () => Promise<void>;
@@ -111,7 +111,7 @@ export function ChatProvider({
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<Error | null>(null);
   const [conversationId, setConversationId] = React.useState<string | null>(
-    initialConversationId || null,
+    initialConversationId || null
   );
 
   const chatService = React.useMemo(() => new ChatService(), []);
@@ -134,12 +134,12 @@ export function ChatProvider({
       } else if (payload.type === "update") {
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === payload.message.id ? payload.message : msg,
-          ),
+            msg.id === payload.message.id ? payload.message : msg
+          )
         );
       } else if (payload.type === "delete") {
         setMessages((prev) =>
-          prev.filter((msg) => msg.id !== payload.messageId),
+          prev.filter((msg) => msg.id !== payload.messageId)
         );
       }
     },
@@ -170,7 +170,7 @@ export function ChatProvider({
         setIsLoading(false);
       }
     },
-    [chatService],
+    [chatService]
   );
 
   const loadConversation = React.useCallback(
@@ -186,7 +186,7 @@ export function ChatProvider({
             id: msg.id,
             role: msg.role,
             content: msg.content,
-          })),
+          }))
         );
       } catch (error) {
         console.error("Error loading conversation:", error);
@@ -195,7 +195,7 @@ export function ChatProvider({
         setIsLoading(false);
       }
     },
-    [chatService],
+    [chatService]
   );
 
   const addMessage = React.useCallback(
@@ -226,7 +226,7 @@ export function ChatProvider({
         setMessages((prev) => prev.filter((msg) => msg.id !== message.id));
       }
     },
-    [broadcast, chatService, conversationId, createConversation],
+    [broadcast, chatService, conversationId, createConversation]
   );
 
   const updateMessage = React.useCallback(
@@ -234,8 +234,8 @@ export function ChatProvider({
       try {
         setMessages((prev) =>
           prev.map((message) =>
-            message.id === id ? updateFn(message) : message,
-          ),
+            message.id === id ? updateFn(message) : message
+          )
         );
 
         if (conversationId) {
@@ -258,7 +258,7 @@ export function ChatProvider({
         setError(error as Error);
       }
     },
-    [broadcast, chatService, conversationId, messages],
+    [broadcast, chatService, conversationId, messages]
   );
 
   const removeMessage = React.useCallback(
@@ -278,7 +278,7 @@ export function ChatProvider({
         setError(error as Error);
       }
     },
-    [broadcast, conversationId],
+    [broadcast, conversationId]
   );
 
   const clearMessages = React.useCallback(async () => {
@@ -313,7 +313,7 @@ export function ChatProvider({
       if (!user) return;
       await updatePresence({ typing: isTyping });
     },
-    [updatePresence, user],
+    [updatePresence, user]
   );
 
   React.useEffect(() => {
@@ -352,7 +352,7 @@ export function ChatProvider({
       archiveConversation,
       activeUsers,
       setTyping,
-    ],
+    ]
   );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

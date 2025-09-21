@@ -15,7 +15,7 @@ fi
 
 # Run comprehensive tests
 echo "🧪 Running comprehensive test suite..."
-pnpm test --passWithNoTests || {
+pnpm test -- --passWithNoTests || {
   echo "❌ Tests failed. Please fix failing tests before pushing."
   exit 1
 }

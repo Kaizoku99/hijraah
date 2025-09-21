@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk-tools/store";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR, { useSWRConfig } from "swr";
@@ -10,6 +10,7 @@ import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { fetcher, generateUUID } from "@/lib/utils";
 import type { ChatMessageVote } from "@/supabase/schema";
+import { useAIDevtoolsEnhanced } from "@/components/ai/ai-devtools-wrapper";
 
 import { Artifact } from "./artifact";
 import { ChatHeader } from "./chat-header";
@@ -41,6 +42,9 @@ export function Chat({
 }) {
   const { mutate } = useSWRConfig();
   const currentUserId = session?.user?.id;
+
+  // === AI DevTools Integration ===
+  const devtools = useAIDevtoolsEnhanced();
 
   const { visibilityType } = useChatVisibility({
     chatId: id,

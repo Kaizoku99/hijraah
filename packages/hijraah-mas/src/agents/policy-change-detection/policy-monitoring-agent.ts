@@ -1,12 +1,12 @@
-import { generateObject, tool } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { z } from 'zod';
-import { createClient } from '@supabase/supabase-js';
-import { 
-  PolicyChangeSchema, 
+import { generateObject, tool } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+import { createClient } from "@supabase/supabase-js";
+import {
+  PolicyChangeSchema,
   PolicyMonitoringContext,
-  PolicyChangeResult 
-} from './types';
+  PolicyChangeResult,
+} from "./types";
 
 /**
  * Policy Monitoring Agent - Specialized agent for detecting and analyzing policy changes
@@ -33,7 +33,7 @@ export class PolicyMonitoringAgent {
     context: PolicyMonitoringContext
   ): Promise<PolicyChangeResult[]> {
     const { object: analysis } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai("gpt-4o"),
       schema: z.object({
         detectedChanges: z.array(PolicyChangeSchema),
         monitoringSummary: z.object({
@@ -42,19 +42,16 @@ export class PolicyMonitoringAgent {
           highPriorityChanges: z.number(),
           lastUpdated: z.string().datetime(),
         }),
-        recommendations: z.array(z.object({
-          action: z.string(),
-          priority: z.enum(['low', 'medium', 'high']),
-          rationale: z.string(),
-        })),
+        recommendations: z.array(
+          z.object({
+            action: z.string(),
+            priority: z.enum(["low", "medium", "high"]),
+            rationale: z.string(),
+          })
+        ),
       }),
-      tools: {
-        queryPolicyDatabase: this.createPolicyDatabaseTool(),
-        fetchPolicyContent: this.createPolicyFetchTool(),
-        analyzeContentChanges: this.createChangeAnalysisTool(),
-        validatePolicyStructure: this.createValidationTool(),
-      },
-      maxSteps: 10,
+
+
       system: `You are a specialized Policy Monitoring Agent with expertise in immigration law and policy analysis.
 
 Your responsibilities:
@@ -79,12 +76,12 @@ Guidelines:
 - Consider temporal aspects of policy implementations`,
       prompt: `Monitor policy changes for the following context:
 
-Sources to monitor: ${context.sources.join(', ')}
+Sources to monitor: ${context.sources.join(", ")}
 Last check: ${context.lastCheck.toISOString()}
 Monitoring rules:
-- Keywords: ${context.monitoringRules.keywords.join(', ')}
-- Categories: ${context.monitoringRules.categories.join(', ')}
-- Jurisdictions: ${context.monitoringRules.jurisdictions.join(', ')}
+- Keywords: ${context.monitoringRules.keywords.join(", ")}
+- Categories: ${context.monitoringRules.categories.join(", ")}
+- Jurisdictions: ${context.monitoringRules.jurisdictions.join(", ")}
 
 Please:
 1. Check each source for policy changes since the last monitoring run
@@ -108,7 +105,7 @@ Please:
     previousVersion?: string
   ): Promise<PolicyChangeResult | null> {
     const { object: analysis } = await generateObject({
-      model: openai('gpt-4o'),
+      model: openai("gpt-4o"),
       schema: z.object({
         hasChanges: z.boolean(),
         change: PolicyChangeSchema.optional(),
@@ -119,19 +116,15 @@ Please:
           confidenceScore: z.number().min(0).max(1),
         }),
       }),
-      tools: {
-        fetchDocument: this.createDocumentFetchTool(),
-        compareVersions: this.createVersionComparisonTool(),
-        extractStructuredData: this.createDataExtractionTool(),
-      },
-      maxSteps: 8,
+
+
       system: `You are analyzing a specific policy document for changes. Focus on:
 - Identifying substantive changes vs. formatting updates
 - Understanding legal implications of modifications
 - Extracting structured information from policy text
 - Providing accurate confidence assessments`,
       prompt: `Analyze the policy document at: ${documentUrl}
-${previousVersion ? `Compare against previous version: ${previousVersion}` : 'Perform initial analysis'}
+${previousVersion ? `Compare against previous version: ${previousVersion}` : "Perform initial analysis"}
 
 Provide detailed analysis of any changes detected, including their significance and potential impact.`,
     });
@@ -151,25 +144,22 @@ Provide detailed analysis of any changes detected, including their significance 
     activeSources: number;
     recentChanges: number;
     pendingReviews: number;
-    systemHealth: 'healthy' | 'warning' | 'error';
+    systemHealth: "healthy" | "warning" | "error";
   }> {
     const { object: status } = await generateObject({
-      model: openai('gpt-4o-mini'),
+      model: openai("gpt-4o-mini"),
       schema: z.object({
         activeSources: z.number(),
         recentChanges: z.number(),
         pendingReviews: z.number(),
-        systemHealth: z.enum(['healthy', 'warning', 'error']),
+        systemHealth: z.enum(["healthy", "warning", "error"]),
         details: z.object({
           lastSuccessfulCheck: z.string().datetime(),
           failedSources: z.array(z.string()),
           averageResponseTime: z.number(),
         }),
       }),
-      tools: {
-        queryMonitoringLogs: this.createLogQueryTool(),
-        checkSourceHealth: this.createHealthCheckTool(),
-      },
+
       system: `Provide current status of the policy monitoring system based on recent activity and system health metrics.`,
       prompt: `Generate a comprehensive status report for the policy monitoring system, including active sources, recent changes, and overall system health.`,
     });
@@ -180,30 +170,33 @@ Provide detailed analysis of any changes detected, including their significance 
   // Tool implementations
   private createPolicyDatabaseTool() {
     return tool({
-      description: 'Query the policy database for existing records and historical data',
+      description:
+        "Query the policy database for existing records and historical data",
       parameters: z.object({
         query: z.string(),
         jurisdiction: z.string().optional(),
-        dateRange: z.object({
-          start: z.string().datetime(),
-          end: z.string().datetime(),
-        }).optional(),
+        dateRange: z
+          .object({
+            start: z.string().datetime(),
+            end: z.string().datetime(),
+          })
+          .optional(),
       }),
-      execute: async ({ query, jurisdiction, dateRange }) => {
+      execute: async ({ query, jurisdiction, dateRange }: { query: string; jurisdiction?: string; dateRange?: { start: string; end: string } }) => {
         try {
           let dbQuery = this.supabaseClient
-            .from('policy_changes')
-            .select('*')
-            .ilike('title', `%${query}%`);
+            .from("policy_changes")
+            .select("*")
+            .ilike("title", `%${query}%`);
 
           if (jurisdiction) {
-            dbQuery = dbQuery.eq('jurisdiction', jurisdiction);
+            dbQuery = dbQuery.eq("jurisdiction", jurisdiction);
           }
 
           if (dateRange) {
             dbQuery = dbQuery
-              .gte('detected_at', dateRange.start)
-              .lte('detected_at', dateRange.end);
+              .gte("detected_at", dateRange.start)
+              .lte("detected_at", dateRange.end);
           }
 
           const { data, error } = await dbQuery.limit(50);
@@ -218,7 +211,8 @@ Provide detailed analysis of any changes detected, including their significance 
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Database query failed',
+            error:
+              error instanceof Error ? error.message : "Database query failed",
             results: [],
             count: 0,
           };
@@ -229,12 +223,12 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createPolicyFetchTool() {
     return tool({
-      description: 'Fetch policy content from official sources',
+      description: "Fetch policy content from official sources",
       parameters: z.object({
         url: z.string().url(),
-        format: z.enum(['html', 'pdf', 'xml']).optional(),
+        format: z.enum(["html", "pdf", "xml"]).optional(),
       }),
-      execute: async ({ url, format = 'html' }) => {
+      execute: async ({ url, format = "html" }) => {
         try {
           // In a real implementation, this would use Firecrawl or similar service
           const response = await fetch(url);
@@ -246,15 +240,18 @@ Provide detailed analysis of any changes detected, including their significance 
             metadata: {
               url,
               fetchedAt: new Date().toISOString(),
-              contentType: response.headers.get('content-type'),
+              contentType: response.headers.get("content-type"),
               size: content.length,
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Failed to fetch content',
-            content: '',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Failed to fetch content",
+            content: "",
           };
         }
       },
@@ -263,33 +260,41 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createChangeAnalysisTool() {
     return tool({
-      description: 'Analyze content for changes and modifications',
+      description: "Analyze content for changes and modifications",
       parameters: z.object({
         currentContent: z.string(),
         previousContent: z.string().optional(),
-        analysisType: z.enum(['diff', 'semantic', 'structural']),
+        analysisType: z.enum(["diff", "semantic", "structural"]),
       }),
       execute: async ({ currentContent, previousContent, analysisType }) => {
         try {
           // Simplified change analysis - in production would use more sophisticated diff algorithms
-          const changes = {
-            diff: previousContent ? this.calculateTextDiff(currentContent, previousContent) : [],
-            semantic: this.analyzeSemanticChanges(currentContent, previousContent),
+          const changes: Record<string, any[]> = {
+            diff: previousContent
+              ? this.calculateTextDiff(currentContent, previousContent)
+              : [],
+            semantic: this.analyzeSemanticChanges(
+              currentContent,
+              previousContent
+            ),
             structural: this.analyzeStructuralChanges(currentContent),
           };
 
           return {
             success: true,
-            changes: changes[analysisType],
+            changes: changes[analysisType as keyof typeof changes] || [],
             summary: {
-              totalChanges: changes[analysisType].length,
-              significantChanges: changes[analysisType].filter((c: any) => c.significance === 'high').length,
+              totalChanges: (changes[analysisType as keyof typeof changes] || []).length,
+              significantChanges: (changes[analysisType as keyof typeof changes] || []).filter(
+                (c: any) => c.significance === "high"
+              ).length,
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Change analysis failed',
+            error:
+              error instanceof Error ? error.message : "Change analysis failed",
             changes: [],
           };
         }
@@ -299,7 +304,7 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createValidationTool() {
     return tool({
-      description: 'Validate policy structure and content integrity',
+      description: "Validate policy structure and content integrity",
       parameters: z.object({
         content: z.string(),
         expectedStructure: z.array(z.string()).optional(),
@@ -316,7 +321,7 @@ Provide detailed analysis of any changes detected, including their significance 
           // Basic validation logic
           if (content.length < 100) {
             validation.isValid = false;
-            validation.issues.push('Content too short for policy document');
+            validation.issues.push("Content too short for policy document");
             validation.confidence = 0.3;
           }
 
@@ -327,8 +332,13 @@ Provide detailed analysis of any changes detected, including their significance 
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Validation failed',
-            validation: { isValid: false, issues: ['Validation error'], structure: [], confidence: 0 },
+            error: error instanceof Error ? error.message : "Validation failed",
+            validation: {
+              isValid: false,
+              issues: ["Validation error"],
+              structure: [],
+              confidence: 0,
+            },
           };
         }
       },
@@ -337,16 +347,18 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createDocumentFetchTool() {
     return tool({
-      description: 'Fetch and parse policy documents',
+      description: "Fetch and parse policy documents",
       parameters: z.object({
         url: z.string().url(),
-        parseOptions: z.object({
-          extractText: z.boolean().default(true),
-          extractMetadata: z.boolean().default(true),
-          extractStructure: z.boolean().default(false),
-        }).optional(),
+        parseOptions: z
+          .object({
+            extractText: z.boolean().default(true),
+            extractMetadata: z.boolean().default(true),
+            extractStructure: z.boolean().default(false),
+          })
+          .optional(),
       }),
-      execute: async ({ url, parseOptions = {} }) => {
+      execute: async ({ url, parseOptions = {} }: { url: string; parseOptions?: { extractText?: boolean; extractMetadata?: boolean; extractStructure?: boolean } }) => {
         try {
           // Simplified document fetching - would use proper document parsing in production
           const response = await fetch(url);
@@ -356,19 +368,24 @@ Provide detailed analysis of any changes detected, including their significance 
             success: true,
             document: {
               url,
-              content: parseOptions.extractText ? content : '',
-              metadata: parseOptions.extractMetadata ? {
-                title: this.extractTitle(content),
-                lastModified: response.headers.get('last-modified'),
-                contentLength: content.length,
-              } : {},
-              structure: parseOptions.extractStructure ? this.extractPolicyStructure(content) : [],
+              content: parseOptions?.extractText ? content : "",
+              metadata: parseOptions?.extractMetadata
+                ? {
+                    title: this.extractTitle(content),
+                    lastModified: response.headers.get("last-modified"),
+                    contentLength: content.length,
+                  }
+                : {},
+              structure: parseOptions?.extractStructure
+                ? this.extractPolicyStructure(content)
+                : [],
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Document fetch failed',
+            error:
+              error instanceof Error ? error.message : "Document fetch failed",
             document: null,
           };
         }
@@ -378,18 +395,29 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createVersionComparisonTool() {
     return tool({
-      description: 'Compare two versions of a policy document',
+      description: "Compare two versions of a policy document",
       parameters: z.object({
         currentVersion: z.string(),
         previousVersion: z.string(),
-        comparisonType: z.enum(['text', 'semantic', 'structural']).default('text'),
+        comparisonType: z
+          .enum(["text", "semantic", "structural"])
+          .default("text"),
       }),
       execute: async ({ currentVersion, previousVersion, comparisonType }) => {
         try {
           const comparison = {
-            differences: this.calculateTextDiff(currentVersion, previousVersion),
-            similarity: this.calculateSimilarity(currentVersion, previousVersion),
-            significantChanges: this.identifySignificantChanges(currentVersion, previousVersion),
+            differences: this.calculateTextDiff(
+              currentVersion,
+              previousVersion
+            ),
+            similarity: this.calculateSimilarity(
+              currentVersion,
+              previousVersion
+            ),
+            significantChanges: this.identifySignificantChanges(
+              currentVersion,
+              previousVersion
+            ),
           };
 
           return {
@@ -399,7 +427,10 @@ Provide detailed analysis of any changes detected, including their significance 
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Version comparison failed',
+            error:
+              error instanceof Error
+                ? error.message
+                : "Version comparison failed",
             comparison: null,
           };
         }
@@ -409,10 +440,12 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createDataExtractionTool() {
     return tool({
-      description: 'Extract structured data from policy documents',
+      description: "Extract structured data from policy documents",
       parameters: z.object({
         content: z.string(),
-        extractionTargets: z.array(z.enum(['dates', 'requirements', 'procedures', 'fees', 'contacts'])),
+        extractionTargets: z.array(
+          z.enum(["dates", "requirements", "procedures", "fees", "contacts"])
+        ),
       }),
       execute: async ({ content, extractionTargets }) => {
         try {
@@ -420,19 +453,19 @@ Provide detailed analysis of any changes detected, including their significance 
 
           for (const target of extractionTargets) {
             switch (target) {
-              case 'dates':
+              case "dates":
                 extractedData.dates = this.extractDates(content);
                 break;
-              case 'requirements':
+              case "requirements":
                 extractedData.requirements = this.extractRequirements(content);
                 break;
-              case 'procedures':
+              case "procedures":
                 extractedData.procedures = this.extractProcedures(content);
                 break;
-              case 'fees':
+              case "fees":
                 extractedData.fees = this.extractFees(content);
                 break;
-              case 'contacts':
+              case "contacts":
                 extractedData.contacts = this.extractContacts(content);
                 break;
             }
@@ -445,7 +478,8 @@ Provide detailed analysis of any changes detected, including their significance 
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Data extraction failed',
+            error:
+              error instanceof Error ? error.message : "Data extraction failed",
             extractedData: {},
           };
         }
@@ -455,27 +489,29 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createLogQueryTool() {
     return tool({
-      description: 'Query monitoring logs and system activity',
+      description: "Query monitoring logs and system activity",
       parameters: z.object({
         timeRange: z.object({
           start: z.string().datetime(),
           end: z.string().datetime(),
         }),
-        logLevel: z.enum(['info', 'warning', 'error']).optional(),
+        logLevel: z.enum(["info", "warning", "error"]).optional(),
       }),
-      execute: async ({ timeRange, logLevel }) => {
+      execute: async ({ timeRange, logLevel }: { timeRange: { start: string; end: string }; logLevel?: "info" | "warning" | "error" }) => {
         try {
           let query = this.supabaseClient
-            .from('monitoring_logs')
-            .select('*')
-            .gte('created_at', timeRange.start)
-            .lte('created_at', timeRange.end);
+            .from("monitoring_logs")
+            .select("*")
+            .gte("created_at", timeRange.start)
+            .lte("created_at", timeRange.end);
 
           if (logLevel) {
-            query = query.eq('level', logLevel);
+            query = query.eq("level", logLevel);
           }
 
-          const { data, error } = await query.order('created_at', { ascending: false }).limit(100);
+          const { data, error } = await query
+            .order("created_at", { ascending: false })
+            .limit(100);
 
           if (error) throw error;
 
@@ -487,7 +523,7 @@ Provide detailed analysis of any changes detected, including their significance 
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Log query failed',
+            error: error instanceof Error ? error.message : "Log query failed",
             logs: [],
             count: 0,
           };
@@ -498,7 +534,7 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private createHealthCheckTool() {
     return tool({
-      description: 'Check health status of monitoring sources',
+      description: "Check health status of monitoring sources",
       parameters: z.object({
         sources: z.array(z.string().url()),
       }),
@@ -508,21 +544,22 @@ Provide detailed analysis of any changes detected, including their significance 
             sources.map(async (source) => {
               try {
                 const start = Date.now();
-                const response = await fetch(source, { method: 'HEAD' });
+                const response = await fetch(source, { method: "HEAD" });
                 const responseTime = Date.now() - start;
 
                 return {
                   source,
-                  status: response.ok ? 'healthy' : 'error',
+                  status: response.ok ? "healthy" : "error",
                   responseTime,
                   statusCode: response.status,
                 };
               } catch (error) {
                 return {
                   source,
-                  status: 'error',
+                  status: "error",
                   responseTime: -1,
-                  error: error instanceof Error ? error.message : 'Unknown error',
+                  error:
+                    error instanceof Error ? error.message : "Unknown error",
                 };
               }
             })
@@ -532,17 +569,21 @@ Provide detailed analysis of any changes detected, including their significance 
             success: true,
             healthChecks,
             summary: {
-              healthy: healthChecks.filter(h => h.status === 'healthy').length,
-              errors: healthChecks.filter(h => h.status === 'error').length,
-              averageResponseTime: healthChecks
-                .filter(h => h.responseTime > 0)
-                .reduce((sum, h) => sum + h.responseTime, 0) / healthChecks.length,
+              healthy: healthChecks.filter((h) => h.status === "healthy")
+                .length,
+              errors: healthChecks.filter((h) => h.status === "error").length,
+              averageResponseTime:
+                healthChecks
+                  .filter((h) => h.responseTime > 0)
+                  .reduce((sum, h) => sum + h.responseTime, 0) /
+                healthChecks.length,
             },
           };
         } catch (error) {
           return {
             success: false,
-            error: error instanceof Error ? error.message : 'Health check failed',
+            error:
+              error instanceof Error ? error.message : "Health check failed",
             healthChecks: [],
           };
         }
@@ -551,11 +592,12 @@ Provide detailed analysis of any changes detected, including their significance 
   }
 
   // Helper methods
-  private async storePolicyChanges(changes: PolicyChangeResult[]): Promise<void> {
+  private async storePolicyChanges(
+    changes: PolicyChangeResult[]
+  ): Promise<void> {
     try {
-      const { error } = await this.supabaseClient
-        .from('policy_changes')
-        .insert(changes.map(change => ({
+      const { error } = await this.supabaseClient.from("policy_changes").insert(
+        changes.map((change) => ({
           id: change.id,
           title: change.title,
           description: change.description,
@@ -570,30 +612,42 @@ Provide detailed analysis of any changes detected, including their significance 
           confidence: change.confidence,
           raw_content: change.rawContent,
           structured_data: change.structuredData,
-        })));
+        }))
+      );
 
       if (error) {
-        console.error('Failed to store policy changes:', error);
+        console.error("Failed to store policy changes:", error);
       }
     } catch (error) {
-      console.error('Error storing policy changes:', error);
+      console.error("Error storing policy changes:", error);
     }
   }
 
   private calculateTextDiff(current: string, previous: string): any[] {
     // Simplified diff calculation - would use proper diff library in production
-    const currentLines = current.split('\n');
-    const previousLines = previous.split('\n');
-    const differences = [];
+    const currentLines = current.split("\n");
+    const previousLines = previous.split("\n");
+    const differences: any[] = [];
 
-    for (let i = 0; i < Math.max(currentLines.length, previousLines.length); i++) {
+    for (
+      let i = 0;
+      i < Math.max(currentLines.length, previousLines.length);
+      i++
+    ) {
       if (currentLines[i] !== previousLines[i]) {
         differences.push({
           line: i + 1,
-          type: currentLines[i] ? (previousLines[i] ? 'modified' : 'added') : 'removed',
-          current: currentLines[i] || '',
-          previous: previousLines[i] || '',
-          significance: this.assessChangeSignificance(currentLines[i], previousLines[i]),
+          type: currentLines[i]
+            ? previousLines[i]
+              ? "modified"
+              : "added"
+            : "removed",
+          current: currentLines[i] || "",
+          previous: previousLines[i] || "",
+          significance: this.assessChangeSignificance(
+            currentLines[i],
+            previousLines[i]
+          ),
         });
       }
     }
@@ -603,60 +657,70 @@ Provide detailed analysis of any changes detected, including their significance 
 
   private analyzeSemanticChanges(current: string, previous?: string): any[] {
     // Simplified semantic analysis
-    return [{
-      type: 'semantic_change',
-      description: 'Content analysis would be performed here',
-      significance: 'medium',
-    }];
+    return [
+      {
+        type: "semantic_change",
+        description: "Content analysis would be performed here",
+        significance: "medium",
+      },
+    ];
   }
 
   private analyzeStructuralChanges(content: string): any[] {
     // Simplified structural analysis
-    return [{
-      type: 'structural_change',
-      description: 'Structure analysis would be performed here',
-      significance: 'low',
-    }];
+    return [
+      {
+        type: "structural_change",
+        description: "Structure analysis would be performed here",
+        significance: "low",
+      },
+    ];
   }
 
   private extractPolicyStructure(content: string): string[] {
     // Simplified structure extraction
     const sections = content.match(/^#+\s+(.+)$/gm) || [];
-    return sections.map(section => section.replace(/^#+\s+/, ''));
+    return sections.map((section) => section.replace(/^#+\s+/, ""));
   }
 
   private calculateSimilarity(text1: string, text2: string): number {
     // Simplified similarity calculation
     const words1 = new Set(text1.toLowerCase().split(/\s+/));
     const words2 = new Set(text2.toLowerCase().split(/\s+/));
-    const intersection = new Set([...words1].filter(x => words2.has(x)));
+    const intersection = new Set([...words1].filter((x) => words2.has(x)));
     const union = new Set([...words1, ...words2]);
     return intersection.size / union.size;
   }
 
   private identifySignificantChanges(current: string, previous: string): any[] {
     // Simplified significant change identification
-    return [{
-      type: 'significant_change',
-      description: 'Significant change analysis would be performed here',
-      impact: 'high',
-    }];
+    return [
+      {
+        type: "significant_change",
+        description: "Significant change analysis would be performed here",
+        impact: "high",
+      },
+    ];
   }
 
-  private assessChangeSignificance(current?: string, previous?: string): 'low' | 'medium' | 'high' {
-    if (!current && !previous) return 'low';
-    if (!current || !previous) return 'high';
-    
+  private assessChangeSignificance(
+    current?: string,
+    previous?: string
+  ): "low" | "medium" | "high" {
+    if (!current && !previous) return "low";
+    if (!current || !previous) return "high";
+
     // Simple heuristic - would be more sophisticated in production
     const lengthDiff = Math.abs(current.length - previous.length);
-    if (lengthDiff > 100) return 'high';
-    if (lengthDiff > 20) return 'medium';
-    return 'low';
+    if (lengthDiff > 100) return "high";
+    if (lengthDiff > 20) return "medium";
+    return "low";
   }
 
   private extractTitle(content: string): string {
-    const titleMatch = content.match(/<title>(.*?)<\/title>/i) || content.match(/^#\s+(.+)$/m);
-    return titleMatch ? titleMatch[1] : 'Untitled Document';
+    const titleMatch =
+      content.match(/<title>(.*?)<\/title>/i) || content.match(/^#\s+(.+)$/m);
+    return titleMatch ? titleMatch[1] : "Untitled Document";
   }
 
   private extractDates(content: string): string[] {
@@ -686,10 +750,10 @@ Provide detailed analysis of any changes detected, including their significance 
     // Simplified contact extraction
     const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g;
     const phoneRegex = /\b\d{3}-\d{3}-\d{4}\b|\b\(\d{3}\)\s*\d{3}-\d{4}\b/g;
-    
+
     const emails = content.match(emailRegex) || [];
     const phones = content.match(phoneRegex) || [];
-    
+
     return [...emails, ...phones];
   }
 }

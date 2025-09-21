@@ -158,10 +158,19 @@ export const generateCacheKey = (prefix: string, ...parts: string[]): string => 
 export const calculateTokenUsage = (steps: AgentStep[]): TokenUsage => {
   return steps.reduce(
     (total, step) => ({
-      promptTokens: total.promptTokens + step.usage.promptTokens,
-      completionTokens: total.completionTokens + step.usage.completionTokens,
-      totalTokens: total.totalTokens + step.usage.totalTokens
+      promptTokens: (total.promptTokens || 0) + (step.usage.promptTokens || 0),
+      completionTokens: (total.completionTokens || 0) + (step.usage.completionTokens || 0),
+      totalTokens: (total.totalTokens || 0) + (step.usage.totalTokens || 0),
+      // Support AI SDK v5 properties
+      inputTokens: (total.inputTokens || 0) + (step.usage.inputTokens || 0),
+      outputTokens: (total.outputTokens || 0) + (step.usage.outputTokens || 0)
     }),
-    { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
+    { 
+      promptTokens: 0, 
+      completionTokens: 0, 
+      totalTokens: 0,
+      inputTokens: 0,
+      outputTokens: 0
+    }
   )
 }

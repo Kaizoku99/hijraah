@@ -113,6 +113,12 @@ import {
   crossLanguageEntityLinkingTasks,
 } from "./multi-language/index.js";
 
+// Import comprehensive immigration data scraping task
+import {
+  scrapeImmigrationDataTask,
+  scheduledImmigrationScrapingTask,
+} from "./immigration-data-scraper.js";
+
 // Export implemented tasks
 export const triggerTasks = {
   // Government website scraping tasks (Task 2.1) - IMPLEMENTED
@@ -177,18 +183,18 @@ export const triggerTasks = {
   batchClassifyDocuments: batchClassifyDocumentsTask,
   extractStructuredData: extractStructuredDataTask,
   batchExtractStructuredData: batchExtractStructuredDataTask,
-  
+
   // Intelligent extraction tasks (Task 7.2) - IMPLEMENTED
   extractFieldData: extractFieldDataTask,
   validateExtraction: validateExtractionTask,
   scoreAccuracy: scoreAccuracyTask,
   reviewManually: reviewManuallyTask,
-  
+
   // Quality monitoring tasks (Task 7.2) - IMPLEMENTED
   monitorExtractionQuality: monitorExtractionQualityTask,
   automatedQualityAssurance: automatedQualityAssuranceTask,
   ragQualityIntegration: ragQualityIntegrationTask,
-  
+
   // Notification system tasks (Task 11.1) - IMPLEMENTED
   // Policy change notifications
   monitorPolicyChanges: monitorPolicyChangesTask,
@@ -199,7 +205,8 @@ export const triggerTasks = {
   initializeUserPreferences: initializeUserPreferencesTask,
   updateUserPreferences: updateUserPreferencesTask,
   optimizeUserPreferences: optimizeUserPreferencesTask,
-  implementOptimizationRecommendations: implementOptimizationRecommendationsTask,
+  implementOptimizationRecommendations:
+    implementOptimizationRecommendationsTask,
   // Multi-channel delivery
   orchestrateMultiChannelDelivery: orchestrateMultiChannelDeliveryTask,
   deliverChannelOptimizedContent: deliverChannelOptimizedContentTask,
@@ -215,7 +222,11 @@ export const triggerTasks = {
   ...multilingualScrapingTasks,
   ...translationPipelineTasks,
   ...crossLanguageEntityLinkingTasks,
-  
+
+  // Comprehensive immigration data scraping tasks - IMPLEMENTED
+  scrapeImmigrationData: scrapeImmigrationDataTask,
+  scheduledImmigrationScraping: scheduledImmigrationScrapingTask,
+
   // Community data tasks (Task 4.3) - PLACEHOLDER
   aggregateTimelineData: null,
   calculateConfidenceIntervals: null,
@@ -241,7 +252,7 @@ export const triggerTasks = {
 export const taskMetadata = {
   totalTasks: Object.keys(triggerTasks).length,
   categories: {
-    scraping: 4,
+    scraping: 6, // Updated to include comprehensive immigration scraper
     policyDetection: 2,
     orchestration: 1,
     knowledgeGraph: 25, // Updated to include graph traversal tasks
@@ -250,6 +261,7 @@ export const taskMetadata = {
     notifications: 16, // Task 11.1 - COMPLETED
     multiLanguage: 12, // Task 8 - COMPLETED
     machineLearning: 8, // Remaining placeholder tasks
+    immigrationData: 2, // New comprehensive immigration data scraping tasks
   },
   implemented: {
     knowledgeGraph: 25, // Tasks 3.1, 3.2, 3.3 - COMPLETED
@@ -257,11 +269,12 @@ export const taskMetadata = {
     documentProcessing: 13, // Tasks 7.1, 7.2 - COMPLETED
     notifications: 16, // Task 11.1 - COMPLETED
     multiLanguage: 12, // Task 8 - COMPLETED
-    scraping: 4, // Tasks 2.1, 2.2, 2.3 - COMPLETED
+    scraping: 6, // Tasks 2.1, 2.2, 2.3 + immigration scraper - COMPLETED
     policyDetection: 2, // Task 2.2 - COMPLETED
     orchestration: 1, // Task 2.3 - COMPLETED
+    immigrationData: 2, // Comprehensive immigration data scraping - COMPLETED
   },
-  status: "Task 8 - Multi-language data processing system - COMPLETED",
+  status: "Comprehensive Immigration Data Scraping System - COMPLETED",
   nextPhase: "Task 5.1 - Predictive analytics and ML models",
 } as const;
 

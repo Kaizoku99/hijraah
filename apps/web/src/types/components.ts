@@ -2,8 +2,7 @@ import { VariantProps } from "class-variance-authority";
 import { ComponentType, Dispatch, SetStateAction } from "react";
 import { FileWithPath } from "react-dropzone";
 
-import { ArtifactKind } from "@/artifacts";
-import { BaseArtifactData } from "@/artifacts";
+import { ArtifactKind, BaseArtifactData } from "@/artifacts";
 
 /**
  * Basic suggestion interface for use in DataStreamDelta

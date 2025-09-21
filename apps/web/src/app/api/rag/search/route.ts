@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { HybridRetriever } from "@/lib/rag/retrieval/hybrid-retriever";
-import { ContextAwareGenerator } from "@/lib/rag/generation/context-generator";
+import { RAGPipelineFactory, type RAGDependencies } from "@hijraah/rag";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 
@@ -23,18 +22,26 @@ export async function POST(req: NextRequest) {
       apiKey: process.env.OPENAI_API_KEY,
     });
 
-    // 1. Initialize components
-    const retriever = new HybridRetriever(supabaseClient, openaiClient);
-    const generator = new ContextAwareGenerator();
+    // Context7 Pattern: Create RAG dependencies and factory
+    const ragDependencies: RAGDependencies = {
+      supabase: supabaseClient as any,
+      openai: openaiClient as any,
+      firecrawlApiKey: process.env.FIRECRAWL_API_KEY,
+      mistralApiKey: process.env.MISTRAL_API_KEY,
+    };
 
-    // 2. Retrieve context
-    const retrievalResult = await retriever.search(query, { userId });
+    const ragFactory = new RAGPipelineFactory(ragDependencies);
+    const pipeline = ragFactory.createPipeline();
 
-    // 3. Generate a streaming response
-    return generator.generate(
+    // Context7 Pattern: Use unified query method
+    const ragResult = await pipeline.query(query, { userId });
+
+    // Generate streaming response
+    const generator = ragFactory.createContextGenerator();
+    return generator.generateUIStream(
       query,
-      retrievalResult,
-      retrievalResult.userContext,
+      ragResult.retrievalResult,
+      ragResult.retrievalResult.userContext,
     );
   } catch (error) {
     console.error("Error in RAG search API:", error);

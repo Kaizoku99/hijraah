@@ -1,3 +1,5 @@
+"use client";
+
 import OrderedMap from "orderedmap";
 import {
   Schema,
@@ -11,7 +13,7 @@ import { EditorState } from "prosemirror-state";
 import { EditorView } from "prosemirror-view";
 import React, { useEffect, useRef } from "react";
 import { renderToString } from "react-dom/server";
-import ReactMarkdown from "react-markdown";
+import { Streamdown } from "streamdown";
 
 import { diffEditor, DiffType } from "@/lib/editor/diff";
 
@@ -59,11 +61,18 @@ export const DiffView = ({ oldContent, newContent }: DiffEditorProps) => {
     if (editorRef.current && !viewRef.current) {
       const parser = DOMParser.fromSchema(diffSchema);
 
+      const securityProps = {
+        allowedLinkPrefixes: ["/", "http://", "https://"],
+        allowedImagePrefixes: ["/", "http://", "https://"],
+        defaultOrigin:
+          typeof window !== "undefined" ? window.location.origin : undefined,
+      } as const;
+
       const oldHtmlContent = renderToString(
-        <ReactMarkdown>{oldContent}</ReactMarkdown>,
+        <Streamdown {...securityProps}>{oldContent}</Streamdown>
       );
       const newHtmlContent = renderToString(
-        <ReactMarkdown>{newContent}</ReactMarkdown>,
+        <Streamdown {...securityProps}>{newContent}</Streamdown>
       );
 
       const oldContainer = document.createElement("div");

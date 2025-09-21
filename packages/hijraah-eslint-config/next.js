@@ -1,13 +1,11 @@
-/** ESLint configuration for Next.js applications in Hijraah */
 module.exports = {
-  extends: ["./index.js", "eslint-config-next"].map(require.resolve),
+  extends: [
+    './index.js',
+    'next/core-web-vitals',
+    'next/typescript'
+  ],
   rules: {
-    // Next.js specific rules
-    "@next/next/no-html-link-for-pages": "off",
-    "@next/next/no-img-element": "warn",
-  },
-  env: {
-    browser: true,
-    node: true,
-  },
+    '@next/next/no-img-element': 'off',
+    '@next/next/no-html-link-for-pages': 'off'
+  }
 };

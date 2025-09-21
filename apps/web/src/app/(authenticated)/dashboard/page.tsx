@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useState, useEffect, useCallback } from "react";
 
 import { AppSidebar } from "@/components/ui/app-sidebar";
@@ -61,7 +61,7 @@ export default function DashboardPage() {
 
       if (!documentsResponse.ok) {
         throw new Error(
-          `Failed to fetch documents: ${documentsResponse.status}`,
+          `Failed to fetch documents: ${documentsResponse.status}`
         );
       }
 
@@ -147,7 +147,7 @@ export default function DashboardPage() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || `Failed to create case: ${response.status}`,
+          errorData.error || `Failed to create case: ${response.status}`
         );
       }
 
@@ -194,7 +194,7 @@ export default function DashboardPage() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || `Failed to upload document: ${response.status}`,
+          errorData.error || `Failed to upload document: ${response.status}`
         );
       }
 

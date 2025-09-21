@@ -1,26 +1,26 @@
-import { generateObject } from 'ai'
-import { openai } from '@ai-sdk/openai'
-import { z } from 'zod'
-import { 
+import { generateObject } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+import {
   DocumentInput,
   OCRProcessingResult,
   ContentExtractionResult,
-  QualityValidationResult, 
+  QualityValidationResult,
   QualityValidationResultSchema,
   AgentConfig,
-  AgentConfigSchema
-} from './types'
-import { withAgentErrorHandling, logAgentStep } from '../../utils'
+  AgentConfigSchema,
+} from "./types";
+import { withAgentErrorHandling, logAgentStep } from "../../utils";
 
 /**
  * Quality Validation Agent using AI SDK v5 evaluation patterns
  * Performs confidence scoring, accuracy assessment, and error detection
  */
 export class QualityValidationAgent {
-  private config: AgentConfig
+  private config: AgentConfig;
 
   constructor(config: Partial<AgentConfig> = {}) {
-    this.config = AgentConfigSchema.parse(config)
+    this.config = AgentConfigSchema.parse(config);
   }
 
   /**
@@ -31,11 +31,11 @@ export class QualityValidationAgent {
     ocrResult: OCRProcessingResult,
     extractionResult: ContentExtractionResult,
     qualityThresholds: {
-      minTextClarity?: number
-      minImageQuality?: number
-      minCompleteness?: number
-      minAuthenticity?: number
-      minOverallScore?: number
+      minTextClarity?: number;
+      minImageQuality?: number;
+      minCompleteness?: number;
+      minAuthenticity?: number;
+      minOverallScore?: number;
     } = {}
   ): Promise<QualityValidationResult> {
     const validateQuality = withAgentErrorHandling(async () => {
@@ -45,9 +45,9 @@ export class QualityValidationAgent {
           text: `Starting quality validation for ${documentInput.id}`,
           toolCalls: [],
           toolResults: [],
-          finishReason: 'in_progress',
-          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
-        })
+          finishReason: "in_progress",
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+        });
       }
 
       // Set default thresholds
@@ -57,14 +57,14 @@ export class QualityValidationAgent {
         minCompleteness: 80,
         minAuthenticity: 85,
         minOverallScore: 75,
-        ...qualityThresholds
-      }
+        ...qualityThresholds,
+      };
 
       const { object: validation } = await generateObject({
         model: openai(this.config.model),
         schema: QualityValidationResultSchema,
         temperature: this.config.temperature,
-        maxSteps: this.config.maxSteps,
+
         system: `You are an expert quality validation agent for immigration document processing.
         
         Your task is to assess the quality of document processing results:
@@ -110,25 +110,15 @@ export class QualityValidationAgent {
         ${JSON.stringify(extractionResult.extractedFields, null, 2)}
         
         Assess quality across all dimensions and provide specific recommendations for improvement.`,
-        onStepFinish: this.config.enableLogging ? ({ text, toolCalls, toolResults, finishReason, usage }) => {
-          logAgentStep({
-            stepNumber: 2,
-            text: text || 'Quality validation step completed',
-            toolCalls: toolCalls || [],
-            toolResults: toolResults || [],
-            finishReason: finishReason || 'completed',
-            usage: usage || { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
-          })
-        } : undefined
-      })
+      });
 
       // Ensure the result includes required metadata
       const result: QualityValidationResult = {
         ...validation,
         documentId: documentInput.id,
         passed: validation.qualityScore >= thresholds.minOverallScore,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      };
 
       if (this.config.enableLogging) {
         logAgentStep({
@@ -136,15 +126,15 @@ export class QualityValidationAgent {
           text: `Quality validation completed for ${documentInput.id} - Score: ${result.qualityScore}, Passed: ${result.passed}`,
           toolCalls: [],
           toolResults: [],
-          finishReason: 'completed',
-          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
-        })
+          finishReason: "completed",
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+        });
       }
 
-      return result
-    })
+      return result;
+    });
 
-    return await validateQuality()
+    return await validateQuality();
   }
 
   /**
@@ -152,16 +142,16 @@ export class QualityValidationAgent {
    */
   async batchValidateQuality(
     inputs: Array<{
-      documentInput: DocumentInput
-      ocrResult: OCRProcessingResult
-      extractionResult: ContentExtractionResult
+      documentInput: DocumentInput;
+      ocrResult: OCRProcessingResult;
+      extractionResult: ContentExtractionResult;
     }>,
     qualityThresholds: {
-      minTextClarity?: number
-      minImageQuality?: number
-      minCompleteness?: number
-      minAuthenticity?: number
-      minOverallScore?: number
+      minTextClarity?: number;
+      minImageQuality?: number;
+      minCompleteness?: number;
+      minAuthenticity?: number;
+      minOverallScore?: number;
     } = {}
   ): Promise<QualityValidationResult[]> {
     const batchValidate = withAgentErrorHandling(async () => {
@@ -171,17 +161,22 @@ export class QualityValidationAgent {
           text: `Starting batch quality validation for ${inputs.length} documents`,
           toolCalls: [],
           toolResults: [],
-          finishReason: 'in_progress',
-          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
-        })
+          finishReason: "in_progress",
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+        });
       }
 
       // Process validations in parallel
       const results = await Promise.all(
         inputs.map(({ documentInput, ocrResult, extractionResult }) =>
-          this.validateQuality(documentInput, ocrResult, extractionResult, qualityThresholds)
+          this.validateQuality(
+            documentInput,
+            ocrResult,
+            extractionResult,
+            qualityThresholds
+          )
         )
-      )
+      );
 
       if (this.config.enableLogging) {
         logAgentStep({
@@ -189,15 +184,15 @@ export class QualityValidationAgent {
           text: `Batch quality validation completed for ${inputs.length} documents`,
           toolCalls: [],
           toolResults: [],
-          finishReason: 'completed',
-          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
-        })
+          finishReason: "completed",
+          usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+        });
       }
 
-      return results
-    })
+      return results;
+    });
 
-    return await batchValidate()
+    return await batchValidate();
   }
 
   /**
@@ -207,26 +202,38 @@ export class QualityValidationAgent {
     documentInput: DocumentInput,
     ocrResult: OCRProcessingResult,
     extractionResult: ContentExtractionResult
-  ): Promise<QualityValidationResult & { detailedMetrics: Record<string, any> }> {
+  ): Promise<
+    QualityValidationResult & { detailedMetrics: Record<string, any> }
+  > {
     const deepAnalysis = withAgentErrorHandling(async () => {
       // Perform standard quality validation
-      const standardValidation = await this.validateQuality(documentInput, ocrResult, extractionResult)
+      const standardValidation = await this.validateQuality(
+        documentInput,
+        ocrResult,
+        extractionResult
+      );
 
       // Calculate detailed metrics
       const detailedMetrics = {
         ocrMetrics: this.calculateOCRMetrics(ocrResult),
         extractionMetrics: this.calculateExtractionMetrics(extractionResult),
-        consistencyMetrics: this.calculateConsistencyMetrics(ocrResult, extractionResult),
-        performanceMetrics: this.calculatePerformanceMetrics(ocrResult, extractionResult)
-      }
+        consistencyMetrics: this.calculateConsistencyMetrics(
+          ocrResult,
+          extractionResult
+        ),
+        performanceMetrics: this.calculatePerformanceMetrics(
+          ocrResult,
+          extractionResult
+        ),
+      };
 
       return {
         ...standardValidation,
-        detailedMetrics
-      }
-    })
+        detailedMetrics,
+      };
+    });
 
-    return await deepAnalysis()
+    return await deepAnalysis();
   }
 
   /**
@@ -237,29 +244,31 @@ export class QualityValidationAgent {
     ocrResult: OCRProcessingResult,
     extractionResult: ContentExtractionResult
   ): Promise<{
-    authenticityScore: number
+    authenticityScore: number;
     indicators: Array<{
-      type: string
-      present: boolean
-      confidence: number
-      description: string
-    }>
-    riskFactors: string[]
-    recommendations: string[]
+      type: string;
+      present: boolean;
+      confidence: number;
+      description: string;
+    }>;
+    riskFactors: string[];
+    recommendations: string[];
   }> {
     const validateAuth = withAgentErrorHandling(async () => {
       const { object: authenticity } = await generateObject({
         model: openai(this.config.model),
         schema: z.object({
           authenticityScore: z.number().min(0).max(100),
-          indicators: z.array(z.object({
-            type: z.string(),
-            present: z.boolean(),
-            confidence: z.number().min(0).max(1),
-            description: z.string()
-          })),
+          indicators: z.array(
+            z.object({
+              type: z.string(),
+              present: z.boolean(),
+              confidence: z.number().min(0).max(1),
+              description: z.string(),
+            })
+          ),
           riskFactors: z.array(z.string()),
-          recommendations: z.array(z.string())
+          recommendations: z.array(z.string()),
         }),
         system: `You are an expert document authenticity validator specializing in immigration documents.
         
@@ -277,37 +286,42 @@ export class QualityValidationAgent {
         OCR Text: ${ocrResult.extractedText.fullText.substring(0, 1000)}...
         Extracted Fields: ${JSON.stringify(extractionResult.extractedFields, null, 2)}
         
-        Look for authenticity indicators and assess the overall authenticity score.`
-      })
+        Look for authenticity indicators and assess the overall authenticity score.`,
+      });
 
-      return authenticity
-    })
+      return authenticity;
+    });
 
-    return await validateAuth()
+    return await validateAuth();
   }
 
   /**
    * Calculate OCR-specific quality metrics
    */
-  private calculateOCRMetrics(ocrResult: OCRProcessingResult): Record<string, number> {
+  private calculateOCRMetrics(
+    ocrResult: OCRProcessingResult
+  ): Record<string, number> {
     return {
       averageConfidence: ocrResult.metadata.averageConfidence,
       textLength: ocrResult.extractedText.fullText.length,
       pageCount: ocrResult.pages.length,
       processingSpeed: ocrResult.metadata.processingTime / 1000, // seconds
       confidenceVariance: this.calculateConfidenceVariance(ocrResult.pages),
-      textDensity: ocrResult.extractedText.fullText.length / ocrResult.pages.length
-    }
+      textDensity:
+        ocrResult.extractedText.fullText.length / ocrResult.pages.length,
+    };
   }
 
   /**
    * Calculate extraction-specific quality metrics
    */
-  private calculateExtractionMetrics(extractionResult: ContentExtractionResult): Record<string, number> {
-    const fieldCount = Object.keys(extractionResult.extractedFields).length
-    const missingCount = extractionResult.missingFields.length
-    const errorCount = extractionResult.validationResults.errors.length
-    const warningCount = extractionResult.validationResults.warnings.length
+  private calculateExtractionMetrics(
+    extractionResult: ContentExtractionResult
+  ): Record<string, number> {
+    const fieldCount = Object.keys(extractionResult.extractedFields).length;
+    const missingCount = extractionResult.missingFields.length;
+    const errorCount = extractionResult.validationResults.errors.length;
+    const warningCount = extractionResult.validationResults.warnings.length;
 
     return {
       fieldsExtracted: fieldCount,
@@ -316,8 +330,10 @@ export class QualityValidationAgent {
       errorCount,
       warningCount,
       validationScore: extractionResult.validationResults.isValid ? 100 : 0,
-      averageFieldConfidence: this.calculateAverageFieldConfidence(extractionResult.fieldConfidence)
-    }
+      averageFieldConfidence: this.calculateAverageFieldConfidence(
+        extractionResult.fieldConfidence as Record<string, number>
+      ),
+    };
   }
 
   /**
@@ -328,18 +344,22 @@ export class QualityValidationAgent {
     extractionResult: ContentExtractionResult
   ): Record<string, number> {
     // Check consistency between OCR structured data and extracted fields
-    const ocrFields = Object.keys(ocrResult.extractedText.structuredData)
-    const extractedFields = Object.keys(extractionResult.extractedFields)
-    
-    const commonFields = ocrFields.filter(field => extractedFields.includes(field))
-    const consistencyScore = commonFields.length / Math.max(ocrFields.length, extractedFields.length, 1)
+    const ocrFields = Object.keys(ocrResult.extractedText.structuredData);
+    const extractedFields = Object.keys(extractionResult.extractedFields);
+
+    const commonFields = ocrFields.filter((field) =>
+      extractedFields.includes(field)
+    );
+    const consistencyScore =
+      commonFields.length /
+      Math.max(ocrFields.length, extractedFields.length, 1);
 
     return {
       fieldConsistency: consistencyScore,
       commonFieldCount: commonFields.length,
       ocrFieldCount: ocrFields.length,
-      extractedFieldCount: extractedFields.length
-    }
+      extractedFieldCount: extractedFields.length,
+    };
   }
 
   /**
@@ -352,32 +372,45 @@ export class QualityValidationAgent {
     return {
       ocrProcessingTime: ocrResult.metadata.processingTime,
       totalProcessingTime: ocrResult.metadata.processingTime, // Would include extraction time in real implementation
-      throughput: ocrResult.extractedText.fullText.length / (ocrResult.metadata.processingTime / 1000), // chars per second
-      efficiency: Object.keys(extractionResult.extractedFields).length / (ocrResult.metadata.processingTime / 1000) // fields per second
-    }
+      throughput:
+        ocrResult.extractedText.fullText.length /
+        (ocrResult.metadata.processingTime / 1000), // chars per second
+      efficiency:
+        Object.keys(extractionResult.extractedFields).length /
+        (ocrResult.metadata.processingTime / 1000), // fields per second
+    };
   }
 
   /**
    * Calculate confidence variance across pages
    */
-  private calculateConfidenceVariance(pages: Array<{ confidence: number }>): number {
-    if (pages.length === 0) return 0
+  private calculateConfidenceVariance(
+    pages: Array<{ confidence: number }>
+  ): number {
+    if (pages.length === 0) return 0;
 
-    const confidences = pages.map(p => p.confidence)
-    const mean = confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
-    const variance = confidences.reduce((sum, conf) => sum + Math.pow(conf - mean, 2), 0) / confidences.length
-    
-    return Math.sqrt(variance) // Return standard deviation
+    const confidences = pages.map((p) => p.confidence);
+    const mean =
+      confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length;
+    const variance =
+      confidences.reduce((sum, conf) => sum + Math.pow(conf - mean, 2), 0) /
+      confidences.length;
+
+    return Math.sqrt(variance); // Return standard deviation
   }
 
   /**
    * Calculate average field confidence
    */
-  private calculateAverageFieldConfidence(fieldConfidence: Record<string, number>): number {
-    const confidences = Object.values(fieldConfidence)
-    if (confidences.length === 0) return 0
-    
-    return confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
+  private calculateAverageFieldConfidence(
+    fieldConfidence: Record<string, number>
+  ): number {
+    const confidences = Object.values(fieldConfidence);
+    if (confidences.length === 0) return 0;
+
+    return (
+      confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
+    );
   }
 
   /**
@@ -386,61 +419,62 @@ export class QualityValidationAgent {
   generateImprovementRecommendations(
     validationResult: QualityValidationResult
   ): Array<{
-    category: string
-    priority: 'high' | 'medium' | 'low'
-    recommendation: string
-    expectedImprovement: number
+    category: string;
+    priority: "high" | "medium" | "low";
+    recommendation: string;
+    expectedImprovement: number;
   }> {
     const recommendations: Array<{
-      category: string
-      priority: 'high' | 'medium' | 'low'
-      recommendation: string
-      expectedImprovement: number
-    }> = []
+      category: string;
+      priority: "high" | "medium" | "low";
+      recommendation: string;
+      expectedImprovement: number;
+    }> = [];
 
     // Text clarity recommendations
     if (validationResult.qualityMetrics.textClarity < 80) {
       recommendations.push({
-        category: 'Text Clarity',
-        priority: 'high',
-        recommendation: 'Improve document scan quality or use higher resolution images',
-        expectedImprovement: 15
-      })
+        category: "Text Clarity",
+        priority: "high",
+        recommendation:
+          "Improve document scan quality or use higher resolution images",
+        expectedImprovement: 15,
+      });
     }
 
     // Image quality recommendations
     if (validationResult.qualityMetrics.imageQuality < 70) {
       recommendations.push({
-        category: 'Image Quality',
-        priority: 'high',
-        recommendation: 'Rescan document with better lighting and focus',
-        expectedImprovement: 20
-      })
+        category: "Image Quality",
+        priority: "high",
+        recommendation: "Rescan document with better lighting and focus",
+        expectedImprovement: 20,
+      });
     }
 
     // Completeness recommendations
     if (validationResult.qualityMetrics.completeness < 90) {
       recommendations.push({
-        category: 'Completeness',
-        priority: 'medium',
-        recommendation: 'Review missing fields and consider manual data entry',
-        expectedImprovement: 10
-      })
+        category: "Completeness",
+        priority: "medium",
+        recommendation: "Review missing fields and consider manual data entry",
+        expectedImprovement: 10,
+      });
     }
 
     // Authenticity recommendations
     if (validationResult.qualityMetrics.authenticity < 85) {
       recommendations.push({
-        category: 'Authenticity',
-        priority: 'high',
-        recommendation: 'Manual review required for authenticity verification',
-        expectedImprovement: 0 // Manual process
-      })
+        category: "Authenticity",
+        priority: "high",
+        recommendation: "Manual review required for authenticity verification",
+        expectedImprovement: 0, // Manual process
+      });
     }
 
     return recommendations.sort((a, b) => {
-      const priorityOrder = { high: 3, medium: 2, low: 1 }
-      return priorityOrder[b.priority] - priorityOrder[a.priority]
-    })
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    });
   }
 }

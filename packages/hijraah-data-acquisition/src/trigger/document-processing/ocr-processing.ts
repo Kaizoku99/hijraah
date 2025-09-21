@@ -81,7 +81,7 @@ export const performOCRTask = task({
       const confidence = calculateOCRConfidence(text, validatedInput.documentType);
       
       // Detect language if not specified
-      const detectedLanguage = validatedInput.language || await detectLanguage(text);
+      const detectedLanguage = validatedInput.language || (await detectLanguage(text));
       
       const processingTime = Date.now() - startTime;
       

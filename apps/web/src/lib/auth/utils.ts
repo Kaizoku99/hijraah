@@ -54,7 +54,7 @@ export function parseJwt(token: string) {
       atob(base64)
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join(""),
+        .join("")
     );
     return JSON.parse(jsonPayload);
   } catch (error) {
@@ -119,7 +119,7 @@ export function generateRandomString(length: number = 16): string {
  * Returns validated settings or throws an error if invalid
  */
 export function validateUserSettings(
-  settings: Partial<UserSettings>,
+  settings: Partial<UserSettings>
 ): Partial<UserSettings> {
   const validatedSettings: Partial<UserSettings> = {};
 
@@ -128,7 +128,7 @@ export function validateUserSettings(
     const validThemes = ["light", "dark", "system"];
     if (!validThemes.includes(settings.theme)) {
       throw new Error(
-        `Invalid theme: ${settings.theme}. Valid values are: ${validThemes.join(", ")}`,
+        `Invalid theme: ${settings.theme}. Valid values are: ${validThemes.join(", ")}`
       );
     }
     validatedSettings.theme = settings.theme;
@@ -139,7 +139,7 @@ export function validateUserSettings(
     const validLanguages = ["en", "es", "fr", "de", "ar"];
     if (!validLanguages.includes(settings.language)) {
       throw new Error(
-        `Invalid language: ${settings.language}. Valid values are: ${validLanguages.join(", ")}`,
+        `Invalid language: ${settings.language}. Valid values are: ${validLanguages.join(", ")}`
       );
     }
     validatedSettings.language = settings.language;
@@ -219,7 +219,7 @@ export function applyDefaultSettings(user: ExtendedUser): ExtendedUser | null {
  * This ensures the URL points to a trusted source
  */
 export function sanitizeAvatarUrl(url: string): string {
-  if (!url) return "/avatars/default-avatar.png";
+  if (!url) return "/avatars/default-1.png";
 
   // Validate and sanitize URL
   try {
@@ -233,11 +233,12 @@ export function sanitizeAvatarUrl(url: string): string {
       "yourapp.com",
       "supabase.co",
       "supabase.in",
+      "api.dicebear.com", // Allow DiceBear for identicons
     ];
 
     if (!allowedDomains.some((domain) => parsedUrl.hostname.includes(domain))) {
       // Return a default avatar if domain is not allowed
-      return "/avatars/default-avatar.png";
+      return "/avatars/default-1.png";
     }
 
     // Ensure HTTPS
@@ -248,6 +249,6 @@ export function sanitizeAvatarUrl(url: string): string {
     return parsedUrl.toString();
   } catch (e) {
     // If URL is invalid, return a default avatar
-    return "/avatars/default-avatar.png";
+    return "/avatars/default-1.png";
   }
 }

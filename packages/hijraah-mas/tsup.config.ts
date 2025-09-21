@@ -1,25 +1,30 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: [
-    'src/index.ts',
-    'src/orchestrators/index.ts',
-    'src/teams/index.ts',
-    'src/tools/index.ts'
+    "src/index.ts",
+    "src/orchestrators/index.ts",
+    "src/teams/index.ts",
+    "src/tools/index.ts",
   ],
-  format: ['esm'],
-  dts: true,
+  format: ["esm"],
+  dts: {
+    compilerOptions: {
+      composite: false,
+      incremental: false,
+    },
+  },
   sourcemap: true,
   clean: true,
   splitting: false,
   treeshake: true,
   external: [
-    'ai',
-    '@ai-sdk/openai',
-    '@ai-sdk/anthropic',
-    '@supabase/supabase-js',
-    'zod',
-    'drizzle-orm',
-    '@trigger.dev/sdk'
-  ]
-})
+    "ai",
+    "@ai-sdk/openai",
+    "@ai-sdk/anthropic",
+    "@supabase/supabase-js",
+    "zod",
+    "drizzle-orm",
+    "@trigger.dev/sdk",
+  ],
+});

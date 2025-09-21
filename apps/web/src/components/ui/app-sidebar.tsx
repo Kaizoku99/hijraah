@@ -332,7 +332,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         collapsible="icon"
         className={cn(
           "border-sidebar-border bg-sidebar-background text-sidebar-foreground",
-          rtl ? "border-l ml-auto" : "border-r",
+          rtl ? "border-l ml-auto" : "border-r"
         )}
         {...props}
       >
@@ -371,7 +371,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Filter out admin sections if user is not an admin
   const filteredNavMain = data.navMain.filter(
-    (section) => section.titleKey !== "admin" || isAdmin,
+    (section) => section.titleKey !== "admin" || isAdmin
   );
 
   // Prepare user data for NavUser component if user is authenticated
@@ -398,7 +398,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const isActive = pathname === item.url;
 
     // Use the translated title
-    const itemContent = <>{t(item.titleKey as any)}</>; // Use translation
+    const itemContent = t(item.titleKey as any); // Use translation
 
     // Wrap content with Link for navigation
     const linkContent = (
@@ -435,7 +435,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       collapsible="icon"
       className={cn(
         "border-sidebar-border bg-sidebar-background text-sidebar-foreground",
-        rtl ? "border-l ml-auto" : "border-r",
+        rtl ? "border-l ml-auto" : "border-r"
       )}
       {...props}
     >
@@ -450,12 +450,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroup>
             <SidebarGroupLabel className="flex items-center justify-between">
               {t("chats")} {/* Assuming 'chats' translation exists */}
-              <Link href="/chat/new" passHref legacyBehavior>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
+              <Button asChild variant="ghost" size="icon" className="h-6 w-6">
+                <Link href="/chat/new" className="inline-flex items-center">
                   <Plus size={16} />
                   <span className="sr-only">New Chat</span>
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </SidebarGroupLabel>
             {isLoadingChats ? (
               <>
@@ -516,7 +516,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {item.subMenu && openSubMenu === item.titleKey && (
                     <SidebarMenuSub>
                       {item.subMenu.map((subItem) =>
-                        renderNavItem(subItem, true),
+                        renderNavItem(subItem, true)
                       )}
                     </SidebarMenuSub>
                   )}
@@ -531,7 +531,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <NavUser user={userData} />
         ) : (
           <div className="flex items-center space-x-2">
-            <Link href="/login" className="flex-1">
+            <Link href="/auth/login" className="flex-1">
               <SidebarMenuButton className="w-full">
                 {t("login")}
               </SidebarMenuButton>

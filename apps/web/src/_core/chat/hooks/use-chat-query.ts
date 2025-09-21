@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat, type Message } from "@ai-sdk/react"; // New import
+import { useChat, type Message } from "@ai-sdk-tools/store"; // New import
 import { nanoid } from "nanoid"; // Import nanoid for generateId
 import * as React from "react";
 // import { useChat as useVercelChat } from 'ai/react'; // Old import

@@ -1,45 +1,26 @@
 import { createClient } from "@supabase/supabase-js";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  // Use the token in the request header if it exists
-  const authHeader = request.headers.get("Authorization");
+export async function GET(request: NextRequest) {
+  // Check for user ID from middleware headers (best approach)
+  const userIdFromHeaders = request.headers.get("x-supabase-user-id");
+  const isAuthenticated =
+    request.headers.get("x-supabase-authenticated") === "true";
 
-  // Create a Supabase client
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
-
-  // If authorization header exists, use it to set the session
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    const token = authHeader.split(" ")[1];
-    await supabase.auth.setSession({
-      access_token: token,
-      refresh_token: "",
-    });
-  }
-
-  // Get current user using the secure getUser method
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  // Check for errors or if user is not found
-  if (userError || !user) {
-    if (userError) {
-      console.error(
-        "Error fetching user in /onboarding/steps:",
-        userError.message,
-      );
-    }
-    // If getUser fails or returns no user, they are unauthorized
+  if (!isAuthenticated || !userIdFromHeaders) {
+    console.error(
+      "Error fetching user in /onboarding/steps: Auth session missing!"
+    );
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Use the verified user ID from getUser
-  const userId = user.id;
+  const userId = userIdFromHeaders;
+
+  // Create a Supabase client with service role for database operations
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   // Get onboarding state
   const { data, error } = await supabase

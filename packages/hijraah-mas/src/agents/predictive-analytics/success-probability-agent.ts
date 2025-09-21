@@ -1,24 +1,24 @@
-import { generateObject, generateText, tool } from 'ai'
-import { openai } from '@ai-sdk/openai'
-import { z } from 'zod'
-import { 
-  SuccessProbabilitySchema, 
-  UserProfileSchema, 
+import { generateObject, generateText, tool } from "ai";
+import { openai } from "@ai-sdk/openai";
+import { z } from "zod";
+import {
+  SuccessProbabilitySchema,
+  UserProfileSchema,
   PredictiveAnalyticsConfigSchema,
   type SuccessProbability,
   type UserProfile,
-  type PredictiveAnalyticsConfig
-} from './types.js'
+  type PredictiveAnalyticsConfig,
+} from "./types.js";
 
 /**
  * Success Probability Agent using AI SDK v5
  * Analyzes user profiles and historical data to predict immigration success probability
  */
 export class SuccessProbabilityAgent {
-  private config: PredictiveAnalyticsConfig
+  private config: PredictiveAnalyticsConfig;
 
   constructor(config: Partial<PredictiveAnalyticsConfig> = {}) {
-    this.config = PredictiveAnalyticsConfigSchema.parse(config)
+    this.config = PredictiveAnalyticsConfigSchema.parse(config);
   }
 
   /**
@@ -27,43 +27,51 @@ export class SuccessProbabilityAgent {
   async calculateSuccessProbability(
     userProfile: UserProfile,
     caseData: {
-      caseType: string
-      country: string
-      visaType: string
-      applicationStage?: string
+      caseType: string;
+      country: string;
+      visaType: string;
+      applicationStage?: string;
     },
     historicalData?: {
-      overallSuccessRate: number
-      similarCases: Array<{ profile: any; outcome: string; factors: string[] }>
-      recentTrends: Array<{ period: string; successRate: number }>
+      overallSuccessRate: number;
+      similarCases: Array<{ profile: any; outcome: string; factors: string[] }>;
+      recentTrends: Array<{ period: string; successRate: number }>;
     }
   ): Promise<SuccessProbability> {
-    const predictionId = `success_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const predictionId = `success_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Define tools for statistical analysis
     const statisticalAnalysisTool = tool({
-      description: 'Perform statistical analysis on historical success rates',
+      description: "Perform statistical analysis on historical success rates",
       parameters: z.object({
         caseType: z.string(),
         country: z.string(),
         visaType: z.string(),
-        profileFactors: z.array(z.string())
+        profileFactors: z.array(z.string()),
       }),
       execute: async ({ caseType, country, visaType, profileFactors }) => {
         // In a real implementation, this would query the database
-        const baseSuccessRate = historicalData?.overallSuccessRate || this.getBaseSuccessRate(caseType, country, visaType)
-        const similarCases = historicalData?.similarCases || this.generateSimilarCases(baseSuccessRate, profileFactors)
-        const recentTrends = historicalData?.recentTrends || this.generateTrendData(baseSuccessRate)
+        const baseSuccessRate =
+          historicalData?.overallSuccessRate ||
+          this.getBaseSuccessRate(caseType, country, visaType);
+        const similarCases =
+          historicalData?.similarCases ||
+          this.generateSimilarCases(baseSuccessRate, profileFactors);
+        const recentTrends =
+          historicalData?.recentTrends ||
+          this.generateTrendData(baseSuccessRate);
 
         // Calculate success rate for similar profiles
-        const successfulCases = similarCases.filter(c => c.outcome === 'approved')
-        const profileSuccessRate = successfulCases.length / similarCases.length
+        const successfulCases = similarCases.filter(
+          (c) => c.outcome === "approved"
+        );
+        const profileSuccessRate = successfulCases.length / similarCases.length;
 
         // Calculate confidence interval using binomial distribution
-        const n = similarCases.length
-        const p = profileSuccessRate
-        const z = 1.96 // 95% confidence
-        const margin = z * Math.sqrt((p * (1 - p)) / n)
+        const n = similarCases.length;
+        const p = profileSuccessRate;
+        const z = 1.96; // 95% confidence
+        const margin = z * Math.sqrt((p * (1 - p)) / n);
 
         return {
           baseSuccessRate,
@@ -73,216 +81,254 @@ export class SuccessProbabilityAgent {
           confidenceInterval: {
             lower: Math.max(0, p - margin),
             upper: Math.min(1, p + margin),
-            confidence: 0.95
+            confidence: 0.95,
           },
           recentTrends,
-          modelAccuracy: 0.87 // Based on historical model performance
-        }
-      }
-    })
+          modelAccuracy: 0.87, // Based on historical model performance
+        };
+      },
+    });
 
     const factorAnalysisTool = tool({
-      description: 'Analyze factors that influence success probability',
+      description: "Analyze factors that influence success probability",
       parameters: z.object({
         userProfile: z.any(),
         caseType: z.string(),
         country: z.string(),
-        visaType: z.string()
+        visaType: z.string(),
       }),
       execute: async ({ userProfile, caseType, country, visaType }) => {
-        const positiveFactors = []
-        const negativeFactors = []
-        const neutralFactors = []
+        const positiveFactors: any[] = [];
+        const negativeFactors: any[] = [];
+        const neutralFactors: any[] = [];
 
         // Analyze education factors
-        if (userProfile.education?.level === 'phd') {
+        if (userProfile.education?.level === "phd") {
           positiveFactors.push({
-            factor: 'Advanced Education (PhD)',
+            factor: "Advanced Education (PhD)",
             impact: 0.15,
             confidence: 0.9,
-            description: 'PhD qualification significantly increases approval chances'
-          })
-        } else if (userProfile.education?.level === 'master') {
+            description:
+              "PhD qualification significantly increases approval chances",
+          });
+        } else if (userProfile.education?.level === "master") {
           positiveFactors.push({
-            factor: 'Graduate Education (Master\'s)',
+            factor: "Graduate Education (Master's)",
             impact: 0.08,
             confidence: 0.85,
-            description: 'Master\'s degree positively impacts application'
-          })
+            description: "Master's degree positively impacts application",
+          });
         }
 
         // Analyze employment factors
-        if (userProfile.employment?.status === 'employed' && userProfile.employment?.jobOffer) {
+        if (
+          userProfile.employment?.status === "employed" &&
+          userProfile.employment?.jobOffer
+        ) {
           positiveFactors.push({
-            factor: 'Job Offer with Current Employment',
+            factor: "Job Offer with Current Employment",
             impact: 0.12,
             confidence: 0.88,
-            description: 'Having both current employment and job offer shows stability'
-          })
+            description:
+              "Having both current employment and job offer shows stability",
+          });
         } else if (userProfile.employment?.jobOffer) {
           positiveFactors.push({
-            factor: 'Job Offer in Target Country',
-            impact: 0.10,
+            factor: "Job Offer in Target Country",
+            impact: 0.1,
             confidence: 0.82,
-            description: 'Job offer demonstrates economic integration potential'
-          })
-        } else if (userProfile.employment?.status === 'unemployed') {
+            description:
+              "Job offer demonstrates economic integration potential",
+          });
+        } else if (userProfile.employment?.status === "unemployed") {
           negativeFactors.push({
-            factor: 'Current Unemployment',
+            factor: "Current Unemployment",
             impact: -0.08,
             confidence: 0.75,
-            description: 'Unemployment may raise concerns about financial stability'
-          })
+            description:
+              "Unemployment may raise concerns about financial stability",
+          });
         }
 
         // Analyze language proficiency
-        const targetLanguageLevel = userProfile.language?.proficiency?.[country]
-        if (targetLanguageLevel === 'advanced' || targetLanguageLevel === 'native') {
+        const targetLanguageLevel =
+          userProfile.language?.proficiency?.[country];
+        if (
+          targetLanguageLevel === "advanced" ||
+          targetLanguageLevel === "native"
+        ) {
           positiveFactors.push({
-            factor: 'Strong Language Proficiency',
+            factor: "Strong Language Proficiency",
             impact: 0.06,
-            confidence: 0.80,
-            description: 'Advanced language skills facilitate integration'
-          })
-        } else if (targetLanguageLevel === 'basic') {
+            confidence: 0.8,
+            description: "Advanced language skills facilitate integration",
+          });
+        } else if (targetLanguageLevel === "basic") {
           negativeFactors.push({
-            factor: 'Limited Language Proficiency',
+            factor: "Limited Language Proficiency",
             impact: -0.04,
-            confidence: 0.70,
-            description: 'Basic language skills may hinder integration'
-          })
+            confidence: 0.7,
+            description: "Basic language skills may hinder integration",
+          });
         }
 
         // Analyze financial factors
-        if (userProfile.financial?.savings && userProfile.financial.savings > 50000) {
+        if (
+          userProfile.financial?.savings &&
+          userProfile.financial.savings > 50000
+        ) {
           positiveFactors.push({
-            factor: 'Strong Financial Resources',
+            factor: "Strong Financial Resources",
             impact: 0.07,
             confidence: 0.85,
-            description: 'Substantial savings demonstrate financial stability'
-          })
-        } else if (userProfile.financial?.debts && userProfile.financial.debts > 20000) {
+            description: "Substantial savings demonstrate financial stability",
+          });
+        } else if (
+          userProfile.financial?.debts &&
+          userProfile.financial.debts > 20000
+        ) {
           negativeFactors.push({
-            factor: 'High Debt Levels',
+            factor: "High Debt Levels",
             impact: -0.05,
             confidence: 0.75,
-            description: 'High debt may indicate financial instability'
-          })
+            description: "High debt may indicate financial instability",
+          });
         }
 
         // Analyze immigration history
-        const previousDenials = userProfile.immigration?.previousApplications?.filter(app => app.outcome === 'denied')
+        const previousDenials =
+          userProfile.immigration?.previousApplications?.filter(
+            (app: any) => app.outcome === "denied"
+          );
         if (previousDenials && previousDenials.length > 0) {
           negativeFactors.push({
-            factor: 'Previous Visa Denials',
+            factor: "Previous Visa Denials",
             impact: -0.12,
-            confidence: 0.90,
-            description: 'Previous denials significantly impact future applications'
-          })
+            confidence: 0.9,
+            description:
+              "Previous denials significantly impact future applications",
+          });
         }
 
         // Analyze document readiness
-        if (userProfile.documents?.documentsReady && userProfile.documents.documentsReady > 0.9) {
+        if (
+          userProfile.documents?.documentsReady &&
+          userProfile.documents.documentsReady > 0.9
+        ) {
           positiveFactors.push({
-            factor: 'Complete Documentation',
+            factor: "Complete Documentation",
             impact: 0.05,
-            confidence: 0.80,
-            description: 'Well-prepared documentation improves approval chances'
-          })
-        } else if (userProfile.documents?.documentsReady && userProfile.documents.documentsReady < 0.6) {
+            confidence: 0.8,
+            description:
+              "Well-prepared documentation improves approval chances",
+          });
+        } else if (
+          userProfile.documents?.documentsReady &&
+          userProfile.documents.documentsReady < 0.6
+        ) {
           negativeFactors.push({
-            factor: 'Incomplete Documentation',
+            factor: "Incomplete Documentation",
             impact: -0.08,
             confidence: 0.85,
-            description: 'Missing documents can lead to delays or denials'
-          })
+            description: "Missing documents can lead to delays or denials",
+          });
         }
 
         return {
           positiveFactors,
           negativeFactors,
           neutralFactors,
-          totalPositiveImpact: positiveFactors.reduce((sum, f) => sum + f.impact, 0),
-          totalNegativeImpact: negativeFactors.reduce((sum, f) => sum + Math.abs(f.impact), 0)
-        }
-      }
-    })
+          totalPositiveImpact: positiveFactors.reduce(
+            (sum, f) => sum + f.impact,
+            0
+          ),
+          totalNegativeImpact: negativeFactors.reduce(
+            (sum, f) => sum + Math.abs(f.impact),
+            0
+          ),
+        };
+      },
+    });
 
     const improvementAnalysisTool = tool({
-      description: 'Analyze potential improvements to increase success probability',
+      description:
+        "Analyze potential improvements to increase success probability",
       parameters: z.object({
         currentFactors: z.any(),
         userProfile: z.any(),
-        visaType: z.string()
+        visaType: z.string(),
       }),
       execute: async ({ currentFactors, userProfile, visaType }) => {
-        const improvements = []
+        const improvements: any[] = [];
 
         // Language improvement suggestions
-        const targetLanguageLevel = userProfile.language?.proficiency?.[caseData.country]
-        if (!targetLanguageLevel || targetLanguageLevel === 'basic') {
+        const targetLanguageLevel =
+          userProfile.language?.proficiency?.[caseData.country];
+        if (!targetLanguageLevel || targetLanguageLevel === "basic") {
           improvements.push({
-            suggestion: 'Improve language proficiency through formal testing',
+            suggestion: "Improve language proficiency through formal testing",
             impact: 0.06,
-            difficulty: 'medium',
-            timeRequired: '3-6 months'
-          })
+            difficulty: "medium",
+            timeRequired: "3-6 months",
+          });
         }
 
         // Employment suggestions
-        if (!userProfile.employment?.jobOffer && visaType === 'work_visa') {
+        if (!userProfile.employment?.jobOffer && visaType === "work_visa") {
           improvements.push({
-            suggestion: 'Secure job offer from target country employer',
+            suggestion: "Secure job offer from target country employer",
             impact: 0.12,
-            difficulty: 'hard',
-            timeRequired: '2-6 months'
-          })
+            difficulty: "hard",
+            timeRequired: "2-6 months",
+          });
         }
 
         // Education enhancement
-        if (userProfile.education?.level === 'bachelor' && visaType === 'skilled_worker') {
+        if (
+          userProfile.education?.level === "bachelor" &&
+          visaType === "skilled_worker"
+        ) {
           improvements.push({
-            suggestion: 'Consider pursuing additional certifications or qualifications',
+            suggestion:
+              "Consider pursuing additional certifications or qualifications",
             impact: 0.04,
-            difficulty: 'medium',
-            timeRequired: '6-12 months'
-          })
+            difficulty: "medium",
+            timeRequired: "6-12 months",
+          });
         }
 
         // Documentation improvements
         if (userProfile.documents?.documentsReady < 0.8) {
           improvements.push({
-            suggestion: 'Complete all required documentation and obtain certified translations',
+            suggestion:
+              "Complete all required documentation and obtain certified translations",
             impact: 0.08,
-            difficulty: 'easy',
-            timeRequired: '2-4 weeks'
-          })
+            difficulty: "easy",
+            timeRequired: "2-4 weeks",
+          });
         }
 
         // Financial improvements
-        if (!userProfile.financial?.savings || userProfile.financial.savings < 20000) {
+        if (
+          !userProfile.financial?.savings ||
+          userProfile.financial.savings < 20000
+        ) {
           improvements.push({
-            suggestion: 'Build financial reserves to demonstrate stability',
+            suggestion: "Build financial reserves to demonstrate stability",
             impact: 0.05,
-            difficulty: 'medium',
-            timeRequired: '6-12 months'
-          })
+            difficulty: "medium",
+            timeRequired: "6-12 months",
+          });
         }
 
-        return improvements
-      }
-    })
+        return improvements;
+      },
+    });
 
     // Generate success probability prediction using AI SDK v5
     const { object: prediction } = await generateObject({
       model: openai(this.config.model),
       temperature: this.config.temperature,
-      maxSteps: this.config.maxSteps,
-      tools: {
-        performStatisticalAnalysis: statisticalAnalysisTool,
-        analyzeFactors: factorAnalysisTool,
-        analyzeImprovements: improvementAnalysisTool
-      },
       schema: SuccessProbabilitySchema,
       system: `You are an expert immigration success probability analyst with deep knowledge of approval patterns, policy requirements, and case success factors.
 
@@ -311,7 +357,7 @@ ${JSON.stringify(userProfile, null, 2)}
 - Case Type: ${caseData.caseType}
 - Country: ${caseData.country}
 - Visa Type: ${caseData.visaType}
-- Application Stage: ${caseData.applicationStage || 'Preparation'}
+- Application Stage: ${caseData.applicationStage || "Preparation"}
 
 **Requirements:**
 1. Use statistical analysis to determine baseline success rates
@@ -327,8 +373,8 @@ ${JSON.stringify(userProfile, null, 2)}
 
 **Prediction ID:** ${predictionId}
 
-Focus on providing data-driven insights and actionable recommendations to maximize approval chances.`
-    })
+Focus on providing data-driven insights and actionable recommendations to maximize approval chances.`,
+    });
 
     return {
       ...prediction,
@@ -337,8 +383,8 @@ Focus on providing data-driven insights and actionable recommendations to maximi
       country: caseData.country,
       visaType: caseData.visaType,
       modelVersion: this.config.model,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -363,50 +409,61 @@ Risk Level: ${existingPrediction.riskLevel}
 **Profile Updates:**
 ${JSON.stringify(profileUpdates, null, 2)}
 
-Analyze how these updates affect the success probability and provide revised estimates.`
-    })
+Analyze how these updates affect the success probability and provide revised estimates.`,
+    });
 
     // For now, return the existing prediction with updated timestamp
     // In a full implementation, this would recalculate based on the analysis
     return {
       ...existingPrediction,
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    };
   }
 
-  private getBaseSuccessRate(caseType: string, country: string, visaType: string): number {
+  private getBaseSuccessRate(
+    caseType: string,
+    country: string,
+    visaType: string
+  ): number {
     // Realistic success rates based on common visa types
     const successRates: Record<string, number> = {
-      'tourist_visa': 0.85,
-      'student_visa': 0.78,
-      'work_visa': 0.72,
-      'family_visa': 0.68,
-      'permanent_residence': 0.65,
-      'citizenship': 0.82
-    }
-    
-    return successRates[visaType] || 0.70
+      tourist_visa: 0.85,
+      student_visa: 0.78,
+      work_visa: 0.72,
+      family_visa: 0.68,
+      permanent_residence: 0.65,
+      citizenship: 0.82,
+    };
+
+    return successRates[visaType] || 0.7;
   }
 
   private generateSimilarCases(baseRate: number, profileFactors: string[]) {
-    const cases = []
+    const cases: any[] = [];
     for (let i = 0; i < 100; i++) {
-      const variation = (Math.random() - 0.5) * 0.3 // ±15% variation
-      const adjustedRate = Math.max(0.1, Math.min(0.95, baseRate + variation))
+      const variation = (Math.random() - 0.5) * 0.3; // ±15% variation
+      const adjustedRate = Math.max(0.1, Math.min(0.95, baseRate + variation));
       cases.push({
         profile: { factors: profileFactors },
-        outcome: Math.random() < adjustedRate ? 'approved' : 'denied',
-        factors: profileFactors
-      })
+        outcome: Math.random() < adjustedRate ? "approved" : "denied",
+        factors: profileFactors,
+      });
     }
-    return cases
+    return cases;
   }
 
   private generateTrendData(baseRate: number) {
-    const periods = ['Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023', 'Q1 2024', 'Q2 2024']
-    return periods.map(period => ({
+    const periods = [
+      "Q1 2023",
+      "Q2 2023",
+      "Q3 2023",
+      "Q4 2023",
+      "Q1 2024",
+      "Q2 2024",
+    ];
+    return periods.map((period) => ({
       period,
-      successRate: baseRate + (Math.random() - 0.5) * 0.1 // ±5% variation
-    }))
+      successRate: baseRate + (Math.random() - 0.5) * 0.1, // ±5% variation
+    }));
   }
 }

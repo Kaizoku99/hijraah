@@ -12,8 +12,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 );
 
-// File validation schema using Zod
-const FileSchema = z.object({
+// Enhanced file validation schema with flexible chat support
+const FileSchemaWithChat = z.object({
   file: z
     .instanceof(Blob)
     .refine((file) => file.size <= 10 * 1024 * 1024, {
@@ -42,6 +42,18 @@ const FileSchema = z.object({
   messageId: z.string().nullable().optional(),
 });
 
+// Simplified schema for non-chat uploads (backward compatibility)
+const FileSchemaSimple = z.object({
+  file: z
+    .instanceof(Blob)
+    .refine((file) => file.size <= 5 * 1024 * 1024, {
+      message: "File size should be less than 5MB",
+    })
+    .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), {
+      message: "File type should be JPEG or PNG",
+    }),
+});
+
 // Set response runtime to edge for better performance
 // export const runtime = 'edge'; // Commented out or removed
 
@@ -67,16 +79,17 @@ export async function POST(request: Request) {
     const chatId = formData.get("chatId") as string;
     const messageId = (formData.get("messageId") as string) || null;
 
-    // Validate file using Zod schema
-    const validationResult = FileSchema.safeParse({
-      file,
-      chatId,
-      messageId,
-    });
+    // Check if this is a chat-based upload or simple upload
+    const isChatUpload = Boolean(chatId);
+    
+    // Validate file using appropriate schema
+    const validationResult = isChatUpload 
+      ? FileSchemaWithChat.safeParse({ file, chatId, messageId })
+      : FileSchemaSimple.safeParse({ file });
 
     if (!validationResult.success) {
-      const errorMessage = validationResult.error.errors
-        .map((error) => error.message)
+      const errorMessage = validationResult.error.issues
+        .map((issue) => issue.message)
         .join(", ");
       console.error(
         "Zod validation failed:",
@@ -85,60 +98,71 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMessage }, { status: 400 });
     }
 
-    // Check if chat exists and belongs to user
-    const { data: chat, error: chatError } = await supabase
-      .from("chats")
-      .select("id")
-      .eq("id", chatId)
-      .eq("user_id", userId)
-      .single();
+    // For chat uploads, verify chat exists and belongs to user
+    if (isChatUpload) {
+      const { data: chat, error: chatError } = await supabase
+        .from("chats")
+        .select("id")
+        .eq("id", chatId)
+        .eq("user_id", userId)
+        .single();
 
-    if (chatError || !chat) {
-      return NextResponse.json(
-        { error: "Chat not found or access denied" },
-        { status: 404 },
-      );
+      if (chatError || !chat) {
+        return NextResponse.json(
+          { error: "Chat not found or access denied" },
+          { status: 404 },
+        );
+      }
     }
 
     // Generate a unique filename
     const fileId = nanoid();
     const fileExtension = file.name.split(".").pop() || "";
     const uniqueFilename = `${fileId}-${Date.now()}.${fileExtension}`;
-    const filePath = `chats/${chatId}/${uniqueFilename}`;
+    
+    // Determine file path based on upload type
+    const filePath = isChatUpload 
+      ? `chats/${chatId}/${uniqueFilename}`
+      : `uploads/${uniqueFilename}`;
 
     // Upload file to blob storage
     const fileBuffer = await file.arrayBuffer();
-    const { url } = await put(filePath, fileBuffer, {
+    const { url, pathname, contentType } = await put(filePath, fileBuffer, {
       access: "public",
       contentType: file.type,
     });
 
-    // Store file metadata in database
-    const { data: attachment, error: attachmentError } = await supabase
-      .from("chat_attachments")
-      .insert({
-        id: fileId,
-        chat_id: chatId,
-        message_id: messageId,
-        file_name: file.name,
-        file_type: file.type,
-        file_size: file.size,
-        file_path: url,
-      })
-      .select()
-      .single();
+    // Store file metadata in database (only for chat uploads)
+    if (isChatUpload) {
+      const { data: attachment, error: attachmentError } = await supabase
+        .from("chat_attachments")
+        .insert({
+          id: fileId,
+          chat_id: chatId,
+          message_id: messageId,
+          file_name: file.name,
+          file_type: file.type,
+          file_size: file.size,
+          file_path: url,
+        })
+        .select()
+        .single();
 
-    if (attachmentError) {
-      console.error("Error storing attachment metadata:", attachmentError);
-      return NextResponse.json(
-        { error: "Failed to store attachment metadata" },
-        { status: 500 },
-      );
+      if (attachmentError) {
+        console.error("Error storing attachment metadata:", attachmentError);
+        return NextResponse.json(
+          { error: "Failed to store attachment metadata" },
+          { status: 500 },
+        );
+      }
     }
 
+    // Return response compatible with both use cases
     return NextResponse.json({
       id: fileId,
       name: file.name,
+      pathname: pathname || filePath,
+      contentType: contentType || file.type,
       type: file.type,
       size: file.size,
       url,

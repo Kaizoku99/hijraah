@@ -19,37 +19,35 @@ import { defaultLocale } from "@/i18n/i18n";
 // This is a fallback page in case middleware doesn't redirect
 export default function RootPage() {
   // Return a simple page that will auto-redirect to the default locale
+  // Note: Don't render html/head/body tags - Next.js layout handles this
   return (
-    <html>
-      <head>
-        <meta httpEquiv="refresh" content={`0;url=/${defaultLocale}`} />
-        <title>Redirecting...</title>
-      </head>
-      <body>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            flexDirection: "column",
-            fontFamily: "system-ui, sans-serif",
-            gap: "1rem",
-          }}
-        >
-          <p>Redirecting to Hijraah...</p>
-          <a
-            href={`/${defaultLocale}`}
-            style={{
-              color: "#3b82f6",
-              textDecoration: "underline",
-            }}
-          >
-            Click here if you are not redirected automatically
-          </a>
-        </div>
-      </body>
-    </html>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        flexDirection: "column",
+        fontFamily: "system-ui, sans-serif",
+        gap: "1rem",
+      }}
+    >
+      <p>Redirecting to Hijraah...</p>
+      <a
+        href={`/${defaultLocale}`}
+        style={{
+          color: "#3b82f6",
+          textDecoration: "underline",
+        }}
+      >
+        Click here if you are not redirected automatically
+      </a>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.location.href = '/${defaultLocale}';`,
+        }}
+      />
+    </div>
   );
 }
 
@@ -96,11 +94,8 @@ export function Home({ locale = defaultLocale }: { locale?: string } = {}) {
                   <Link
                     href={`${linkPrefix}/chat`}
                     className="flex items-center"
-                    legacyBehavior
                   >
-                    <a>
-                      Start Chat <MessageSquare className="ml-2 h-5 w-5" />
-                    </a>
+                    Start Chat <MessageSquare className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button
@@ -112,7 +107,6 @@ export function Home({ locale = defaultLocale }: { locale?: string } = {}) {
                   <Link
                     href={`${linkPrefix}/assessment`}
                     className="flex items-center"
-                    legacyBehavior
                   >
                     Check Eligibility <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
@@ -129,7 +123,6 @@ export function Home({ locale = defaultLocale }: { locale?: string } = {}) {
                   <Link
                     href={`${linkPrefix}/dashboard`}
                     className="flex items-center"
-                    legacyBehavior
                   >
                     <LineChart className="mr-2 h-4 w-4" /> Existing users? Go to
                     Dashboard
@@ -340,11 +333,7 @@ export function Home({ locale = defaultLocale }: { locale?: string } = {}) {
               variant="secondary"
               className="text-lg font-medium bg-white text-blue-700 hover:bg-blue-50 transition-all duration-200"
             >
-              <Link
-                href={`${linkPrefix}/signup`}
-                className="flex items-center"
-                legacyBehavior
-              >
+              <Link href={`${linkPrefix}/signup`} className="flex items-center">
                 Get Started <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -370,7 +359,6 @@ export function Home({ locale = defaultLocale }: { locale?: string } = {}) {
               <Link
                 href={`${linkPrefix}/dashboard`}
                 className="flex items-center justify-center"
-                legacyBehavior
               >
                 <LineChart className="mr-2 h-4 w-4" /> Already have an account?
                 Go to Dashboard

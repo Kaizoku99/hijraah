@@ -35,6 +35,7 @@ import {
   MoreHorizontalIcon,
   ShareIcon,
   TrashIcon,
+  UserIcon,
 } from "@/components/ui/icons";
 import {
   SidebarGroup,
@@ -47,7 +48,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { fetcher } from "@/lib/utils";
-import type { Chat } from "@/supabase/schema";
+import type { ChatSession as Chat } from "@/supabase/schema";
 
 import type { User } from "next-auth";
 
@@ -84,9 +85,8 @@ const PureChatItem = ({
         <Link
           href={`/chat/${chat.id}`}
           onClick={() => setOpenMobile(false)}
-          legacyBehavior
-        >
-          <span>{chat.title}</span>
+          legacyBehavior>
+          {chat.title}
         </Link>
       </SidebarMenuButton>
       <DropdownMenu modal={true}>
@@ -134,6 +134,18 @@ const PureChatItem = ({
                   </div>
                   {visibilityType === "public" ? <CheckCircleFillIcon /> : null}
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer flex-row justify-between"
+                  onClick={() => {
+                    setVisibilityType("team");
+                  }}
+                >
+                  <div className="flex flex-row gap-2 items-center">
+                    <UserIcon />
+                    <span>Team</span>
+                  </div>
+                  {visibilityType === "team" ? <CheckCircleFillIcon /> : null}
+                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
@@ -176,7 +188,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
   const handleDelete = async () => {
-    const deletePromise = fetch(`/api/chat?id=${deleteId}`, {
+    const deletePromise = fetch(`/api/chat/${deleteId}`, {
       method: "DELETE",
     });
 
@@ -185,8 +197,9 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
       success: () => {
         mutate((history) => {
           if (history) {
-            return history.filter((h) => h.id !== id);
+            return history.filter((h) => h.id !== deleteId);
           }
+          return history;
         });
         return "Chat deleted successfully";
       },

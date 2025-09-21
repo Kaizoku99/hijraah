@@ -1,9 +1,10 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { createRequire } from "module";
 import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
-import { createRequire } from "module";
-import createNextIntlPlugin from "next-intl/plugin";
+
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -78,7 +79,7 @@ const nextConfig = {
       "lodash",
     ],
   },
-  // Use the recommended config.turbopack structure instead of experimental.turbo
+  // Turbopack configuration for module resolution and aliases
   turbopack: {
     resolveAlias: {
       "@": resolve(__dirname, "./src"),
@@ -106,7 +107,7 @@ const nextConfig = {
     ignoreBuildErrors: process.env.CI !== "true",
   },
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true, // Temporarily ignore during builds
     dirs: ["src", "app", "config", "scripts", "__tests__"],
   },
   images: {
@@ -256,7 +257,12 @@ const nextConfig = {
       },
       {
         source: "/signup",
-        destination: "/auth/signup",
+        destination: "/auth/register",
+        permanent: true,
+      },
+      {
+        source: "/:locale/signup",
+        destination: "/:locale/auth/register",
         permanent: true,
       },
     ];

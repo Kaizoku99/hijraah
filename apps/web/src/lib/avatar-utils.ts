@@ -8,7 +8,7 @@ import type { Database } from "@/types/database.types";
 export class AvatarUploadError extends Error {
   constructor(
     message: string,
-    public originalError?: any,
+    public originalError?: any
   ) {
     super(message);
     this.name = "AvatarUploadError";
@@ -24,7 +24,7 @@ export class AvatarUploadError extends Error {
 export class ProfileUpdateError extends Error {
   constructor(
     message: string,
-    public originalError?: any,
+    public originalError?: any
   ) {
     super(message);
     this.name = "ProfileUpdateError";
@@ -47,8 +47,8 @@ const DEFAULT_AVATARS = [
   "/avatars/default-5.png",
 ];
 
-// Default avatar path
-const defaultAvatarPath = "/avatars/default.png";
+// Default avatar path - use the first default avatar as fallback
+const defaultAvatarPath = "/avatars/default-1.png";
 
 // Cache for avatar URLs
 const avatarCache = new Map<string, string>();
@@ -78,12 +78,66 @@ export function generateAvatarUrl(userId: string): string {
 }
 
 /**
+ * Get all available default avatars
+ */
+export function getAllDefaultAvatars(): string[] {
+  return [...DEFAULT_AVATARS];
+}
+
+/**
+ * Get avatar metadata for display purposes
+ */
+export function getAvatarMetadata() {
+  return [
+    {
+      url: "/avatars/default-1.png",
+      name: "Adventurer",
+      description: "Illustrated character avatar by Lisa Wischofsky",
+    },
+    {
+      url: "/avatars/default-2.png",
+      name: "Avataaars",
+      description: "Customizable character avatar by Pablo Stanley",
+    },
+    {
+      url: "/avatars/default-3.png",
+      name: "Bottts",
+      description: "Robot-style avatar by Pablo Stanley",
+    },
+    {
+      url: "/avatars/default-4.png",
+      name: "Identicon",
+      description: "Geometric pattern avatar by DiceBear",
+    },
+    {
+      url: "/avatars/default-5.png",
+      name: "Initials",
+      description: "Letter-based avatar by DiceBear",
+    },
+  ];
+}
+
+/**
+ * Check if a given URL is one of our default avatars
+ */
+export function isDefaultAvatar(url: string): boolean {
+  return DEFAULT_AVATARS.includes(url);
+}
+
+/**
+ * Get the default avatar path (fallback)
+ */
+export function getDefaultAvatarPath(): string {
+  return defaultAvatarPath;
+}
+
+/**
  * Upload an avatar image to Supabase storage
  */
 export async function uploadAvatar(
   supabase: SupabaseClient<Database>,
   file: File,
-  userId: string,
+  userId: string
 ): Promise<string> {
   try {
     const fileExt = file.name.split(".").pop();
@@ -98,7 +152,7 @@ export async function uploadAvatar(
     if (uploadError) {
       throw new AvatarUploadError(
         "Failed to upload avatar to storage.",
-        uploadError,
+        uploadError
       );
     }
 
@@ -109,7 +163,7 @@ export async function uploadAvatar(
 
     if (!publicUrl) {
       throw new AvatarUploadError(
-        "Failed to get public URL for avatar after upload.",
+        "Failed to get public URL for avatar after upload."
       );
     }
 
@@ -121,7 +175,7 @@ export async function uploadAvatar(
     console.error("Error uploading avatar:", error);
     throw new AvatarUploadError(
       "An unexpected error occurred during avatar upload.",
-      error,
+      error
     );
   }
 }
@@ -132,7 +186,7 @@ export async function uploadAvatar(
 export async function updateUserAvatar(
   supabase: SupabaseClient<Database>,
   userId: string,
-  avatarUrl: string,
+  avatarUrl: string
 ): Promise<void> {
   try {
     // First, check if profile exists
@@ -145,7 +199,7 @@ export async function updateUserAvatar(
     if (profileError) {
       throw new ProfileUpdateError(
         "Error checking for existing profile before avatar update.",
-        profileError,
+        profileError
       );
     }
 
@@ -159,7 +213,7 @@ export async function updateUserAvatar(
       if (error) {
         throw new ProfileUpdateError(
           "Failed to update profile with new avatar URL.",
-          error,
+          error
         );
       }
     } else {
@@ -177,7 +231,7 @@ export async function updateUserAvatar(
       if (error) {
         throw new ProfileUpdateError(
           "Failed to create new profile with avatar URL.",
-          error,
+          error
         );
       }
     }
@@ -188,7 +242,7 @@ export async function updateUserAvatar(
     console.error("Error updating user avatar:", error);
     throw new ProfileUpdateError(
       "An unexpected error occurred while updating user avatar.",
-      error,
+      error
     );
   }
 }
@@ -218,7 +272,7 @@ export const getIdenticonUrl = (userId: string): string => {
  */
 export async function getUserAvatar(
   supabase: SupabaseClient<Database>, // Accept client as argument
-  userId: string,
+  userId: string
 ): Promise<string> {
   if (!userId) {
     console.warn("getUserAvatar called with no userId, returning default.");
@@ -250,7 +304,7 @@ export async function getUserAvatar(
         "Error fetching profile avatar_url (raw):",
         profileError,
         "Error fetching profile avatar_url (JSON):",
-        JSON.stringify(profileError, Object.getOwnPropertyNames(profileError)),
+        JSON.stringify(profileError, Object.getOwnPropertyNames(profileError))
       );
     }
 
@@ -277,7 +331,7 @@ export async function getUserAvatar(
         return storageData.publicUrl;
       } else {
         console.warn(
-          `Storage URL ${storageData.publicUrl} does not match expected path ${avatarFilePath}. Falling back.`,
+          `Storage URL ${storageData.publicUrl} does not match expected path ${avatarFilePath}. Falling back.`
         );
       }
     }
@@ -291,7 +345,7 @@ export async function getUserAvatar(
       "Error getting user avatar (raw):",
       error,
       "Error getting user avatar (JSON):",
-      JSON.stringify(error, Object.getOwnPropertyNames(error)),
+      JSON.stringify(error, Object.getOwnPropertyNames(error))
     );
     // Final fallback in case of any unexpected error
     const identiconUrl = getIdenticonUrl(userId);

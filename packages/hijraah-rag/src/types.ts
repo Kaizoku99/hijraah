@@ -212,6 +212,7 @@ export interface SourceEvaluation {
     publicationDate?: Date;
     lastUpdated?: Date;
     citations?: number;
+    failsCriteria?: boolean;
   };
 }
 
@@ -229,7 +230,7 @@ export const RetrievalQuerySchema = z.object({
   text: z.string().min(1),
   userId: z.string().optional(),
   contextId: z.string().optional(),
-  filters: z.record(z.any()).optional(),
+  filters: z.record(z.string(), z.any()).optional(),
   limit: z.number().min(1).max(100).default(10),
   threshold: z.number().min(0).max(1).default(0.7),
   includeImages: z.boolean().default(false),
@@ -261,7 +262,7 @@ export class RAGError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: any,
+    public details?: any
   ) {
     super(message);
     this.name = "RAGError";

@@ -7,6 +7,7 @@ import {
   X,
   Mic,
   MicOff,
+  Play,
 } from "lucide-react";
 import { useSession } from "@/lib/auth/hooks";
 import {
@@ -20,13 +21,24 @@ import {
 import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useChatContext } from "@/hooks/useChatContext";
+import { useModelManager } from "@/hooks/useModelManager";
 import { useI18n } from "@/i18n/hooks";
 import { cn } from "@/lib/utils";
 
-import { ExtendedAttachment } from "./types";
+import {
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputToolbar,
+  PromptInputTools,
+  PromptInputButton,
+  PromptInputSubmit,
+} from "./ai-elements";
+
+// Import the correct type from the types file
+import { ExtendedAttachment } from "@/types/components";
 
 interface UnifiedMessageInputProps {
   input: string;
@@ -38,6 +50,10 @@ interface UnifiedMessageInputProps {
   setAttachments: (attachments: ExtendedAttachment[]) => void;
   chatId: string;
   chatError: string | null;
+  selectedModel?: string; // Optional - for external control, but auto-selected if not provided
+  onModelChange?: (model: string) => void; // Optional - for external model change notifications
+  chatContext?: "general" | "visa" | "documents" | "eligibility" | "timeline" | "legal" | "family" | "work" | "study" | "business";
+  resumeStream?: () => void; // Add resume function
 }
 
 export function UnifiedMessageInput({
@@ -50,6 +66,10 @@ export function UnifiedMessageInput({
   setAttachments,
   chatId,
   chatError,
+  selectedModel: externalSelectedModel,
+  onModelChange: externalOnModelChange,
+  chatContext,
+  resumeStream,
 }: UnifiedMessageInputProps) {
   const { toast } = useToast();
   const { locale, t } = useI18n();
@@ -59,6 +79,46 @@ export function UnifiedMessageInput({
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const { session, user, isLoading: isSessionLoading } = useSession();
+  const modelChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Context7 - Smart context and model management
+  const contextInfo = useChatContext(chatContext);
+  const {
+    selectedModel: internalSelectedModel,
+    setSelectedModel: setInternalSelectedModel,
+    availableModels,
+    currentModel,
+    suggestOptimalModel,
+  } = useModelManager(externalSelectedModel || contextInfo.suggestedModel);
+
+  // Use external model if provided, otherwise use internal management
+  const selectedModel = externalSelectedModel || internalSelectedModel;
+  const handleModelChange = (model: string) => {
+    if (externalOnModelChange) {
+      externalOnModelChange(model);
+    } else {
+      setInternalSelectedModel(model);
+    }
+  };
+
+  // Context7 - Dynamic placeholder based on context and auto-selected model
+  const getContextualPlaceholder = () => {
+    if (isRecording) {
+      return t("chat.input.recordingPlaceholder") || "Listening... Speak now";
+    }
+    
+    // Smart placeholder based on current context and selected model
+    const basePlaceholder = contextInfo.placeholder || t("chat.input.placeholder") || "Ask me anything about immigration...";
+    
+    // Add subtle model indicator to placeholder for complex contexts
+    if (contextInfo.context === 'legal' || contextInfo.context === 'eligibility') {
+      return basePlaceholder + " (AI will analyze deeply)";
+    } else if (contextInfo.context === 'documents') {
+      return basePlaceholder + " (AI will examine thoroughly)";
+    }
+    
+    return basePlaceholder;
+  };
 
   // --- Integrate Speech Recognition Hook with locale support ---
   const {
@@ -74,20 +134,20 @@ export function UnifiedMessageInput({
     },
     onError: (error) => {
       console.error("Speech recognition error in component:", error);
-      let message = t("chat.speechRecognition.errors.general");
+      let message = t("chat.speechRecognition.errors.general") || "Speech recognition error occurred";
       if (error === "not-allowed" || error === "service-not-allowed") {
-        message = t("chat.speechRecognition.errors.notAllowed");
+        message = t("chat.speechRecognition.errors.notAllowed") || "Microphone access denied";
       } else if (error === "no-speech") {
-        message = t("chat.speechRecognition.errors.noSpeech");
+        message = t("chat.speechRecognition.errors.noSpeech") || "No speech detected";
       } else if (error === "network") {
-        message = t("chat.speechRecognition.errors.network");
+        message = t("chat.speechRecognition.errors.network") || "Network error during speech recognition";
       } else if (error === "not-available") {
-        message = t("chat.speechRecognition.errors.notAvailable");
+        message = t("chat.speechRecognition.errors.notAvailable") || "Speech recognition not available";
       }
       setSpeechError(message);
       // Optionally show a toast as well
       toast({
-        title: t("error"),
+        title: t("error") || "Error",
         description: message,
         variant: "destructive",
       });
@@ -157,8 +217,9 @@ export function UnifiedMessageInput({
               type: file.type,
               size: file.size,
               url: data.url,
+              status: "uploaded" as const,
             } as ExtendedAttachment;
-          }),
+          })
         );
 
         setAttachments([...attachments, ...newAttachments]);
@@ -245,8 +306,9 @@ export function UnifiedMessageInput({
             type: file.type,
             size: file.size,
             url: data.url,
+            status: "uploaded" as const,
           } as ExtendedAttachment;
-        }),
+        })
       );
       setAttachments([...attachments, ...newAttachments]);
       toast({
@@ -270,25 +332,137 @@ export function UnifiedMessageInput({
     }
   }, [input, speechError]);
 
+  // Context7 - Automatic model selection based on input analysis and context
+  const selectOptimalModel = (input: string, context: string, attachments: ExtendedAttachment[]) => {
+    // Analyze input complexity and requirements
+    const isComplexQuery = input.length > 200 || 
+                          input.includes('analyze') || 
+                          input.includes('compare') || 
+                          input.includes('explain') ||
+                          input.includes('requirements') ||
+                          input.includes('eligibility');
+                          
+    const hasDocuments = attachments.some(att => 
+      att.type === 'application/pdf' || 
+      att.type === 'document'
+    );
+    
+    const hasImages = attachments.some(att => att.type.startsWith('image/'));
+    
+    // Context-based model selection
+    let optimalModel: string;
+    
+    if (hasDocuments || hasImages) {
+      // Use vision-capable models for documents and images
+      optimalModel = "gateway:reasoning-large";
+    } else if (context === 'legal' || context === 'eligibility' || isComplexQuery) {
+      // Use reasoning models for complex analysis
+      optimalModel = "gateway:reasoning-claude";
+    } else if (context === 'documents' || context === 'visa') {
+      // Use balanced models for document and visa queries
+      optimalModel = "gateway:reasoning-large";
+    } else if (input.length < 50 && !isComplexQuery) {
+      // Use fast models for simple, short queries
+      optimalModel = "gateway:chat-fast";
+    } else {
+      // Default to balanced model
+      optimalModel = "gateway:chat-balanced";
+    }
+    
+    console.log('🤖 Auto-selected model:', optimalModel, {
+      inputLength: input.length,
+      context,
+      isComplex: isComplexQuery,
+      hasDocuments,
+      hasImages
+    });
+    
+    return optimalModel;
+  };
+
+  // Context7 - Auto-select optimal model based on context and input changes (with debouncing)
+  useEffect(() => {
+    // Clear existing timeout
+    if (modelChangeTimeoutRef.current) {
+      clearTimeout(modelChangeTimeoutRef.current);
+    }
+
+    // Debounce model changes to prevent excessive switching while typing
+    const timeout = setTimeout(() => {
+      if (input.trim() || attachments.length > 0) {
+        const optimalModel = selectOptimalModel(input, contextInfo.context, attachments);
+        
+        // Only change model if it's different and beneficial
+        if (optimalModel !== selectedModel) {
+          if (externalOnModelChange) {
+            externalOnModelChange(optimalModel);
+          } else {
+            setInternalSelectedModel(optimalModel);
+          }
+        }
+      } else {
+        // Default to context suggestion when no input
+        const contextModel = contextInfo.suggestedModel;
+        if (contextModel && contextModel !== selectedModel) {
+          if (externalOnModelChange) {
+            externalOnModelChange(contextModel);
+          } else {
+            setInternalSelectedModel(contextModel);
+          }
+        }
+      }
+    }, 1000); // 1 second debounce
+
+    modelChangeTimeoutRef.current = timeout;
+
+    // Cleanup on unmount
+    return () => {
+      if (modelChangeTimeoutRef.current) {
+        clearTimeout(modelChangeTimeoutRef.current);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, attachments, contextInfo.context, contextInfo.suggestedModel, selectedModel, externalOnModelChange]);
+
+  // Context7 - Ensure a model is always selected with debug logging
+  useEffect(() => {
+    console.log('Model Manager State:', {
+      selectedModel,
+      availableModels: availableModels.map(m => ({ value: m.value, label: m.label, isAvailable: m.isAvailable })),
+      contextSuggestion: contextInfo.suggestedModel,
+      externalModel: externalSelectedModel
+    });
+
+    if (!selectedModel && availableModels.length > 0) {
+      // If no model is selected, use the first available or context suggestion
+      const defaultModel = contextInfo.suggestedModel || availableModels[0].value;
+      console.log('Setting default model:', defaultModel);
+      
+      if (externalOnModelChange) {
+        externalOnModelChange(defaultModel);
+      } else {
+        setInternalSelectedModel(defaultModel);
+      }
+    }
+  }, [selectedModel, availableModels, contextInfo.suggestedModel, externalOnModelChange, setInternalSelectedModel, externalSelectedModel]);
+
   return (
     <div
       {...getRootProps()}
       className={cn(
-        "relative border-t bg-background", // Added bg-background
+        "relative border-t bg-background",
         isDraggingOver &&
-          "after:absolute after:inset-0 after:bg-primary/10 after:border-2 after:border-dashed after:border-primary after:rounded-md after:z-10",
+          "after:absolute after:inset-0 after:bg-primary/10 after:border-2 after:border-dashed after:border-primary after:rounded-md after:z-10"
       )}
     >
-      <form
-        ref={formRef}
+      <PromptInput
         onSubmit={(e) => {
           if (!isRecording) {
             handleSubmit(e);
           } else {
-            e.preventDefault(); // Prevent form submission if recording
+            e.preventDefault();
           }
         }}
-        className="relative flex flex-col p-2" // Add padding
       >
         {/* Hidden inputs */}
         <input {...getDropzoneInputProps()} />
@@ -306,6 +480,16 @@ export function UnifiedMessageInput({
           <div className="mb-2 p-2 text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-md">
             {chatError && <div>{chatError}</div>}
             {speechError && <div>{speechError}</div>}
+          </div>
+        )}
+
+        {/* Model Selection Indicator - Shows current model in subtle way */}
+        {selectedModel && currentModel && (
+          <div className="mb-1 text-xs text-muted-foreground flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+            {t("chat.model.using") || "Using"} {currentModel.label}
+            {currentModel.tier === 'advanced' && <span className="text-purple-500">⚡</span>}
+            {currentModel.tier === 'fast' && <span className="text-yellow-500">🚀</span>}
           </div>
         )}
 
@@ -333,103 +517,79 @@ export function UnifiedMessageInput({
         )}
 
         {/* Input Area */}
-        <div className="relative flex items-end gap-2">
-          {/* Attach Button */}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            disabled={isLoading || isRecording}
-            className="text-muted-foreground flex-shrink-0"
-            onClick={handleFileButtonClick}
-            aria-label={t("chat.input.attachFile")}
-          >
-            <Paperclip className="h-5 w-5" />
-          </Button>
+        <PromptInputTextarea
+          ref={inputRef}
+          placeholder={getContextualPlaceholder()}
+          value={input}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+            setInput(e.target.value);
+          }}
+          onKeyDown={handleKeyDown}
+          disabled={isLoading || isRecording}
+          minHeight={40}
+          maxHeight={144}
+        />
 
-          {/* Textarea */}
-          <Textarea
-            ref={inputRef}
-            tabIndex={0}
-            placeholder={
-              isRecording
-                ? t("chat.input.recordingPlaceholder")
-                : t("chat.input.placeholder")
-            }
-            value={input}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
-              setInput(e.target.value);
-            }}
-            onKeyDown={handleKeyDown}
-            className="flex-grow resize-none self-end max-h-36 min-h-[2.5rem] pr-20 py-2 leading-tight"
-            rows={1}
-            disabled={isLoading || isRecording}
-          />
-          {/* Absolute positioned buttons inside the relative container */}
-          <div className="absolute right-2 bottom-1 flex items-center gap-1">
-            {/* Mic Button - Conditionally Render based on availability */}
+        <PromptInputToolbar>
+          <PromptInputTools>
+            {/* Attach Button */}
+            <PromptInputButton
+              disabled={isLoading || isRecording}
+              onClick={handleFileButtonClick}
+            >
+              <Paperclip className="h-4 w-4" />
+            </PromptInputButton>
+
+            {/* Resume Button - Shows when there might be interrupted streams */}
+            {resumeStream && !isLoading && (
+              <PromptInputButton
+                onClick={resumeStream}
+                title={t("chat.resume.tooltip") || "Resume interrupted stream"}
+                className="text-blue-500 hover:text-blue-700"
+              >
+                <Play className="h-4 w-4" />
+              </PromptInputButton>
+            )}
+
+            {/* Mic Button */}
             {isSpeechAvailable ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                disabled={isLoading} // Disable mic if AI is responding
-                className={cn(
-                  "text-muted-foreground",
-                  isRecording && "text-red-500 animate-pulse",
-                )}
+              <PromptInputButton
+                disabled={isLoading}
                 onClick={isRecording ? stopRecording : startRecording}
-                aria-label={
-                  isRecording
-                    ? t("chat.input.stopRecording")
-                    : t("chat.input.startRecording")
-                }
+                className={cn(isRecording && "text-red-500 animate-pulse")}
               >
                 {isRecording ? (
-                  <MicOff className="h-5 w-5" />
+                  <MicOff className="h-4 w-4" />
                 ) : (
-                  <Mic className="h-5 w-5" />
+                  <Mic className="h-4 w-4" />
                 )}
-              </Button>
+              </PromptInputButton>
             ) : (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+              <PromptInputButton
                 disabled
-                title={t("chat.input.speechUnavailable")}
+                title={t("chat.input.speechUnavailable") || "Speech recognition not available"}
               >
-                <MicOff className="h-5 w-5 text-muted-foreground/50" />
-              </Button>
+                <MicOff className="h-4 w-4 text-muted-foreground/50" />
+              </PromptInputButton>
             )}
+          </PromptInputTools>
 
-            {/* Send/Stop Button */}
+          {/* Send/Stop Button */}
+          <PromptInputSubmit
+            status={isLoading ? "streaming" : "idle"}
+            disabled={
+              (!input.trim() && attachments.length === 0) || isRecording
+            }
+            onClick={isLoading ? stop : undefined}
+          >
             {isLoading ? (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={stop}
-                aria-label={t("chat.input.stop")}
-              >
-                <StopCircle className="h-5 w-5" />
-              </Button>
+              <StopCircle className="h-4 w-4" />
             ) : (
-              <Button
-                type="submit"
-                variant="ghost"
-                size="icon"
-                disabled={
-                  (!input.trim() && attachments.length === 0) || isRecording
-                }
-                aria-label={t("chat.input.send")}
-              >
-                <SendHorizonal className="h-5 w-5" />
-              </Button>
+              <SendHorizonal className="h-4 w-4" />
             )}
-          </div>
-        </div>
-      </form>
+          </PromptInputSubmit>
+        </PromptInputToolbar>
+      </PromptInput>
     </div>
   );
 }

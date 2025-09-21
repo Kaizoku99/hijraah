@@ -1,7 +1,7 @@
 "use client";
 
 import { nanoid } from "nanoid";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 // Update import path to match our implementation
 import { useDeepResearch as useDeepResearchContext } from "@/lib/contexts/deep-research-context";
@@ -103,14 +103,18 @@ export function useDeepResearch() {
         setIsLoading(false);
       }
     },
-    [addActivity, clearState, initProgress, setDepth],
+    [addActivity, clearState, initProgress, setDepth]
   );
+
+  const pollForUpdatesRef = useRef<
+    ((sessionId: string) => Promise<void>) | null
+  >(null);
 
   const pollForUpdates = useCallback(
     async (sessionId: string) => {
       try {
         const response = await fetch(
-          `/api/deep-research?sessionId=${sessionId}`,
+          `/api/deep-research?sessionId=${sessionId}`
         );
 
         if (!response.ok) {
@@ -176,7 +180,9 @@ export function useDeepResearch() {
           // If the research is still in progress, poll again after a delay
           if (session && session.status === "in_progress") {
             setTimeout(() => {
-              void pollForUpdates(sessionId);
+              if (pollForUpdatesRef.current) {
+                void pollForUpdatesRef.current(sessionId);
+              }
             }, 3000); // Poll every 3 seconds
           }
         }
@@ -184,8 +190,11 @@ export function useDeepResearch() {
         console.error("Error polling for updates:", err);
       }
     },
-    [addActivity, addSource, setDepth, updateProgress],
+    [addActivity, addSource, setDepth, updateProgress]
   );
+
+  // Update the ref when pollForUpdates changes
+  pollForUpdatesRef.current = pollForUpdates;
 
   return {
     startResearch,

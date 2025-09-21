@@ -3,7 +3,7 @@
  * Provides a container for related content with variants for different use cases.
  */
 
-import { motion, HTMLMotionProps } from "motion/react";
+import { motion, HTMLMotionProps } from "framer-motion";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";

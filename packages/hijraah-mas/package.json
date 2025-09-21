@@ -33,23 +33,27 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
-    "ai": "^5.0.0-beta.25",
-    "@ai-sdk/openai": "^1.0.0",
-    "@ai-sdk/anthropic": "^1.0.0",
-    "@supabase/supabase-js": "^2.39.0",
-    "zod": "^3.22.4",
-    "drizzle-orm": "^0.29.0",
-    "@trigger.dev/sdk": "^4.0.0-beta.1"
+    "ai": "catalog:",
+    "@ai-sdk/openai": "catalog:",
+    "@ai-sdk/anthropic": "catalog:",
+    "@ai-sdk/mistral": "catalog:",
+    "@ai-sdk/google": "catalog:",
+    "@ai-sdk/deepseek": "catalog:",
+    "@ai-sdk/fireworks": "catalog:",
+    "@supabase/supabase-js": "catalog:",
+    "zod": "catalog:",
+    "drizzle-orm": "catalog:",
+    "@trigger.dev/sdk": "catalog:"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "typescript": "^5.8.3",
-    "tsup": "^8.0.0",
-    "vitest": "^1.0.0",
-    "@vitest/coverage-v8": "^1.0.0",
-    "eslint": "^8.55.0",
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0"
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "tsup": "catalog:",
+    "vitest": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:"
   },
   "peerDependencies": {
     "@hijraah/types": "workspace:*",

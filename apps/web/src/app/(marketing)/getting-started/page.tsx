@@ -68,8 +68,10 @@ export default function GettingStartedPage() {
                 <p className="text-muted-foreground mb-4">{step.description}</p>
                 <Button asChild>
                   <Link href={step.href} legacyBehavior>
-                    {step.buttonText}
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <span className="inline-flex items-center">
+                      {step.buttonText}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </span>
                   </Link>
                 </Button>
               </div>

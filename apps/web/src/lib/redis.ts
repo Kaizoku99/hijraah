@@ -5,32 +5,14 @@
  * in the application. It provides:
  *
  * 1. A singleton Redis client instance with connection management
- * 2. Cache middleware for Hono API routes
+ * 2. Cache utilities for Next.js API routes
  * 3. Translation cache utilities
  * 4. Cache invalidation and statistics
  * 5. Testing utilities
  */
 
-// Add a mock Cache API for Hono's built-in cache middleware
-// This prevents the "Cache Middleware is not enabled because caches is not defined" error
-if (typeof globalThis.caches === "undefined") {
-  // Create a minimal mock of the Cache API that Hono expects
-  globalThis.caches = {
-    open: () => {
-      return Promise.resolve({
-        match: () => Promise.resolve(null),
-        put: () => Promise.resolve(),
-        delete: () => Promise.resolve(false),
-      });
-    },
-    has: () => Promise.resolve(false),
-    delete: () => Promise.resolve(false),
-  } as any;
-  console.log("Added Cache API mock for Hono middleware");
-}
-
 import { Redis } from "@upstash/redis";
-import { Context, MiddlewareHandler, Next } from "hono";
+import { NextRequest, NextResponse } from "next/server";
 import { LRUCache } from "lru-cache";
 
 // Environment variables for Upstash Redis
@@ -47,10 +29,9 @@ const STATS_KEYS = {
 // Interface for cache options
 interface CacheOptions {
   ttl?: number; // Time to live in seconds (default: 300 seconds)
-  key?: (c: Context<any>) => string; // Custom key generator
+  key?: (req: NextRequest) => string; // Custom key generator
   ignoreQuery?: boolean; // Whether to ignore query parameters in the cache key
   varyByAuth?: boolean; // Whether to create different cache entries based on authentication status
-  caches?: string[]; // Routes or patterns to cache, if not provided all routes will be cached
 }
 
 // Singleton pattern for Redis client
@@ -217,12 +198,12 @@ export const translationCache = {
 /**
  * Default cache key generator based on URL, path, and user ID
  */
-function defaultKeyGenerator(c: Context<any>): string {
-  const url = new URL(c.req.url);
+function defaultKeyGenerator(req: NextRequest): string {
+  const url = new URL(req.url);
 
-  // Get user info for personalized caching
-  const user = c.get("user");
-  const userId = user?.id || "anonymous";
+  // Get user info for personalized caching (from headers or auth)
+  const authHeader = req.headers.get("authorization");
+  const userId = authHeader ? "authenticated" : "anonymous";
 
   // Construct path with query parameters
   const pathWithQuery = url.pathname + url.search;
@@ -231,46 +212,33 @@ function defaultKeyGenerator(c: Context<any>): string {
 }
 
 /**
- * Middleware for Redis-backed caching with user-specific keys
- *
- * @deprecated Use redisApiCacheMiddleware instead to avoid conflicts with Hono's built-in cache
- * @param options Cache options
- * @returns Hono middleware
+ * Cache wrapper for Next.js API routes
+ * Use this to wrap your API route handlers with caching functionality
  */
-export function redisCacheMiddleware(
+export function withCache(
+  handler: (req: NextRequest) => Promise<Response>,
   options: CacheOptions = {},
-): MiddlewareHandler<any> {
-  // Set default values for options to avoid Hono warnings
-  options.caches = options.caches || []; // Always provide a caches array to avoid Hono built-in middleware warnings
-
-  return async (c: Context<any>, next: Next) => {
+) {
+  return async (req: NextRequest): Promise<Response> => {
     if (!redis) {
-      console.warn(
-        "[redisCacheMiddleware] Redis client not available. Skipping cache.",
-      );
-      return next();
+      console.warn("[withCache] Redis client not available. Skipping cache.");
+      return handler(req);
     }
+
     // Only cache GET requests
-    if (c.req.method !== "GET") {
-      return next();
+    if (req.method !== "GET") {
+      return handler(req);
     }
 
     // Log incoming Cache-Control header
-    const requestCacheControl = c.req.header("Cache-Control");
+    const requestCacheControl = req.headers.get("Cache-Control");
     console.log(
-      `[redisCacheMiddleware] Incoming Cache-Control: ${requestCacheControl}`,
+      `[withCache] Incoming Cache-Control: ${requestCacheControl}`,
     );
-
-    // If caches is not defined, continue with caching
-    // This removes the error message and allows the middleware to be used without the caches parameter
-    if (options.caches === undefined) {
-      // If caches is undefined, we'll cache everything by default
-      // No need to log a warning as this is a valid configuration
-    }
 
     // Generate cache key
     const generateKey = options.key || defaultKeyGenerator;
-    const cacheKey = generateKey(c);
+    const cacheKey = generateKey(req);
 
     // Check if cached response exists
     try {
@@ -280,15 +248,18 @@ export function redisCacheMiddleware(
         // Track cache hit
         await redis.incr(STATS_KEYS.HITS);
 
-        // Add cache headers
-        c.header("X-Cache", "HIT");
-        c.header("X-Cache-Key", cacheKey);
+        const parsedData = JSON.parse(cachedData as string);
+        
+        // Create response with cache headers
+        const response = NextResponse.json(parsedData);
+        response.headers.set("X-Cache", "HIT");
+        response.headers.set("X-Cache-Key", cacheKey);
 
         // Use a default TTL of 300 seconds if none is provided
         const maxAge = options.ttl ? options.ttl.toString() : "300";
-        c.header("Cache-Control", `public, max-age=${maxAge}`);
+        response.headers.set("Cache-Control", `public, max-age=${maxAge}`);
 
-        return c.json(JSON.parse(cachedData as string));
+        return response;
       }
 
       // Track cache miss
@@ -298,17 +269,15 @@ export function redisCacheMiddleware(
       // Continue without caching on error
     }
 
-    // Set header to indicate cache miss
-    c.header("X-Cache", "MISS");
-    c.header("X-Cache-Key", cacheKey);
-
-    // Continue to the next middleware/handler
-    await next();
+    // Execute the original handler
+    const response = await handler(req);
 
     // Store the response in cache only if status is success
-    if (c.res && c.res.status >= 200 && c.res.status < 300) {
+    if (response.status >= 200 && response.status < 300) {
       try {
-        const responseData = await c.res.clone().json();
+        // Clone the response to read the body
+        const clonedResponse = response.clone();
+        const responseData = await clonedResponse.json();
 
         // Store in Redis with TTL
         const ttl = options.ttl || 300; // Default 5 minutes
@@ -318,97 +287,15 @@ export function redisCacheMiddleware(
         await redis.sadd(STATS_KEYS.KEYS, cacheKey);
 
         // Add cache-related headers to the response
-        c.header("Cache-Control", `public, max-age=${ttl}`);
+        response.headers.set("X-Cache", "MISS");
+        response.headers.set("X-Cache-Key", cacheKey);
+        response.headers.set("Cache-Control", `public, max-age=${ttl}`);
       } catch (error) {
         console.error("Redis cache write error:", error);
       }
     }
-  };
-}
 
-/**
- * Renamed middleware for Redis-backed caching to avoid conflicts with Hono's built-in cache
- * Use this version instead of redisCacheMiddleware to prevent "Cache Middleware is not enabled" errors
- *
- * @param options Cache options
- * @returns Hono middleware
- */
-export function redisApiCacheMiddleware(
-  options: CacheOptions = {},
-): MiddlewareHandler<any> {
-  return async (c: Context<any>, next: Next) => {
-    if (!redis) {
-      console.warn(
-        "[redisApiCacheMiddleware] Redis client not available. Skipping cache.",
-      );
-      return next();
-    }
-    // Only cache GET requests
-    if (c.req.method !== "GET") {
-      return next();
-    }
-
-    // Log incoming Cache-Control header
-    const requestCacheControl = c.req.header("Cache-Control");
-    console.log(
-      `[redisApiCacheMiddleware] Incoming Cache-Control: ${requestCacheControl}`,
-    );
-
-    // Generate cache key
-    const generateKey = options.key || defaultKeyGenerator;
-    const cacheKey = generateKey(c);
-
-    // Check if cached response exists
-    try {
-      const cachedData = await redis.get(cacheKey);
-
-      if (cachedData) {
-        // Track cache hit
-        await redis.incr(STATS_KEYS.HITS);
-
-        // Add cache headers
-        c.header("X-Cache", "HIT");
-        c.header("X-Cache-Key", cacheKey);
-
-        // Use a default TTL of 300 seconds if none is provided
-        const maxAge = options.ttl ? options.ttl.toString() : "300";
-        c.header("Cache-Control", `public, max-age=${maxAge}`);
-
-        return c.json(JSON.parse(cachedData as string));
-      }
-
-      // Track cache miss
-      await redis.incr(STATS_KEYS.MISSES);
-    } catch (error) {
-      console.error("Redis cache read error:", error);
-      // Continue without caching on error
-    }
-
-    // Set header to indicate cache miss
-    c.header("X-Cache", "MISS");
-    c.header("X-Cache-Key", cacheKey);
-
-    // Continue to the next middleware/handler
-    await next();
-
-    // Store the response in cache only if status is success
-    if (c.res && c.res.status >= 200 && c.res.status < 300) {
-      try {
-        const responseData = await c.res.clone().json();
-
-        // Store in Redis with TTL
-        const ttl = options.ttl || 300; // Default 5 minutes
-        await redis.set(cacheKey, JSON.stringify(responseData), { ex: ttl });
-
-        // Track cache keys
-        await redis.sadd(STATS_KEYS.KEYS, cacheKey);
-
-        // Add cache-related headers to the response
-        c.header("Cache-Control", `public, max-age=${ttl}`);
-      } catch (error) {
-        console.error("Redis cache write error:", error);
-      }
-    }
+    return response;
   };
 }
 

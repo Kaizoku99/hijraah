@@ -35,9 +35,12 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
 
   const { completion, complete, isLoading } = useCompletion({
     api: "/api/search",
-    onResponse: (response) => {
-      // Handle streaming response
-      console.log("AI response:", response);
+    onFinish: (prompt: string, completion: string) => {
+      // Handle completion finished
+      console.log("AI completion finished:", { prompt, completion });
+    },
+    onError: (error: Error) => {
+      console.error("AI completion error:", error);
     },
   });
 

@@ -366,11 +366,11 @@ export const ragQualityIntegrationTask = task({
       });
 
       // Create chunks if they don't exist
-      const chunks = payload.processingResult.chunks || await createQualityChunks(
+      const chunks = payload.processingResult.chunks || (await createQualityChunks(
         payload.processingResult.extractedContent,
         payload.ragOptions.chunkSize,
         payload.ragOptions.chunkOverlap
-      );
+      ));
 
       // Generate embeddings for each chunk
       const chunkEmbeddings = await Promise.all(

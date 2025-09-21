@@ -21,10 +21,23 @@ export function ThemeToggle({
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
+  // Avoid hydration mismatch - Context7 Pattern: Only render after client mount
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Context7 - Defensive programming: Return loading state until theme context is ready
+  if (!mounted) {
+    const isSidebar = variant === "sidebar";
+    return (
+      <div
+        className={cn(
+          "h-9 w-9 rounded-full bg-background border border-border/40 animate-pulse",
+          isSidebar && "h-8 w-8 rounded-md"
+        )}
+      />
+    );
+  }
 
   const isSidebar = variant === "sidebar";
 
@@ -40,19 +53,19 @@ export function ThemeToggle({
             "hover:shadow-md data-[state=open]:bg-accent data-[state=open]:text-accent-foreground",
             "focus-visible:ring-offset-0 focus-visible:border-primary/50",
             mounted && "animate-in fade-in-50 duration-300",
-            isSidebar && "h-8 w-8 rounded-md",
+            isSidebar && "h-8 w-8 rounded-md"
           )}
         >
           <Sun
             className={cn(
               "h-[1.15rem] w-[1.15rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0",
-              isSidebar && "h-4 w-4",
+              isSidebar && "h-4 w-4"
             )}
           />
           <Moon
             className={cn(
               "absolute h-[1.15rem] w-[1.15rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100",
-              isSidebar && "h-4 w-4",
+              isSidebar && "h-4 w-4"
             )}
           />
           <span className="sr-only">Toggle theme</span>
@@ -66,7 +79,7 @@ export function ThemeToggle({
           onClick={() => setTheme("light")}
           className={cn(
             "flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-            theme === "light" && "bg-accent font-medium text-accent-foreground",
+            theme === "light" && "bg-accent font-medium text-accent-foreground"
           )}
         >
           <Sun className="h-4 w-4" />
@@ -76,7 +89,7 @@ export function ThemeToggle({
           onClick={() => setTheme("dark")}
           className={cn(
             "flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-            theme === "dark" && "bg-accent font-medium text-accent-foreground",
+            theme === "dark" && "bg-accent font-medium text-accent-foreground"
           )}
         >
           <Moon className="h-4 w-4" />
@@ -86,8 +99,7 @@ export function ThemeToggle({
           onClick={() => setTheme("system")}
           className={cn(
             "flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
-            theme === "system" &&
-              "bg-accent font-medium text-accent-foreground",
+            theme === "system" && "bg-accent font-medium text-accent-foreground"
           )}
         >
           <Laptop className="h-4 w-4" />

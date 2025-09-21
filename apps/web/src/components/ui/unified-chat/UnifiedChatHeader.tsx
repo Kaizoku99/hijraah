@@ -78,6 +78,8 @@ export const chatVisibilityOptions = [
 const availableModels = [
   { value: "gpt-4o", label: "GPT-4o" },
   { value: "gpt-3.5-turbo", label: "GPT-3.5 Turbo" },
+  { value: "claude-3-opus", label: "Claude 3 Opus" },
+  { value: "claude-3-haiku", label: "Claude 3 Haiku" },
 ];
 
 interface ChatSession {
@@ -168,7 +170,7 @@ export function UnifiedChatHeader({
         chatId,
       );
       try {
-        const sessionApiUrl = "/api/chat?limit=50";
+        const sessionApiUrl = "/api/history";
         console.log(
           `[UnifiedChatHeader] Fetching sessions from: ${sessionApiUrl}`,
         );
@@ -215,26 +217,40 @@ export function UnifiedChatHeader({
         });
 
         if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error("Authentication failed. Please log in again.");
+          // If the response is not OK, try to parse the body for a JSON error.
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.message ||
+                `API Error: ${response.status} ${response.statusText}`,
+            );
           }
+          // Otherwise, throw a generic error.
           throw new Error(
             `API Error: ${response.status} ${response.statusText}`,
           );
         }
 
+        // Check content type before parsing
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Received non-JSON response from server.");
+        }
+
         const result = await response.json();
 
-        const fetchedSessions = result.chats || [];
+        // The /api/history endpoint returns chats directly as an array
+        const fetchedSessions = Array.isArray(result) ? result : result.chats || [];
 
         console.log(
-          "[UnifiedChatHeader] Data from /api/chat:",
+          "[UnifiedChatHeader] Data from /api/history:",
           fetchedSessions,
         );
 
         if (!Array.isArray(fetchedSessions)) {
           console.error(
-            "[UnifiedChatHeader] API response 'chats' is not an array:",
+            "[UnifiedChatHeader] API response is not an array:",
             fetchedSessions,
           );
           throw new Error("Invalid data format received from API.");
@@ -766,41 +782,6 @@ export function UnifiedChatHeader({
             toggleWebScraper ||
             toggleArtifact ||
             toggleAnalytics) && <div className="h-6 w-px bg-border mx-1"></div>}
-
-          <DropdownMenu>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-1.5 px-2 h-8"
-                  >
-                    <Settings2 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm max-w-[100px] truncate">
-                      {availableModels.find((m) => m.value === selectedModel)
-                        ?.label || selectedModel}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-              </TooltipTrigger>
-              <TooltipContent>Select Model</TooltipContent>
-            </Tooltip>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Select Model</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioGroup
-                value={selectedModel}
-                onValueChange={onModelChange}
-              >
-                {availableModels.map((model) => (
-                  <DropdownMenuRadioItem key={model.value} value={model.value}>
-                    {model.label}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           <DropdownMenu>
             <Tooltip>

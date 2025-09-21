@@ -1,4 +1,4 @@
-import { type Message as AIMessage, type JSONValue } from "ai";
+import { type UIMessage as AIMessage, type JSONValue } from "ai";
 
 export type ChatRole = "user" | "assistant" | "system";
 export type ChatSessionStatus = "active" | "archived" | "deleted";

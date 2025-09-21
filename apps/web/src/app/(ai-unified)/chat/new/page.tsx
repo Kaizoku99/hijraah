@@ -20,11 +20,10 @@ export default function NewChatPage() {
       if (!user) return;
 
       try {
-        // Create a new chat using our hook
+        // Create a new chat using our hook - empty chat per AI SDK v5 best practices
         const chat = await createChat({
           title: "New Chat",
           modelType: ChatModelType.GPT_4,
-          initialMessage: "Hello, I need help with immigration.",
         });
 
         if (chat) {

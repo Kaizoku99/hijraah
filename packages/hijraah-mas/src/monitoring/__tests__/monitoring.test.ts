@@ -1,43 +1,36 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { AgentPerformanceDashboard } from '../agent-performance-dashboard'
 import { TokenUsageAnalytics } from '../token-usage-analytics'
-import { AgentSuccessMetricsAnalyzer } from '../agent-success-metrics'
+import { AgentSuccessMetrics } from '../agent-success-metrics'
 import { AgentDebuggingTools } from '../agent-debugging-tools'
 import { AgentABTesting } from '../agent-ab-testing'
 
-// Mock Supabase client
+// Mock Supabase client with proper method chaining
+const createMockChain = () => {
+  const chain = {
+    select: vi.fn(() => chain),
+    insert: vi.fn(() => chain),
+    update: vi.fn(() => chain),
+    upsert: vi.fn(() => chain),
+    delete: vi.fn(() => chain),
+    eq: vi.fn(() => chain),
+    gte: vi.fn(() => chain),
+    lt: vi.fn(() => chain),
+    order: vi.fn(() => chain),
+    limit: vi.fn(() => chain),
+    single: vi.fn(() => Promise.resolve({ data: null, error: null })),
+    then: vi.fn(() => Promise.resolve({ data: [], error: null }))
+  }
+  return chain
+}
+
 vi.mock('@/utils/supabase/server', () => ({
   createClient: vi.fn(() => ({
-    from: vi.fn(() => ({
-      select: vi.fn(() => ({ data: [] })),
-      insert: vi.fn(() => ({ data: [] })),
-      update: vi.fn(() => ({ data: [] })),
-      upsert: vi.fn(() => ({ data: [] })),
-      delete: vi.fn(() => ({ data: [] })),
-      eq: vi.fn(() => ({ data: [] })),
-      gte: vi.fn(() => ({ data: [] })),
-      lt: vi.fn(() => ({ data: [] })),
-      order: vi.fn(() => ({ data: [] })),
-      limit: vi.fn(() => ({ data: [] })),
-      single: vi.fn(() => ({ data: null }))
-    }))
+    from: vi.fn(() => createMockChain())
   }))
 }))
 
-// Mock AI SDK
-vi.mock('ai', () => ({
-  generateObject: vi.fn(() => Promise.resolve({
-    object: {
-      recommendations: ['Test recommendation'],
-      insights: ['Test insight'],
-      score: 0.8,
-      reasoning: 'Test reasoning'
-    }
-  })),
-  generateText: vi.fn(() => Promise.resolve({
-    text: 'Test generated text'
-  }))
-}))
+// AI SDK is mocked globally in vitest.setup.ts
 
 // Mock monitoring utils
 vi.mock('../utils/monitoring', () => ({
@@ -183,10 +176,10 @@ describe('Token Usage Analytics', () => {
 })
 
 describe('Agent Success Metrics Analyzer', () => {
-  let analyzer: AgentSuccessMetricsAnalyzer
+  let analyzer: AgentSuccessMetrics
 
   beforeEach(() => {
-    analyzer = new AgentSuccessMetricsAnalyzer()
+    analyzer = new AgentSuccessMetrics()
   })
 
   afterEach(() => {
@@ -484,7 +477,7 @@ describe('Integration Tests', () => {
   it('should work together for comprehensive monitoring', async () => {
     const dashboard = new AgentPerformanceDashboard()
     const analytics = new TokenUsageAnalytics()
-    const successMetrics = new AgentSuccessMetricsAnalyzer()
+    const successMetrics = new AgentSuccessMetrics()
     const debugTools = new AgentDebuggingTools()
 
     // Initialize dashboard

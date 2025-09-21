@@ -1,4 +1,4 @@
-import { Context, Next } from "hono";
+import { NextRequest, NextResponse } from "next/server";
 
 import { logger } from "./logger";
 import { supabase } from "./supabase/client";
@@ -235,32 +235,37 @@ export function withCircuitBreaker<Args extends any[], R>(
   return (...args: Args) => breaker.execute(fn, ...args);
 }
 
-// Hono middleware
-export function circuitBreakerMiddleware(
+// Next.js API route wrapper with circuit breaker
+export function withCircuitBreakerRoute<T = any>(
+  handler: (req: NextRequest, context?: any) => Promise<Response>,
   options: CircuitBreakerOptions = {},
-): (c: Context, next: Next) => Promise<Response | undefined> {
-  const breaker = new CircuitBreaker<[Next], void>(options);
+): (req: NextRequest, context?: any) => Promise<Response> {
+  const breaker = new CircuitBreaker<[NextRequest, any], Response>(options);
 
-  return async (c: Context, next: Next) => {
+  return async (req: NextRequest, context?: any) => {
     try {
-      await breaker.execute(async (next) => {
-        await next();
-      }, next);
+      return await breaker.execute(async (req, context) => {
+        return await handler(req, context);
+      }, req, context);
     } catch (error) {
       if (
         error instanceof Error &&
         error.message === "Circuit breaker is OPEN"
       ) {
-        c.status(503);
-        c.header(
+        const response = NextResponse.json(
+          {
+            error: "Service temporarily unavailable",
+            metrics: breaker.getMetrics(),
+          },
+          { status: 503 },
+        );
+        response.headers.set(
           "Retry-After",
           Math.ceil(options.resetTimeout! / 1000).toString(),
         );
-        return c.json({
-          error: "Service temporarily unavailable",
-          metrics: breaker.getMetrics(),
-        });
+        return response;
       }
+      // Re-throw other errors to be handled by global error handlers
       throw error;
     }
   };

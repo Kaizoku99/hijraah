@@ -2,7 +2,7 @@ import Link from "next/link";
 import { memo } from "react";
 
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
-import type { Chat } from "@/lib/db/schema";
+import type { ChatSession as Chat } from "@/supabase/schema";
 
 import {
   CheckCircleFillIcon,
@@ -11,6 +11,7 @@ import {
   MoreHorizontalIcon,
   ShareIcon,
   TrashIcon,
+  UserIcon,
 } from "./icons";
 import {
   DropdownMenu,
@@ -50,9 +51,8 @@ const PureChatItem = ({
         <Link
           href={`/chat/${chat.id}`}
           onClick={() => setOpenMobile(false)}
-          legacyBehavior
-        >
-          <span>{chat.title}</span>
+          legacyBehavior>
+          {chat.title}
         </Link>
       </SidebarMenuButton>
       <DropdownMenu modal={true}>
@@ -99,6 +99,18 @@ const PureChatItem = ({
                     <span>Public</span>
                   </div>
                   {visibilityType === "public" ? <CheckCircleFillIcon /> : null}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer flex-row justify-between"
+                  onClick={() => {
+                    setVisibilityType("team");
+                  }}
+                >
+                  <div className="flex flex-row gap-2 items-center">
+                    <UserIcon />
+                    <span>Team</span>
+                  </div>
+                  {visibilityType === "team" ? <CheckCircleFillIcon /> : null}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>

@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-import { DocumentAnalysis, DocumentType } from "@/types/documents";
+import { DocumentAnalysis, DocumentType } from "@/types/domain/documents";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -12,7 +12,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
  * Save document analysis result to the database
  */
 export async function saveDocumentAnalysisResult(
-  analysisResult: Omit<DocumentAnalysis, "id">,
+  analysisResult: Omit<DocumentAnalysis, "id">
 ): Promise<DocumentAnalysis> {
   const { data, error } = await supabase
     .from("document_analyses")
@@ -53,7 +53,7 @@ export async function saveDocumentAnalysisResult(
  * Get document analysis result by ID
  */
 export async function getDocumentAnalysisById(
-  id: string,
+  id: string
 ): Promise<DocumentAnalysis | null> {
   const { data, error } = await supabase
     .from("document_analyses")
@@ -87,7 +87,7 @@ export async function getDocumentAnalysisById(
  * Get document analyses by user ID
  */
 export async function getDocumentAnalysesByUserId(
-  userId: string,
+  userId: string
 ): Promise<DocumentAnalysis[]> {
   const { data, error } = await supabase
     .from("document_analyses")

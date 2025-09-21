@@ -1,4 +1,9 @@
-import { Case, CaseStatus, CaseType, TimelineEvent } from "../entities/case";
+import {
+  Case,
+  CaseStatus,
+  CaseType,
+  TimelineEvent,
+} from "@/core/immigration/entities/case";
 
 /**
  * Case Service domain service
@@ -59,7 +64,7 @@ export class CaseService {
    */
   isValidStatusTransition(
     currentStatus: CaseStatus,
-    newStatus: CaseStatus,
+    newStatus: CaseStatus
   ): boolean {
     // Define valid transitions for each status
     const validTransitions: Record<CaseStatus, CaseStatus[]> = {
@@ -102,7 +107,7 @@ export class CaseService {
       | "assign"
       | "change_status"
       | "add_document"
-      | "add_comment",
+      | "add_comment"
   ): boolean {
     if (!userRole) return false;
 
@@ -191,7 +196,7 @@ export class CaseService {
    */
   calculateCompletionPercentage(
     caseInstance: Case,
-    uploadedDocuments: string[],
+    uploadedDocuments: string[]
   ): number {
     // Define status weights for completion calculation
     const statusWeight: Record<CaseStatus, number> = {
@@ -218,7 +223,7 @@ export class CaseService {
     // Combine document and status percentages
     return Math.min(
       Math.round((documentPercentage + statusPercentage) * 100),
-      100,
+      100
     );
   }
 
@@ -228,7 +233,7 @@ export class CaseService {
   createDocumentEvent(
     documentId: string,
     documentName: string,
-    uploadedBy: string,
+    uploadedBy: string
   ): TimelineEvent {
     return {
       id: crypto.randomUUID(),

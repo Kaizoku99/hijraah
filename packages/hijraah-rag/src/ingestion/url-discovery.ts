@@ -1,4 +1,4 @@
-import FirecrawlApp from "@mendable/firecrawl-js";
+import FirecrawlApp from "firecrawl";
 import { evaluateSourceConfidence } from "../sources/source-evaluator.js";
 import { IngestionError } from "../types.js";
 
@@ -26,11 +26,12 @@ export class UrlDiscovery {
    * @param query user query or topic
    */
   async discover(query: string, limit = 10): Promise<DiscoveredUrl[]> {
-    const results: any = await this.firecrawl.search(query, {
+    const results: any = await (this.firecrawl as any).search(query, {
       numResults: limit * 2,
       safeSearch: true,
+      // Some SDK versions don't support includeHeaders, keep it optional
       includeHeaders: false,
-    });
+    } as any);
 
     return (results.items || [])
       .map((item: any) => {
@@ -55,17 +56,17 @@ export class UrlDiscovery {
       maxPages?: number;
       includePatterns?: string[];
       excludePatterns?: string[];
-    },
+    }
   ): Promise<DiscoveredUrl[]> {
-    const crawlResult = await this.firecrawl.crawlUrl(baseUrl, {
+    const crawlResult = await (this.firecrawl as any).crawlUrl(baseUrl, {
       limit: options?.maxPages || 100,
       includes: options?.includePatterns,
       excludes: options?.excludePatterns,
-    });
+    } as any);
 
     if (!crawlResult.success) {
       throw new IngestionError(
-        `Failed to crawl ${baseUrl}: ${crawlResult.error}`,
+        `Failed to crawl ${baseUrl}: ${crawlResult.error}`
       );
     }
 
@@ -82,7 +83,7 @@ export class UrlDiscovery {
    */
   async discoverByTopic(
     topic: string,
-    sources: string[] = [],
+    sources: string[] = []
   ): Promise<DiscoveredUrl[]> {
     const allResults: DiscoveredUrl[] = [];
 
@@ -112,7 +113,7 @@ export class UrlDiscovery {
     });
 
     return Array.from(uniqueUrls.values()).sort(
-      (a, b) => b.confidence - a.confidence,
+      (a, b) => b.confidence - a.confidence
     );
   }
 }

@@ -1,3 +1,6 @@
 {
-  "recommendations": ["denoland.vscode-deno"]
+  "recommendations": [
+    "ms-vscode.vscode-js-debug",
+    "ms-vscode.vscode-chrome-debug-core"
+  ]
 }

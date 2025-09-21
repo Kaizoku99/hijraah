@@ -1,61 +1,55 @@
 {
   "name": "@hijraah/database",
   "version": "0.1.0",
-  "private": true,
+  "description": "Database schema and operations for Hijraah workspace",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./schema": {
-      "types": "./src/schema.ts",
-      "default": "./src/schema.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./client": {
-      "types": "./src/client.ts",
-      "default": "./src/client.ts"
+      "types": "./dist/client.d.ts",
+      "import": "./dist/client.js"
     },
-    "./migrations": {
-      "types": "./src/migrations.ts",
-      "default": "./src/migrations.ts"
-    },
-    "./types": {
-      "types": "./src/types.ts",
-      "default": "./src/types.ts"
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "dev": "drizzle-kit studio",
-    "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
-    "push": "drizzle-kit push",
-    "pull": "drizzle-kit pull",
-    "check": "drizzle-kit check",
-    "up": "drizzle-kit up",
-    "drop": "drizzle-kit drop",
-    "introspect": "drizzle-kit introspect",
-    "validate": "drizzle-kit validate",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "type-check": "npx tsc --noEmit",
-    "build": "npx tsc"
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "drizzle-orm": "^0.43.1",
-    "drizzle-zod": "^0.8.2",
-    "postgres": "^3.4.3",
-    "pg": "^8.13.1",
-    "@supabase/supabase-js": "^2.47.10",
-    "zod": "^3.22.4"
+    "drizzle-orm": "catalog:",
+    "@supabase/supabase-js": "catalog:",
+    "postgres": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@hijraah/typescript-config": "workspace:*",
-    "@hijraah/eslint-config": "workspace:*",
-    "drizzle-kit": "^0.31.2",
-    "typescript": "^5.8.3",
-    "@types/pg": "^8.11.10",
-    "@types/node": "^20"
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "tsup": "catalog:",
+    "drizzle-kit": "catalog:",
+    "eslint": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:"
   },
-  "peerDependencies": {
-    "typescript": "^5"
+  "publishConfig": {
+    "access": "restricted"
   }
 }

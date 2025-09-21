@@ -311,7 +311,9 @@ export class MonitoringDashboard {
     this.metricsUpdateInterval = setInterval(async () => {
       try {
         await this.getRealTimeMetrics()
-        await sendMetrics('dashboard.realtime_update', this.realTimeMetrics)
+        if (this.realTimeMetrics) {
+          await sendMetrics('dashboard.realtime_update', this.realTimeMetrics)
+        }
       } catch (error) {
         console.error('Error updating real-time metrics:', error)
       }

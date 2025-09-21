@@ -35,9 +35,23 @@ export interface ToolResult {
 }
 
 export interface TokenUsage {
-  promptTokens: number
-  completionTokens: number
-  totalTokens: number
+  // AI SDK v5 standard properties
+  inputTokens?: number
+  outputTokens?: number
+  totalTokens?: number
+  reasoningTokens?: number
+  cachedInputTokens?: number
+  
+  // Legacy compatibility
+  promptTokens?: number
+  completionTokens?: number
+  
+  // Enhanced tracking properties
+  timestamp?: Date
+  cost?: number
+  model?: string
+  executionId?: string
+  agentName?: string
 }
 
 // Immigration-specific types
@@ -50,22 +64,22 @@ export const CaseDataSchema = z.object({
     id: z.string(),
     type: z.string(),
     url: z.string(),
-    metadata: z.record(z.any()).optional()
+    metadata: z.record(z.string(), z.any()).optional()
   })),
   timeline: z.object({
     submitted: z.date(),
     deadline: z.date().optional()
   }),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 })
 
 export type CaseData = z.infer<typeof CaseDataSchema>
 
 export const ProcessedCaseDataSchema = z.object({
   caseData: CaseDataSchema,
-  documentAnalysis: z.record(z.any()),
-  policyCompliance: z.record(z.any()),
-  riskAssessment: z.record(z.any()),
+  documentAnalysis: z.record(z.string(), z.any()),
+  policyCompliance: z.record(z.string(), z.any()),
+  riskAssessment: z.record(z.string(), z.any()),
   recommendations: z.array(z.string())
 })
 
@@ -77,7 +91,7 @@ export const DocumentSchema = z.object({
   type: z.enum(['passport', 'visa', 'certificate', 'form', 'supporting_document']),
   url: z.string(),
   extractedText: z.string().optional(),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 })
 
 export type Document = z.infer<typeof DocumentSchema>
@@ -99,7 +113,7 @@ export const ApplicationSchema = z.object({
   status: z.enum(['draft', 'submitted', 'under_review', 'approved', 'denied']),
   documents: z.array(DocumentSchema),
   requirements: z.array(z.string()),
-  metadata: z.record(z.any()).optional()
+  metadata: z.record(z.string(), z.any()).optional()
 })
 
 export type Application = z.infer<typeof ApplicationSchema>
@@ -120,8 +134,8 @@ export type Policy = z.infer<typeof PolicySchema>
 
 // Case context for processing
 export const CaseContextSchema = z.object({
-  applicantProfile: z.record(z.any()),
-  historicalData: z.array(z.record(z.any())).optional(),
+  applicantProfile: z.record(z.string(), z.any()),
+  historicalData: z.array(z.record(z.string(), z.any())).optional(),
   policyContext: z.array(PolicySchema).optional(),
   urgency: z.enum(['low', 'medium', 'high']).default('medium')
 })

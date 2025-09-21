@@ -1,4 +1,4 @@
-import { UseChatHelpers } from "@ai-sdk/react";
+import { UseChatHelpers } from "@ai-sdk-tools/store";
 import { ComponentType, Dispatch, ReactNode, SetStateAction } from "react";
 
 import { DataStreamDelta, Suggestion, UIArtifact } from "@/types";

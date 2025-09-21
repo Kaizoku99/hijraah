@@ -1,23 +1,28 @@
-/** Base ESLint configuration for Hijraah monorepo */
 module.exports = {
-  extends: ["eslint-config-turbo"].map(require.resolve),
-  parser: "@typescript-eslint/parser",
-  plugins: ["@typescript-eslint"],
-  rules: {
-    // Custom Hijraah rules
-    "@typescript-eslint/no-unused-vars": "error",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-explicit-any": "warn",
-    "prefer-const": "error",
-    "no-var": "error",
-  },
+  extends: [
+    'eslint:recommended',
+    '@typescript-eslint/recommended',
+    'prettier'
+  ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  root: true,
   env: {
     node: true,
-    es6: true,
+    browser: true,
+    es2022: true
   },
   parserOptions: {
-    ecmaVersion: 2022,
-    sourceType: "module",
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true
+    }
   },
+  rules: {
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-explicit-any': 'warn',
+    'prefer-const': 'error',
+    'no-var': 'error'
+  }
 };

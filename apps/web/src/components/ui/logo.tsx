@@ -19,7 +19,7 @@ export function Logo({ className, showText = true }: LogoProps = {}) {
         className,
       )}
       aria-label="Hijraah - Immigration Platform"
-    >
+      legacyBehavior>
       <>
         <div className="relative h-8 w-8 overflow-hidden">
           <Image

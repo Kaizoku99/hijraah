@@ -12,3 +12,5 @@ export { UnifiedMarkdown } from "./UnifiedMarkdown";
 export { UnifiedCodeBlock } from "./UnifiedCodeBlock";
 export { UnifiedTypingIndicator } from "./UnifiedTypingIndicator";
 export { UnifiedWebScraper } from "./UnifiedWebScraper";
+export { StreamStatus } from "./StreamStatus";
+// Example component removed. Refer to context7 docs for the latest usage patterns.

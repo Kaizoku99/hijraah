@@ -255,8 +255,8 @@ async function analyzeCachePerformance(db: any): Promise<{
     .groupBy(predictions.type);
   
   // Get hit/miss statistics from Redis
-  const hitCount = await redis.get("cache:hits") || 0;
-  const missCount = await redis.get("cache:misses") || 0;
+  const hitCount = (await redis.get("cache:hits")) || 0;
+  const missCount = (await redis.get("cache:misses")) || 0;
   const totalRequests = Number(hitCount) + Number(missCount);
   
   const hitRate = totalRequests > 0 ? Number(hitCount) / totalRequests : 0;
@@ -677,8 +677,8 @@ async function analyzeCacheUsagePatterns(
   peakHours: number[];
 }> {
   // Get usage statistics from Redis
-  const hitCount = Number(await redis.get("cache:hits") || 0);
-  const missCount = Number(await redis.get("cache:misses") || 0);
+  const hitCount = Number((await redis.get("cache:hits")) || 0);
+  const missCount = Number((await redis.get("cache:misses")) || 0);
   const totalRequests = hitCount + missCount;
   const hitRate = totalRequests > 0 ? hitCount / totalRequests : 0;
   

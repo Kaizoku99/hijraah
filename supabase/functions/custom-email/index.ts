@@ -27,7 +27,7 @@ function PasswordResetEmail({ actionUrl, email, name }: EmailTemplateProps) {
     React.createElement(
       "p",
       { key: "p2" },
-      `We received a request to reset the password for your Hijraah account (${email}).`,
+      `We received a request to reset the password for your Hijraah account (${email}).`
     ),
     React.createElement(
       "div",
@@ -45,13 +45,13 @@ function PasswordResetEmail({ actionUrl, email, name }: EmailTemplateProps) {
             fontWeight: "bold",
           },
         },
-        "Reset Password",
-      ),
+        "Reset Password"
+      )
     ),
     React.createElement(
       "p",
       { key: "p3" },
-      "If you did not request a password reset, please ignore this email.",
+      "If you did not request a password reset, please ignore this email."
     ),
     React.createElement("p", { key: "p4" }, "Best regards,\nThe Hijraah Team"),
   ]);
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     if (!type || !metadata) {
       return new Response(
         JSON.stringify({ error: "Missing required parameters" }),
-        { status: 400, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
         // Return an error for unsupported email types
         return new Response(
           JSON.stringify({ error: `Unsupported email type: ${type}` }),
-          { status: 400, headers: { "Content-Type": "application/json" } },
+          { status: 400, headers: { "Content-Type": "application/json" } }
         );
     }
 

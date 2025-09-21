@@ -10,7 +10,7 @@ export default function AuthButton({ session }: { session: Session | null }) {
   const router = useRouter();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   const handleSignOut = async () => {
@@ -23,7 +23,7 @@ export default function AuthButton({ session }: { session: Session | null }) {
       Sign Out
     </Button>
   ) : (
-    <Button variant="outline" onClick={() => router.push("/login")}>
+    <Button variant="outline" onClick={() => router.push("/auth/login")}>
       Sign In
     </Button>
   );

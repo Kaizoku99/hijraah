@@ -1,7 +1,7 @@
 import { datadogRum } from "@datadog/browser-rum";
 
-import { cache } from "../cache";
-import { getSupabaseClient } from "../supabase/client";
+import { cache } from "@/lib/cache";
+import { getSupabaseClient } from "@/lib/supabase/client";
 
 const EVENT_BATCH_SIZE = 50;
 const EVENT_BATCH_INTERVAL = 5000; // 5 seconds
@@ -71,7 +71,7 @@ async function processBatchedEvents() {
         user_id: event.userId,
         timestamp: event.timestamp || new Date().toISOString(),
         session_id: event.sessionId,
-      })),
+      }))
     );
   } catch (error) {
     console.error("Failed to process event batch:", error);
@@ -117,7 +117,7 @@ export function startPerformanceTracking(
   options: {
     sampleRate?: number;
     threshold?: number;
-  } = {},
+  } = {}
 ): () => void {
   const shouldTrack =
     Math.random() < (options.sampleRate || PERFORMANCE_SAMPLE_RATE);
@@ -216,7 +216,7 @@ export function identifyUser(userId: string, traits?: Record<string, unknown>) {
 // Enhanced page view tracking
 export function trackPageView(
   path: string,
-  properties?: Record<string, unknown>,
+  properties?: Record<string, unknown>
 ) {
   const startTime = performance.now();
 
@@ -248,7 +248,7 @@ export function trackPageView(
 // Feature usage tracking with metadata
 export function trackFeatureUsage(
   featureName: string,
-  properties?: Record<string, unknown>,
+  properties?: Record<string, unknown>
 ) {
   const context = datadogRum.getInternalContext();
   trackEvent({
