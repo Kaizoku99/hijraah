@@ -81,4 +81,10 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Application materials (keep private)
+application-materials/
+
+# Waitlist page (separate project)
+waitlist-page/
+
 .trigger
