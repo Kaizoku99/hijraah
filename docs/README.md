@@ -1,6 +1,78 @@
-# Hijraah Immigration Platform
+# Hijraah Documentation
 
-Modern immigration processing and management platform built with Next.js, Supabase, and Shadcn UI.
+> Comprehensive documentation for the Hijraah AI-powered immigration assistant system
+
+Welcome to the Hijraah documentation hub! This documentation is organized into four main categories to help you quickly find the information you need.
+
+## 📚 **Documentation Structure**
+
+### 🏗️ **[Architecture](./architecture/)**
+System design, architectural patterns, and technical blueprints
+- **Domain-Driven Design (DDD)** patterns and implementation
+- **Multi-Agent System** architecture and coordination
+- **RAG Pipeline** design and knowledge graph structure
+- **User experience flows** and system interactions
+
+### 📖 **[Guides](./guides/)**
+Step-by-step tutorials and user guides
+- **Installation & Setup** - Get Hijraah running locally
+- **Quick Start Guide** - Your first steps with Hijraah
+- **Feature Guides** - Detailed walkthroughs of key features
+- **Migration Guides** - Upgrading between versions
+
+### ⚙️ **[Technical](./technical/)**
+Implementation details, integrations, and technical specifications
+- **AI Provider Integrations** - OpenAI, Anthropic, Google AI setup
+- **Middleware & Authentication** - Security and request handling
+- **RAG Pipeline Implementation** - Vector search and knowledge graphs
+- **Performance Optimizations** - Caching, streaming, and scaling
+
+### 📋 **[Planning](./planning/)**
+Project roadmaps, migration strategies, and development plans
+- **Feature Roadmaps** - Upcoming functionality and timelines  
+- **Migration Strategies** - System evolution and upgrade paths
+- **Integration Plans** - Third-party service integrations
+- **Enhancement Proposals** - Future system improvements
+
+## 🚀 **Getting Started**
+
+1. **New to Hijraah?** Start with [Quick Start Guide](./guides/01-quick-start.md)
+2. **Setting up locally?** Check [Installation Guide](./guides/INSTALLATION.md)
+3. **Understanding the system?** Review [Architecture Overview](./architecture/README.md)
+4. **Implementing features?** Browse [Technical Documentation](./technical/README.md)
+
+## 🔍 **Find What You Need**
+
+| I want to... | Go to... |
+|-------------|----------|
+| **Set up Hijraah locally** | [Installation Guide](./guides/INSTALLATION.md) |
+| **Understand system architecture** | [Architecture Docs](./architecture/README.md) |
+| **Integrate AI providers** | [Technical Integration Guides](./technical/README.md) |
+| **See development roadmap** | [Planning Documents](./planning/README.md) |
+| **Learn about features** | [User Guides](./guides/README.md) |
+
+## 📊 **Documentation Coverage**
+
+- **Architecture**: 6 comprehensive design documents
+- **Guides**: 8 step-by-step tutorials and references  
+- **Technical**: 16 implementation and integration guides
+- **Planning**: 11 roadmaps and strategic documents
+- **Total**: 40+ specialized documentation files
+
+## 🤝 **Contributing to Documentation**
+
+Found something missing or outdated? We'd love your help!
+
+1. **Report Issues**: [Create an issue](https://github.com/Kaizoku99/hijraah/issues) for documentation problems
+2. **Suggest Improvements**: Submit pull requests with documentation enhancements  
+3. **Add Examples**: Contribute code examples and use cases
+4. **Update Guides**: Help keep tutorials current with the latest features
+
+---
+
+## 🏗️ **Modern Immigration Platform**
+
+Modern immigration processing and management platform built with Next.js, Supabase, and advanced AI integration.
 
 ## Key Features
 
